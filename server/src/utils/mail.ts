@@ -1,7 +1,7 @@
 import { convert } from 'html-to-text'
 import nodemailer from 'nodemailer'
 import pug from 'pug'
-import { EmailOptions } from '../interfaces/email'
+import { EmailOptions } from '../interfaces'
 
 class Email {
   private to: string

@@ -1,7 +1,12 @@
-import './App.css'
+import { useContent } from './services/useContext'
 
 function App() {
-  return <></>
+  const { authState } = useContent()
+  return (
+    <>
+      <div>{authState.isAuthenticated.toString()}</div>
+    </>
+  )
 }
 
 export default App
