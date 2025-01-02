@@ -1,0 +1,60 @@
+@import 'argon-dashboard/custom/functions';
+@import 'argon-dashboard/custom/variables';
+@import 'argon-dashboard/custom/mixins';
+
+@import '../../../node_modules/bootstrap/scss/root';
+@import '../../../node_modules//scss/reboot';
+@import '../../../node_modules//scss/type';
+@import '../../../node_modules//scss/images';
+@import '../../../node_modules//scss/code';
+@import '../../../node_modules//scss/grid';
+@import '../../../node_modules//scss/tables';
+@import '../../../node_modules//scss/forms';
+@import '../../../node_modules//scss/buttons';
+@import '../../../node_modules//scss/transitions';
+@import '../../../node_modules//scss/dropdown';
+@import '../../../node_modules//scss/button-group';
+@import '../../../node_modules//scss/input-group';
+@import '../../../node_modules//scss/custom-forms';
+@import '../../../node_modules//scss/nav';
+@import '../../../node_modules//scss/navbar';
+@import '../../../node_modules//scss/card';
+@import '../../../node_modules//scss/breadcrumb';
+@import '../../../node_modules//scss/pagination';
+@import '../../../node_modules//scss/badge';
+@import '../../../node_modules//scss/jumbotron';
+@import '../../../node_modules//scss/alert';
+@import '../../../node_modules//scss/progress';
+@import '../../../node_modules//scss/media';
+@import '../../../node_modules//scss/list-group';
+@import '../../../node_modules//scss/close';
+@import '../../../node_modules//scss/modal';
+@import '../../../node_modules//scss/tooltip';
+@import '../../../node_modules//scss/popover';
+@import '../../../node_modules//scss/carousel';
+@import '../../../node_modules//scss/utilities';
+@import '../../../node_modules//scss/print';
+
+// Argon utilities and components
+
+@import 'argon-dashboard/custom/reboot';
+@import 'argon-dashboard/custom/utilities';
+@import 'argon-dashboard/custom/components';
+
+// Vendor (Plugins)
+
+@import 'argon-dashboard/custom/vendors';
+
+// Docs components
+
+@import 'argon-dashboard/docs/variables';
+@import 'argon-dashboard/docs/nav';
+@import 'argon-dashboard/docs/clipboard-js';
+@import 'argon-dashboard/docs/component-examples';
+@import 'argon-dashboard/docs/prism';
+@import 'argon-dashboard/docs/content';
+@import 'argon-dashboard/docs/sidebar';
+@import 'argon-dashboard/docs/footer';
+
+// React Differences
+@import 'react/react-differences';

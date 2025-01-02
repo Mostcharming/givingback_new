@@ -3,6 +3,8 @@ import { Provider } from 'react-redux'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { PersistGate } from 'redux-persist/integration/react'
 import App from './App'
+import './assets/plugins/nucleo/css/nucleo.css'
+import './assets/scss/argon-dashboard-react.scss'
 import { persistor, store } from './store/configureStore'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
