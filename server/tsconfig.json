@@ -2,9 +2,11 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "CommonJS",
+    "rootDir": "./",
     "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true
+    "strict": true,
+    "esModuleInterop": true
   },
-  "exclude": ["node_modules"]
+  "include": ["src/**/*.ts", "knexfile.ts"],
+  "exclude": ["node_modules", "dist"]
 }
