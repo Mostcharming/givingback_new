@@ -30,6 +30,6 @@ const authSlice = createSlice({
   }
 })
 
-export const counterActions = authSlice.actions
+export const { login, logout, signup } = authSlice.actions
 export default authSlice.reducer
 export type { AuthState }
