@@ -70,6 +70,9 @@ class Email {
   async sendPasswordReset() {
     await this.send('passwordReset', 'Your password reset token')
   }
+  async conatctUs(subject: string) {
+    await this.send('contactForm', subject)
+  }
 }
 
 export default Email

@@ -3,6 +3,8 @@ import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { logout } from '../store/reducers/authReducer'
+import { useContent } from './useContext'
 
 const getBaseURL = (): string => {
   switch (import.meta.env.VITE_NODE_ENV) {
@@ -30,7 +32,7 @@ const useBackendService = <TData, TError>(
   method: 'GET' | 'POST' | 'PUT' | 'DELETE',
   options: UseMutationOptions<TData, TError, any, unknown> = {}
 ): UseMutationResult<TData, TError, any, unknown> => {
-  const { token } = useAuth()
+  const { authState } = useContent()
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const url = baseURL + endpoint
@@ -43,7 +45,7 @@ const useBackendService = <TData, TError>(
 
     const headers = {
       ...config.headers,
-      Authorization: token ? `Bearer ${token}` : undefined
+      Authorization: authState.token ? `Bearer ${authState.token}` : undefined
     }
 
     if (payload instanceof FormData) {
@@ -86,7 +88,7 @@ const useBackendService = <TData, TError>(
 
   const enhancedOptions = {
     ...options,
-    onError: (error: any) => {
+    onError: (error: any, variables: any, context: unknown) => {
       if (!navigator.onLine) {
         toast.error(
           'No internet connection. Please check your network and try again.'
@@ -103,7 +105,7 @@ const useBackendService = <TData, TError>(
       }
 
       if (options.onError) {
-        options.onError(error)
+        options.onError(error, variables, context)
       }
     }
   }

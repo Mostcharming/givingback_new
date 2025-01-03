@@ -1,6 +1,14 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
-import Index from './pages/home'
+import 'react-toastify/dist/ReactToastify.css'
+import Error from './pages/error'
+import About from './pages/home/about'
+import Aml from './pages/home/aml'
+import Contact from './pages/home/contact'
+import Index from './pages/home/home'
+import PrivacyPolicy from './pages/home/policy'
+import Services from './pages/home/services'
+import Terms from './pages/home/terms'
 import { useContent } from './services/useContext'
 
 function ProtectedRoute({
@@ -41,6 +49,13 @@ function App() {
       />
       <Routes>
         <Route path='/' element={<Index />} />
+        <Route path='/aml' element={<Aml />} />
+        <Route path='/contact' element={<Contact />} />
+        <Route path='/about_us' element={<About />} />
+        <Route path='/services' element={<Services />} />
+        <Route path='/policy' element={<PrivacyPolicy />} />
+        <Route path='/terms' element={<Terms />} />
+
         <Route
           path='/auth/*'
           element={
@@ -81,7 +96,7 @@ function App() {
             />
           }
         />
-        <Route path='*' element={<Navigate to='/' replace />} />
+        <Route path='*' element={<Error />} />
       </Routes>
     </>
   )

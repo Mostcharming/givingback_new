@@ -1,19 +1,22 @@
+import 'bootstrap/dist/css/bootstrap.css'
+
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { PersistGate } from 'redux-persist/integration/react'
 import App from './App'
-import './assets/plugins/nucleo/css/nucleo.css'
-import './assets/scss/argon-dashboard-react.scss'
 import AutoLogout from './services/autologout'
+import QueryProvider from './services/queryProvider'
 import { persistor, store } from './store/configureStore'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       <Router>
-        <AutoLogout />
-        <App />
+        <QueryProvider>
+          <AutoLogout />
+          <App />
+        </QueryProvider>
       </Router>
     </PersistGate>
   </Provider>
