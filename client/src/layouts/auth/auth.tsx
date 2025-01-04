@@ -35,36 +35,31 @@ const Auth = (props) => {
 
   return (
     <>
-      <div className='main-content' ref={mainContent}>
+      <div
+        className='main-content'
+        ref={mainContent}
+        style={{
+          minHeight: '100vh',
+          background: `linear-gradient(87deg, rgba(123, 128, 221, 0) 0, rgba(159, 128, 221, 0.4) 100%), url('/src/assets/images/background.jpg')`,
+          // backgroundImage: "url('/src/assets/images/background.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
         <AuthNavbar />
         <div className='header bg-gradient-info py-7 py-lg-8'>
           <Container>
             <div className='header-body text-center mb-7'>
               <Row className='justify-content-center'>
                 <Col lg='5' md='6'>
-                  <h1 className='text-white'>Welcome!</h1>
-                  <p className='text-lead text-light'>
+                  <h1 style={{ color: 'black' }}>Welcome!</h1>
+                  <p className='text-lead' style={{ color: 'black' }}>
                     Login to your GivingBack Account
                   </p>
                 </Col>
               </Row>
             </div>
           </Container>
-          <div className='separator separator-bottom separator-skew zindex-100'>
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              preserveAspectRatio='none'
-              version='1.1'
-              viewBox='0 0 2560 100'
-              x='0'
-              y='0'
-            >
-              <polygon
-                className='fill-default'
-                points='2560 0 2560 100 0 100'
-              />
-            </svg>
-          </div>
         </div>
         {/* Page content */}
         <Container className='mt--8 pb-5'>

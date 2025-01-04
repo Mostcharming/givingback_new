@@ -93,7 +93,8 @@ const Login = () => {
         <Row className='mt-3'>
           <Col xs='6'>
             <a
-              className='text-light'
+              // className='text-black'
+              style={{ color: 'black' }}
               href='#'
               onClick={(e) => e.preventDefault()}
             >
@@ -102,7 +103,8 @@ const Login = () => {
           </Col>
           <Col className='text-right' xs='6'>
             <a
-              className='text-light'
+              // className='text-black'
+              style={{ color: 'black' }}
               href='#'
               onClick={(e) => e.preventDefault()}
             >
