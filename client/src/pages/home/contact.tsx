@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { toast } from 'react-toastify'
 import PageBanner from '../../components/home/pageBanner'
 import Layout from '../../layouts/home'
@@ -6,15 +6,7 @@ import useBackendService from '../../services/backend_service'
 import { useLoadStyles } from '../../services/styles'
 
 const Contact = () => {
-  const [stylesLoaded, setStylesLoaded] = useState(false)
-
   useLoadStyles(['givingback'])
-
-  // Set stylesLoaded to true once styles are loaded
-  useEffect(() => {
-    const timer = setTimeout(() => setStylesLoaded(true), 500) // Wait for 500ms to ensure styles are loaded
-    return () => clearTimeout(timer) // Cleanup the timer
-  }, [])
 
   const [formData, setFormData] = useState({
     name: '',
@@ -48,15 +40,6 @@ const Contact = () => {
     })
   }
 
-  // const handleChange = (
-  //   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  // ) => {
-  //   const { id, value } = e.target
-  //   setFormData((prevState) => ({
-  //     ...prevState,
-  //     [id]: value
-  //   }))
-  // }
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {

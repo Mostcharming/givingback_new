@@ -8,30 +8,41 @@ class Email {
   private url: string
   private token: number
   private from: string
-  private additionalData: { [key: string]: any }
+  private additionalData: Record<string, any>
 
   constructor({ email, url, token, additionalData }: EmailOptions) {
     this.to = email
     this.url = url
     this.token = token
     this.additionalData = additionalData || {}
-    this.from = `GivingBack<${process.env.EMAIL_FROM}>`
+    this.from = `GivingBack <${process.env.EMAIL_FROM}>`
   }
 
-  // Create transport for sending emails
-  private newTransport() {
+  // Create a transport instance for sending emails
+  private createTransport() {
+    const { EMAIL_HOST, EMAIL_USER, EMAIL_PASS } = process.env
+
+    if (!EMAIL_HOST || !EMAIL_USER || !EMAIL_PASS) {
+      throw new Error(
+        'Email environment variables are not properly configured.'
+      )
+    }
+
     return nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
+      host: EMAIL_HOST,
       port: 2525,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        user: EMAIL_USER,
+        pass: EMAIL_PASS
       }
     })
   }
 
-  // Generic method to send email
-  private async send(template: string, subject: string) {
+  // Generate email HTML and text content
+  private generateEmailContent(
+    template: string,
+    subject: string
+  ): { html: string; text: string } {
     const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
       url: this.url,
       token: this.token,
@@ -40,38 +51,28 @@ class Email {
       ...this.additionalData
     })
 
+    const text = convert(html)
+    return { html, text }
+  }
+
+  // Generic method to send an email
+  private async send(template: string, subject: string): Promise<void> {
+    const { html, text } = this.generateEmailContent(template, subject)
+
     const mailOptions = {
       from: this.from,
       to: this.to,
       subject,
       html,
-      text: convert(html)
+      text
     }
 
-    await this.newTransport().sendMail(mailOptions)
+    await this.createTransport().sendMail(mailOptions)
   }
 
-  // Method to send a welcome email to a user
-  async sendWelcome() {
-    await this.send('welcome', 'Welcome to the GivingBack Family!')
-  }
-
-  // Method to send a welcome email to a donor
-  async sendWelcomeD() {
-    await this.send('donor', 'Welcome to the GivingBack Family!')
-  }
-
-  // Method to send a welcome email to a new NGO
-  async sendWelcomeNGO() {
-    await this.send('newU', 'Welcome to the GivingBack Family!')
-  }
-
-  // Method to send a password reset email
-  async sendPasswordReset() {
-    await this.send('passwordReset', 'Your password reset token')
-  }
-  async conatctUs(subject: string) {
-    await this.send('contactForm', subject)
+  // Public method to send an email using a template
+  async sendEmail(template: string, subject: string): Promise<void> {
+    await this.send(template, subject)
   }
 }
 

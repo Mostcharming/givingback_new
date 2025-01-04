@@ -29,7 +29,7 @@ interface BackendServiceConfig extends AxiosRequestConfig {
 
 const useBackendService = <TData, TError>(
   endpoint: string,
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
   options: UseMutationOptions<TData, TError, any, unknown> = {}
 ): UseMutationResult<TData, TError, any, unknown> => {
   const { authState } = useContent()
@@ -81,6 +81,13 @@ const useBackendService = <TData, TError>(
           ...config
         })
         return deleteResponse.data
+      case 'patch':
+        const patchResponse: AxiosResponse<TData> = await axios.patch(
+          url,
+          payload,
+          config
+        )
+        return patchResponse.data
       default:
         throw new Error(`Unsupported method: ${method}`)
     }

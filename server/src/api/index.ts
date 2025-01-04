@@ -19,7 +19,8 @@ const whitelist: string[] = [
   'http://localhost:3000',
   'https://givebackng.org',
   'https://api.givebackng.org',
-  'https://www.givebackng.org'
+  'https://www.givebackng.org',
+  'http://localhost:5173'
 ]
 
 const corsOptions: CorsOptions = {

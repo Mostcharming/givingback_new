@@ -20,7 +20,7 @@ export const sendContactEmail = async (
         message,
         phoneNumber
       }
-    }).conatctUs(subject)
+    }).sendEmail('contactForm', subject)
 
     res.status(200).json({
       status: 'success',

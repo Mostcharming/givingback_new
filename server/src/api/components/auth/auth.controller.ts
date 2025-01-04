@@ -51,7 +51,10 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
   if (uuid !== 'giveback' || uuid !== 'google-donor') {
     const token = newUser.token ?? 0
     const url = ''
-    await new Email({ email: mail, url, token }).sendWelcome()
+    await new Email({ email: mail, url, token }).sendEmail(
+      'welcome',
+      'Welcome to the GivingBack Family!'
+    )
   }
 
   createSendToken(user, 200, req, res)
@@ -126,7 +129,10 @@ export const resend = async (
     await db('users').where({ id: userId }).update({ token: newToken })
     const userEmail = user.email
     const url = ''
-    await new Email({ email: userEmail, url, token: newToken }).sendWelcome()
+    await new Email({ email: userEmail, url, token: newToken }).sendEmail(
+      'welcome',
+      'Welcome to the GivingBack Family!'
+    )
 
     res.status(200).json({ status: 'success' })
   } else {
@@ -272,7 +278,10 @@ export const forgotPassword = async (
   }
 
   const url = `${req.protocol}://givebackng.org/resetPassword/${token}`
-  await new Email({ email, url, token }).sendPasswordReset()
+  await new Email({ email, url, token }).sendEmail(
+    'passwordReset',
+    'Your password reset token'
+  )
 
   res.status(200).json({ status: 'success', message: 'Token sent to email!' })
 }

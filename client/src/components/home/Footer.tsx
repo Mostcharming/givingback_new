@@ -19,7 +19,7 @@ const Footer = ({ footerSolidBg }) => {
               </div>
               <div className='col-lg-auto col-md-6'>
                 <a
-                  href='/login'
+                  href='/auth/login'
                   className='main-btn bordered-btn bordered-white mt-md-30'
                 >
                   Fund a project <i className='far fa-arrow-right' />

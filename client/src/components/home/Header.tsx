@@ -44,7 +44,7 @@ const Header = ({ transparentTop, transparentHeader, topSecondaryBg }) => {
               <div className='col-auto d-none d-md-block'>
                 <ul className='social-icons'>
                   <li className='bg-white p-1 pl-3 pr-3 rounded'>
-                    <Link style={{ color: 'black' }} to={'/login'}>
+                    <Link style={{ color: 'black' }} to={'/auth/login'}>
                       Login
                     </Link>
                   </li>

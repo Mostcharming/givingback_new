@@ -1,4 +1,8 @@
+import '@fortawesome/fontawesome-free/css/all.min.css'
 import 'bootstrap/dist/css/bootstrap.css'
+
+import './assets/plugins/nucleo/css/nucleo.css'
+import './assets/scss/argon-dashboard-react.scss'
 
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'

@@ -1,12 +1,15 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import Auth from './layouts/auth/auth'
 import Error from './pages/error'
 import About from './pages/home/about'
 import Aml from './pages/home/aml'
 import Contact from './pages/home/contact'
 import Index from './pages/home/home'
+import LatestProject from './pages/home/latest-project'
 import PrivacyPolicy from './pages/home/policy'
+import ProjectDetails from './pages/home/project-details'
 import Services from './pages/home/services'
 import Terms from './pages/home/terms'
 import { useContent } from './services/useContext'
@@ -55,17 +58,10 @@ function App() {
         <Route path='/services' element={<Services />} />
         <Route path='/policy' element={<PrivacyPolicy />} />
         <Route path='/terms' element={<Terms />} />
+        <Route path='/project-details' element={<ProjectDetails />} />
+        <Route path='/latest-projects' element={<LatestProject />} />
+        <Route path='/auth/*' element={<Auth />} />
 
-        <Route
-          path='/auth/*'
-          element={
-            <ProtectedRoute
-              element={<Index />}
-              roles={['admin', 'donor', 'corporate', 'ngo']}
-              authState={authState}
-            />
-          }
-        />
         <Route
           path='/admin/*'
           element={
