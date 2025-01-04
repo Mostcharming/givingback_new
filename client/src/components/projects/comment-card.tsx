@@ -3,6 +3,10 @@ import { toast } from 'react-toastify'
 import useBackendService from '../../services/backend_service'
 import Util from '../../services/utils'
 
+import badcomment from '../../assets/images/home/bad-comment.svg'
+import claphand from '../../assets/images/home/clap-hand.svg'
+import usercomment from '../../assets/images/home/user-comment.svg'
+
 interface CommentCardProps {
   message: any
 }
@@ -54,10 +58,7 @@ export default function CommentCard({ message }: CommentCardProps) {
       <div className='user-replies__area'>
         <div className='user-replies__area--container'>
           <div className='user-reply__info'>
-            <img
-              className='user_img'
-              src='./src/assets/images/home/user-comment.svg'
-            />
+            <img className='user_img' src={usercomment} />
             <div>
               <p className='user__name'>{messages.name}</p>
               <p className='comment__date'>
@@ -72,7 +73,7 @@ export default function CommentCard({ message }: CommentCardProps) {
               onClick={like}
             >
               <span>{messages.likes}</span>
-              <img src='./src/assets/images/home/clap-hand.svg' />
+              <img src={claphand} />
             </div>
             <div
               className='reactions__container--emoji'
@@ -80,7 +81,7 @@ export default function CommentCard({ message }: CommentCardProps) {
               onClick={dislike}
             >
               <span>{messages.reactions}</span>
-              <img src='./src/assets/images/home/bad-comment.svg' />
+              <img src={badcomment} />
             </div>
           </div>
         </div>

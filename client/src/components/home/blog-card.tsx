@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import main7 from '../../assets/images/home/main_image/main7.jpeg'
 
 export default function BlogCard() {
   return (
@@ -9,7 +10,7 @@ export default function BlogCard() {
       >
         <div className='latest-post-box mt-30'>
           <div className='post-thumb'>
-            <img src='assets/main_image/main7.jpeg' alt='Image' />
+            <img src={main7} alt='Image' />
           </div>
           <div className='post-content'>
             <a href='#' className='post-date'>

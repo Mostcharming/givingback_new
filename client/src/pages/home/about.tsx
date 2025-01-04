@@ -3,6 +3,13 @@ import PageBanner from '../../components/home/pageBanner'
 import Layout from '../../layouts/home'
 import { useLoadStyles } from '../../services/styles'
 
+import aboutImage from '../../assets/images/home/new/about.png'
+import madamImage from '../../assets/images/home/new/madam.jpeg'
+import mayImage from '../../assets/images/home/new/may.jpeg'
+import mrpelumiImage from '../../assets/images/home/new/mrpelumi.png'
+import mrsamImage from '../../assets/images/home/new/mrsam.png'
+import pastorImage from '../../assets/images/home/new/pastor.png'
+
 const About = () => {
   useLoadStyles(['givingback'])
 
@@ -11,7 +18,7 @@ const About = () => {
       name: 'Olumide Ademidun',
       position: 'Platform Lead',
       linkedinLink: '#',
-      image: '/src/assets/images/home/new/pastor.png',
+      image: pastorImage,
       bio: `Olumide Ademidun is the Chief Platform Officer for GivingBack® Organization. 
       A graduate of Computer Science from the University of Lagos and holder of an MBA in Strategic Management, 
       Olumide is a Certified Member of the Project Management Institute, North America (PMP), and a long-standing Fellow of the British Computer Society. 
@@ -24,7 +31,7 @@ const About = () => {
       name: 'Vivian Byron',
       position: 'Corporate & Legal Lead',
       linkedinLink: '#',
-      image: '/src/assets/images/home/new/madam.jpeg',
+      image: madamImage,
       bio: `Attended the. Prestigious University of lfe as it then was .Now Obafemi Awolowo University (OAU).
 
 Graduated with Llb hons in 1988 and conferred with Bachelor of Law in 1990
@@ -39,7 +46,7 @@ A successful law firm`
       name: 'Samuel Omotayo',
       position: 'Product & Business Development',
       linkedinLink: 'https://www.linkedin.com/in/omotayosamuel/',
-      image: '/src/assets/images/home/new/mrsam.png',
+      image: mrsamImage,
       bio: `Visionary product leader with 15+ years of experience delivering new-to-live and managing matured products in several industries such as banking, fintech, telecoms, and government in delivering impactful solutions and products. 
       Strong track record of bringing new products to life, including launching the first digital bank in West Africa, which now powers over 2MM+ financial transactions and 5MM API+ calls daily. 
       He recently managed and grew a product with over 65 million users covering 32 countries across the Caribbean islands, Latin America (LATAM), French West Indies and the Pacific region. 
@@ -52,14 +59,14 @@ A successful law firm`
       name: 'Akinpelumi Akinlolu',
       position: 'Advocacy Lead',
       linkedinLink: '#',
-      image: '/src/assets/images/home/new/mrpelumi.png',
+      image: mrpelumiImage,
       bio: 'Akinpelumi leads advocacy initiatives, engaging stakeholders for impact.'
     },
     {
       name: 'Fadeni Mayowa',
       position: 'Technology Lead',
       linkedinLink: 'https://www.linkedin.com/in/mayowaffredrick/',
-      image: '/src/assets/images/home/new/may.jpeg',
+      image: mayImage,
       bio: `Fadeni Mayowa is an experienced Technology Lead and full-stack developer with a strong focus on leveraging technology to solve real-world challenges. 
         With a background in computer science and over 5 years of professional experience, he has been pivotal in building scalable software solutions for various industries, including agriculture, fintech, and nonprofit organizations. 
         At GivingBack, Mayowa oversees the design, implementation, and optimization of the organization's technological infrastructure. 
@@ -77,8 +84,7 @@ A successful law firm`
       <div className='card border-0 shadow position-relative'>
         <img
           style={{
-            paddingBottom:
-              image === '/src/assets/images/home/new/madam.jpeg' ? '58px' : '0'
+            paddingBottom: image === madamImage ? '58px' : '0'
           }}
           src={image}
           className='card-img-top'
@@ -205,7 +211,7 @@ A successful law firm`
             </div>
 
             <div className='col-md-6 col-sm-10'>
-              <img src='/src/assets/images/home/new/about.png' alt='hi' />
+              <img src={aboutImage} alt='hi' />
             </div>
           </div>
 

@@ -3,6 +3,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Slider from 'react-slick'
+import main2 from '../../assets/images/home/avatar.svg'
+import main3 from '../../assets/images/home/main_image/main3.jpeg'
+import main4 from '../../assets/images/home/main_image/main4.jpeg'
+import main5 from '../../assets/images/home/main_image/main5.jpeg'
+import main8 from '../../assets/images/home/main_image/main8.png'
+
 import BlogCard, { DUMMY_ARRAY2 } from '../../components/home/blog-card'
 import Counter from '../../components/home/Counter'
 import { imageTextBlockSlider } from '../../components/home/sliderProps'
@@ -76,10 +82,7 @@ const Index = () => {
                 data-wow-delay='0.2s'
               >
                 <div className='hero-img text-lg-right'>
-                  <img
-                    src='/src/assets/images/home/main_image/main4.jpeg'
-                    alt='Hero-Img'
-                  />
+                  <img src={main4} alt='Hero-Img' />
                 </div>
               </div>
             </div>
@@ -237,10 +240,7 @@ const Index = () => {
                     className='about-curved-img'
                     style={{ marginBottom: '200px' }}
                   >
-                    <img
-                      src='/src/assets/images/home/main_image/main3.jpeg'
-                      alt='Image'
-                    />
+                    <img src={main3} alt='Image' />
                   </div>
                 </div>
               </div>
@@ -329,10 +329,7 @@ const Index = () => {
               </div>
               <div className='col-lg-7 col-md-10'>
                 <div className=''>
-                  <img
-                    src='/src/assets/images/home/main_image/main8.png'
-                    alt='Image'
-                  />
+                  <img src={main8} alt='Image' />
                   {/* <a
                     href="#"
                     className="video-popup"
@@ -362,10 +359,7 @@ const Index = () => {
                 <div className='single-slider'>
                   <div className='image-text-block text-block-one'>
                     <div className='block-img'>
-                      <img
-                        src='/src/assets/images/home/main_image/main5.jpeg'
-                        alt='Image'
-                      />
+                      <img src={main5} alt='Image' />
                     </div>
                     <div className='block-content'>
                       <div className='common-heading mb-40'>
@@ -402,10 +396,7 @@ const Index = () => {
                 <div className='single-slider'>
                   <div className='image-text-block text-block-one'>
                     <div className='block-img'>
-                      <img
-                        src='/src/assets/images/home/main_image/main2.jpeg'
-                        alt='Image'
-                      />
+                      <img src={main2} alt='Image' />
                     </div>
                     <div className='block-content'>
                       <div className='common-heading mb-40'>

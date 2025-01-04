@@ -12,12 +12,13 @@ import {
   InputGroupText,
   Row
 } from 'reactstrap'
+import google from '../../assets/images/auth/google.svg'
 
 const Login = () => {
   return (
     <>
       <Col lg='5' md='7'>
-        <Card className='bg-secondary shadow border-0'>
+        <Card className='shadow border-0'>
           <CardHeader className='bg-transparent pb-5'>
             <div className='text-muted text-center mt-2 mb-3'>
               <small>Sign in with</small>
@@ -30,7 +31,7 @@ const Login = () => {
                 onClick={(e) => e.preventDefault()}
               >
                 <span className='btn-inner--icon'>
-                  <img src='/src/assets/images/auth/google.svg' alt='...' />
+                  <img src={google} alt='...' />
                 </span>
                 <span className='btn-inner--text'>Google</span>
               </Button>
@@ -83,7 +84,11 @@ const Login = () => {
                 </label>
               </div>
               <div className='text-center'>
-                <Button className='my-4' color='primary' type='button'>
+                <Button
+                  className='my-4'
+                  style={{ background: '#5e72e4' }}
+                  type='button'
+                >
                   Sign in
                 </Button>
               </div>

@@ -10,6 +10,7 @@ import {
   Row,
   UncontrolledCollapse
 } from 'reactstrap'
+import Logo from '../../assets/images/home/GivingBackNG-logo.svg'
 
 const AuthNavbar = () => {
   return (
@@ -17,11 +18,7 @@ const AuthNavbar = () => {
       <Navbar className='navbar-top navbar-horizontal navbar-dark' expand='md'>
         <Container className='px-4'>
           <NavbarBrand to='/' tag={Link}>
-            <img
-              alt='...'
-              src={'/src/assets/images/home/GivingBackNG-logo.svg'}
-              style={{ height: '100px' }}
-            />
+            <img alt='...' src={Logo} style={{ height: '100px' }} />
           </NavbarBrand>
           <button className='navbar-toggler' id='navbar-collapse-main'>
             <span className='navbar-toggler-icon' />
@@ -31,11 +28,7 @@ const AuthNavbar = () => {
               <Row>
                 <Col className='collapse-brand' xs='6'>
                   <Link to='/'>
-                    <img
-                      alt='...'
-                      src={'/src/assets/images/home/GivingBackNG-logo.svg'}
-                      style={{ height: '100px' }}
-                    />
+                    <img alt='...' src={Logo} style={{ height: '100px' }} />
                   </Link>
                 </Col>
                 <Col className='collapse-close' xs='6'>

@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 
 import './assets/plugins/nucleo/css/nucleo.css'
 import './assets/scss/argon-dashboard-react.scss'
+import './assets/scss/home/App.scss'
 
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'

@@ -10,6 +10,8 @@ import useBackendService from '../../services/backend_service'
 import { useLoadStyles } from '../../services/styles'
 import Util from '../../services/utils'
 
+import avatar from '../../assets/images/home/avatar.svg'
+
 const ProjectDetails = () => {
   useLoadStyles(['givingback'])
 
@@ -257,10 +259,7 @@ const ProjectDetails = () => {
                       <h4>Community Responses</h4>
                       <hr />
                       <div className='user-comment__area'>
-                        <img
-                          className='avatar_img'
-                          src='./src/assets/images/home/avatar.svg'
-                        />
+                        <img className='avatar_img' src={avatar} />
                         <div className='user-comment__container'>
                           <div>
                             <div className='user-details'>
