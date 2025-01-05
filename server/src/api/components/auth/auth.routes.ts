@@ -7,6 +7,7 @@ import {
 
 import {
   changePassword,
+  forgotPassword,
   getOne,
   login,
   logout,
@@ -28,6 +29,8 @@ router.get('/logout', logout)
 
 // Routes for verifying and resending
 router.route('/verify').post(secureLogin, verify).put(secureLogin, resend)
+
+router.post('/forgotpassword', forgotPassword)
 
 // Route to get user details (requires secure login)
 router.get('/', secureLogin, getOne)

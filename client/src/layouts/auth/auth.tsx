@@ -1,6 +1,7 @@
 import React from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Col, Container, Row } from 'reactstrap'
+import backgroundImage from '../../assets/images/background.jpg'
 import AuthNavbar from '../../components/auth/authNav'
 import routes from '../../routes/routes'
 import { useLoadStyles } from '../../services/styles'
@@ -40,8 +41,7 @@ const Auth = (props) => {
         ref={mainContent}
         style={{
           minHeight: '100vh',
-          background: `linear-gradient(87deg, rgba(123, 128, 221, 0) 0, rgba(159, 128, 221, 0.4) 100%), url('/src/assets/images/background.jpg')`,
-          // backgroundImage: "url('/src/assets/images/background.jpg')",
+          background: `linear-gradient(87deg, rgba(123, 128, 221, 0) 0, rgba(159, 128, 221, 0.4) 100%), url(${backgroundImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}

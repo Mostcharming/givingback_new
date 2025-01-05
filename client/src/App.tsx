@@ -1,7 +1,11 @@
+import { ThunkDispatch } from '@reduxjs/toolkit'
+import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { ToastContainer } from 'react-toastify'
+import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Auth from './layouts/auth/auth'
+import Dashboard from './layouts/dashboard/layout'
 import Error from './pages/error'
 import About from './pages/home/about'
 import Aml from './pages/home/aml'
@@ -12,7 +16,10 @@ import PrivacyPolicy from './pages/home/policy'
 import ProjectDetails from './pages/home/project-details'
 import Services from './pages/home/services'
 import Terms from './pages/home/terms'
+import useBackendService from './services/backend_service'
 import { useContent } from './services/useContext'
+import { getCurrent } from './store/reducers/userReducer'
+import { RootState } from './types'
 
 function ProtectedRoute({
   element,
@@ -23,16 +30,58 @@ function ProtectedRoute({
   roles: string[]
   authState: any
 }) {
+  // Verify the role you're checking against
+
+  if (!authState?.isAuthenticated || !authState?.user) {
+    return <Navigate to='/' replace />
+  }
+
+  const userStatus = authState.user.status
+  const userRole = authState.user.role
+
+  if (userStatus === 0 || userStatus === false) {
+    return <Navigate to='/auth/verify' replace />
+  }
+
+  if (roles.includes(userRole.toLowerCase())) {
+    return element
+  }
+
+  return <Navigate to='/' replace />
+}
+
+function DashboardRoute({ authState }: { authState: any }) {
+  const dispatch: ThunkDispatch<RootState, unknown, any> = useDispatch()
+  const { mutate: getCurrentD } = useBackendService('/auth', 'GET', {
+    onSuccess: (response: any) => {
+      dispatch(getCurrent(response))
+    },
+    onError: (error: any) => {
+      toast.error(error.response.data.error)
+    }
+  })
+  useEffect(() => {
+    if (authState?.isAuthenticated) {
+      getCurrentD({})
+    }
+  }, [authState])
   if (!authState?.isAuthenticated || !authState?.user) {
     return <Navigate to='/' replace />
   }
 
   const userRole = authState.user.role.toLowerCase()
-  if (roles.includes(userRole)) {
-    return element
-  }
 
-  return <Navigate to='/' replace />
+  switch (userRole) {
+    case 'ngo':
+      return <Navigate to='/ngo/dashboard' replace />
+    case 'admin':
+      return <Navigate to='/admin/dashboard' replace />
+    case 'donor':
+    case 'corporate':
+      return <Navigate to='/donor/dashboard' replace />
+    default:
+      return <Navigate to='/' replace />
+  }
 }
 
 function App() {
@@ -66,7 +115,7 @@ function App() {
           path='/admin/*'
           element={
             <ProtectedRoute
-              element={<Index />}
+              element={<Dashboard compare='/admin' />}
               roles={['admin']}
               authState={authState}
             />
@@ -76,7 +125,7 @@ function App() {
           path='/donor/*'
           element={
             <ProtectedRoute
-              element={<Index />}
+              element={<Dashboard compare='/donor' />}
               roles={['donor', 'corporate']}
               authState={authState}
             />
@@ -86,12 +135,27 @@ function App() {
           path='/ngo/*'
           element={
             <ProtectedRoute
-              element={<Index />}
+              element={<Dashboard compare='/ngo' />}
               roles={['ngo']}
               authState={authState}
             />
           }
         />
+        <Route
+          path='/dashboard'
+          element={<DashboardRoute authState={authState} />}
+        />
+        <Route
+          path='/auth/verify'
+          element={
+            authState?.isAuthenticated && authState?.user?.status === 1 ? (
+              <DashboardRoute authState={authState} />
+            ) : (
+              <Auth />
+            )
+          }
+        />
+
         <Route path='*' element={<Error />} />
       </Routes>
     </>

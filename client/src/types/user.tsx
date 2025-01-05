@@ -4,4 +4,5 @@ export interface User {
   status: number
   role: string
   active: number
+  name: string
 }

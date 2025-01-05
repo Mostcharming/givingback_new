@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { logout } from '../store/reducers/authReducer'
+import { logout_auth } from '../store/reducers/authReducer'
 import { useContent } from './useContext'
 
 const AutoLogout: React.FC = () => {
@@ -39,7 +39,7 @@ const AutoLogout: React.FC = () => {
   }
 
   const handleLogout = (): void => {
-    dispatch(logout())
+    dispatch(logout_auth())
     navigate('/')
   }
 

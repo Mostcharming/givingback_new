@@ -12,59 +12,69 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
   const mail = email.trim()
   let newUser: Partial<FullUser>
 
-  if (uuid === 'giveback') {
-    newUser = {
-      email: mail,
-      password: uuid,
-      status: 1,
-      active: 1,
-      token: 0
+  try {
+    if (uuid === 'giveback') {
+      newUser = {
+        email: mail,
+        password: uuid,
+        status: 1,
+        active: 1,
+        token: 0
+      }
+    } else if (uuid === 'donor' || uuid === 'google-donor') {
+      newUser = {
+        email: mail,
+        password: hash(password.trim()),
+        role: 'donor',
+        active: 1,
+        token: generateOtp(6)
+      }
+    } else if (uuid === 'corporate') {
+      if (!password) {
+        res
+          .status(400)
+          .json({ error: 'Password is required for corporate role' })
+        return
+      }
+      newUser = {
+        email: mail,
+        password: hash(password.trim()),
+        role: 'corporate',
+        active: 1,
+        token: generateOtp(6)
+      }
+    } else {
+      newUser = {
+        email: mail,
+        password: hash(password.trim()),
+        active: 1,
+        token: generateOtp(6)
+      }
     }
-  } else if (uuid === 'donor' || uuid === 'google-donor') {
-    newUser = {
-      email: mail,
-      password: hash(password.trim()),
-      role: 'donor',
-      active: 1,
-      token: generateOtp(6)
+
+    const [id] = await db('users').insert(newUser)
+    const user = await db('users').where({ id }).first()
+
+    if (uuid !== 'giveback' && uuid !== 'google-donor') {
+      const token = newUser.token ?? 0
+      const url = ''
+      await new Email({ email: mail, url, token }).sendEmail(
+        'welcome',
+        'Welcome to the GivingBack Family!'
+      )
     }
-  } else if (uuid === 'corporate') {
-    if (!password) {
-      res.status(400).json({ error: 'Password is required for corporate role' })
-      return
-    }
-    newUser = {
-      email: mail,
-      password: hash(password.trim()),
-      role: 'corporate',
-      active: 1,
-      token: generateOtp(6)
-    }
-  } else {
-    res.status(400).json({ error: 'Invalid UUID provided' })
-    return
+
+    createSendToken(user, 200, req, res)
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while signing up' })
   }
-
-  const [id] = await db('users').insert(newUser)
-  const user = await db('users').where({ id }).first()
-
-  if (uuid !== 'giveback' || uuid !== 'google-donor') {
-    const token = newUser.token ?? 0
-    const url = ''
-    await new Email({ email: mail, url, token }).sendEmail(
-      'welcome',
-      'Welcome to the GivingBack Family!'
-    )
-  }
-
-  createSendToken(user, 200, req, res)
 }
 
 export const verify = async (
   req: UserRequest,
   res: Response
 ): Promise<void> => {
-  const otp = req.body.otp
+  const otp = Number(req.body.otp)
   const id = (req.user as User)?.id
   const user = await db('users').where({ id }).first()
 
@@ -74,7 +84,7 @@ export const verify = async (
     res.status(200).json('Email Verified')
     return
   } else {
-    res.status(400).json('Invalid OTP')
+    res.status(400).json({ error: 'Invalid OTP' })
     return
   }
 }
