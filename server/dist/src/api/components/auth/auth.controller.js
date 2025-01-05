@@ -24,54 +24,65 @@ const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password, uuid } = req.body;
     const mail = email.trim();
     let newUser;
-    if (uuid === 'giveback') {
-        newUser = {
-            email: mail,
-            password: uuid,
-            status: 1,
-            active: 1,
-            token: 0
-        };
-    }
-    else if (uuid === 'donor' || uuid === 'google-donor') {
-        newUser = {
-            email: mail,
-            password: (0, general_1.hash)(password.trim()),
-            role: 'donor',
-            active: 1,
-            token: (0, otp_1.generateOtp)(6)
-        };
-    }
-    else if (uuid === 'corporate') {
-        if (!password) {
-            res.status(400).json({ error: 'Password is required for corporate role' });
-            return;
+    try {
+        if (uuid === 'giveback') {
+            newUser = {
+                email: mail,
+                password: uuid,
+                status: 1,
+                active: 1,
+                token: 0
+            };
         }
-        newUser = {
-            email: mail,
-            password: (0, general_1.hash)(password.trim()),
-            role: 'corporate',
-            active: 1,
-            token: (0, otp_1.generateOtp)(6)
-        };
+        else if (uuid === 'donor' || uuid === 'google-donor') {
+            newUser = {
+                email: mail,
+                password: (0, general_1.hash)(password.trim()),
+                role: 'donor',
+                active: 1,
+                token: (0, otp_1.generateOtp)(6)
+            };
+        }
+        else if (uuid === 'corporate') {
+            if (!password) {
+                res
+                    .status(400)
+                    .json({ error: 'Password is required for corporate role' });
+                return;
+            }
+            newUser = {
+                email: mail,
+                password: (0, general_1.hash)(password.trim()),
+                role: 'corporate',
+                active: 1,
+                token: (0, otp_1.generateOtp)(6)
+            };
+        }
+        else {
+            newUser = {
+                email: mail,
+                password: (0, general_1.hash)(password.trim()),
+                active: 1,
+                token: (0, otp_1.generateOtp)(6)
+            };
+        }
+        const [id] = yield (0, config_1.default)('users').insert(newUser);
+        const user = yield (0, config_1.default)('users').where({ id }).first();
+        if (uuid !== 'giveback' && uuid !== 'google-donor') {
+            const token = (_a = newUser.token) !== null && _a !== void 0 ? _a : 0;
+            const url = '';
+            yield new mail_1.default({ email: mail, url, token }).sendEmail('welcome', 'Welcome to the GivingBack Family!');
+        }
+        (0, jwt_1.createSendToken)(user, 200, req, res);
     }
-    else {
-        res.status(400).json({ error: 'Invalid UUID provided' });
-        return;
+    catch (error) {
+        res.status(500).json({ error: 'An error occurred while signing up' });
     }
-    const [id] = yield (0, config_1.default)('users').insert(newUser);
-    const user = yield (0, config_1.default)('users').where({ id }).first();
-    if (uuid !== 'giveback' || uuid !== 'google-donor') {
-        const token = (_a = newUser.token) !== null && _a !== void 0 ? _a : 0;
-        const url = '';
-        yield new mail_1.default({ email: mail, url, token }).sendEmail('welcome', 'Welcome to the GivingBack Family!');
-    }
-    (0, jwt_1.createSendToken)(user, 200, req, res);
 });
 exports.signup = signup;
 const verify = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const otp = req.body.otp;
+    const otp = Number(req.body.otp);
     const id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
     const user = yield (0, config_1.default)('users').where({ id }).first();
     if (otp === (user === null || user === void 0 ? void 0 : user.token)) {
@@ -80,7 +91,7 @@ const verify = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return;
     }
     else {
-        res.status(400).json('Invalid OTP');
+        res.status(400).json({ error: 'Invalid OTP' });
         return;
     }
 });

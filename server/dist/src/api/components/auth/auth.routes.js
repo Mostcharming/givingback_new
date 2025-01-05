@@ -15,6 +15,7 @@ router.post('/login', auth_1.verifyLogin, auth_controller_1.login);
 router.get('/logout', auth_controller_1.logout);
 // Routes for verifying and resending
 router.route('/verify').post(auth_1.secureLogin, auth_controller_1.verify).put(auth_1.secureLogin, auth_controller_1.resend);
+router.post('/forgotpassword', auth_controller_1.forgotPassword);
 // Route to get user details (requires secure login)
 router.get('/', auth_1.secureLogin, auth_controller_1.getOne);
 // Route to change password (requires secure login)
