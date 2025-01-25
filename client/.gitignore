@@ -7,6 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+.ssh
+.bash_history
+.cache
+
 node_modules
 env
 .env

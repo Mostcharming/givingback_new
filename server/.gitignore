@@ -12,6 +12,9 @@ env
 dist-ssr
 dist
 /dist
+.ssh
+.bash_history
+.cache
 *.local
 
 # Editor directories and files
