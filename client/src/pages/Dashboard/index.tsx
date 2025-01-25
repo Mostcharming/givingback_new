@@ -1,0 +1,251 @@
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import DashBox from '../../components/dashbox'
+import { formatDate } from '../../components/formatTime'
+import Tables from '../../components/tables'
+import useBackendService from '../../services/backend_service'
+import { useContent } from '../../services/useContext'
+
+const Dashboard = () => {
+  const { authState, currentState } = useContent()
+  const navigate = useNavigate()
+  const [dashBoxItems, setDashBoxItems] = useState([])
+  const [tableData, setTableData] = useState([])
+  const [headers, setHeaders] = useState([])
+  const [actions, setActions] = useState([])
+
+  const role = authState.user?.role
+
+  // Fetching dashboard details
+  const { mutate: getDash } = useBackendService('/donor/dashboard', 'GET', {
+    onSuccess: (res) => {
+      const items = getDashBoxItems(role, res)
+      setDashBoxItems(items)
+    },
+    onError: () => {
+      toast.error('Error getting Dashboard details')
+    }
+  })
+
+  const { mutate: getDashAdmin } = useBackendService(
+    '/admin/dashboard',
+    'GET',
+    {
+      onSuccess: (res) => {
+        const items = getDashBoxItems(role, res)
+        setDashBoxItems(items)
+      },
+      onError: () => {
+        toast.error('Error getting Dashboard details')
+      }
+    }
+  )
+
+  // Fetching table data
+  const { mutate: getTableData } = useBackendService('/allprojects', 'GET', {
+    onSuccess: (res: any) => {
+      const filteredData =
+        res.projects?.map((project: any) => ({
+          title: project.title, // Adjust field name if necessary
+          description: project.description, // Adjust field name if necessary
+          amount: project.cost, // Adjust field name if necessary
+          dateTime: formatDate(project.createdAt) // Adjust field name if necessary
+        })) || []
+
+      // Update the table data with filtered data
+      setTableData(filteredData)
+      setupTableAttributes(role)
+    },
+    onError: () => {
+      setupTableAttributes(role)
+
+      toast.error('Error getting projects data')
+    }
+  })
+
+  useEffect(() => {
+    if (authState.user?.role === 'admin') {
+      getDashAdmin({})
+      getTableData({ projectType: 'present' })
+    } else if (
+      authState.user?.role === 'donor' ||
+      authState.user?.role === 'corporate'
+    ) {
+      getDash({})
+      getTableData({ projectType: 'present', donor_id: currentState?.user.id })
+    } else if (authState.user?.role === 'NGO') {
+      getDash({})
+      getTableData({
+        projectType: 'present',
+        organization_id: currentState?.user.id
+      })
+    }
+  }, [authState.user?.role])
+
+  const getDashBoxItems = (role, data: any) => {
+    // Return dash box items based on role
+    switch (role) {
+      case 'NGO':
+        return [
+          {
+            title: 'Completed Projects',
+            amount: data.completedProjectsCount,
+            iconClass: 'fas fa-check-circle',
+            bgColor: 'bg-success'
+          },
+          {
+            title: 'Ongoing Projects',
+            amount: data.activeProjectsCount,
+            iconClass: 'fas fa-spinner',
+            bgColor: 'bg-info'
+          },
+          {
+            title: 'Donations Received',
+            amount: data.totalDonations,
+            iconClass: 'fas fa-hand-holding-usd',
+            bgColor: 'bg-warning'
+          },
+          {
+            title: 'Wallet Balance',
+            amount: data.walletBalance,
+            iconClass: 'fas fa-wallet',
+            bgColor: 'bg-primary'
+          }
+        ]
+      case 'donor':
+      case 'corporate':
+        return [
+          {
+            title: 'Completed Projects',
+            amount: data.completedProjectsCount,
+            iconClass: 'fas fa-check-circle',
+            bgColor: 'bg-success'
+          },
+          {
+            title: 'Ongoing Projects',
+            amount: data.activeProjectsCount,
+            iconClass: 'fas fa-spinner',
+            bgColor: 'bg-info'
+          },
+          {
+            title: 'Total Project Funding',
+            amount: data.totalDonations,
+            iconClass: 'fas fa-donate',
+            bgColor: 'bg-warning'
+          },
+          {
+            title: 'Wallet Balance',
+            amount: data.walletBalance,
+            iconClass: 'fas fa-wallet',
+            bgColor: 'bg-primary'
+          }
+        ]
+      case 'admin':
+        return [
+          {
+            title: 'Number of NGOs',
+            amount: data.ngoUsersCount,
+            iconClass: 'fas fa-users',
+            bgColor: 'bg-success'
+          },
+          {
+            title: 'Pending Requests',
+            amount: data.pendingRequests,
+            iconClass: 'fas fa-clock',
+            bgColor: 'bg-warning'
+          },
+          {
+            title: 'Total Project Funding',
+            amount: data.donationCount,
+            iconClass: 'fas fa-donate',
+            bgColor: 'bg-info'
+          },
+          {
+            title: 'Number of Projects',
+            amount: data.projectCount,
+            iconClass: 'fas fa-tasks',
+            bgColor: 'bg-primary'
+          }
+        ]
+      default:
+        return []
+    }
+  }
+
+  const setupTableAttributes = (role: string) => {
+    // Set dynamic headers and actions based on the role
+    switch (role) {
+      case 'NGO':
+        setHeaders(['Project Title', 'Description', 'Amount', 'Date-Time'])
+        setActions([
+          // {
+          //   label: 'View',
+          //   onClick: (row) => console.log('View details of', row)
+          // }
+        ])
+        break
+      case 'donor':
+      case 'corporate':
+        setHeaders(['Project Title', 'Description', 'Amount', 'Date-Time'])
+        setActions([
+          // {
+          //   label: 'View',
+          //   onClick: (row) => console.log('View details of', row)
+          // }
+        ])
+        break
+      case 'admin':
+        setHeaders(['Project Title', 'Description', 'Amount', 'Date-Time'])
+        setActions([
+          // {
+          //   label: 'View',
+          //   onClick: (row) => console.log('View details of', row)
+          // }
+        ])
+        break
+      default:
+        setHeaders([])
+        setActions([])
+    }
+  }
+
+  const handleEmptyStateClick = () => {
+    const role = authState.user?.role
+    switch (role) {
+      case 'admin':
+        navigate('/admin/briefs') // Redirect to admin briefs
+        break
+      case 'donor':
+      case 'corporate':
+        navigate('/donor/briefs') // Redirect to donor briefs
+        break
+      case 'NGO':
+        navigate('/ngo/briefs') // Redirect to NGO briefs
+        break
+      default:
+        console.log('Invalid role or no role found')
+    }
+  }
+
+  return (
+    <>
+      <DashBox items={dashBoxItems} />
+      <Tables
+        tableName='Recent Projects'
+        headers={headers}
+        data={tableData}
+        isPagination={false}
+        actions={actions}
+        emptyStateContent='No projects found'
+        emptyStateButtonLabel='Create New Project'
+        onEmptyStateButtonClick={handleEmptyStateClick}
+        currentPage={''}
+        totalPages={''}
+        onPageChange={''}
+      />
+    </>
+  )
+}
+
+export default Dashboard

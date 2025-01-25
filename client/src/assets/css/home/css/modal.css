@@ -1,0 +1,107 @@
+.modal-backdrop.show {
+  opacity: 0.5;
+}
+
+.modal-content {
+  border: none;
+  background-color: transparent;
+}
+
+.modal-body {
+  background-color: white;
+  border-top: 5px solid #6c72d9;
+  border-bottom: 5px solid #6c72d9;
+  padding: 20px;
+}
+
+.active-milestone {
+  background-color: #7b80dd !important;
+  color: white;
+  border-radius: 5px; /* Optional */
+}
+
+.modal-header {
+  border: none;
+}
+
+.form-modal-label {
+  font-weight: 500;
+  font-size: 12px;
+  color: #9d95a3;
+}
+
+.btn-modal {
+  background-color: #6c72d9;
+  border-radius: 5px;
+  color: white;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 10px 20px;
+  border: none;
+  text-transform: none;
+  width: 100%;
+}
+
+.btn-modal-back {
+  background-color: #9c9db3;
+  border-radius: 5px;
+  color: white;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 10px 20px;
+  border: none;
+  text-transform: none;
+  width: 100%;
+}
+
+.btn-brief-response-modal {
+  background-color: #6c72d9;
+  border-radius: 5px;
+  color: white;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 10px 20px;
+  border: none;
+  text-transform: none;
+}
+
+.milestone-modal-title {
+  border-bottom: #7b80dd 5px solid;
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+
+.comment-modal-body {
+  min-width: 400px;
+}
+
+.comment-modal-title {
+  font-size: 14px;
+  font-weight: 550;
+}
+
+@media (max-width: 768px) {
+  .donation-modal-title {
+    font-size: 1rem !important;
+  }
+
+  .comment-modal-body {
+    width: unset;
+  }
+}
+
+.ngo-directory-active-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* width: 75%; */
+  border-bottom: 3px solid;
+  border-bottom-color: #7b80dd;
+}
+
+.admin-container {
+  background-color: white;
+  border: 1px solid #7b80dd;
+  border-radius: 3px;
+  box-shadow: 0px 0px 5px 1px #cebde4;
+}

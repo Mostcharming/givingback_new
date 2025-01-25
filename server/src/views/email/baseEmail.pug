@@ -1,0 +1,166 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title= subject
+    style.
+      /* Reset default styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #aef8c0;
+        font-family: Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        padding: 20px;
+      }
+
+      /* Main container */
+      .email-container {
+        background-color: #ffffff;
+        max-width: 600px;
+        margin: 0 auto;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      /* Header image */
+      .header-image {
+        width: 150px; /* Reduced from full width */
+        height: auto;
+        margin: 20px auto;
+        display: block;
+      }
+
+      /* Subject styling */
+      .subject {
+        font-size: 24px;
+        font-weight: bold;
+        color: #239742;
+        padding: 24px 20px;
+        text-align: center;
+        background-color: #ffffff;
+      }
+
+      /* Content section */
+      .email-content {
+        background-color: #ffffff;
+        padding: 20px 30px;
+        margin: 0 20px 20px;
+        border: 2px solid #239742;
+        border-radius: 8px;
+        color: #333333;
+        line-height: 1.6;
+      }
+
+      /* Footer sections */
+      .footer-container {
+        background-color: #239742;
+        margin: 20px;
+        padding: 20px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .footer-container img {
+        width: 30px; /* Reduced size */
+        height: auto;
+        display: block;
+      }
+
+      .footer-container p {
+        color: #ffffff;
+        text-align: left;
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .footer-images {
+        padding: 20px;
+        text-align: center;
+      }
+
+      .footer-images img {
+        width: 40px; /* Reduced size */
+        height: auto;
+        margin: 10px auto;
+        display: block;
+      }
+
+      .footer-images h1 {
+        color: #239742;
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+
+      .footer-images p {
+        color: #666666;
+        font-size: 14px;
+      }
+
+      /* Image container for consistent centering */
+      .image-container {
+        text-align: center;
+        margin: 0 auto;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+
+        .header-image {
+          width: 200px; /* Even smaller on mobile */
+        }
+
+        .subject {
+          font-size: 20px;
+          padding: 16px 10px;
+        }
+
+        .email-content {
+          padding: 15px 20px;
+          margin: 0 10px 10px;
+        }
+
+        .footer-container {
+          margin: 10px;
+          padding: 15px;
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .footer-images img {
+          width: 50px; /* Smaller on mobile */
+        }
+      }
+
+  body
+    .email-container
+      .image-container
+        img.header-image(src=`cid:image1`, alt="Header Image")
+      .subject #{subject}
+      .email-content
+        block content
+      .footer-container
+        img(src=`cid:image2`, alt="Support Icon")
+        p
+          strong Need any help or have any questions?
+          br
+          | Just click on the icon to reply to this email and we are always happy to help out.
+      .footer-images
+        img(src=`cid:image3`, alt="Footer Logo")
+        h1 Warm Regards
+        p GivingBack Team

@@ -1,0 +1,9 @@
+extends baseEmail
+
+block content
+  p Admin Notification:
+  p A wallet funding transaction has been completed.
+  p User Name: #{userName}
+  p Amount: #{amount} #{currency}
+  p Transaction ID: #{transactionId}
+  p Please ensure the transaction is correctly recorded in the system.

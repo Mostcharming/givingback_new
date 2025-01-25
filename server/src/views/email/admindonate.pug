@@ -1,0 +1,11 @@
+extends baseEmail
+
+block content
+  p Admin Notification:
+  p A new donation has been made to a project.
+  p Donor Name: #{donorName}
+  p Project Title: #{projectTitle}
+  p Amount: #{amount} #{currency}
+  p Transaction ID: #{transactionId}
+  p NGO Managing Project: #{ngoName}
+  p Please review the transaction details for verification.

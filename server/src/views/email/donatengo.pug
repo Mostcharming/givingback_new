@@ -1,0 +1,9 @@
+extends baseEmail
+
+block content
+  p Hello #{userName},
+  p Thank you for your generous donation of #{amount} #{currency} to the project "#{projectTitle}".
+  p Project Owner: #{ngoName}
+  p Transaction ID: #{transactionId}
+  p Your contribution is making a real difference in the community.
+  p If you have any questions, please contact our support team.
