@@ -12,6 +12,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Setup Backend Environment
+        run: |
+          echo "PORT=${{ secrets.BACKEND_PORT }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}" >> .env
+          echo "JWT_COOKIE_EXPIRES_IN=${{ secrets.JWT_COOKIE_EXPIRES_IN }}" >> .env
+          echo "NODE_ENV=${{ secrets.BACKEND_NODE_ENV }}" >> .env
+
       - name: Deploy Backend
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -30,6 +38,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Setup Frontend Environment
+        run: |
+          echo "VITE_NODE_ENV=${{ secrets.FRONTEND_NODE_ENV }}" >> client/.env
 
       - name: Deploy Frontend
         uses: appleboy/ssh-action@v0.1.6
