@@ -1,0 +1,45 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy Backend
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.BACKEND_HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            git pull origin main
+            cd server
+            npm install
+            npm run build
+            pm2 restart all
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy Frontend
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            git pull origin main
+            cd client
+            npm install
+            npm run build
+            sudo cp -r /home/ubuntu/client/dist/* /var/www/html/
