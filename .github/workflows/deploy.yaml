@@ -76,26 +76,6 @@ jobs:
           script: |
             git pull origin main
 
-      - name: Clean Frontend Directories
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.FRONTEND_HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /home/ubuntu/client
-            rm -rf dist
-
-      - name: Build Frontend
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.FRONTEND_HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /home/ubuntu/client
-            npm run build
-
       - name: Deploy Frontend Build to Web Server
         uses: appleboy/ssh-action@v0.1.6
         with:
