@@ -10,6 +10,12 @@ lerna-debug.log*
 .ssh
 .bash_history
 .cache
+.ssh
+.bash_history
+.cache
+.Xauthority
+.bash_history
+.sudo_as_admin_successful
 
 node_modules
 env

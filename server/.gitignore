@@ -15,6 +15,10 @@ dist
 .ssh
 .bash_history
 .cache
+.Xauthority
+.bash_history
+.sudo_as_admin_successful
+
 *.local
 
 # Editor directories and files
