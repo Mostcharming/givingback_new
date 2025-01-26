@@ -7,22 +7,20 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+node_modules
+env
 .ssh
 .bash_history
-.cache
-.ssh
-.bash_history
-.cache
+.cache/*
 .Xauthority
 .bash_history
 .sudo_as_admin_successful
+.npm/*
+.pm2
 
 node_modules
 env
 .env
-dist-ssr
-dist
-/dist
 *.local
 .npm
 

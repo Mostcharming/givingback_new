@@ -14,10 +14,12 @@ dist
 /dist
 .ssh
 .bash_history
-.cache
+.cache/*
 .Xauthority
 .bash_history
 .sudo_as_admin_successful
+.npm/*
+.pm2
 
 *.local
 
