@@ -11,38 +11,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-
-      - name: Remove Old Backend Environment File
-        run: |
-          rm -f /home/ubuntu/server/.env
-
-      - name: Setup Backend Environment Variables
-        run: |
-          echo "PORT=${{ secrets.BACKEND_PORT }}" >> /home/ubuntu/server/.env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> /home/ubuntu/server/.env
-          echo "JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}" >> /home/ubuntu/server/.env
-          echo "JWT_COOKIE_EXPIRES_IN=${{ secrets.JWT_COOKIE_EXPIRES_IN }}" >> /home/ubuntu/server/.env
-          echo "NODE_ENV=${{ secrets.BACKEND_NODE_ENV }}" >> /home/ubuntu/server/.env
-          echo "EMAIL_FROM=${{ secrets.EMAIL_FROM }}" >> /home/ubuntu/server/.env
-          echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> /home/ubuntu/server/.env
-          echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> /home/ubuntu/server/.env
-          echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> /home/ubuntu/server/.env
-          echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" >> /home/ubuntu/server/.env
-          echo "AWS3_ACCESS_KEY=${{ secrets.AWS3_ACCESS_KEY }}" >> /home/ubuntu/server/.env
-          echo "AWS3_ACCESS_SECRET=${{ secrets.AWS3_ACCESS_SECRET }}" >> /home/ubuntu/server/.env
-          echo "REGION=${{ secrets.REGION }}" >> /home/ubuntu/server/.env
-          echo "BUCKET=${{ secrets.BUCKET }}" >> /home/ubuntu/server/.env
-          echo "DEV_DB_HOST=${{ secrets.DEV_DB_HOST }}" >> /home/ubuntu/server/.env
-          echo "DEV_DB_PORT=${{ secrets.DEV_DB_PORT }}" >> /home/ubuntu/server/.env
-          echo "DEV_DB_DATABASE=${{ secrets.DEV_DB_DATABASE }}" >> /home/ubuntu/server/.env
-          echo "DEV_DB_USER=${{ secrets.DEV_DB_USER }}" >> /home/ubuntu/server/.env
-          echo "DEV_DB_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}" >> /home/ubuntu/server/.env
-          echo "PROD_DB_HOST=${{ secrets.PROD_DB_HOST }}" >> /home/ubuntu/server/.env
-          echo "PROD_DB_PORT=${{ secrets.PROD_DB_PORT }}" >> /home/ubuntu/server/.env
-          echo "PROD_DB_DATABASE=${{ secrets.PROD_DB_DATABASE }}" >> /home/ubuntu/server/.env
-          echo "PROD_DB_USER=${{ secrets.PROD_DB_USER }}" >> /home/ubuntu/server/.env
-          echo "PROD_DB_PASSWORD=${{ secrets.PROD_DB_PASSWORD }}" >> /home/ubuntu/server/.env
-
       - name: Reset Backend Repository
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -98,14 +66,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-
-      - name: Remove Old Frontend Environment File
-        run: |
-          rm -f home/ubuntu/client/.env
-
-      - name: Setup Frontend Environment Variables
-        run: |
-          echo "VITE_NODE_ENV=${{ secrets.FRONTEND_NODE_ENV }}" >> home/ubuntu/client/.env
 
       - name: Reset Frontend Repository
         uses: appleboy/ssh-action@v0.1.6
