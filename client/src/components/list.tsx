@@ -196,12 +196,14 @@ const List = ({ type, donor = null }) => {
         fetchUsers({
           page: currentPage,
           projectType: 'present',
+          status: 'active',
           organization_id: currentState.user.id
         })
       } else {
         fetchUsers({
           page: currentPage,
           projectType: 'present',
+          status: 'active',
           donor_id: currentState.user.id
         })
       }
