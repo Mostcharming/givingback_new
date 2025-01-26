@@ -378,7 +378,7 @@ export const donate = async (req: any, res: Response) => {
     //email
 
     let userData = await db('organizations').where('user_id', ngo_id).first()
-    let userData4 = await db('users').where('user_id', ngo_id).first()
+    let userData4 = await db('users').where('id', ngo_id).first()
     const userData2 = await db('donors').where('user_id', donor_id).first()
     const userData3 = await db('project').where('id', project_id).first()
     if (!userData2) {

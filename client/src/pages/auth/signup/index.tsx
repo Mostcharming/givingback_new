@@ -578,7 +578,7 @@ const CorporateDetailsForm: React.FC<CorporateDetailsFormProps> = ({
       try {
         setRegistrationNumberError('')
 
-        await Util.checkIfCompanyRegistrationNumberIsValid(value)
+        // await Util.checkIfCompanyRegistrationNumberIsValid(value)
         setFormData({ ...formData, [name]: value })
       } catch (err: any) {
         setRegistrationNumberError(err.response.data.message)
@@ -1384,7 +1384,7 @@ const Org: React.FC<any> = ({
       try {
         setRegistrationNumberError('')
 
-        await Util.checkIfCompanyRegistrationNumberIsValid(value)
+        // await Util.checkIfCompanyRegistrationNumberIsValid(value)
         setFormData({ ...formData, [name]: value })
       } catch (err: any) {
         setFormData({ ...formData, [name]: '' })
