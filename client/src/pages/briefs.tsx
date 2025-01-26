@@ -202,7 +202,7 @@ const Briefs = () => {
     if (authState.user.role === 'NGO') {
     } else {
       return (
-        <Row className='mt-4 p-3'>
+        <Row className='p-3'>
           <Col
             lg='12'
             md
@@ -220,7 +220,7 @@ const Briefs = () => {
                     borderRadius: '3px',
                     padding: '5px 30px 5px 10px',
                     outline: 'none',
-                    width: '120px'
+                    width: '150px'
                   }}
                   onChange={handleSearch}
                 />
@@ -271,7 +271,7 @@ const Briefs = () => {
                   padding: '5px 30px 5px 10px',
                   outline: 'none',
                   appearance: 'none',
-                  width: '120px'
+                  width: '200px'
                 }}
                 value={selectedArea}
                 onChange={(e) => handleAreaChange(e.target.value)}

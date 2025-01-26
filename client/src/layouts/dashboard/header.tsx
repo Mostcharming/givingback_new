@@ -55,7 +55,7 @@ const AdminNavbar: React.FC<any> = (props) => {
   return (
     <>
       <Navbar
-        style={{ height: '10px', marginBottom: '100px' }}
+        style={{ height: '10px', marginBottom: '70px' }}
         className='navbar-top navbar-dark'
         expand='md'
         id='navbar-main'

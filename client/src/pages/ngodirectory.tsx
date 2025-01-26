@@ -199,7 +199,7 @@ const Ngo = () => {
 
   const filter = () => {
     return (
-      <Row className='mt-4 p-3'>
+      <Row className='p-3'>
         <Col
           lg='12'
           md
