@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Col, Container, Row } from 'reactstrap'
 
+import GiveBackLogo from '../assets/images/logo.png'
+import StripeIcon from '../assets/images/stripe.svg'
 import Loading from '../components/home/loading'
 import useBackendService from '../services/backend_service'
 import { useContent } from '../services/useContext'
@@ -300,14 +302,15 @@ const PaymentForm2 = ({
     onError: () => {}
   })
   const { mutate: fundPost } = useBackendService('/fund', 'POST', {
-    onSuccess: (res2: any) => {},
+    onSuccess: (res2: any) => {
+      toast.success('Payment successful')
+      setClientSecret(null)
+    },
     onError: () => {}
   })
 
   const handleStripePayment = async () => {
     if (!stripe || !elements) return
-
-    stripeS({ amount: +amount * 100, currency: 'usd' })
 
     const { error: submitError } = await elements.submit()
     if (submitError) {
@@ -329,14 +332,6 @@ const PaymentForm2 = ({
       }
     )
 
-    // const { error, paymentIntent } = await stripe.confirmPayment({
-    //   elements,
-    //   clientSecret,
-    //   confirmParams: {
-    //     return_url: `${window.location.origin}/dashboard`
-    //   }
-    // })
-
     if (error) {
       toast.error('Payment failed ')
     } else {
@@ -350,45 +345,40 @@ const PaymentForm2 = ({
           amount: amount
         }
         fundPost(data)
-        toast.success('Payment successful!')
+        toast.info('Payment processing.......')
       }
     }
   }
 
   const handleSubmit = () => {
-    handleStripePayment()
+    stripeS({ amount: +amount * 100, currency: 'usd' })
   }
 
   return (
     <div className='col-lg-6 mx-auto'>
-      <div className='card'>
+      <div className='card w-[60vw]'>
         <div className='card-header'>
-          <div className='form-group'>
-            <h6>Amount</h6>
-            <input
-              type='number'
-              required
-              className='form-control'
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </div>
-          <button
-            type='button'
-            className='btn btn-block '
-            style={styles.paymentButton}
-            onClick={handleSubmit}
-          >
-            Confirm Payment
-          </button>
-          {clientSecret && (
+          {clientSecret ? (
             <>
-              {/* <PaymentElement
-                id='payment-element'
-                options={{
-                  layout: 'tabs'
-                }}
-              /> */}
+              <div className='d-flex justify-content-between'>
+                <img
+                  src={GiveBackLogo}
+                  alt='logo'
+                  className='img-fluid'
+                  style={{
+                    marginTop: '-16px',
+                    maxHeight: '80px'
+                  }}
+                />
+                <img
+                  src={StripeIcon}
+                  alt='stripe'
+                  className='img-fluid'
+                  style={{
+                    maxHeight: '46px'
+                  }}
+                />
+              </div>
               <CardElement
                 options={{
                   style: {
@@ -409,6 +399,45 @@ const PaymentForm2 = ({
                   }
                 }}
               />
+              <div className='d-flex justify-content-between mt-3'>
+                <button
+                  type='button'
+                  className='btn btn-block '
+                  style={styles.back}
+                  onClick={() => setClientSecret(null)}
+                >
+                  Back
+                </button>
+                <button
+                  type='button'
+                  className='btn btn-block '
+                  style={styles.paymentButton}
+                  onClick={handleStripePayment}
+                >
+                  Confirm Payment
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className='form-group'>
+                <h6>Amount</h6>
+                <input
+                  type='number'
+                  required
+                  className='form-control'
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+              </div>
+              <button
+                type='button'
+                className='btn btn-block '
+                style={styles.paymentButton}
+                onClick={handleSubmit}
+              >
+                Confirm Payment
+              </button>
             </>
           )}
         </div>
@@ -437,6 +466,11 @@ const styles = {
   paymentButton: {
     backgroundColor: '#7B80DD',
     color: '#fff'
+  },
+  back: {
+    backgroundColor: 'red',
+    color: '#fff',
+    flex: 1
   }
 }
 

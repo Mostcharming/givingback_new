@@ -367,3 +367,18 @@ export const withdraw = async (req: any, res: Response) => {
     res.status(500).json({ error: 'Unable to complete process' })
   }
 }
+
+export const respondBrief = async (req: any, res: Response) => {
+  try {
+    const projectId = req.params.id
+    const { message } = req.body
+
+    await db('project').where({ id: projectId }).update({
+      status: 'active'
+    })
+
+    res.status(200).json({ message: 'Project accepted' })
+  } catch (error) {
+    res.status(500).json({ error: 'Unable to update project' })
+  }
+}

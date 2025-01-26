@@ -6,6 +6,7 @@ import DashBox from '../../components/dashbox'
 import { formatDate } from '../../components/formatTime'
 import Tables from '../../components/tables'
 import useBackendService from '../../services/backend_service'
+import { capitalizeFirstLetter } from '../../services/capitalize'
 import { useContent } from '../../services/useContext'
 import Withdraw from './withdrawPop'
 
@@ -60,11 +61,11 @@ const FundsM = () => {
         const filteredData =
           res.donations?.map((project: any) => ({
             id: project.id,
-            title: project.project_name, // Adjust field name if necessary
-            description: project.project_description, // Adjust field name if necessary
+            title: capitalizeFirstLetter(project.project_name), // Adjust field name if necessary
+            description: capitalizeFirstLetter(project.project_description), // Adjust field name if necessary
             amount: project.amount, // Adjust field name if necessary
-            type: project.type,
-            status: project.status ?? 'Completed',
+            type: capitalizeFirstLetter(project.type),
+            status: capitalizeFirstLetter(project.status) ?? 'Completed',
             dateTime: formatDate(project.createdAt) // Adjust field name if necessary
           })) || []
 

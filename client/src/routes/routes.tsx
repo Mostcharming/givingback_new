@@ -5,6 +5,7 @@ import Login from '../pages/auth/login'
 import Register from '../pages/auth/ngoregister'
 import OtpVerification from '../pages/auth/otp'
 import SignUp from '../pages/auth/signup'
+import Briefs from '../pages/briefs'
 import Dashboard from '../pages/Dashboard'
 import DN_Projects from '../pages/donor_ngo_projects'
 import FundsM from '../pages/fundsM'
@@ -181,23 +182,24 @@ var routes = [
   },
   //////donor/briefs
   {
-    path: '/dashboard',
+    path: '/briefs',
     name: 'Briefs',
     icon: 'ni ni-archive-2',
-    component: <Dashboard />,
+    component: <Briefs />,
     layout: '/donor'
   },
   ,
   {
-    path: '/dashboard',
+    path: '/briefs',
     name: 'Briefs',
     icon: 'ni ni-archive-2',
-    component: <Dashboard />,
+    component: <Briefs />,
     layout: '/ngo'
   },
+  /////admin Donor
   {
     path: '/dashboard',
-    name: 'Donor',
+    name: 'Donors',
     icon: 'ni ni-favourite-28',
     component: <Dashboard />,
     layout: '/admin'

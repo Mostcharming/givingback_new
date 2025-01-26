@@ -11,6 +11,7 @@ import Tables from '../components/tables'
 import ViewMileStoneUpdateModal from '../components/ViewMilestoneUpdateModal'
 import useBackendService from '../services/backend_service'
 import { useContent } from '../services/useContext'
+import RespondToBriefModal from './RespondToBriefModal'
 
 const ProjectViewDetail: React.FC<any> = ({ ngo = null }) => {
   const [activeTab, setActiveTab] = useState('detail')
@@ -18,6 +19,7 @@ const ProjectViewDetail: React.FC<any> = ({ ngo = null }) => {
   const { id } = useParams<{ id: string }>()
   const [loading, setLoading] = useState<boolean>(true)
   const { authState } = useContent()
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { mutate: getTableData, isLoading } = useBackendService(
     '/allprojects',
@@ -49,34 +51,42 @@ const ProjectViewDetail: React.FC<any> = ({ ngo = null }) => {
       <Updates project={project} />
     ) : null
   }
-
   const renderTabs = () => {
     return (
       <div className='tabs' style={tabsContainerStyle}>
-        <div>
+        {project?.status === 'brief' ? (
           <Tab
             label='Details'
             active={activeTab === 'detail'}
             onClick={() => setActiveTab('detail')}
           />
-          <Tab
-            label='Updates'
-            active={activeTab === 'updates'}
-            onClick={() => setActiveTab('updates')}
-          />
-          <Tab
-            label='Media'
-            active={activeTab === 'media'}
-            onClick={() => setActiveTab('media')}
-          />
-          {authState.user.role !== 'NGO' && (
+        ) : (
+          <div>
             <Tab
-              label='Community'
-              active={activeTab === 'community'}
-              onClick={() => setActiveTab('community')}
+              label='Details'
+              active={activeTab === 'detail'}
+              onClick={() => setActiveTab('detail')}
             />
-          )}
-        </div>
+            <Tab
+              label='Updates'
+              active={activeTab === 'updates'}
+              onClick={() => setActiveTab('updates')}
+            />
+            <Tab
+              label='Media'
+              active={activeTab === 'media'}
+              onClick={() => setActiveTab('media')}
+            />
+            {authState.user.role !== 'NGO' && (
+              <Tab
+                label='Community'
+                active={activeTab === 'community'}
+                onClick={() => setActiveTab('community')}
+              />
+            )}
+          </div>
+        )}
+
         {authState.user.role === 'admin' && (
           <Button
             variant='light'
@@ -84,6 +94,15 @@ const ProjectViewDetail: React.FC<any> = ({ ngo = null }) => {
             onClick={() => handleExportClick()}
           >
             Export Project Report
+          </Button>
+        )}
+        {authState.user.role === 'NGO' && (
+          <Button
+            variant='light'
+            style={exportButtonStyle}
+            onClick={() => handleRespond()}
+          >
+            Respond to Brief
           </Button>
         )}
       </div>
@@ -139,6 +158,13 @@ const ProjectViewDetail: React.FC<any> = ({ ngo = null }) => {
     doc.save(`${project?.title || 'Project'}_Report_givingback.pdf`)
     toast.success('Project report exported successfully!')
   }
+  const handleRespond = async () => {
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+  }
 
   return (
     <div>
@@ -167,6 +193,12 @@ const ProjectViewDetail: React.FC<any> = ({ ngo = null }) => {
 
         <div className='form-container mt-4'>{renderForm()}</div>
       </Container>
+      <RespondToBriefModal
+        open={isModalOpen}
+        handleClose={closeModal}
+        name={project?.title}
+        id={project?.id}
+      />
     </div>
   )
 }
@@ -303,6 +335,27 @@ const ProjectSummary: React.FC<any> = ({ project, ngo = null }) => {
               </div>
             </Col>
           </Row>
+
+          <h3 className='detail-header mt-5'>Sponsors</h3>
+          <Row style={{ backgroundColor: '#F0F1FB' }} className='p-2'>
+            <Col xs={3}>Name</Col>
+            <Col xs={9}>Description</Col>
+          </Row>
+          <Row key={project?.donor.name} className='p-2'>
+            <Col xs={3}>
+              <img
+                src={project?.donor.image}
+                alt='logo'
+                style={{ width: '50px', height: '50px', marginRight: '10px' }}
+              />
+              {project?.donor.name}
+            </Col>
+            <Col xs={9} className='mt-2'>
+              {project?.donor.about}
+            </Col>
+          </Row>
+          <hr />
+
           <Row>
             <Col md={4}>
               <h3 className='detail-header'>Focus Category</h3>
@@ -364,14 +417,15 @@ const ProjectSummary: React.FC<any> = ({ project, ngo = null }) => {
           <Row style={{ backgroundColor: '#F0F1FB' }} className='p-2'>
             <Col md={1}>S/N</Col>
             <Col md={2}>Milestone</Col>
-            <Col md={1}>Actual</Col>
             <Col md={1}>Target</Col>
+            <Col md={1}>Achieve</Col>
+
             <Col md={1}>%</Col>
             <Col>Details</Col>
           </Row>
           {project.milestones && project.milestones.length > 0 ? (
             project.milestones.map((milestone: any, index: number) => {
-              const update = milestone.milestoneUpdates?.[0]
+              const update = milestone.updates?.[0]
               return (
                 <Row key={milestone.id} className='p-2'>
                   <Col md={1}>{index + 1}</Col>
@@ -396,45 +450,51 @@ const ProjectSummary: React.FC<any> = ({ project, ngo = null }) => {
           <hr />
         </div>
       </div>
-      {(authState.user.role === 'donor' ||
-        authState.user.role === 'corporate' ||
-        authState.user.role === 'admin') && (
-        <div
-          style={{
-            marginTop: '20px',
-            padding: '20px',
-            backgroundColor: 'white'
-          }}
-        >
-          <h3 className='detail-header p-2'>
-            {authState.user.role === 'admin' ? "Admin's Feedback" : 'Comment'}
-          </h3>
-          <Form>
-            <Form.Group controlId='comment'>
-              <Form.Control
-                as='textarea'
-                rows={4}
-                value={comment}
-                onChange={handleCommentChange}
-                placeholder='Write your comment here...'
-                style={{ resize: 'none' }}
-              />
-            </Form.Group>
-            <Button
+      {project?.status !== 'brief' && (
+        <>
+          {(authState.user.role === 'donor' ||
+            authState.user.role === 'corporate' ||
+            authState.user.role === 'admin') && (
+            <div
               style={{
-                backgroundColor: '#7B80DD',
-                borderColor: '#7B80DD',
-                width: '100%',
-                padding: '10px',
-                marginTop: '30px'
+                marginTop: '20px',
+                padding: '20px',
+                backgroundColor: 'white'
               }}
-              variant='primary'
-              onClick={handleCommentSubmit}
             >
-              Submit
-            </Button>
-          </Form>
-        </div>
+              <h3 className='detail-header p-2'>
+                {authState.user.role === 'admin'
+                  ? "Admin's Feedback"
+                  : 'Comment'}
+              </h3>
+              <Form>
+                <Form.Group controlId='comment'>
+                  <Form.Control
+                    as='textarea'
+                    rows={4}
+                    value={comment}
+                    onChange={handleCommentChange}
+                    placeholder='Write your comment here...'
+                    style={{ resize: 'none' }}
+                  />
+                </Form.Group>
+                <Button
+                  style={{
+                    backgroundColor: '#7B80DD',
+                    borderColor: '#7B80DD',
+                    width: '100%',
+                    padding: '10px',
+                    marginTop: '30px'
+                  }}
+                  variant='primary'
+                  onClick={handleCommentSubmit}
+                >
+                  Submit
+                </Button>
+              </Form>
+            </div>
+          )}
+        </>
       )}
     </>
   )
@@ -544,13 +604,10 @@ const Updates: React.FC<any> = ({ project }) => {
   }
 
   const changeMilestone = (index) => {
-    
     setCurrentMilestone(index)
   }
 
   let rows = []
-
-
 
   if (milestones) {
     rows = milestones[currentMilestone].updates.map((milestone, index) => {
