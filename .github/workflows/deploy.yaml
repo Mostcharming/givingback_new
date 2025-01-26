@@ -86,16 +86,6 @@ jobs:
             cd /home/ubuntu/client
             rm -rf dist
 
-      - name: Install Frontend Dependencies
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.FRONTEND_HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /home/ubuntu/client
-            npm install
-
       - name: Build Frontend
         uses: appleboy/ssh-action@v0.1.6
         with:
