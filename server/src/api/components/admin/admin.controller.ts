@@ -525,3 +525,67 @@ export const getPaymentGateways = async (
     res.status(500).json({ error: 'Failed to fetch payment gateways' })
   }
 }
+
+export const getAllDonors = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { name, industry, interest_area, state, city_lga } = req.query
+
+    let query = db('donors').select(
+      'id',
+      'name',
+      'phoneNumber',
+      'industry',
+      'email',
+      'interest_area',
+      'state',
+      'city_lga',
+      'address',
+      'about',
+      'image'
+    )
+
+    if (name) {
+      query = query.where(db.raw('LOWER(name)'), '=', name.toLowerCase())
+    }
+    if (industry) {
+      query = query.where(
+        db.raw('LOWER(industry)'),
+        'LIKE',
+        `%${industry.toLowerCase()}%`
+      )
+    }
+    if (interest_area) {
+      query = query.where(
+        db.raw('LOWER(interest_area)'),
+        'LIKE',
+        `%${interest_area.toLowerCase()}%`
+      )
+    }
+    if (state) {
+      query = query.where(
+        db.raw('LOWER(state)'),
+        'LIKE',
+        `%${state.toLowerCase()}%`
+      )
+    }
+    if (city_lga) {
+      query = query.where(
+        db.raw('LOWER(city_lga)'),
+        'LIKE',
+        `%${city_lga.toLowerCase()}%`
+      )
+    }
+
+    const allDonors = await query
+
+    res.status(200).json({
+      donors: allDonors
+    })
+  } catch (error) {
+    res.status(500).json({ error: 'Unable to fetch donors' })
+  }
+}

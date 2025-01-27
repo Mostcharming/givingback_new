@@ -34,14 +34,18 @@ export default function RespondToBriefModal({ open, handleClose, name, id }) {
     navigate('/ngo/briefs')
   }
 
-  const { mutate: respond } = useBackendService(`/ngo/projects/${id}`, 'PUT', {
-    onSuccess: (res2: any) => {
-      setIsSuccessModalOpen(true)
-    },
-    onError: (error: any) => {
-      toast.error(error.message)
+  const { mutate: respond, isLoading } = useBackendService(
+    `/ngo/projects/${id}`,
+    'PUT',
+    {
+      onSuccess: (res2: any) => {
+        setIsSuccessModalOpen(true)
+      },
+      onError: (error: any) => {
+        toast.error(error.message)
+      }
     }
-  })
+  )
 
   const handleSubmit = async () => {
     const message = messageRef.current.value
@@ -88,9 +92,26 @@ export default function RespondToBriefModal({ open, handleClose, name, id }) {
             ></textarea>
           </Form.Group>
           <DialogActions className='mb-4'>
-            <button className='btn-brief-response-modal' onClick={handleSubmit}>
-              Accept Brief
-            </button>
+            <DialogActions className='mb-4'>
+              <button
+                className='btn-brief-response-modal btn btn-primary'
+                onClick={handleSubmit}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className='d-flex align-items-center'>
+                    <span
+                      className='spinner-border spinner-border-sm me-2'
+                      role='status'
+                      aria-hidden='true'
+                    ></span>
+                    Loading...
+                  </div>
+                ) : (
+                  'Accept Brief'
+                )}
+              </button>
+            </DialogActions>
           </DialogActions>
         </Container>
       </Dialog>

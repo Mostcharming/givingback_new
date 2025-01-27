@@ -12,6 +12,7 @@ import FundsM from '../pages/fundsM'
 import AddPastProject from '../pages/ngo/pastproject/past-projects'
 import NGODetails from '../pages/ngo_details'
 import Ngo from '../pages/ngodirectory'
+import CreateProject from '../pages/project/create-project'
 import ProjectViewDetail from '../pages/project_details'
 import SendMoney from '../pages/send'
 
@@ -291,6 +292,19 @@ var routes = [
     path: '/send_money',
     icon: 'ni ni-settings-gear-65',
     component: <SendMoney />,
+    layout: '/donor'
+  },
+  //////breif initiate
+  {
+    path: '/brief_initiate',
+    icon: 'ni ni-chart-bar-32',
+    component: <CreateProject />,
+    layout: '/admin'
+  },
+  {
+    path: '/brief_initiate',
+    icon: 'ni ni-send',
+    component: <CreateProject />,
     layout: '/donor'
   }
 ]

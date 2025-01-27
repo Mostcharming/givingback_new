@@ -6,6 +6,7 @@ import {
   bulk,
   deletePaymentGateway,
   feedBack,
+  getAllDonors,
   getCounts,
   getDonations,
   getPaymentGateways,
@@ -38,5 +39,10 @@ router.delete('/payment-gateways/:id', deletePaymentGateway)
 
 router.get('/rates', getRates)
 router.post('/rates', addRates)
+
+router
+  .route('/donor')
+  // .post(secureLogin, uploadimg, verifyNewUser, admin.createDonor)
+  .get(getAllDonors)
 
 export default router

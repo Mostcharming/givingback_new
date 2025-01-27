@@ -377,6 +377,49 @@ export const respondBrief = async (req: any, res: Response) => {
       status: 'active'
     })
 
+    const userData3 = await db('project').where('id', projectId).first()
+    let userData = await db('organizations')
+      .where('user_id', req.user.id)
+      .first()
+    let userData4 = await db('users').where('id', req.user.id).first()
+    const userData2 = await db('donors').where('id', userData3.donor_id).first()
+    const userData5 = await db('donations')
+      .where('type', 'allocated')
+      .where('ngo_id', userData.id)
+      .where('donor_id', userData3.donor_id)
+      .where('project_id', projectId)
+      .first()
+    if (!userData2) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'User not found.'
+      })
+    }
+
+    const token = 0
+    const url = userData.name
+    const additionalData = {
+      projectDescription: userData3.description,
+      fundingAmount: userData5.amount,
+      projectTitle: userData3.title,
+      currency: 'NGN',
+      ngoName: userData.name,
+      donorName: userData2.name
+    }
+    await new Email({
+      email: userData4.email,
+      url,
+      token,
+      additionalData
+    }).sendEmail('ngoaccetpbrief', 'Project Acceptance')
+
+    await new Email({
+      email: 'info@givingbackng.org',
+      url,
+      token,
+      additionalData
+    }).sendEmail('adminngoacceptbrief', 'Project Acceptance')
+
     res.status(200).json({ message: 'Project accepted' })
   } catch (error) {
     res.status(500).json({ error: 'Unable to update project' })

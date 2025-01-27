@@ -42,6 +42,7 @@ const AdminNavbar: React.FC<any> = (props) => {
     if (path.endsWith('/fund_wallet')) return 'FUND WALLET'
     if (path.endsWith('/send_money')) return 'SEND MONEY'
     if (path.includes('/briefs')) return 'BRIEFS'
+    if (path.includes('/brief_initiate')) return 'CREATE BRIEF'
 
     // Check if the path matches "/ngo/<number>"
     const ngoDetailsMatch = path.match(/\/ngo\/\d+$/)

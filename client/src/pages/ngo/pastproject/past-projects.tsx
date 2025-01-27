@@ -6,7 +6,7 @@ import Beneficiaries from './beneficaries'
 import Details from './details'
 import Media from './media'
 import Sponsors from './sponsors'
-const headers = ['Project Details', 'Sponsors', 'Beneficiaries', 'Media']
+const headers = ['Details', 'Sponsors', 'Beneficiaries', 'Media']
 
 const AddPastProject = () => {
   const { page, changePage } = usePageChange()
