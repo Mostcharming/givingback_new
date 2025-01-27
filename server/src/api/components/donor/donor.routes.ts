@@ -3,6 +3,7 @@ import express from 'express'
 import { secureLogin } from '../../../middleware/auth'
 import { uploadHandler, uploadimg } from '../../../middleware/general'
 import {
+  addbrief,
   addRecipient,
   donate,
   feedBack,
@@ -40,5 +41,5 @@ router
   .put(donate as any)
 
 router.route('/users/:id/projects').get(getAllUserPresentProjects as any)
-
+router.route('/projects').post(uploadimg, addbrief)
 export default router

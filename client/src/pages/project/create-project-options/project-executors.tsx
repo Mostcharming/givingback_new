@@ -3,6 +3,7 @@ import { Col, Container, Form, Row } from 'react-bootstrap'
 import Select from 'react-select'
 
 import { toast } from 'react-toastify'
+import useBackendService from '../../../services/backend_service'
 import ProgressHeader from '../../ngo/progress-header'
 import { useBriefContext } from '../add-brief-context'
 import AddBriefRow from './add-brief-row'
@@ -28,16 +29,21 @@ const ProjectExecutors = ({ page, headers, changePage }) => {
     label: ngo.name
   }))
 
-  useEffect(() => {
-    const getAllNGOs = async () => {
-      try {
-        // const res = await getNgos(1)
-        // setNgos(res.users)
-      } catch (error) {
-        toast.error(error.message)
+  const { mutate: fetchUsers, isLoading } = useBackendService(
+    '/donor/users',
+    'GET',
+    {
+      onSuccess: (res: any) => {
+        setNgos(res.users)
+      },
+      onError: (error) => {
+        toast.error('Failed to fetch NGOs.')
       }
     }
-    getAllNGOs()
+  )
+
+  useEffect(() => {
+    fetchUsers({ page: 1, limit: 10000 })
   }, [setNgos])
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -49,6 +55,11 @@ const ProjectExecutors = ({ page, headers, changePage }) => {
   }
 
   const handleNext = () => {
+    if (executors.length === 0) {
+      toast.error('You must add at least one NGO before proceeding.')
+      return
+    }
+
     for (let i = 0; i < executors.length; i++) {
       const id = ngos.find((ngo) => ngo.name == executors[i].name)?.id
       const brief = executors[i].brief
@@ -79,7 +90,6 @@ const ProjectExecutors = ({ page, headers, changePage }) => {
     completeInit.push({ id: id.toString(), name, brief })
     setCompleteExecutors(completeInit)
 
-    // Reset the form
     if (formRef.current) {
       formRef.current.reset()
     }
@@ -129,8 +139,11 @@ const ProjectExecutors = ({ page, headers, changePage }) => {
           </Row>
           <Row>
             <Col lg='6'>
-              <button className='btn-modal-back mb-5'>
-                Back to Beneficiaries
+              <button
+                onClick={() => changePage('Back')}
+                className='btn-modal-back mb-5'
+              >
+                Back to Milestones
               </button>
             </Col>
             <Col lg='6'>
@@ -144,19 +157,6 @@ const ProjectExecutors = ({ page, headers, changePage }) => {
         <button className='btn-modal mt-4' onClick={handleNext}>
           Proceed to Initiation
         </button>
-
-        {/* <Row className="mt-4">
-          <Col className="ps-0" lg="6">
-            <button onClick={() => changePage("Back")} className="btn-modal-back mb-5">
-              Back to Overview
-            </button>
-          </Col>
-          <Col className="pe-0" lg="6">
-            <button onClick={handleNext} className="btn-modal mb-5">
-              Procced to milestones
-            </button>
-          </Col>
-        </Row> */}
       </Container>
     </>
   )

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Col, Container, Form, Row } from 'react-bootstrap'
+import { toast } from 'react-toastify'
 import { AddPlusIcon } from '../../../assets/images/svgs'
 import { States } from '../../../services/utils'
 import ProgressHeader from '../../ngo/progress-header'
@@ -54,8 +55,10 @@ const ProjectBeneficiaries = ({ page, headers, changePage }) => {
   }
 
   const handleNext = () => {
-    console.log(brief)
-    console.log(beneficiary_overview)
+    if (beneficiaries.length === 0) {
+      toast.error('You must add at least one beneficiary before proceeding.')
+      return
+    }
 
     addToBrief({ beneficiary_overview })
 

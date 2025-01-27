@@ -1,6 +1,9 @@
 import usePageChange from '../../components/pageChange'
 import AddBriefProvider from './add-brief-context'
 import ProjectBeneficiaries from './create-project-options/project-beneficiaries'
+import ProjectExecutors from './create-project-options/project-executors'
+import ProjectInitiate from './create-project-options/project-initiate'
+import ProjectMilestones from './create-project-options/project-milestones'
 // import ProjectExecutors from './create-project-options/project-executors'
 // import ProjectInitiate from './create-project-options/project-initiate'
 // import ProjectMilestones from './create-project-options/project-milestones'
@@ -36,7 +39,7 @@ const CreateProject = ({ donor = null }) => {
           changePage={changePage}
         />
       )}
-      {/*
+
       {page === 3 && (
         <ProjectMilestones
           page={page}
@@ -44,6 +47,7 @@ const CreateProject = ({ donor = null }) => {
           changePage={changePage}
         />
       )}
+
       {page === 4 && (
         <ProjectExecutors
           page={page}
@@ -58,7 +62,7 @@ const CreateProject = ({ donor = null }) => {
           headers={headers}
           changePage={changePage}
         />
-      )} */}
+      )}
     </AddBriefProvider>
   )
 }

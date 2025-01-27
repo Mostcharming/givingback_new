@@ -1,9 +1,10 @@
 import express from 'express'
-import { uploadbulk } from '../../../middleware/general'
+import { uploadbulk, uploadimg } from '../../../middleware/general'
 import {
   addPaymentGateway,
   addRates,
   bulk,
+  createProject,
   deletePaymentGateway,
   feedBack,
   getAllDonors,
@@ -44,5 +45,6 @@ router
   .route('/donor')
   // .post(secureLogin, uploadimg, verifyNewUser, admin.createDonor)
   .get(getAllDonors)
+router.post('/projects', uploadimg, createProject)
 
 export default router

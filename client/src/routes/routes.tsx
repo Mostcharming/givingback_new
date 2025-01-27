@@ -14,6 +14,7 @@ import NGODetails from '../pages/ngo_details'
 import Ngo from '../pages/ngodirectory'
 import CreateProject from '../pages/project/create-project'
 import ProjectViewDetail from '../pages/project_details'
+import AdminDashboard from '../pages/report/dashboard'
 import SendMoney from '../pages/send'
 
 var routes = [
@@ -207,18 +208,18 @@ var routes = [
   },
   //////report
   {
-    path: '/dashboard',
+    path: '/report',
     name: 'Report',
     icon: 'ni ni-chart-bar-32',
-    component: <Dashboard />,
+    component: <AdminDashboard donor={1} />,
     layout: '/donor'
   },
   ,
   {
-    path: '/dashboard',
+    path: '/report',
     name: 'Report',
     icon: 'ni ni-chart-bar-32',
-    component: <Dashboard />,
+    component: <AdminDashboard />,
     layout: '/admin'
   },
   ////messages

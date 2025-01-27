@@ -613,3 +613,160 @@ export const getAllUserPresentProjects = async (
     res.status(500).json({ error: "Unable to fetch user's present projects" })
   }
 }
+
+export const addbrief = async (
+  req: any,
+  res: any,
+  next: NextFunction
+): Promise<void> => {
+  const transaction = await db.transaction()
+
+  try {
+    const userId = req.user.id
+
+    const {
+      title,
+      startDate,
+      endDate,
+      description,
+      objectives,
+      category,
+      cost,
+      scope,
+      beneficiary_overview,
+      beneficiaries,
+      milestones,
+      donor_id,
+      ngos,
+      funds
+    } = req.body
+
+    const missingFields = []
+    if (!title) missingFields.push('title')
+    if (!startDate) missingFields.push('startDate')
+    if (!endDate) missingFields.push('endDate')
+    if (!description) missingFields.push('description')
+    if (!objectives) missingFields.push('objectives')
+    if (!category) missingFields.push('category')
+    if (!milestones || milestones.length === 0) missingFields.push('milestones')
+    if (!donor_id) missingFields.push('donor_id')
+    if (!ngos || ngos.length === 0) missingFields.push('ngos')
+
+    // If there are any missing fields, return an error response
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        status: 'fail',
+        error: `Missing required field(s): ${missingFields.join(', ')}`
+      })
+    }
+
+    // Calculate the total fund required by converting the amount to a number
+    const totalFunds = funds.reduce((acc: any, fund: any) => {
+      const amount = parseFloat(fund.amount) || 0 // Convert to number, default to 0 if NaN
+      return acc + amount
+    }, 0)
+
+    // If totalFunds is 0 and there are funds provided, throw an error
+    if (totalFunds === 0 && funds.length > 0) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid fund amounts provided.'
+      })
+    }
+
+    // Check the user's wallet balance
+    const userWallet = await db('wallet').where({ user_id: userId }).first()
+    if (!userWallet || userWallet.balance < totalFunds) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Insufficient balance in wallet to fund the project.'
+      })
+    }
+
+    // Proceed with project creation
+    const createdProjects = []
+    await Promise.all(
+      ngos.map(async (ngo: any) => {
+        const { id: ngoId, name, brief, kpi } = ngo
+
+        const [projectId] = await db('project').insert({
+          title,
+          startDate,
+          endDate,
+          description,
+          objectives,
+          category,
+          cost,
+          scope,
+          beneficiary_overview,
+          donor_id,
+          status: 'brief',
+          organization_id: ngoId
+        })
+
+        createdProjects.push(projectId)
+
+        await db('brief_kpi').insert({
+          brief,
+          kpi,
+          project_id: projectId
+        })
+
+        await Promise.all(
+          beneficiaries.map(async (beneficiary: any) => {
+            const { state, city, community } = beneficiary
+            await db('beneficiary').insert({
+              project_id: projectId,
+              state,
+              city,
+              community
+            })
+          })
+        )
+
+        await Promise.all(
+          milestones.map(async (milestone: any) => {
+            const { milestone: milestoneDesc, target } = milestone
+            await db('milestone').insert({
+              project_id: projectId,
+              target: target,
+              organization_id: ngoId,
+              milestone: milestoneDesc
+            })
+          })
+        )
+
+        if (funds && funds.length > 0) {
+          const ngoFunds = funds.filter((fund: any) => fund.ngo_id === ngoId)
+          await Promise.all(
+            ngoFunds.map(async (fund: any) => {
+              const { ngo_id, amount } = fund
+              await db('donations').insert({
+                project_id: projectId,
+                type: 'allocated',
+                ngo_id: ngo_id,
+                donor_id: donor_id,
+                amount: parseFloat(amount)
+              })
+              await db('project')
+                .where({ id: projectId })
+                .update({ allocated: parseFloat(amount) })
+            })
+          )
+        }
+      })
+    )
+
+    // Deduct the total fund amount from the user's wallet
+    await db('wallet')
+      .where({ user_id: userId })
+      .decrement('balance', totalFunds)
+
+    await transaction.commit()
+    res.status(201).json({ message: 'Briefs created successfully' })
+  } catch (error) {
+    await transaction.rollback()
+    console.error('Error creating projects:', error)
+    res.status(500).json({ error: 'Unable to create projects' })
+  }
+}

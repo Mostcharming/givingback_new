@@ -4,11 +4,14 @@ import { useNavigate } from 'react-router-dom'
 
 import { toast } from 'react-toastify'
 import Loading from '../../../components/home/loading'
+import useBackendService from '../../../services/backend_service'
+import { useContent } from '../../../services/useContext'
 import ProgressHeader from '../../ngo/progress-header'
 import SuccessModal from '../../SuccessModal'
 import { useBriefContext } from '../add-brief-context'
 
 const ProjectInitiate = ({ page, headers, changePage, donor = null }) => {
+  const { authState, currentState } = useContent()
   const { brief, addToBrief, executingNGOs } = useBriefContext()
   const navigate = useNavigate()
   const [funds, setFunds] = useState<{ ngo_id: string; amount: number }[]>([])
@@ -21,18 +24,15 @@ const ProjectInitiate = ({ page, headers, changePage, donor = null }) => {
 
     formatAmountToDisplay(amount)
 
-    // Check if an object with the same ngo_id already exists
     const index = funds.findIndex((fund) => fund.ngo_id === ngo_id)
 
     if (index !== -1) {
-      // If it exists, update the existing object
       setFunds((prevFunds) => {
         const updatedFunds = [...prevFunds]
         updatedFunds[index] = { ngo_id, amount }
         return updatedFunds
       })
     } else {
-      // If it doesn't exist, add a new object
       setFunds((prevFunds) => [...prevFunds, { ngo_id, amount }])
     }
   }
@@ -44,7 +44,33 @@ const ProjectInitiate = ({ page, headers, changePage, donor = null }) => {
     setFormattedFunds(formatted)
   }
 
+  const { mutate: donors } = useBackendService('/donor/projects', 'POST', {
+    onSuccess: (res2: any) => {
+      setIsLoading(false)
+      setIsModalOpen(true)
+    },
+    onError: (error: any) => {
+      setIsLoading(false)
+      toast.error(error.response?.data?.message || 'Something went wrong')
+    }
+  })
+  const { mutate: admin } = useBackendService('/admin/projects', 'POST', {
+    onSuccess: (res2: any) => {
+      setIsLoading(false)
+      setIsModalOpen(true)
+    },
+    onError: (error: any) => {
+      setIsLoading(false)
+      toast.error(error.response?.data?.message || 'Something went wrong')
+    }
+  })
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (funds.length === 0) {
+      toast.error('You must fund at least one NGO before proceeding.')
+      return
+    }
+
     const fundsBrief = {}
     e.preventDefault()
     for (let i = 0; i < funds.length; i++) {
@@ -58,34 +84,45 @@ const ProjectInitiate = ({ page, headers, changePage, donor = null }) => {
       fundsBrief[amountKey] = amount
     }
 
-    try {
-      setIsLoading(true)
-      if (donor) {
-        //   await createBriefD({
-        //     ...brief,
-        //     ...fundsBrief
-        //   })
-        // } else {
-        //   await createBrief({
-        //     ...brief,
-        //     ...fundsBrief
-        //   })
-      }
+    setIsLoading(true)
 
-      setIsLoading(false)
-      setIsModalOpen(true)
-    } catch (error) {
-      setIsLoading(false)
-      toast.error(error.response?.data?.message || 'Something went wrong')
+    const formData = new FormData()
+
+    // Append fields from the brief object
+    Object.entries(brief).forEach(([key, value]) => {
+      formData.append(key, value as string)
+    })
+
+    // Append fields from the fundsBrief
+    funds.forEach((fund, index) => {
+      formData.append(`funds[${index}][ngo_id]`, fund.ngo_id)
+      formData.append(
+        `funds[${index}][amount]`,
+        fund.amount.toString().replace(/,/g, '')
+      )
+    })
+    if (
+      authState.user.role === 'donor' ||
+      authState.user.role === 'corporate'
+    ) {
+      //     ...brief,
+      //     ...fundsBrief
+
+      donors(formData)
+    } else {
+      admin(formData)
     }
   }
 
   const handleClose = () => {
     setIsModalOpen(false)
-    if (donor) {
-      navigate('/donor/dashboard')
+    if (
+      authState.user.role === 'donor' ||
+      authState.user.role === 'corporate'
+    ) {
+      navigate('/donor/briefs')
     } else {
-      navigate('/admin/dashboard')
+      navigate('/admin/briefs')
     }
   }
 

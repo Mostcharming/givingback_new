@@ -1,0 +1,29 @@
+.custom-modal {
+    max-width: 100vw;
+    margin: auto;
+}
+
+.table-container {
+    max-height: 500px; /* Adjust as needed */
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.results-table th, .results-table td {
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    text-align: left;
+}
+
+.results-table th {
+    background-color: #f8f9fa;
+}
+
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+}
