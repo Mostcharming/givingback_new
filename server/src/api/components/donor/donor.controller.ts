@@ -662,7 +662,7 @@ export const addbrief = async (
 
     // Calculate the total fund required by converting the amount to a number
     const totalFunds = funds.reduce((acc: any, fund: any) => {
-      const amount = parseFloat(fund.amount) || 0 // Convert to number, default to 0 if NaN
+      const amount = parseFloat(fund.amount) || 0
       return acc + amount
     }, 0)
 
@@ -682,6 +682,11 @@ export const addbrief = async (
         message: 'Insufficient balance in wallet to fund the project.'
       })
     }
+
+    //email
+    // details
+    const donor = await db('donors').where({ id: donor_id }).first()
+    const donorName = donor.name
 
     // Proceed with project creation
     const createdProjects = []
@@ -754,6 +759,28 @@ export const addbrief = async (
             })
           )
         }
+        let userData = await db('organizations').where('id', ngoId).first()
+        let userData2 = await db('users').where('id', userData.user_id).first()
+        const ngoEmail = userData2.email
+        const fundingAmount = funds
+          .filter((fund: any) => fund.ngo_id === ngoId)
+          .reduce((acc: any, fund: any) => acc + parseFloat(fund.amount), 0)
+        const currency = 'NGN'
+
+        const ngoAdditionalData = {
+          donorName,
+          ngoName: userData.name,
+          projectTitle: title,
+          projectDescription: description,
+          fundingAmount,
+          currency
+        }
+        await new Email({
+          email: ngoEmail,
+          url: '',
+          token: 0,
+          additionalData: ngoAdditionalData
+        }).sendEmail('donorbriefngo', 'New Project assigned')
       })
     )
 
@@ -763,6 +790,27 @@ export const addbrief = async (
       .decrement('balance', totalFunds)
 
     await transaction.commit()
+
+    const adminEmail = 'info@givingbackng.org'
+
+    const adminAdditionalData = {
+      donorName,
+      projectTitle: title,
+      projectDescription: description,
+      fundingAmount: totalFunds,
+      currency: 'NGN'
+    }
+
+    const token = 0
+    const url = 'name'
+
+    await new Email({
+      email: adminEmail,
+      url,
+      token,
+      additionalData: adminAdditionalData
+    }).sendEmail('admindonorbriefngo', 'New Project assigned')
+
     res.status(201).json({ message: 'Briefs created successfully' })
   } catch (error) {
     await transaction.rollback()

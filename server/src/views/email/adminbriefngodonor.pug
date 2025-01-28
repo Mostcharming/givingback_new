@@ -1,0 +1,11 @@
+extends baseEmail
+
+block content
+  p Hello #{donorName},
+  p A new project has been created by the admin, and your funds have been allocated to the project.
+  p Project Details:
+  p - Title: #{projectTitle}
+  p - Description: #{projectDescription}
+  p - NGO Responsible: #{ngoName}
+  p Please monitor the project progress from your dashboard.
+  p If you have any questions, feel free to contact us.

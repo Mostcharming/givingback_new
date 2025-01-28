@@ -1,0 +1,10 @@
+extends baseEmail
+
+block content
+  p Admin Notification:
+  p A new project has been created by #{donorName}, and the NGO "#{ngoName}" has been selected to execute it.
+  p Project Details:
+  p - Title: #{projectTitle}
+  p - Description: #{projectDescription}
+  p - Funding Amount: #{fundingAmount} #{currency}
+  p Please monitor the progress to ensure compliance with platform policies.

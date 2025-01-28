@@ -3,6 +3,7 @@ import xlsx from 'xlsx'
 import db from '../../../config'
 import { fetchDonations } from '../../../helper/getTransac'
 import { hash } from '../../../middleware/general'
+import Email from '../../../utils/mail'
 
 export const getCounts = async (
   req: Request,
@@ -642,6 +643,7 @@ export const createProject = async (
     }
 
     const createdProjects = []
+    let ngoName = ''
     await Promise.all(
       ngos.map(async (ngo: any) => {
         const { id: ngoId, name, brief, kpi } = ngo
@@ -711,9 +713,54 @@ export const createProject = async (
             })
           )
         }
+
+        let userData = await db('organizations').where('id', ngoId).first()
+        if (userData) {
+          ngoName += `${userData.name}, `
+        }
+
+        let userData2 = await db('users').where('id', userData.user_id).first()
+        const donor2 = await db('donors').where({ id: donor_id }).first()
+        const donorName = donor2.name
+
+        await new Email({
+          email: userData2.email,
+          url,
+          token,
+          additionalData: {
+            projectTitle: title,
+            projectDescription: description,
+            ngoName: userData.name,
+            donorName
+          }
+        }).sendEmail('adminbriefngo', 'New Project assigned')
       })
     )
     await transaction.commit()
+
+    const donor2 = await db('donors').where({ id: donor_id }).first()
+    const donor = await db('users').where({ id: donor2.user_id }).first()
+
+    const donorName = donor2.name
+
+    const adminAdditionalData = {
+      donorName,
+      projectTitle: title,
+      projectDescription: description,
+
+      ngoName
+    }
+
+    const token = 0
+    const url = 'name'
+
+    await new Email({
+      email: donor.email,
+      url,
+      token,
+      additionalData: adminAdditionalData
+    }).sendEmail('adminbriefngodonor', 'New Project assigned')
+
     res.status(201).json({ message: 'Briefs created successfully' })
   } catch (error) {
     await transaction.rollback()

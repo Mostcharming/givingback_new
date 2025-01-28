@@ -44,26 +44,34 @@ const ProjectInitiate = ({ page, headers, changePage, donor = null }) => {
     setFormattedFunds(formatted)
   }
 
-  const { mutate: donors } = useBackendService('/donor/projects', 'POST', {
-    onSuccess: (res2: any) => {
-      setIsLoading(false)
-      setIsModalOpen(true)
-    },
-    onError: (error: any) => {
-      setIsLoading(false)
-      toast.error(error.response?.data?.message || 'Something went wrong')
+  const { mutate: donors, isLoading: donorLoad } = useBackendService(
+    '/donor/projects',
+    'POST',
+    {
+      onSuccess: (res2: any) => {
+        setIsLoading(false)
+        setIsModalOpen(true)
+      },
+      onError: (error: any) => {
+        setIsLoading(false)
+        toast.error(error.response?.data?.message || 'Something went wrong')
+      }
     }
-  })
-  const { mutate: admin } = useBackendService('/admin/projects', 'POST', {
-    onSuccess: (res2: any) => {
-      setIsLoading(false)
-      setIsModalOpen(true)
-    },
-    onError: (error: any) => {
-      setIsLoading(false)
-      toast.error(error.response?.data?.message || 'Something went wrong')
+  )
+  const { mutate: admin, isLoading: adminLoad } = useBackendService(
+    '/admin/projects',
+    'POST',
+    {
+      onSuccess: (res2: any) => {
+        setIsLoading(false)
+        setIsModalOpen(true)
+      },
+      onError: (error: any) => {
+        setIsLoading(false)
+        toast.error(error.response?.data?.message || 'Something went wrong')
+      }
     }
-  })
+  )
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     if (funds.length === 0) {
@@ -177,7 +185,21 @@ const ProjectInitiate = ({ page, headers, changePage, donor = null }) => {
               </button>
             </Col>
             <Col lg='6'>
-              <button className='btn-modal mb-5'>Initiate Brief</button>
+              <button
+                className='btn btn-primary mb-5'
+                disabled={donorLoad || adminLoad}
+              >
+                {donorLoad || adminLoad ? (
+                  <div
+                    className='spinner-border spinner-border-sm text-light'
+                    role='status'
+                  >
+                    <span className='visually-hidden'>Loading...</span>
+                  </div>
+                ) : (
+                  'Initiate Brief'
+                )}
+              </button>
             </Col>
           </Row>
         </Form>
