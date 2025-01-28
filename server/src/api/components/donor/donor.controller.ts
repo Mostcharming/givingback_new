@@ -818,3 +818,75 @@ export const addbrief = async (
     res.status(500).json({ error: 'Unable to create projects' })
   }
 }
+
+export const getMessage = async (
+  req: any,
+  res: any,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { user_id, sender_type } = req.query
+
+    let query = db('messages')
+
+    if (user_id) {
+      query = query.where('user_id', user_id)
+    }
+    if (sender_type) {
+      query = query.where('sender_type', sender_type)
+    }
+
+    const messages = await query
+    res.json(messages)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+export const updateMessage = async (
+  req: any,
+  res: any,
+  next: NextFunction
+): Promise<void> => {
+  const { id } = req.params
+
+  try {
+    const updatedMessage = await db('messages')
+      .where({ id })
+      .update({ is_read: 1 })
+
+    if (updatedMessage) {
+      res.json({ message: 'Message marked as read' })
+    } else {
+      res.status(404).json({ error: 'Message not found' })
+    }
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+export const sendMessageToAdmin = async (
+  req: any,
+  res: any,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { subject, message, sender_type } = req.body
+
+    await db('messages').insert({
+      subject,
+      message,
+      sender_id: req.user.id,
+      sender_type
+    })
+
+    res.status(200).json({
+      message: 'Message sent successfully'
+    })
+  } catch (error: any) {
+    res.status(500).json({
+      message: 'Failed to send message',
+      error: error.message
+    })
+  }
+}

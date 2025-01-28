@@ -9,6 +9,7 @@ import Briefs from '../pages/briefs'
 import Dashboard from '../pages/Dashboard'
 import DN_Projects from '../pages/donor_ngo_projects'
 import FundsM from '../pages/fundsM'
+import MessageDonor from '../pages/messages'
 import AddPastProject from '../pages/ngo/pastproject/past-projects'
 import NGODetails from '../pages/ngo_details'
 import Ngo from '../pages/ngodirectory'
@@ -224,18 +225,18 @@ var routes = [
   },
   ////messages
   {
-    path: '/dashboard',
+    path: '/messages',
     name: 'Messages',
     icon: 'ni ni-send',
-    component: <Dashboard />,
+    component: <MessageDonor />,
     layout: '/donor'
   },
   ,
   {
-    path: '/dashboard',
+    path: '/messages',
     name: 'Messages',
     icon: 'ni ni-send',
-    component: <Dashboard />,
+    component: <MessageDonor />,
     layout: '/ngo'
   },
   ///////settings

@@ -10,9 +10,12 @@ import {
   getAllUserPresentProjects,
   getAllUsers,
   getCountsHandler,
+  getMessage,
   getRecipient,
   newDonor,
-  sendMessageToNGO
+  sendMessageToAdmin,
+  sendMessageToNGO,
+  updateMessage
 } from './donor.controller'
 
 const router = express.Router()
@@ -42,4 +45,7 @@ router
 
 router.route('/users/:id/projects').get(getAllUserPresentProjects as any)
 router.route('/projects').post(uploadimg, addbrief)
+router.get('/messages', getMessage)
+router.get('/messages/:id', updateMessage)
+router.post('/messages_admin', sendMessageToAdmin)
 export default router

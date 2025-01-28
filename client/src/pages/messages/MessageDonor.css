@@ -1,0 +1,104 @@
+.header {
+  background-color: #7b80dd;
+  color: white;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-title {
+  color: white;
+  font-size: 24px;
+}
+
+.unread-messages {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.yellow-dot {
+  width: 10px;
+  height: 10px;
+  background-color: yellow;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.messages-list {
+  margin-top: 20px;
+  width: 100%; /* Ensure messages list takes full width */
+}
+
+.message-block {
+  margin-bottom: 10px;
+  width: 100%; /* Ensure each message takes full width */
+}
+
+.message-item {
+  display: flex;
+  background-color: white;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  align-items: center; /* Align content within the message item */
+  position: relative; /* Position relative for the unread status bar */
+}
+
+.message-bar {
+  width: 5px;
+  background-color: yellow;
+  border-radius: 5px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: none; /* Hidden by default */
+}
+
+.unread .message-bar {
+  display: block; /* Show unread status bar */
+}
+
+.message-content {
+  margin-left: 15px; /* Leave space for the message bar */
+  flex: 1;
+}
+
+.message-subject {
+  font-weight: bold;
+  margin: 0;
+}
+
+.message-date {
+  color: gray;
+  font-size: 14px;
+}
+
+.message-actions {
+  margin-left: auto;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(128, 0, 128, 0.5); /* Semi-transparent purple */
+  backdrop-filter: blur(5px); /* Blur effect */
+  z-index: 1040; /* Ensure it appears above the background */
+}
+
+.message-modal {
+  z-index: 1050; /* Ensure modal appears above the backdrop */
+}
+
+/* Optional styling for modal content */
+.message-modal .modal-content {
+  border-radius: 8px;
+}
