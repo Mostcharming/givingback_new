@@ -67,6 +67,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 
     createSendToken(user, 200, req, res)
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: 'An error occurred while signing up' })
   }
 }
