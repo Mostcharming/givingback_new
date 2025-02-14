@@ -9,8 +9,8 @@
 
 .modal-body {
   background-color: white;
-  border-top: 5px solid #6c72d9;
-  border-bottom: 5px solid #6c72d9;
+  /* border-top: 5px solid #6c72d9;
+  border-bottom: 5px solid #6c72d9; */
   padding: 20px;
 }
 

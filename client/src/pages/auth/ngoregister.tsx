@@ -1,8 +1,9 @@
 import { ThunkDispatch } from '@reduxjs/toolkit'
 import { GoogleAuthProvider, getAuth, signInWithPopup } from 'firebase/auth'
 import { useEffect, useState } from 'react'
+import { FaHandHoldingHeart, FaHandsHelping } from 'react-icons/fa'
 import { useDispatch } from 'react-redux'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import {
   Button,
@@ -20,7 +21,11 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupText,
-  Label
+  Label,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader
 } from 'reactstrap'
 import google from '../../assets/images/auth/google.svg'
 import useBackendService from '../../services/backend_service'
@@ -29,9 +34,14 @@ import { clearAuthState, signup_auth } from '../../store/reducers/authReducer'
 import { clearCurrentState } from '../../store/reducers/userReducer'
 import { RootState } from '../../types'
 
-const Register = ({ isDonor }: { isDonor: boolean }) => {
+const Register = () => {
   const dispatch: ThunkDispatch<RootState, unknown, any> = useDispatch()
   const navigate = useNavigate()
+  const [modalOpen, setModalOpen] = useState(true)
+  const handleRoleSelection = (role) => {
+    setIsDonor(role === 'donor')
+    setModalOpen(false)
+  }
 
   const { mutate: signup, isLoading } = useBackendService(
     '/auth/signup',
@@ -68,6 +78,12 @@ const Register = ({ isDonor }: { isDonor: boolean }) => {
 
   const handleDropdownSelect = (option: string) => {
     setSelectedOption(option)
+  }
+
+  const [isDonor, setIsDonor] = useState(false)
+
+  const toggleRole = () => {
+    setIsDonor((prev) => !prev)
   }
 
   const calculatePasswordStrength = (password: string) => {
@@ -145,6 +161,47 @@ const Register = ({ isDonor }: { isDonor: boolean }) => {
 
   return (
     <>
+      <Modal isOpen={modalOpen} backdrop='static' centered>
+        <ModalHeader
+          className='text-black'
+          style={{ backgroundColor: 'white' }}
+        >
+          Choose Registration Type
+        </ModalHeader>
+        <ModalBody
+          className='text-center'
+          style={{
+            backgroundColor: 'white',
+            color: 'black',
+            display: 'flex',
+            justifyContent: 'space-around'
+          }}
+        >
+          <div
+            color='light'
+            style={{ cursor: 'pointer' }}
+            onClick={() => handleRoleSelection('ngo')}
+          >
+            <FaHandsHelping size={60} color='black' />
+            <div>NGO</div>
+          </div>
+          <div
+            color='light'
+            style={{ cursor: 'pointer' }}
+            onClick={() => handleRoleSelection('donor')}
+          >
+            <FaHandHoldingHeart size={60} color='black' />
+            <div>Donor</div>
+          </div>
+        </ModalBody>
+        <ModalFooter style={{ backgroundColor: 'white' }}>
+          Back to
+          <Button color='light' onClick={() => navigate('/auth/login')}>
+            Login
+          </Button>
+        </ModalFooter>
+      </Modal>
+
       <Col lg='6' md='8'>
         <Card className='shadow border-0'>
           <CardHeader className='bg-transparent pb-3'>
@@ -287,17 +344,11 @@ const Register = ({ isDonor }: { isDonor: boolean }) => {
               </div>
             </Form>
             <div className='text-center mt-3'>
-              {isDonor ? (
-                <Link to='/auth/register'>
-                  <small style={{ color: 'black' }}>or sign up as an NGO</small>
-                </Link>
-              ) : (
-                <Link to='/auth/donor_register'>
-                  <small style={{ color: 'black' }}>
-                    or sign up as a Donor
-                  </small>
-                </Link>
-              )}
+              <Button color='link' onClick={toggleRole}>
+                <small style={{ color: 'black' }}>
+                  {isDonor ? 'or sign up as an NGO' : 'or sign up as a Donor'}
+                </small>
+              </Button>
             </div>
           </CardBody>
         </Card>

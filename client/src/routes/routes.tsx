@@ -37,16 +37,16 @@ var routes = [
     path: '/register',
     name: 'Register',
     icon: 'ni ni-key-25 text-info',
-    component: <Register isDonor={false} />,
+    component: <Register />,
     layout: '/auth'
   },
-  {
-    path: '/donor_register',
-    name: 'DonorRegister',
-    icon: 'ni ni-key-25 text-info',
-    component: <Register isDonor />,
-    layout: '/auth'
-  },
+  // {
+  //   path: '/donor_register',
+  //   name: 'DonorRegister',
+  //   icon: 'ni ni-key-25 text-info',
+  //   component: <Register isDonor />,
+  //   layout: '/auth'
+  // },
   {
     path: '/verify',
     name: 'Verification',
