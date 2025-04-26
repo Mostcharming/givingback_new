@@ -6,19 +6,20 @@ import { toast } from 'react-toastify'
 import { logout_auth } from '../store/reducers/authReducer'
 import { useContent } from './useContext'
 
-const getBaseURL = (): string => {
-  switch (import.meta.env.VITE_NODE_ENV) {
-    case 'production':
-      return 'https://givebackng.org/rest/v1'
-    case 'development':
-      return 'http://localhost:5000/rest/v1'
+// const getBaseURL = (): string => {
+//   switch (import.meta.env.VITE_NODE_ENV) {
+//     case 'production':
+//       return 'https://givebackng.org/rest/v1'
+//     case 'development':
+//       return 'http://localhost:5000/rest/v1'
 
-    default:
-      return ''
-  }
-}
+//     default:
+//       return ''
+//   }
+// }
 
-const baseURL = getBaseURL()
+// const baseURL = getBaseURL()
+const baseURL = import.meta.env.VITE_API_URL || ''
 
 interface BackendServiceConfig extends AxiosRequestConfig {
   headers?: {

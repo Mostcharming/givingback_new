@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 import useBackendService from '../../../services/backend_service'
 import { Banks } from '../../../services/banks'
 import { useContent } from '../../../services/useContext'
-import Util, { States } from '../../../services/utils'
+import { States } from '../../../services/utils'
 
 interface CorporateDetailsFormProps {
   previewUrl: string | null
@@ -49,13 +49,64 @@ const SignUp = ({ ngo }) => {
   const navigate = useNavigate()
 
   const [areas, setAreas] = useState([])
-  const [corporateFormData, setCorporateFormData] = useState({})
-  const [personalFormData, setPersonalFormData] = useState({})
+  const [corporateFormData, setCorporateFormData] = useState({
+    companyName: '',
+    companyRegistration: '',
+    companyEmail: '',
+    companyPhone: '',
+    companyAddress: '',
+    state: '',
+    lga: '',
+    area: '',
+    website: '',
+    description: ''
+  })
+  const [personalFormData, setPersonalFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: ''
+  })
 
-  const [orgdetilsFormData, setOrgdetailsFormData] = useState({})
-  const [kycFormData, setKycdetailsFormData] = useState({})
+  const [orgdetilsFormData, setOrgdetailsFormData] = useState({
+    orgName: '',
+    email: '',
+    phone: '',
+    address: '',
+    state: '',
+    lga: '',
+    cac: '',
+    website: '',
+    description: ''
+  })
+  const [kycFormData, setKycdetailsFormData] = useState({
+    bvn: '',
+    accountNumber: '',
+    bankName: '',
+    accountName: ''
+  })
 
   const handleCorporateNext = () => {
+    let errors = [
+      ...validateCorporateForm(
+        corporateFormData,
+        image,
+        selectedFile,
+        selectedState,
+        selectedLGA
+      )
+    ]
+
+    if (errors.length > 0) {
+      errors.forEach((error) => toast.error(error))
+      return
+    }
+
     if (!ngo) {
       if (
         validateCorporateForm(
@@ -91,12 +142,25 @@ const SignUp = ({ ngo }) => {
   const handlePersonalSubmit = (e: React.UIEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!ngo) {
+      let errors = [...validatePersonalForm(personalFormData, image)]
+
+      if (errors.length > 0) {
+        errors.forEach((error) => toast.error(error))
+        return
+      }
+
       if (validatePersonalForm(personalFormData, image)) {
         submitFinalForm()
       } else {
         toast.error('Please fill out all fields in the Personal Details form.')
       }
     } else {
+      let errors = [...validatePersonalForm(personalFormData, image)]
+
+      if (errors.length > 0) {
+        errors.forEach((error) => toast.error(error))
+        return
+      }
       if (validatePersonalForm(kycFormData, image)) {
         submitFinalngoForm()
       } else {
@@ -120,21 +184,19 @@ const SignUp = ({ ngo }) => {
   )
 
   const submitFinalForm = async () => {
-    if (
-      !validateCorporateForm(
+    let errors = [
+      ...validateCorporateForm(
         corporateFormData,
         image,
         selectedFile,
         selectedState,
         selectedLGA
-      )
-    ) {
-      toast.error('Please fill out all fields in the Corporate Details form.')
-      return
-    }
+      ),
+      ...validatePersonalForm(personalFormData, image)
+    ]
 
-    if (!validatePersonalForm(personalFormData, image)) {
-      toast.error('Please fill out all fields in the Personal Details form.')
+    if (errors.length > 0) {
+      errors.forEach((error) => toast.error(error))
       return
     }
 
@@ -176,23 +238,19 @@ const SignUp = ({ ngo }) => {
     submitDonorForm(finalFormData)
   }
   const submitFinalngoForm = async () => {
-    if (
-      !validateCorporateForm(
+    let errors = [
+      ...validateCorporateForm(
         orgdetilsFormData,
         image,
         selectedFile,
         selectedState,
         selectedLGA
-      )
-    ) {
-      toast.error(
-        'Please fill out all fields in the Organization Details form.'
-      )
-      return
-    }
+      ),
+      ...validatePersonalForm(kycFormData, image)
+    ]
 
-    if (!validatePersonalForm(kycFormData, image)) {
-      toast.error('Please fill out all fields in the KYC Details form.')
+    if (errors.length > 0) {
+      errors.forEach((error) => toast.error(error))
       return
     }
 
@@ -290,22 +348,32 @@ const SignUp = ({ ngo }) => {
     selectedState: string | null,
     selectedLGA: string | null
   ) => {
-    const formFieldsValid = Object.values(formData).every(
-      (value) => value !== null && value !== ''
-    )
-    const imageValid = image !== null
-    const fileValid = selectedFile !== null
-    const stateValid = selectedState !== null && selectedState !== ''
-    const lgaValid = selectedLGA !== null && selectedLGA !== ''
-    return formFieldsValid && imageValid && fileValid && stateValid && lgaValid
+    let errors: string[] = []
+
+    Object.entries(formData).forEach(([key, value]) => {
+      if (!value)
+        errors.push(`Please fill out the ${key.replace(/_/g, ' ')} field.`)
+    })
+
+    if (!image) errors.push('Please upload a logo.')
+    if (!selectedFile) errors.push('Please upload the CAC document.')
+    if (!selectedState) errors.push('Please select a state.')
+    if (!selectedLGA) errors.push('Please select an LGA.')
+
+    return errors
   }
 
   const validatePersonalForm = (formData: any, image: File | null) => {
-    const formFieldsValid = Object.values(formData).every(
-      (value) => value !== null && value !== ''
-    )
-    const imageValid = image !== null
-    return formFieldsValid && imageValid
+    let errors: string[] = []
+
+    Object.entries(formData).forEach(([key, value]) => {
+      if (!value)
+        errors.push(`Please fill out the ${key.replace(/_/g, ' ')} field.`)
+    })
+
+    if (!image) errors.push('Please upload a profile picture.')
+
+    return errors
   }
 
   const { mutate: getAreas } = useBackendService('/areas', 'GET', {
