@@ -25,7 +25,7 @@ const MobileHeader = ({
         } ${transparentHeader ? 'transparent-header' : ''}`}
         id='header-sticky'
       >
-        <div
+        {/* <div
           className={`header-topbar d-none d-sm-block ${
             topSecondaryBg ? 'topbar-secondary-bg' : ''
           }`}
@@ -73,7 +73,7 @@ const MobileHeader = ({
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
         <div className='navbar-wrapper breakpoint-on'>
           <div className='container'>
             <div className='navbar-inner'>
@@ -89,7 +89,8 @@ const MobileHeader = ({
                   className='main-btn nav-btn d-none d-sm-inline-block'
                   onClick={() => setIsDonateModalOpen(true)}
                 >
-                  Donate Now <i className='far fa-arrow-right' />
+                  Create Account
+                  {/* <i className='far fa-arrow-right' /> */}
                 </a>
                 <a
                   href='#'
@@ -134,15 +135,18 @@ const MobileHeader = ({
           </ul>
           <div className='panel-extra'>
             <Link to='/auth/login' className='main-btn btn-white'>
-              Login <i className='far fa-arrow-right' />
+              Sign in
+              {/* <i className='far fa-arrow-right' /> */}
             </Link>
           </div>
           <div className='panel-extra mt-3'>
             <a
+              href='auth/register'
               className='main-btn btn-white'
               onClick={() => setIsDonateModalOpen(true)}
             >
-              Donate Now <i className='far fa-arrow-right' />
+              Create Account
+              {/* <i className='far fa-arrow-right' /> */}
             </a>
           </div>
           <a href='#' className='panel-close' onClick={() => setToggle(false)}>

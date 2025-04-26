@@ -19,7 +19,7 @@ const Header = ({ transparentTop, transparentHeader, topSecondaryBg }) => {
         } ${transparentHeader ? 'transparent-header' : ''}`}
         id='header-sticky'
       >
-        <div
+        {/* <div
           className={`header-topbar d-none d-sm-block ${
             topSecondaryBg ? 'topbar-secondary-bg' : ''
           }`}
@@ -52,11 +52,11 @@ const Header = ({ transparentTop, transparentHeader, topSecondaryBg }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
         <div className='navbar-wrapper'>
           <div className='container'>
-            <div className='navbar-inner'>
-              <div className='site-logo'>
+            <div className='d-flex'>
+              <div className='site-logo mr-4'>
                 <Link to='/'>
                   <a>
                     <img src={GiveBackLogo} alt='GivingBack' />
@@ -64,14 +64,14 @@ const Header = ({ transparentTop, transparentHeader, topSecondaryBg }) => {
                 </Link>
               </div>
 
-              <div className='navbar-extra d-flex align-items-center'>
+              <div className='ml-3 navbar-extra d-flex align-items-center'>
                 <div className='nav-menu pr-4' id='menu'>
                   <ul>
                     <li>
                       <Link to='/'>Home</Link>
                     </li>
                     <li>
-                      <Link to='/about_us'>About</Link>
+                      <Link to='/about_us'>About us</Link>
                     </li>
                     <li>
                       <Link to='/services'>Services</Link>
@@ -85,14 +85,28 @@ const Header = ({ transparentTop, transparentHeader, topSecondaryBg }) => {
                     </li>
                   </ul>
                 </div>
+
+                <a href='#' className='nav-toggler'>
+                  <span />
+                </a>
+              </div>
+              <div className='d-flex align-items-center ml-auto'>
                 <a
+                  href='/auth/register'
+                  className='mr-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer'
+                  onClick={() => setIsDonateModalOpen(true)}
+                  style={{ backgroundColor: '#F3FAF5', color: '#34A853' }}
+                >
+                  Sign in
+                  {/* <i className='far fa-arrow-right' /> */}
+                </a>
+                <a
+                  href='/auth/register'
                   className='main-btn nav-btn d-none d-sm-inline-block cursor-pointer'
                   onClick={() => setIsDonateModalOpen(true)}
                 >
-                  Fund a project <i className='far fa-arrow-right' />
-                </a>
-                <a href='#' className='nav-toggler'>
-                  <span />
+                  Create Account
+                  {/* <i className='far fa-arrow-right' /> */}
                 </a>
               </div>
             </div>

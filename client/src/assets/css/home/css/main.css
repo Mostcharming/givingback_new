@@ -488,7 +488,7 @@ a:hover {
   color: var(--white);
   background-color: var(--primary-color);
   padding: 16px 36px;
-  border-radius: 35px;
+  border-radius: 10px;
   position: relative;
   z-index: 1;
   border: 1px solid transparent;
