@@ -116,6 +116,12 @@ const MobileHeader = ({
               <Link to='/'>Home</Link>
             </li>
             <li>
+              <Link to='/about_us'>About Us</Link>
+            </li>
+            <li>
+              <Link to='/services'>Services</Link>
+            </li>
+            <li>
               <a href='#'>
                 Project
                 <span

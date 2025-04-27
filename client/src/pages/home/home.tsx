@@ -8,6 +8,7 @@ import main3 from '../../assets/images/home/main_image/main3.jpeg'
 import main4 from '../../assets/images/home/main_image/main4.jpeg'
 import main5 from '../../assets/images/home/main_image/main5.jpeg'
 import main8 from '../../assets/images/home/main_image/main8.png'
+import Rectangle from '../../assets/images/home/main_image/Rectangle.png'
 
 import BlogCard, { DUMMY_ARRAY2 } from '../../components/home/blog-card'
 import Counter from '../../components/home/Counter'
@@ -39,6 +40,143 @@ const Index = () => {
     <>
       <Layout transparentHeader topSecondaryBg>
         {video && <VideoPopup close={setVideo} />}
+        <br />
+        <br /> <br /> <br />
+        <br />
+        <br />
+        <section className='d-flex justify-content-center align-items-center'>
+          <div className=''>
+            <div style={{ width: '60vw' }}>
+              <h2
+                className='title'
+                style={{
+                  textAlign: 'center',
+                  fontWeight: '700',
+                  fontSize: '40px',
+                  color: '#34A853'
+                }}
+              >
+                Make Every Donation Count, Support Life-Changing Projects And
+                Make a Difference.
+              </h2>
+            </div>
+          </div>
+        </section>
+        <section className='mt-2 d-flex justify-content-center align-items-center'>
+          <div className=''>
+            <div style={{ width: '50vw' }}>
+              <h6
+                className='title mt-2 mb-4'
+                style={{
+                  textAlign: 'center',
+                  // fontWeight: '700',
+                  fontSize: '18px'
+                }}
+              >
+                Join a global community that connects donors, NGO’s, &
+                beneficiaries to create real impact. Fund meaningful projects,
+                support verified NGO’s, & ensure donation reaches those who need
+                it .
+              </h6>
+            </div>
+          </div>
+        </section>
+        <section className='mt-3 d-flex justify-content-center align-items-center'>
+          <div className=''>
+            <div>
+              <div>
+                <a
+                  href='/auth/register'
+                  className='mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer'
+                  style={{ backgroundColor: '#F3FAF5', color: '#34A853' }}
+                >
+                  Create Project
+                </a>
+                <a
+                  href='/latest-projects'
+                  className='ml-4 mr-4 main-btn nav-btn d-none d-sm-inline-block cursor-pointer'
+                >
+                  Explor Project
+                  {/* <i className='far fa-arrow-right' /> */}
+                </a>
+                <a
+                  href='/auth/register'
+                  className='ml-4 main-btn nav-btn d-none d-sm-inline-block cursor-pointer'
+                  style={{ backgroundColor: '#F3FAF5', color: '#34A853' }}
+                >
+                  Join as an Organization
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div className='mt-5 about-form-area'>
+          <div className='container'>
+            <div className='about-donation-form'>
+              <img src={Rectangle} alt='' />
+            </div>
+          </div>
+        </div>
+        <section className='feature-section feature-section-one section-gap'>
+          <div className='container'>
+            <div className='row justify-content-lg-between justify-content-center align-items-center'>
+              <div className='col-xl-6 col-lg-7 col-md-10 col-sm-12'>
+                <div className='feature-content'>
+                  <div className='common-heading mb-3'>
+                    <h3
+                      style={{
+                        width: 'max-content',
+                        fontWeight: '600',
+                        fontSize: '35px'
+                      }}
+                      className=''
+                    >
+                      About Us At GivingBack
+                    </h3>
+                  </div>
+                  {/* Fancy Icon List */}
+                  <div className='fancy-icon-list'>
+                    <div className='fancy-list-item'>
+                      <div className='contentT'>
+                        <p
+                          style={{
+                            fontWeight: '100',
+                            color: 'black'
+                          }}
+                        >
+                          Due to unclear and non-insightful reports, donors
+                          struggle to articulate the effectiveness and impact
+                          (Stanford Social Innovation). This means that
+                          beneficiaries may also not enjoy the full benefits
+                          intended for them.
+                        </p>
+                      </div>
+                    </div>
+                    <div className='fancy-list-item'>
+                      <p
+                        style={{
+                          fontWeight: '100',
+                          color: 'black'
+                        }}
+                      >
+                        At GivingBack, we are set to address this problem by
+                        leveraging technology. We are a platform that enables
+                        real-time collaboration among charity project
+                        stakeholders.{' '}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className='col-lg-6 col-md-9'>
+                <div className=''>
+                  <img src={main8} alt='Image' />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        {/* Previous website */}
         <section className='hero-area-two'>
           <div className='container'>
             <div className='row align-items-center'>

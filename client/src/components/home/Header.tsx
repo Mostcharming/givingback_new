@@ -67,20 +67,20 @@ const Header = ({ transparentTop, transparentHeader, topSecondaryBg }) => {
               <div className='ml-3 navbar-extra d-flex align-items-center'>
                 <div className='nav-menu pr-4' id='menu'>
                   <ul>
-                    <li>
+                    <li className='ml-3'>
                       <Link to='/'>Home</Link>
                     </li>
-                    <li>
+                    <li className='ml-3'>
                       <Link to='/about_us'>About us</Link>
                     </li>
-                    <li>
+                    <li className='ml-3'>
                       <Link to='/services'>Services</Link>
                     </li>
 
-                    <li>
+                    <li className='ml-3'>
                       <Link to='/latest-projects'>Project</Link>
                     </li>
-                    <li>
+                    <li className='ml-3'>
                       <Link to='/contact'>Contact</Link>
                     </li>
                   </ul>
