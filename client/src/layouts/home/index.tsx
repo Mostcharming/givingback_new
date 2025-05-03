@@ -43,7 +43,7 @@ const Layout = ({
           href='https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400&family=Shadows+Into+Light&display=swap'
           rel='stylesheet'
         />
-        <title>World social responsibility platform</title>
+        <title>GivingBack</title>
         <link
           rel='shortcut icon'
           href='assets/img/favicon.ico'

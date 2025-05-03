@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Slider from 'react-slick'
 import main2 from '../../assets/images/home/avatar.svg'
+import main8 from '../../assets/images/home/main_image/1.png'
 import main3 from '../../assets/images/home/main_image/main3.jpeg'
 import main4 from '../../assets/images/home/main_image/main4.jpeg'
 import main5 from '../../assets/images/home/main_image/main5.jpeg'
-import main8 from '../../assets/images/home/main_image/main8.png'
+
 import Rectangle from '../../assets/images/home/main_image/Rectangle.png'
 
 import BlogCard, { DUMMY_ARRAY2 } from '../../components/home/blog-card'
@@ -96,7 +97,7 @@ const Index = () => {
                   href='/latest-projects'
                   className='ml-4 mr-4 main-btn nav-btn d-none d-sm-inline-block cursor-pointer'
                 >
-                  Explor Project
+                  Explore Project
                   {/* <i className='far fa-arrow-right' /> */}
                 </a>
                 <a
@@ -117,7 +118,10 @@ const Index = () => {
             </div>
           </div>
         </div>
-        <section className='feature-section feature-section-one section-gap'>
+        <section
+          style={{ paddingBottom: '60px' }}
+          className='feature-section feature-section-one section-gap'
+        >
           <div className='container'>
             <div className='row justify-content-lg-between justify-content-center align-items-center'>
               <div className='col-xl-6 col-lg-7 col-md-10 col-sm-12'>
@@ -140,7 +144,7 @@ const Index = () => {
                       <div className='contentT'>
                         <p
                           style={{
-                            fontWeight: '100',
+                            fontWeight: '300',
                             color: 'black'
                           }}
                         >
@@ -155,15 +159,186 @@ const Index = () => {
                     <div className='fancy-list-item'>
                       <p
                         style={{
-                          fontWeight: '100',
+                          fontWeight: '300',
                           color: 'black'
                         }}
                       >
                         At GivingBack, we are set to address this problem by
                         leveraging technology. We are a platform that enables
                         real-time collaboration among charity project
-                        stakeholders.{' '}
+                        stakeholders.
                       </p>
+                    </div>
+
+                    <div className='fancy-list-item'>
+                      <p
+                        style={{
+                          fontWeight: '300',
+                          color: 'black'
+                        }}
+                      >
+                        Our purpose is to optimize return on investment (ROI)
+                        and impact on CSR/philanthropic investment.
+                      </p>
+                    </div>
+                    <div className='fancy-list-item'>
+                      <div
+                        style={{ width: '-webkit-fill-available' }}
+                        className='row justify-content-lg-between justify-content-center align-items-center'
+                      >
+                        <div className='col-xl-6 col-lg-7 col-md-10 col-sm-12'>
+                          <div className='feature-content'>
+                            {/* Fancy Icon List */}
+                            <div className='fancy-icon-list'>
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column'
+                                }}
+                                className='fancy-list-item'
+                              >
+                                <p
+                                  style={{
+                                    fontWeight: '600',
+                                    color: '#34A853'
+                                  }}
+                                >
+                                  5,000+
+                                </p>
+                                <p
+                                  style={{
+                                    fontWeight: '500',
+                                    color: 'black'
+                                  }}
+                                >
+                                  Projects Completed
+                                </p>
+                                <p
+                                  style={{
+                                    fontWeight: '300',
+                                    color: 'black'
+                                  }}
+                                >
+                                  Reported by NGOs/NFPOs
+                                </p>
+                              </div>
+
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column'
+                                }}
+                                className='fancy-list-item'
+                              >
+                                <p
+                                  style={{
+                                    fontWeight: '600',
+                                    color: '#34A853'
+                                  }}
+                                >
+                                  120,000,000+
+                                </p>
+                                <p
+                                  style={{
+                                    fontWeight: '500',
+                                    color: 'black'
+                                  }}
+                                >
+                                  Beneficiaries Impacted
+                                </p>
+                                <p
+                                  style={{
+                                    fontWeight: '300',
+                                    color: 'black'
+                                  }}
+                                >
+                                  From projects listed on this platform
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className='col-lg-6 col-md-9'>
+                          <div className='feature-content'>
+                            {/* Fancy Icon List */}
+                            <div className='fancy-icon-list'>
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column'
+                                }}
+                                className='fancy-list-item'
+                              >
+                                <p
+                                  style={{
+                                    fontWeight: '600',
+                                    color: '#34A853'
+                                  }}
+                                >
+                                  1,000+
+                                </p>
+                                <p
+                                  style={{
+                                    fontWeight: '500',
+                                    color: 'black'
+                                  }}
+                                >
+                                  NGOs/NFPOs
+                                </p>
+                                <p
+                                  style={{
+                                    fontWeight: '300',
+                                    color: 'black'
+                                  }}
+                                >
+                                  Across all geopolitical zones
+                                </p>
+                              </div>
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column'
+                                }}
+                                className='fancy-list-item'
+                              >
+                                <p
+                                  style={{
+                                    fontWeight: '600',
+                                    color: '#34A853'
+                                  }}
+                                >
+                                  10+
+                                </p>
+                                <p
+                                  style={{
+                                    fontWeight: '500',
+                                    color: 'black'
+                                  }}
+                                >
+                                  Industry Partners
+                                </p>
+                                <p
+                                  style={{
+                                    fontWeight: '300',
+                                    color: 'black'
+                                  }}
+                                >
+                                  Multi-sectoral and global trusted partners
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className='fancy-list-item'>
+                      <a
+                        href='/about'
+                        style={{ width: '40vw' }}
+                        className='mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer'
+                      >
+                        Learn More
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -171,6 +346,121 @@ const Index = () => {
               <div className='col-lg-6 col-md-9'>
                 <div className=''>
                   <img src={main8} alt='Image' />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className='d-flex justify-content-center align-items-center'>
+          <div className=''>
+            <div style={{ width: '60vw' }}>
+              <h2
+                className='title'
+                style={{
+                  textAlign: 'center',
+                  fontWeight: '600',
+                  fontSize: '35px',
+                  color: 'black'
+                }}
+              >
+                The 4-Fold Problems We Are Solving
+              </h2>
+            </div>
+          </div>
+        </section>
+        <section
+          style={{ paddingBottom: '60px', paddingTop: '30px' }}
+          className='feature-section feature-section-one '
+        >
+          <div className='container'>
+            <div className='row justify-content-lg-between justify-content-center align-items-center'>
+              <div className='col-xl-6 col-lg-7 col-md-10 col-sm-12'>
+                <div
+                  style={{ background: '#EDF7ED', borderRadius: '13px' }}
+                  className='feature-content'
+                >
+                  {/* Fancy Icon List */}
+                  <div style={{ padding: '25px' }} className='fancy-icon-list'>
+                    <div className='fancy-list-item'>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}
+                        className='fancy-list-item'
+                      >
+                        <p
+                          style={{
+                            fontWeight: '600',
+                            color: 'black'
+                          }}
+                        >
+                          Bringing Trust & Transparency to Giving
+                        </p>
+                        <p
+                          style={{
+                            // fontWeight: '500',
+                            color: 'black'
+                          }}
+                        >
+                          Donors struggle with transparency, project
+                          verification, & NGO credibility. We bridge the gap by
+                          ensuring clarity, accountability, and trust in every
+                          donation.
+                        </p>
+                        <p
+                          style={{
+                            fontWeight: '300',
+                            color: '#218025',
+                            textDecoration: 'underline'
+                          }}
+                        >
+                          Would you like to donate? Get started
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className='col-lg-6 col-md-9'>
+                <div className='feature-content'>
+                  {/* Fancy Icon List */}
+                  <div className='fancy-icon-list'>
+                    <div className='fancy-list-item'>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}
+                        className='fancy-list-item'
+                      >
+                        <p
+                          style={{
+                            fontWeight: '600',
+                            color: '#34A853'
+                          }}
+                        >
+                          5,000+
+                        </p>
+                        <p
+                          style={{
+                            fontWeight: '500',
+                            color: 'black'
+                          }}
+                        >
+                          Projects Completed
+                        </p>
+                        <p
+                          style={{
+                            fontWeight: '300',
+                            color: 'black'
+                          }}
+                        >
+                          Reported by NGOs/NFPOs
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
