@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import main8 from '../../assets/images/home/main_image/1.png'
+import v4 from '../../assets/images/home/main_image/Vector.png'
 import v1 from '../../assets/images/home/main_image/Vector1.png'
 import v2 from '../../assets/images/home/main_image/Vector2.png'
+import v3 from '../../assets/images/home/main_image/Vector3.png'
 
 import Rectangle from '../../assets/images/home/main_image/Rectangle.png'
 
@@ -27,7 +29,6 @@ const Index = () => {
     getAllProjects({ page: 1, limit: 3, projectType: 'present' })
   }, [setProjects])
 
-  const [video, setVideo] = useState(false)
   return (
     <>
       <Layout transparentHeader topSecondaryBg>
@@ -359,7 +360,7 @@ const Index = () => {
           </div>
         </section>
         <section
-          style={{ paddingBottom: '60px', paddingTop: '30px' }}
+          style={{ paddingBottom: '30px', paddingTop: '30px' }}
           className='feature-section feature-section-one '
         >
           <div className='container'>
@@ -396,7 +397,8 @@ const Index = () => {
                         & NGO credibility. We bridge the gap by ensuring
                         clarity, accountability, and trust in every donation.
                       </p>
-                      <p
+                      <a
+                        href='/auth/register'
                         style={{
                           fontWeight: '500',
                           color: '#218025',
@@ -404,7 +406,7 @@ const Index = () => {
                         }}
                       >
                         Would you like to donate? Get started
-                      </p>
+                      </a>
                     </div>
                     <div
                       style={{ display: 'flex', justifyContent: 'center' }}
@@ -454,6 +456,112 @@ const Index = () => {
                       className='fancy-list-item'
                     >
                       <img className='p-4' src={v2} alt='Icon' />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section
+          style={{ paddingBottom: '60px' }}
+          className='feature-section feature-section-one '
+        >
+          <div className='container'>
+            <div className='row justify-content-lg-between justify-content-center align-items-center'>
+              <div className='col-xl-6 col-lg-7 col-md-10 col-sm-12'>
+                <div
+                  style={{ background: '#FFF9E6', borderRadius: '13px' }}
+                  className='feature-content'
+                >
+                  {/* Fancy Icon List */}
+                  <div style={{ padding: '25px' }} className='fancy-icon-list'>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                      className='fancy-list-item'
+                    >
+                      {' '}
+                      <p
+                        style={{
+                          fontWeight: '600',
+                          color: 'black'
+                        }}
+                      >
+                        Simplifying NGO Engagement{' '}
+                      </p>
+                      <p
+                        style={{
+                          // fontWeight: '500',
+                          color: 'black'
+                        }}
+                      >
+                        Connecting with beneficiaries is complex, and varied
+                        feedback can feel overwhelming. We streamline the
+                        process, helping NGOs gather insights and take
+                        meaningful action.{' '}
+                      </p>
+                      <a
+                        href='/auth/register'
+                        style={{
+                          fontWeight: '500',
+                          color: '#916D00',
+                          textDecoration: 'underline'
+                        }}
+                      >
+                        Are you an organization? Join now
+                      </a>
+                    </div>
+                    <div
+                      style={{ display: 'flex', justifyContent: 'center' }}
+                      className='fancy-list-item'
+                    >
+                      <img className='p-3' src={v3} alt='Icon' />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className='col-lg-6 col-md-9'>
+                <div
+                  style={{ background: '#E8F4FE', borderRadius: '13px' }}
+                  className='feature-content'
+                >
+                  {/* Fancy Icon List */}
+                  <div style={{ padding: '25px' }} className='fancy-icon-list'>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                      className='fancy-list-item'
+                    >
+                      <p
+                        style={{
+                          fontWeight: '600',
+                          color: 'black'
+                        }}
+                      >
+                        Data-Driven Decision-Making
+                      </p>
+                      <p
+                        style={{
+                          // fontWeight: '500',
+                          color: 'black'
+                        }}
+                      >
+                        Without a unified database, portfolio managers struggle
+                        to track impact. We provide holistic visibility,
+                        ensuring better analysis, insights, and informed
+                        decisions.
+                      </p>
+                    </div>
+                    <div
+                      style={{ display: 'flex', justifyContent: 'center' }}
+                      className='fancy-list-item'
+                    >
+                      <img className='p-4' src={v4} alt='Icon' />
                     </div>
                   </div>
                 </div>
