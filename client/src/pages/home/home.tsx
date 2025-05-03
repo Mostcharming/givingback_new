@@ -464,7 +464,7 @@ const Index = () => {
           </div>
         </section>
         <section
-          style={{ paddingBottom: '60px' }}
+          style={{ paddingBottom: '25px' }}
           className='feature-section feature-section-one '
         >
           <div className='container'>
@@ -566,6 +566,39 @@ const Index = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+        <section className='mb-5 d-flex justify-content-center align-items-center'>
+          <div className=''>
+            <div style={{ width: '25vw' }}>
+              <div className='fancy-list-item'>
+                <a
+                  href='/about'
+                  style={{ width: '25vw' }}
+                  className='mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer'
+                >
+                  Learn More
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className='mt-5 d-flex justify-content-center align-items-center'>
+          <div className=''>
+            <div style={{ width: '60vw' }}>
+              <h2
+                className='title'
+                style={{
+                  textAlign: 'center',
+                  fontWeight: '600',
+                  fontSize: '35px',
+                  color: 'black'
+                }}
+              >
+                Discover projects making a difference in communities around the
+                world.
+              </h2>
             </div>
           </div>
         </section>
