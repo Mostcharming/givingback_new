@@ -7,7 +7,7 @@ const Footer = ({ footerSolidBg }) => {
         footerSolidBg ? '' : 'with-footer-cta with-footer-bg'
       }`}
     >
-      {!footerSolidBg && (
+      {/* {!footerSolidBg && (
         <div className='footer-cta'>
           <div className='container'>
             <div className='row justify-content-lg-between justify-content-center align-items-center'>
@@ -28,9 +28,9 @@ const Footer = ({ footerSolidBg }) => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
-      <div className='footer-content-area'>
+      <div style={{ background: 'white' }} className='footer-content-area'>
         <div className='container'>
           <div className='footer-widgets'>
             <div className='row justify-content-between'>
@@ -40,13 +40,18 @@ const Footer = ({ footerSolidBg }) => {
                     <img src={GiveBackLogo} alt='GivingBack' />
                   </div>
                   <div className='newsletter-form'>
-                    <h5 className='form-title'>Join Newsletters</h5>
+                    <p style={{ color: 'black' }}>
+                      We're on a mission to transform how donors, NGOs, and
+                      communities connect and collaborate to create lasting
+                      positive change around the world.
+                    </p>
+                    {/* <h5 className='form-title'>Join Newsletters</h5>
                     <form onSubmit={(e) => e.preventDefault()} action='#'>
                       <input type='text' placeholder='Email Address' />
                       <button type='submit'>
                         <i className='far fa-arrow-right' />
                       </button>
-                    </form>
+                    </form> */}
                   </div>
                 </div>
               </div>
@@ -148,7 +153,7 @@ const Footer = ({ footerSolidBg }) => {
           </div>
           <div className='copyright-area'>
             <div className='row flex-md-row-reverse'>
-              <div className='col-md-6'>
+              {/* <div className='col-md-6'>
                 <ul className='social-icons'>
                   <li>
                     <a href='#'>
@@ -176,8 +181,8 @@ const Footer = ({ footerSolidBg }) => {
                     </a>
                   </li>
                 </ul>
-              </div>
-              <div className='col-md-6'>
+              </div> */}
+              <div className='col-md-7'>
                 <p className='copyright-text'>
                   © {new Date().getFullYear()} <a href='#'>GivingBack</a>. All
                   Rights Reserved
