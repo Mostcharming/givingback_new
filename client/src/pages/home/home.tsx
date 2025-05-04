@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import main8 from '../../assets/images/home/main_image/1.png'
+import p3 from '../../assets/images/home/main_image/3.png'
+import p4 from '../../assets/images/home/main_image/4.png'
 import v4 from '../../assets/images/home/main_image/Vector.png'
 import v1 from '../../assets/images/home/main_image/Vector1.png'
 import v2 from '../../assets/images/home/main_image/Vector2.png'
@@ -14,7 +16,6 @@ import useBackendService from '../../services/backend_service'
 import { useLoadStyles } from '../../services/styles'
 const Index = () => {
   useLoadStyles(['givingback'])
-  // const [isDonateModalOpen, setIsDonateModalOpen] = useState(false)
 
   const [projects, setProjects] = useState<any[]>([])
 
@@ -27,7 +28,9 @@ const Index = () => {
 
   useEffect(() => {
     getAllProjects({ page: 1, limit: 3, projectType: 'present' })
-  }, [setProjects])
+  }, [])
+
+  console.log(projects)
 
   return (
     <>
@@ -622,11 +625,11 @@ const Index = () => {
                     m.updates?.some((u) => u.status === 'completed')
                   ).length || 0
 
-                // const progressPercent = 11
+                const progressPercent = 11
 
-                const progressPercent = totalMilestones
-                  ? Math.round((completedMilestones / totalMilestones) * 100)
-                  : 0
+                // const progressPercent = totalMilestones
+                //   ? Math.round((completedMilestones / totalMilestones) * 100)
+                //   : 0
 
                 return (
                   <div key={index} className='col-lg-4 col-md-6 mb-4'>
@@ -722,14 +725,24 @@ const Index = () => {
           </div>
         </section>
         <section
-          style={{ paddingBottom: '60px', paddingTop: '30px' }}
+          style={{ paddingBottom: '60px', paddingTop: '40px' }}
           className='feature-section feature-section-one'
         >
-          <div className='container'>
+          <div
+            style={{
+              background: '#016741e0',
+              backgroundImage: `url(${p4})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              padding: '3rem 1rem'
+            }}
+            className='container'
+          >
             <div className='row justify-content-lg-between justify-content-center align-items-center'>
               <div className='col-lg-6 col-md-9'>
                 <div className=''>
-                  <img src={main8} alt='Image' />
+                  <img src={p3} alt='Image' />
                 </div>
               </div>
               <div className='col-xl-6 col-lg-7 col-md-10 col-sm-12'>
@@ -741,7 +754,7 @@ const Index = () => {
                         <p
                           style={{
                             fontWeight: '600',
-                            color: 'black'
+                            color: 'white'
                           }}
                         >
                           Meet Amina: A Story of Hope and Renewal
@@ -752,7 +765,7 @@ const Index = () => {
                       <p
                         style={{
                           fontWeight: '300',
-                          color: 'black'
+                          color: 'white'
                         }}
                       >
                         For years, Amina, a widow and small-scale farmer,
@@ -766,7 +779,7 @@ const Index = () => {
                       <p
                         style={{
                           fontWeight: '300',
-                          color: 'black'
+                          color: 'white'
                         }}
                       >
                         Then, she discovered GivingBack. Through a crowdfunding
@@ -781,7 +794,7 @@ const Index = () => {
                       <p
                         style={{
                           fontWeight: '300',
-                          color: 'black',
+                          color: 'white',
                           fontStyle: 'italic'
                         }}
                       >
@@ -792,6 +805,23 @@ const Index = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+        <section className='mt-5 d-flex justify-content-center align-items-center'>
+          <div className=''>
+            <div style={{ width: '60vw' }}>
+              <h2
+                className='title'
+                style={{
+                  textAlign: 'center',
+                  fontWeight: '600',
+                  fontSize: '35px',
+                  color: 'black'
+                }}
+              >
+                Hear what our clients and partners are saying
+              </h2>
             </div>
           </div>
         </section>
