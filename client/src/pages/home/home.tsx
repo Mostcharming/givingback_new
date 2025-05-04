@@ -602,6 +602,199 @@ const Index = () => {
             </div>
           </div>
         </section>
+        <section
+          style={{ paddingBottom: '25px', paddingTop: '20px' }}
+          className='feature-section feature-section-one'
+        >
+          <div className='container'>
+            <div className='row justify-content-center'>
+              {projects.slice(0, 3).map((project, index) => {
+                const formatter = new Intl.NumberFormat('en-NG', {
+                  style: 'currency',
+                  currency: 'NGN'
+                })
+
+                const cost = project.cost ?? project.allocated ?? 0
+
+                const totalMilestones = project.milestones?.length || 0
+                const completedMilestones =
+                  project.milestones?.filter((m) =>
+                    m.updates?.some((u) => u.status === 'completed')
+                  ).length || 0
+
+                // const progressPercent = 11
+
+                const progressPercent = totalMilestones
+                  ? Math.round((completedMilestones / totalMilestones) * 100)
+                  : 0
+
+                return (
+                  <div key={index} className='col-lg-4 col-md-6 mb-4'>
+                    <div
+                      className='feature-content p-3'
+                      style={{ borderRadius: '13px' }}
+                    >
+                      <img
+                        src={
+                          project?.projectImages?.length
+                            ? project.projectImages[0].image
+                            : 'assets/images/project/project-1.jpg'
+                        }
+                        alt={project.title}
+                        style={{
+                          width: '100%',
+                          height: '200px',
+                          objectFit: 'cover',
+                          borderRadius: '13px'
+                        }}
+                      />
+
+                      <h5 className='mt-3 fw-bold'>{project.title}</h5>
+
+                      <div
+                        className='progress mb-2'
+                        style={{ height: '10px', borderRadius: '5px' }}
+                      >
+                        <div
+                          className='progress-bar'
+                          role='progressbar'
+                          style={{
+                            width: `${progressPercent}%`,
+                            backgroundColor: '#34A853',
+                            height: '100%',
+                            borderRadius: '5px',
+                            transition: 'width 0.3s ease-in-out'
+                          }}
+                          aria-valuenow={progressPercent}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                        />
+                      </div>
+                      <small>{progressPercent}% completed</small>
+
+                      <div className='d-flex justify-content-between align-items-center mt-3'>
+                        <strong>{formatter.format(cost)}</strong>
+                        <a style={{ color: '#34A853', fontWeight: '600' }}>
+                          Donate Now
+                          <span style={{ fontSize: '1rem', marginLeft: '2px' }}>
+                            ↗
+                          </span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+        <section className='mb-5 d-flex justify-content-center align-items-center'>
+          <div className=''>
+            <div style={{ width: '25vw' }}>
+              <div className='fancy-list-item'>
+                <a
+                  href='/latest-projects'
+                  style={{ width: '25vw' }}
+                  className='mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer'
+                >
+                  See More projects
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className='mt-5 d-flex justify-content-center align-items-center'>
+          <div className=''>
+            <div style={{ width: '60vw' }}>
+              <h2
+                className='title'
+                style={{
+                  textAlign: 'center',
+                  fontWeight: '600',
+                  fontSize: '35px',
+                  color: 'black'
+                }}
+              >
+                Hear frome people whose lives have been changed through our
+                platform
+              </h2>
+            </div>
+          </div>
+        </section>
+        <section
+          style={{ paddingBottom: '60px', paddingTop: '30px' }}
+          className='feature-section feature-section-one'
+        >
+          <div className='container'>
+            <div className='row justify-content-lg-between justify-content-center align-items-center'>
+              <div className='col-lg-6 col-md-9'>
+                <div className=''>
+                  <img src={main8} alt='Image' />
+                </div>
+              </div>
+              <div className='col-xl-6 col-lg-7 col-md-10 col-sm-12'>
+                <div className='feature-content'>
+                  {/* Fancy Icon List */}
+                  <div className='fancy-icon-list'>
+                    <div className='fancy-list-item'>
+                      <div className='contentT'>
+                        <p
+                          style={{
+                            fontWeight: '600',
+                            color: 'black'
+                          }}
+                        >
+                          Meet Amina: A Story of Hope and Renewal
+                        </p>
+                      </div>
+                    </div>
+                    <div className='fancy-list-item'>
+                      <p
+                        style={{
+                          fontWeight: '300',
+                          color: 'black'
+                        }}
+                      >
+                        For years, Amina, a widow and small-scale farmer,
+                        struggled to provide for her children. Droughts and poor
+                        harvests made it nearly impossible to make ends meet.
+                        With little support, she feared for their future.
+                      </p>
+                    </div>
+
+                    <div className='fancy-list-item'>
+                      <p
+                        style={{
+                          fontWeight: '300',
+                          color: 'black'
+                        }}
+                      >
+                        Then, she discovered GivingBack. Through a crowdfunding
+                        campaign, generous donors helped Amina buy better seeds,
+                        farming tools, and irrigation equipment. Today, her farm
+                        is thriving, her children are back in school, and she
+                        even helps other widows in her community.{' '}
+                      </p>
+                    </div>
+
+                    <div className='fancy-list-item'>
+                      <p
+                        style={{
+                          fontWeight: '300',
+                          color: 'black',
+                          fontStyle: 'italic'
+                        }}
+                      >
+                        "I thought I was alone in my struggles but GivingBack
+                        gave me hope. Now, I can dream again." – Amina
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </Layout>
     </>
   )

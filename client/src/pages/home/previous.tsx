@@ -18,7 +18,7 @@ import ProjectCard from '../../components/projects/project-card'
 import Layout from '../../layouts/home'
 import useBackendService from '../../services/backend_service'
 import { useLoadStyles } from '../../services/styles'
-const Index = () => {
+const PreviousIndex = () => {
   useLoadStyles(['givingback'])
   // const [isDonateModalOpen, setIsDonateModalOpen] = useState(false)
 
@@ -784,4 +784,4 @@ const Index = () => {
   )
 }
 
-export default Index
+export default PreviousIndex

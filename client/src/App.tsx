@@ -21,6 +21,7 @@ import Terms from './pages/home/terms'
 // Services and Context
 import Signup from './layouts/auth/signup'
 import Error from './pages/error'
+import PreviousIndex from './pages/home/previous'
 import useBackendService from './services/backend_service'
 import { useContent } from './services/useContext'
 import { getCurrent } from './store/reducers/userReducer'
@@ -178,6 +179,7 @@ export function HomeRoutes() {
   return (
     <Routes>
       <Route path='/' element={<Index />} />
+      <Route path='/previous' element={<PreviousIndex />} />
       <Route path='/aml' element={<Aml />} />
       <Route path='/contact' element={<Contact />} />
       <Route path='/about_us' element={<About />} />
