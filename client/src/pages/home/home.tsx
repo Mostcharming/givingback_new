@@ -8,7 +8,7 @@ import v4 from "../../assets/images/home/main_image/Vector.png";
 import v1 from "../../assets/images/home/main_image/Vector1.png";
 import v2 from "../../assets/images/home/main_image/Vector2.png";
 import v3 from "../../assets/images/home/main_image/Vector3.png";
-
+import hands from "../../assets/images/home/main_image/hands.png";
 import Rectangle from "../../assets/images/home/main_image/Rectangle.png";
 
 import Layout from "../../layouts/home";
@@ -16,6 +16,7 @@ import useBackendService from "../../services/backend_service";
 import { useLoadStyles } from "../../services/styles";
 import { Image } from "react-bootstrap";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { toast } from "react-toastify";
 const Index = () => {
   useLoadStyles(["givingback"]);
 
@@ -32,7 +33,17 @@ const Index = () => {
     getAllProjects({ page: 1, limit: 3, projectType: "present" });
   }, []);
 
-  console.log(projects);
+  const [email, setEmail] = useState("");
+  const handleSubscribe = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.trim()) {
+      toast.error("Please enter an email address.");
+    } else if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address.");
+    } else {
+      toast.success("Subscribed successfully!");
+    }
+  };
 
   return (
     <>
@@ -1136,21 +1147,23 @@ const Index = () => {
             </div>
           </div>
         </section>
-        {/* CTA Section */}
-        <section className="py-5">
-          <div className="container">
-            <div className="position-relative rounded overflow-hidden">
-              <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50"></div>
-              <Image
-                src="/placeholder.svg?height=400&width=1200"
-                alt="Hands coming together"
-                width={1200}
-                height={400}
-                className="w-100 object-fit-cover"
-                style={{ height: "300px" }}
-              />
-              <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white p-4">
-                <h3 className="text-center mb-3 fs-2">
+        <section
+          style={{ paddingBottom: "60px", paddingTop: "40px" }}
+          className="feature-section feature-section-one"
+        >
+          <div
+            style={{
+              backgroundImage: `url(${hands})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              padding: "3rem 1rem",
+            }}
+            className="container rounded"
+          >
+            <div className="">
+              <div className=" d-flex flex-column align-items-center justify-content-center text-white p-4">
+                <h3 className="text-white text-center mb-3 fs-2">
                   Ready To Make A Difference?
                 </h3>
                 <p
@@ -1161,18 +1174,23 @@ const Index = () => {
                   creating lasting impact through meaningful collaboration.
                 </p>
                 <div className="d-flex flex-column flex-sm-row gap-3">
-                  <button className="btn btn-success px-4 py-2">
+                  <a
+                    href="/auth/regsiter"
+                    className="ml-4 mr-4 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
+                  >
                     I want to donate to projects
-                  </button>
-                  <button className="btn btn-success px-4 py-2">
+                  </a>
+                  <a
+                    href="/auth/regsiter"
+                    className="ml-4 mr-4 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
+                  >
                     I want to create projects
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>
           </div>
         </section>
-        {/* Newsletter Section */}
         <section className="py-5">
           <div className="container">
             <div className="row align-items-center g-4">
@@ -1197,8 +1215,13 @@ const Index = () => {
                       height: "55px",
                     }}
                     placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
-                  <button className="ml-4 mr-4 main-btn nav-btn d-none d-sm-inline-block cursor-pointer">
+                  <button
+                    className="ml-4 mr-4 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
+                    onClick={handleSubscribe}
+                  >
                     Subscribe
                   </button>
                 </div>
