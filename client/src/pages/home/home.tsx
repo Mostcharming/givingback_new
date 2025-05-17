@@ -879,18 +879,6 @@ const Index = () => {
                       >
                         JU
                       </div>
-                      {/* <div
-                      className="rounded-circle bg-light overflow-hidden me-3"
-                      style={{ width: "48px", height: "48px" }}
-                    >
-                      <Image
-                        src="/placeholder.svg?height=48&width=48"
-                        alt="Adeola O. Akinyele"
-                        width={48}
-                        height={48}
-                        className="img-fluid"
-                      />
-                    </div> */}
                       <div>
                         <p className="fw-medium mb-0">Adeola O. Akinyele</p>
                         <p className="small text-secondary mb-1">
