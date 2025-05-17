@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Libraries and Utilities
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { Route, Routes, useNavigate } from 'react-router-dom'
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -28,22 +29,23 @@ import { getCurrent } from './store/reducers/userReducer'
 
 // ProtectedRoute Component
 function ProtectedRoute({ element, roles, authState }) {
-  const userRole = authState.user?.role
-  const userStatus = authState.user?.status
+  const { isAuthenticated, user } = authState || {};
+  const userRole = user?.role?.toLowerCase();
+  const userStatus = user?.status;
 
-  // if (!authState?.isAuthenticated || !authState?.user) {
-  //   return <Navigate to='/' replace />
-  // }
-
-  // if (userStatus === 0 || userStatus === false) {
-  //   return <Navigate to='/auth/verify' replace />
-  // }
-
-  if (roles.includes(userRole?.toLowerCase())) {
-    return element
+  if (!isAuthenticated || !user) {
+    return <Navigate to='/' replace />;
   }
 
-  // return <Navigate to='/' replace />
+  if (!userStatus) {
+    return <Navigate to='/auth/verify' replace />;
+  }
+
+  if (roles?.includes(userRole)) {
+    return element;
+  }
+
+  return <Navigate to='/' replace />;
 }
 
 // DashboardRoute Component
@@ -100,7 +102,7 @@ function DashboardRoute({ authState }) {
     } else if (authState?.isAuthenticated && authState.user?.status === 0) {
       navigate('/auth/verify', { replace: true })
     } else navigate('/')
-  }, [authState, fetchCurrentUser])
+  }, [authState, fetchCurrentUser, navigate])
 
   return null
 }

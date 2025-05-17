@@ -1,5 +1,4 @@
-// @ts-ignore
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import GiveBackLogo from '../../assets/images/home/GivingBackNG-logo.svg'
@@ -19,40 +18,7 @@ const Header = ({ transparentTop, transparentHeader, topSecondaryBg }) => {
         } ${transparentHeader ? 'transparent-header' : ''}`}
         id='header-sticky'
       >
-        {/* <div
-          className={`header-topbar d-none d-sm-block ${
-            topSecondaryBg ? 'topbar-secondary-bg' : ''
-          }`}
-        >
-          <div className='container'>
-            <div className='row justify-content-between align-items-center'>
-              <div className='col-auto'>
-                <ul className='contact-info'>
-                  <li>
-                    <a href='mailto:info@givingbackng.org'>
-                      <i className='far fa-envelope' /> info@givingbackng.org
-                    </a>
-                  </li>
-                  <li>
-                    <div>
-                      <i className='far fa-map-marker-alt' /> Muliner Towers,
-                      Alfred Rewane Rd. Ikoyi, Lagos
-                    </div>
-                  </li>
-                </ul>
-              </div>
-              <div className='col-auto d-none d-md-block'>
-                <ul className='social-icons'>
-                  <li className='bg-white p-1 pl-3 pr-3 rounded'>
-                    <Link style={{ color: 'black' }} to={'/auth/login'}>
-                      Login
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div> */}
+      
         <div className='navbar-wrapper'>
           <div className='container'>
             <div className='d-flex'>
@@ -92,13 +58,12 @@ const Header = ({ transparentTop, transparentHeader, topSecondaryBg }) => {
               </div>
               <div className='d-flex align-items-center ml-auto'>
                 <a
-                  href='/auth/register'
+                  href='/auth/login'
                   className='mr-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer'
                   onClick={() => setIsDonateModalOpen(true)}
                   style={{ backgroundColor: '#F3FAF5', color: '#34A853' }}
                 >
                   Sign in
-                  {/* <i className='far fa-arrow-right' /> */}
                 </a>
                 <a
                   href='/auth/register'
@@ -106,7 +71,6 @@ const Header = ({ transparentTop, transparentHeader, topSecondaryBg }) => {
                   onClick={() => setIsDonateModalOpen(true)}
                 >
                   Create Account
-                  {/* <i className='far fa-arrow-right' /> */}
                 </a>
               </div>
             </div>

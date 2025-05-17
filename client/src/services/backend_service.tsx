@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query'
 import { useDispatch } from 'react-redux'
@@ -6,19 +7,7 @@ import { toast } from 'react-toastify'
 import { logout_auth } from '../store/reducers/authReducer'
 import { useContent } from './useContext'
 
-// const getBaseURL = (): string => {
-//   switch (import.meta.env.VITE_NODE_ENV) {
-//     case 'production':
-//       return 'https://givebackng.org/rest/v1'
-//     case 'development':
-//       return 'http://localhost:5000/rest/v1'
 
-//     default:
-//       return ''
-//   }
-// }
-
-// const baseURL = getBaseURL()
 const baseURL = import.meta.env.VITE_API_URL || ''
 
 interface BackendServiceConfig extends AxiosRequestConfig {
@@ -57,38 +46,38 @@ const useBackendService = <TData, TError>(
 
     switch (lowerCaseMethod) {
       case 'get':
-        const getResponse: AxiosResponse<TData> = await axios.get(url, {
+        { const getResponse: AxiosResponse<TData> = await axios.get(url, {
           params: payload,
           ...config
         })
-        return getResponse.data
+        return getResponse.data }
       case 'post':
-        const postResponse: AxiosResponse<TData> = await axios.post(
+        { const postResponse: AxiosResponse<TData> = await axios.post(
           url,
           payload,
           config
         )
-        return postResponse.data
+        return postResponse.data }
       case 'put':
-        const putResponse: AxiosResponse<TData> = await axios.put(
+        { const putResponse: AxiosResponse<TData> = await axios.put(
           url,
           payload,
           config
         )
-        return putResponse.data
+        return putResponse.data }
       case 'delete':
-        const deleteResponse: AxiosResponse<TData> = await axios.delete(url, {
+        { const deleteResponse: AxiosResponse<TData> = await axios.delete(url, {
           data: payload,
           ...config
         })
-        return deleteResponse.data
+        return deleteResponse.data }
       case 'patch':
-        const patchResponse: AxiosResponse<TData> = await axios.patch(
+        { const patchResponse: AxiosResponse<TData> = await axios.patch(
           url,
           payload,
           config
         )
-        return patchResponse.data
+        return patchResponse.data }
       default:
         throw new Error(`Unsupported method: ${method}`)
     }
