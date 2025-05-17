@@ -1,4 +1,4 @@
-// @ts-ignore
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState } from 'react'
 import main8 from '../../assets/images/home/main_image/1.png'
@@ -625,11 +625,11 @@ const Index = () => {
                     m.updates?.some((u) => u.status === 'completed')
                   ).length || 0
 
-                const progressPercent = 11
+              
 
-                // const progressPercent = totalMilestones
-                //   ? Math.round((completedMilestones / totalMilestones) * 100)
-                //   : 0
+                const progressPercent = totalMilestones
+                  ? Math.round((completedMilestones / totalMilestones) * 100)
+                  : 0
 
                 return (
                   <div key={index} className='col-lg-4 col-md-6 mb-4'>
@@ -677,7 +677,7 @@ const Index = () => {
 
                       <div className='d-flex justify-content-between align-items-center mt-3'>
                         <strong>{formatter.format(cost)}</strong>
-                        <a style={{ color: '#34A853', fontWeight: '600' }}>
+                        <a href='/auth/register' style={{ color: '#34A853', fontWeight: '600' }}>
                           Donate Now
                           <span style={{ fontSize: '1rem', marginLeft: '2px' }}>
                             ↗
