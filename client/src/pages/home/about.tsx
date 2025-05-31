@@ -1,5 +1,5 @@
 import { useState } from "react";
-import PageBanner from "../../components/home/pageBanner";
+// import PageBanner from "../../components/home/pageBanner";
 import Layout from "../../layouts/home";
 import { useLoadStyles } from "../../services/styles";
 
@@ -12,6 +12,7 @@ import pastorImage from "../../assets/images/home/new/pastor.png";
 import pelumi from "../../assets/images/home/new/pelumi.jpeg";
 import { toast } from "react-toastify";
 import hands from "../../assets/images/home/main_image/hands.png";
+import hands2 from "../../assets/images/home/new/about_hand.png";
 
 const About = () => {
   const [email, setEmail] = useState("");
@@ -176,7 +177,7 @@ When she’s not deep in Figma or sketching out new concepts, you’ll probably 
   return (
     <Layout>
       {/* <PageBanner pageName="About Us" /> */}
-      <section className="d-flex justify-content-center align-items-center">
+      <section className=" d-flex justify-content-center align-items-center">
         <div className="">
           <div style={{ width: "60vw" }}>
             <h2
@@ -213,6 +214,13 @@ When she’s not deep in Figma or sketching out new concepts, you’ll probably 
           </div>
         </div>
       </section>
+      <div className="mt-3 about-form-area">
+        <div className="container">
+          <div className="about-donation-form">
+            <img src={hands2} alt="" />
+          </div>
+        </div>
+      </div>
       <section className="contact-section section-gap-extra-bottom">
         <div className="container">
           <div className="row align-items-center justify-content-center">
@@ -277,18 +285,41 @@ When she’s not deep in Figma or sketching out new concepts, you’ll probably 
           <br />
 
           <div className="contact-from-area">
-            <h3 style={{ fontWeight: "bold", marginBottom: "10px" }}>
-              Our Team
-            </h3>
-            <hr
-              style={{
-                borderTop: "2px solid black",
-                width: "100%",
-                margin: "0 auto",
-              }}
-            />
-
             <div className="container">
+              <section className="mt-3 d-flex justify-content-center align-items-center">
+                <div className="">
+                  <div style={{ width: "60vw" }}>
+                    <h2
+                      className="title"
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "600",
+                        fontSize: "30px",
+                        color: "black",
+                      }}
+                    >
+                      Meet the amazing humans who make up GivingBack
+                    </h2>
+                  </div>
+                </div>
+              </section>
+              <section className="mt-2 d-flex justify-content-center align-items-center">
+                <div className="">
+                  <div style={{ width: "70vw" }}>
+                    <h6
+                      className="title mt-2 "
+                      style={{
+                        textAlign: "center",
+                        // fontWeight: '700',
+                        fontSize: "18px",
+                      }}
+                    >
+                      Our philosophy is simple, hire great people and give them
+                      the resources and support to do their best work.
+                    </h6>
+                  </div>
+                </div>
+              </section>
               <div className="row">
                 {teamMembers.map((member, index) => (
                   <TeamMember

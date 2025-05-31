@@ -74,6 +74,8 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            git add .
+            git commit -m "hi" || echo "Nothing to commit"
             git pull origin main
 
       - name: Deploy Frontend Build to Web Server
