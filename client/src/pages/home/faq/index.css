@@ -1,0 +1,29 @@
+.accordion-button {
+  background-color: #f8f9fa;
+  color: #34a853;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-weight: 500;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.accordion-button.active {
+  /* border-radius: 9px; */
+  background-color: #34a853;
+  color: white;
+}
+
+.accordion-body {
+  padding: 1rem;
+}
+
+.transition-icon {
+  transition: transform 0.3s ease;
+}
+
+.transition-icon.rotate {
+  transform: rotate(180deg);
+}

@@ -1,12 +1,12 @@
-@import '../../css/home/css/animate.min.css';
-@import '../../css/home/css/popup.css';
-@import '../../css/home/css/bootstrap.min.css';
-@import '../../css/home/css/font-awesome.min.css';
-@import '../../css/home/css/flaticon.css';
-@import '../../css/home/css/slick.min.css';
-@import '../../css/home/css/lity.min.css';
-@import '../../css/home/css/main.css';
-@import '../../css/home/css/responsive.css';
+@import "../../css/home/css/animate.min.css";
+@import "../../css/home/css/popup.css";
+@import "../../css/home/css/bootstrap.min.css";
+@import "../../css/home/css/font-awesome.min.css";
+@import "../../css/home/css/flaticon.css";
+@import "../../css/home/css/slick.min.css";
+@import "../../css/home/css/lity.min.css";
+@import "../../css/home/css/main.css";
+@import "../../css/home/css/responsive.css";
 
 .App {
   text-align: center;
@@ -327,7 +327,7 @@
 .spinner:before,
 .spinner:after {
   position: absolute;
-  content: '';
+  content: "";
 }
 
 .spinner:before {

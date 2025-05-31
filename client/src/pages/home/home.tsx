@@ -17,6 +17,7 @@ import { useLoadStyles } from "../../services/styles";
 import { Image } from "react-bootstrap";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-toastify";
+import FAQAccordion from "./faq/faq";
 const Index = () => {
   useLoadStyles(["givingback"]);
 
@@ -340,7 +341,7 @@ const Index = () => {
                     </div>
                     <div className="fancy-list-item">
                       <a
-                        href="/about"
+                        href="/about_us"
                         style={{ width: "40vw" }}
                         className="mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
                       >
@@ -590,7 +591,7 @@ const Index = () => {
             <div style={{ width: "25vw" }}>
               <div className="fancy-list-item">
                 <a
-                  href="/about"
+                  href="/about_us"
                   style={{ width: "25vw" }}
                   className="mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
                 >
@@ -857,7 +858,6 @@ const Index = () => {
             </div>
           </div>
         </section>
-        {/* testing */}
         <section className="py-5">
           <div className="container">
             <div className="row g-4">
@@ -995,143 +995,7 @@ const Index = () => {
                 </div>
               </div>
 
-              <div className="col-md-8">
-                <div className="accordion" id="faqAccordion">
-                  {/* FAQ Item 1 - Expanded */}
-                  <div className="accordion-item border mb-3 rounded">
-                    <h2 className="accordion-header">
-                      <button
-                        className="accordion-button bg-success text-white"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseOne"
-                        aria-expanded="true"
-                        aria-controls="collapseOne"
-                      >
-                        Who is a donor?
-                      </button>
-                    </h2>
-                    <div
-                      id="collapseOne"
-                      className="accordion-collapse collapse show"
-                      data-bs-parent="#faqAccordion"
-                    >
-                      <div className="accordion-body">
-                        Any individual or organization that donates to a project
-                        is considered a donor.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* FAQ Item 2 - Collapsed */}
-                  <div className="accordion-item border mb-3 rounded">
-                    <h2 className="accordion-header">
-                      <button
-                        className="accordion-button collapsed text-success bg-white"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseTwo"
-                        aria-expanded="false"
-                        aria-controls="collapseTwo"
-                      >
-                        Who is a partner?
-                      </button>
-                    </h2>
-                    <div
-                      id="collapseTwo"
-                      className="accordion-collapse collapse"
-                      data-bs-parent="#faqAccordion"
-                    >
-                      <div className="accordion-body">
-                        Partners are organizations or individuals who
-                        collaborate with GivingBack to support projects and
-                        initiatives.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* FAQ Item 3 - Collapsed */}
-                  <div className="accordion-item border mb-3 rounded">
-                    <h2 className="accordion-header">
-                      <button
-                        className="accordion-button collapsed text-success bg-white"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseThree"
-                        aria-expanded="false"
-                        aria-controls="collapseThree"
-                      >
-                        How do I give or donate?
-                      </button>
-                    </h2>
-                    <div
-                      id="collapseThree"
-                      className="accordion-collapse collapse"
-                      data-bs-parent="#faqAccordion"
-                    >
-                      <div className="accordion-body">
-                        You can donate by selecting a project and clicking the
-                        "Donate" button. You'll be guided through the donation
-                        process.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* FAQ Item 4 - Collapsed */}
-                  <div className="accordion-item border mb-3 rounded">
-                    <h2 className="accordion-header">
-                      <button
-                        className="accordion-button collapsed text-success bg-white"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseFour"
-                        aria-expanded="false"
-                        aria-controls="collapseFour"
-                      >
-                        What is a project?
-                      </button>
-                    </h2>
-                    <div
-                      id="collapseFour"
-                      className="accordion-collapse collapse"
-                      data-bs-parent="#faqAccordion"
-                    >
-                      <div className="accordion-body">
-                        A project is an initiative created by an individual or
-                        organization seeking support to address a specific need
-                        or cause.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* FAQ Item 5 - Collapsed */}
-                  <div className="accordion-item border mb-3 rounded">
-                    <h2 className="accordion-header">
-                      <button
-                        className="accordion-button collapsed text-success bg-white"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseFive"
-                        aria-expanded="false"
-                        aria-controls="collapseFive"
-                      >
-                        How do I create a project?
-                      </button>
-                    </h2>
-                    <div
-                      id="collapseFive"
-                      className="accordion-collapse collapse"
-                      data-bs-parent="#faqAccordion"
-                    >
-                      <div className="accordion-body">
-                        To create a project, sign up or log in to your account,
-                        navigate to "Create Project," and follow the guided
-                        steps.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <FAQAccordion />
             </div>
           </div>
         </section>
