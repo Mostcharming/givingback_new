@@ -32,7 +32,7 @@ const Index = () => {
 
   useEffect(() => {
     getAllProjects({ page: 1, limit: 3, projectType: "present" });
-  }, []);
+  }, [getAllProjects]);
 
   const [email, setEmail] = useState("");
   const handleSubscribe = () => {
