@@ -3,7 +3,6 @@ import { useState } from "react";
 import Layout from "../../layouts/home";
 import { useLoadStyles } from "../../services/styles";
 
-import aboutImage from "../../assets/images/home/new/about.png";
 import madamImage from "../../assets/images/home/new/madam.jpeg";
 import mayImage from "../../assets/images/home/new/may.jpeg";
 import mrpelumiImage from "../../assets/images/home/new/mrpelumi.png";
@@ -13,6 +12,9 @@ import pelumi from "../../assets/images/home/new/pelumi.jpeg";
 import { toast } from "react-toastify";
 import hands from "../../assets/images/home/main_image/hands.png";
 import hands2 from "../../assets/images/home/new/about_hand.png";
+import hands3 from "../../assets/images/home/new/hand3.png";
+import smile1 from "../../assets/images/home/new/smile1.png";
+import greenback from "../../assets/images/home/new/greenback.png";
 
 const About = () => {
   const [email, setEmail] = useState("");
@@ -174,6 +176,95 @@ When she’s not deep in Figma or sketching out new concepts, you’ll probably 
     </div>
   );
 
+  const features = [
+    {
+      title: "Transparency",
+      description:
+        "We believe in open, honest giving. Every donation, every project, and every impact is tracked and shared.",
+      icon: (
+        <svg
+          width="22"
+          height="19"
+          viewBox="0 0 22 19"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5 12L6.45 9.1C6.61696 8.76866 6.87281 8.49029 7.18893 8.29603C7.50504 8.10176 7.86897 7.99927 8.24 8H19M19 8C19.3055 7.99946 19.6071 8.06894 19.8816 8.20308C20.1561 8.33723 20.3963 8.53249 20.5836 8.77387C20.7709 9.01525 20.9004 9.29633 20.9622 9.59555C21.024 9.89477 21.0164 10.2042 20.94 10.5L19.39 16.5C19.279 16.9299 19.0281 17.3106 18.6769 17.5822C18.3256 17.8538 17.894 18.0008 17.45 18H3C2.46957 18 1.96086 17.7893 1.58579 17.4142C1.21071 17.0391 1 16.5304 1 16V3C1 1.9 1.9 1 3 1H6.93C7.25941 1.0017 7.58331 1.08475 7.8729 1.24176C8.1625 1.39877 8.40882 1.62488 8.59 1.9L9.41 3.1C9.59118 3.37512 9.8375 3.60123 10.1271 3.75824C10.4167 3.91525 10.7406 3.9983 11.07 4H17C17.5304 4 18.0391 4.21071 18.4142 4.58579C18.7893 4.96086 19 5.46957 19 6V8Z"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+    },
+    {
+      title: "Customer Centricity",
+      description:
+        "Whether you’re a donor, an NGO, or a beneficiary, your experience matters. We’re here to make giving seamless and rewarding.",
+      icon: (
+        <svg
+          width="22"
+          height="19"
+          viewBox="0 0 22 19"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5 12L6.45 9.1C6.61696 8.76866 6.87281 8.49029 7.18893 8.29603C7.50504 8.10176 7.86897 7.99927 8.24 8H19M19 8C19.3055 7.99946 19.6071 8.06894 19.8816 8.20308C20.1561 8.33723 20.3963 8.53249 20.5836 8.77387C20.7709 9.01525 20.9004 9.29633 20.9622 9.59555C21.024 9.89477 21.0164 10.2042 20.94 10.5L19.39 16.5C19.279 16.9299 19.0281 17.3106 18.6769 17.5822C18.3256 17.8538 17.894 18.0008 17.45 18H3C2.46957 18 1.96086 17.7893 1.58579 17.4142C1.21071 17.0391 1 16.5304 1 16V3C1 1.9 1.9 1 3 1H6.93C7.25941 1.0017 7.58331 1.08475 7.8729 1.24176C8.1625 1.39877 8.40882 1.62488 8.59 1.9L9.41 3.1C9.59118 3.37512 9.8375 3.60123 10.1271 3.75824C10.4167 3.91525 10.7406 3.9983 11.07 4H17C17.5304 4 18.0391 4.21071 18.4142 4.58579C18.7893 4.96086 19 5.46957 19 6V8Z"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+    },
+    {
+      title: "Innovation",
+      description: `We harness technology to make philanthropy smarter, faster, and more effective—because generosity should never be limited by outdated systems.`,
+      icon: (
+        <svg
+          width="22"
+          height="19"
+          viewBox="0 0 22 19"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5 12L6.45 9.1C6.61696 8.76866 6.87281 8.49029 7.18893 8.29603C7.50504 8.10176 7.86897 7.99927 8.24 8H19M19 8C19.3055 7.99946 19.6071 8.06894 19.8816 8.20308C20.1561 8.33723 20.3963 8.53249 20.5836 8.77387C20.7709 9.01525 20.9004 9.29633 20.9622 9.59555C21.024 9.89477 21.0164 10.2042 20.94 10.5L19.39 16.5C19.279 16.9299 19.0281 17.3106 18.6769 17.5822C18.3256 17.8538 17.894 18.0008 17.45 18H3C2.46957 18 1.96086 17.7893 1.58579 17.4142C1.21071 17.0391 1 16.5304 1 16V3C1 1.9 1.9 1 3 1H6.93C7.25941 1.0017 7.58331 1.08475 7.8729 1.24176C8.1625 1.39877 8.40882 1.62488 8.59 1.9L9.41 3.1C9.59118 3.37512 9.8375 3.60123 10.1271 3.75824C10.4167 3.91525 10.7406 3.9983 11.07 4H17C17.5304 4 18.0391 4.21071 18.4142 4.58579C18.7893 4.96086 19 5.46957 19 6V8Z"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+    },
+    {
+      title: "Mutual Respect",
+      description: `Collaboration thrives on trust. We foster a space where every stakeholder is valued, heard, and empowered to create lasting change.`,
+      icon: (
+        <svg
+          width="22"
+          height="19"
+          viewBox="0 0 22 19"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5 12L6.45 9.1C6.61696 8.76866 6.87281 8.49029 7.18893 8.29603C7.50504 8.10176 7.86897 7.99927 8.24 8H19M19 8C19.3055 7.99946 19.6071 8.06894 19.8816 8.20308C20.1561 8.33723 20.3963 8.53249 20.5836 8.77387C20.7709 9.01525 20.9004 9.29633 20.9622 9.59555C21.024 9.89477 21.0164 10.2042 20.94 10.5L19.39 16.5C19.279 16.9299 19.0281 17.3106 18.6769 17.5822C18.3256 17.8538 17.894 18.0008 17.45 18H3C2.46957 18 1.96086 17.7893 1.58579 17.4142C1.21071 17.0391 1 16.5304 1 16V3C1 1.9 1.9 1 3 1H6.93C7.25941 1.0017 7.58331 1.08475 7.8729 1.24176C8.1625 1.39877 8.40882 1.62488 8.59 1.9L9.41 3.1C9.59118 3.37512 9.8375 3.60123 10.1271 3.75824C10.4167 3.91525 10.7406 3.9983 11.07 4H17C17.5304 4 18.0391 4.21071 18.4142 4.58579C18.7893 4.96086 19 5.46957 19 6V8Z"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+    },
+  ];
+
   return (
     <Layout>
       {/* <PageBanner pageName="About Us" /> */}
@@ -221,69 +312,162 @@ When she’s not deep in Figma or sketching out new concepts, you’ll probably 
           </div>
         </div>
       </div>
-      <section className="contact-section section-gap-extra-bottom">
+      <section className="py-4 pl-4">
         <div className="container">
-          <div className="row align-items-center justify-content-center">
-            <div className="col-md-6 col-sm-10">
-              <p style={{ fontSize: "18px" }}>
-                Due to unclear and non-insightful reports, donors struggle to
-                articulate the effectiveness and impact (Stanford Social
-                Innovation). At GivingBack, this means that beneficiaries may
-                also not enjoy the full benefits intended for them.
-              </p>
-              <br />
-              <p style={{ fontSize: "18px" }}>
-                At GivingBack, we are set to address this problem by leveraging
-                technology. We are a platform that enables real-time
-                collaboration among charity project stakeholders.
-              </p>
-              <br />
-              <p style={{ fontSize: "18px" }}>
-                <span style={{ color: "black", fontWeight: "bold" }}>
-                  Our Vision:
-                </span>
-              </p>
-              <br />
-              <p style={{ fontSize: "18px" }}>
-                <span style={{ color: "black", fontWeight: "bold" }}>
-                  Our Mission:
-                </span>
-              </p>
-              <br />
-              <p style={{ fontSize: "18px" }}>
-                <span style={{ color: "black", fontWeight: "bold" }}>
-                  Our Purpose:{" "}
-                </span>{" "}
-                To optimize Return on Investment (ROI) and impact on
-                CSR/philanthropic investment.
-              </p>
-              <br />
-              <span
-                style={{ fontSize: "18px", color: "black", fontWeight: "bold" }}
-              >
-                Core Value:
-              </span>
-              <ul
-                style={{
-                  fontSize: "18px",
-                  listStyleType: "disc",
-                  paddingLeft: "20px",
-                }}
-              >
-                <li>Transparency</li>
-                <li>Customer-Centricity</li>
-                <li>Innovation</li>
-                <li>Mutual Respect</li>
-              </ul>
-            </div>
+          <div className="row align-items-center g-4">
+            <h3
+              style={{
+                fontSize: "20px",
+                fontStyle: "italic",
+                color: "#34A853",
+                textDecoration: "underline",
+              }}
+            >
+              Our Mission
+            </h3>
+          </div>
+        </div>
+      </section>
+      <section className="py-1 pl-4">
+        <div className="container">
+          <div className="row align-items-center g-4">
+            <h5>
+              Due to unclear and non-insightful reports, donors struggle to
+              articulate the effectiveness and impact (Stanford Social
+              Innovation). At GivingBack, this means that beneficiaries may also
+              not enjoy the full benefits intended for them. At GivingBack, we
+              are set to address this problem by leveraging technology. We are a
+              platform that enables real-time collaboration among charity
+              project stakeholders.
+            </h5>
+          </div>
+        </div>
+      </section>
+      <section className="py-4 pl-4">
+        <div className="container">
+          <div className="row align-items-center g-4">
+            <h3
+              style={{
+                fontSize: "20px",
+                fontStyle: "italic",
+                color: "#34A853",
+                textDecoration: "underline",
+              }}
+            >
+              Our Vision
+            </h3>
+          </div>
+        </div>
+      </section>
+      <section className="py-1 pl-4">
+        <div className="container">
+          <div className="row align-items-center g-4">
+            <h5>
+              Due to unclear and non-insightful reports, donors struggle to
+              articulate the effectiveness and impact (Stanford Social
+              Innovation). At GivingBack, this means that beneficiaries may also
+              not enjoy the full benefits intended for them. At GivingBack, we
+              are set to address this problem by leveraging technology. We are a
+              platform that enables real-time collaboration among charity
+              project stakeholders.
+            </h5>
+          </div>
+        </div>
+      </section>
 
-            <div className="col-md-6 col-sm-10">
-              <img src={aboutImage} alt="hi" />
+      <section
+        style={{ paddingBottom: "60px", paddingTop: "40px" }}
+        className="feature-section feature-section-one section-gap"
+      >
+        <div className="container">
+          <div className="row justify-content-lg-between justify-content-center align-items-center">
+            <div className="col-xl-6 col-lg-7 col-md-10 col-sm-12">
+              <div className="">
+                <img src={hands3} alt="Image" />
+              </div>
+            </div>
+            <div className="col-lg-6 col-md-9">
+              <div className="">
+                <img src={smile1} alt="Image" />
+              </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          <br />
+      <section
+        style={{
+          background: "#016741",
+          backgroundImage: `url(${greenback})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          padding: "3rem 1rem",
+        }}
+        className="project-section "
+      >
+        <section className="py-1 pl-4">
+          <div className="container">
+            <div className="row align-items-center g-4">
+              <h5
+                style={{
+                  color: "green",
+                  backgroundColor: "white",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "999px",
+                  display: "inline-block",
+                  border: "1px solid green",
+                }}
+              >
+                Our Core Values
+              </h5>
+            </div>
+          </div>
+        </section>
+        <section className="py-1 pl-4">
+          <div className="container">
+            <div className="row align-items-center g-4">
+              <h3 className="p-3" style={{ color: "white" }}>
+                What Drives Us
+              </h3>
+            </div>
+          </div>
+        </section>
+        <div
+          className="pl-4"
+          style={{ display: "flex", justifyContent: "space-between" }}
+        >
+          {features.map((feature, index) => (
+            <div key={index}>
+              <div className="col-xl-12 col-md-12 mb-4">
+                <div
+                  style={{
+                    border: "1px solid rgb(7, 132, 86)",
+                    borderRadius: "20px",
+                    padding: "10px 0",
+                  }}
+                >
+                  <div className="m-4">{feature.icon}</div>
+                  <div className="name-box w-100">
+                    <h5 className="m-4" style={{ color: "white" }}>
+                      {feature.title}
+                    </h5>
+                    <h6
+                      className="m-4"
+                      style={{ color: "white", fontSize: "17px" }}
+                    >
+                      {feature.description}
+                    </h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
+      <section className="contact-section section-gap-extra-bottom">
+        <div className="container">
           <div className="contact-from-area">
             <div className="container">
               <section className="mt-3 d-flex justify-content-center align-items-center">
@@ -336,7 +520,6 @@ When she’s not deep in Figma or sketching out new concepts, you’ll probably 
           </div>
         </div>
       </section>
-
       {selectedMember && (
         <div className="modal">
           <div className="modal-content">
@@ -362,7 +545,6 @@ When she’s not deep in Figma or sketching out new concepts, you’ll probably 
           </div>
         </div>
       )}
-
       <style>
         {`
     .modal {
