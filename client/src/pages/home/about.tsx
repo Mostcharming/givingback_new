@@ -268,7 +268,7 @@ When she’s not deep in Figma or sketching out new concepts, you’ll probably 
   return (
     <Layout>
       {/* <PageBanner pageName="About Us" /> */}
-      <section className=" d-flex justify-content-center align-items-center">
+      <section className="mt-4 d-flex justify-content-center align-items-center">
         <div className="">
           <div style={{ width: "60vw" }}>
             <h2
