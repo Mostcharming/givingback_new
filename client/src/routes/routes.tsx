@@ -1,44 +1,44 @@
-import FundWallets from '../pages'
-import Admin_projects from '../pages/admin_projects'
-import ForgotPassword from '../pages/auth/forgotPassword'
-import Login from '../pages/auth/login'
-import Register from '../pages/auth/ngoregister'
-import OtpVerification from '../pages/auth/otp'
-import SignUp from '../pages/auth/signup'
-import Briefs from '../pages/briefs'
-import Dashboard from '../pages/Dashboard'
-import DN_Projects from '../pages/donor_ngo_projects'
-import FundsM from '../pages/fundsM'
-import MessageDonor from '../pages/messages'
-import AddPastProject from '../pages/ngo/pastproject/past-projects'
-import NGODetails from '../pages/ngo_details'
-import Ngo from '../pages/ngodirectory'
-import CreateProject from '../pages/project/create-project'
-import ProjectViewDetail from '../pages/project_details'
-import AdminDashboard from '../pages/report/dashboard'
-import SendMoney from '../pages/send'
+import FundWallets from "../pages";
+import Admin_projects from "../pages/admin_projects";
+import ForgotPassword from "../pages/auth/forgotPassword";
+import Login from "../pages/auth/login";
+import Register from "../pages/auth/ngoregister";
+import OtpVerification from "../pages/auth/otp";
+import SignUp from "../pages/auth/signup";
+import Briefs from "../pages/briefs";
+import Dashboard from "../pages/Dashboard";
+import DN_Projects from "../pages/donor_ngo_projects";
+import FundsM from "../pages/fundsM";
+import MessageDonor from "../pages/messages";
+import AddPastProject from "../pages/ngo/pastproject/past-projects";
+import NGODetails from "../pages/ngo_details";
+import Ngo from "../pages/ngodirectory";
+import CreateProject from "../pages/project/create-project";
+import ProjectViewDetail from "../pages/project_details";
+import AdminDashboard from "../pages/report/dashboard";
+import SendMoney from "../pages/send";
 
-var routes = [
+const routes = [
   {
-    path: '/login',
-    name: 'Login',
-    icon: 'ni ni-key-25 text-info',
+    path: "/login",
+    name: "Login",
+    icon: "ni ni-key-25 text-info",
     component: <Login />,
-    layout: '/auth'
+    layout: "/auth",
   },
   {
-    path: '/forgot_password',
-    name: 'ForgotPassword',
-    icon: 'ni ni-key-25 text-info',
+    path: "/forgot_password",
+    name: "ForgotPassword",
+    icon: "ni ni-key-25 text-info",
     component: <ForgotPassword />,
-    layout: '/auth'
+    layout: "/auth",
   },
   {
-    path: '/register',
-    name: 'Register',
-    icon: 'ni ni-key-25 text-info',
+    path: "/register",
+    name: "Register",
+    icon: "ni ni-key-25 text-info",
     component: <Register />,
-    layout: '/auth'
+    layout: "/auth",
   },
   // {
   //   path: '/donor_register',
@@ -48,267 +48,267 @@ var routes = [
   //   layout: '/auth'
   // },
   {
-    path: '/verify',
-    name: 'Verification',
-    icon: 'ni ni-key-25 text-info',
+    path: "/verify",
+    name: "Verification",
+    icon: "ni ni-key-25 text-info",
     component: <OtpVerification />,
-    layout: '/auth'
+    layout: "/auth",
   },
   {
-    path: '/donor',
-    name: 'Signup',
-    icon: 'ni ni-align-center',
+    path: "/donor",
+    name: "Signup",
+    icon: "ni ni-align-center",
     component: <SignUp ngo={null} />,
-    layout: '/signup'
+    layout: "/signup",
   },
   {
-    path: '/organization',
-    name: 'NGO_Signup',
-    icon: 'ni ni-align-center',
+    path: "/organization",
+    name: "NGO_Signup",
+    icon: "ni ni-align-center",
     component: <SignUp ngo={1} />,
-    layout: '/signup'
+    layout: "/signup",
   },
   //Dash
   {
-    path: '/dashboard',
-    name: 'Dashboard',
-    icon: 'ni ni-align-center',
+    path: "/dashboard",
+    name: "Dashboard",
+    icon: "ni ni-align-center",
     component: <Dashboard />,
-    layout: '/donor'
+    layout: "/donor",
   },
-  ,
+
   {
-    path: '/dashboard',
-    name: 'Dashboard',
-    icon: 'ni ni-align-center',
+    path: "/dashboard",
+    name: "Dashboard",
+    icon: "ni ni-align-center",
     component: <Dashboard />,
-    layout: '/ngo'
+    layout: "/ngo",
   },
   {
-    path: '/dashboard',
-    name: 'Dashboard',
-    icon: 'ni ni-align-center',
+    path: "/dashboard",
+    name: "Dashboard",
+    icon: "ni ni-align-center",
     component: <Dashboard />,
-    layout: '/admin'
+    layout: "/admin",
   },
   //ngo_directory
   {
-    path: '/ngo_directory',
-    name: 'NGO Directory',
-    icon: 'ni ni-circle-08',
+    path: "/ngo_directory",
+    name: "NGO Directory",
+    icon: "ni ni-circle-08",
     component: <Ngo />,
-    layout: '/donor'
+    layout: "/donor",
   },
   {
-    path: '/ngo_directory',
-    name: 'NGO Directory',
-    icon: 'ni ni-circle-08',
+    path: "/ngo_directory",
+    name: "NGO Directory",
+    icon: "ni ni-circle-08",
     component: <Ngo />,
-    layout: '/admin'
+    layout: "/admin",
   },
   //viewing one ngo
   {
-    path: '/ngo/:id',
-    icon: 'ni ni-circle-08',
+    path: "/ngo/:id",
+    icon: "ni ni-circle-08",
     component: <NGODetails />,
-    layout: '/donor'
+    layout: "/donor",
   },
   {
-    path: '/ngo/:id',
-    icon: 'ni ni-circle-08',
+    path: "/ngo/:id",
+    icon: "ni ni-circle-08",
     component: <NGODetails />,
-    layout: '/admin'
+    layout: "/admin",
   },
   ////projects
   {
-    path: '/projects',
-    name: 'Projects',
-    icon: 'ni ni-building',
+    path: "/projects",
+    name: "Projects",
+    icon: "ni ni-building",
     component: <DN_Projects />,
-    layout: '/ngo'
+    layout: "/ngo",
   },
   {
-    path: '/projects',
-    name: 'Projects',
-    icon: 'ni ni-building',
+    path: "/projects",
+    name: "Projects",
+    icon: "ni ni-building",
     component: <DN_Projects />,
-    layout: '/donor'
+    layout: "/donor",
   },
   {
-    path: '/projects',
-    name: 'Projects',
-    icon: 'ni ni-building',
+    path: "/projects",
+    name: "Projects",
+    icon: "ni ni-building",
     component: <Admin_projects />,
-    layout: '/admin'
+    layout: "/admin",
   },
   ///projectdetails
   {
-    path: '/project/:id',
-    icon: 'ni ni-circle-08',
+    path: "/project/:id",
+    icon: "ni ni-circle-08",
     component: <ProjectViewDetail />,
-    layout: '/donor'
+    layout: "/donor",
   },
   {
-    path: '/project/:id',
-    icon: 'ni ni-circle-08',
+    path: "/project/:id",
+    icon: "ni ni-circle-08",
     component: <ProjectViewDetail />,
-    layout: '/ngo'
+    layout: "/ngo",
   },
   {
-    path: '/project/:id',
-    icon: 'ni ni-circle-08',
+    path: "/project/:id",
+    icon: "ni ni-circle-08",
     component: <ProjectViewDetail />,
-    layout: '/admin'
+    layout: "/admin",
   },
   ////fund management
   {
-    path: '/fund_management',
-    name: 'FundsManagement',
-    icon: 'ni ni-money-coins',
+    path: "/fund_management",
+    name: "FundsManagement",
+    icon: "ni ni-money-coins",
     component: <FundsM />,
-    layout: '/donor'
+    layout: "/donor",
   },
-  ,
+
   {
-    path: '/fund_management',
-    name: 'FundsManagement',
-    icon: 'ni ni-money-coins',
+    path: "/fund_management",
+    name: "FundsManagement",
+    icon: "ni ni-money-coins",
     component: <FundsM />,
-    layout: '/ngo'
+    layout: "/ngo",
   },
   {
-    path: '/fund_management',
-    name: 'FundsManagement',
-    icon: 'ni ni-money-coins',
+    path: "/fund_management",
+    name: "FundsManagement",
+    icon: "ni ni-money-coins",
     component: <FundsM />,
-    layout: '/admin'
+    layout: "/admin",
   },
   //////donor/briefs
   {
-    path: '/briefs',
-    name: 'Briefs',
-    icon: 'ni ni-archive-2',
+    path: "/briefs",
+    name: "Briefs",
+    icon: "ni ni-archive-2",
     component: <Briefs />,
-    layout: '/donor'
+    layout: "/donor",
   },
-  ,
+
   {
-    path: '/briefs',
-    name: 'Briefs',
-    icon: 'ni ni-archive-2',
+    path: "/briefs",
+    name: "Briefs",
+    icon: "ni ni-archive-2",
     component: <Briefs />,
-    layout: '/ngo'
+    layout: "/ngo",
   },
   /////admin Donor
   {
-    path: '/dashboard',
-    name: 'Donors',
-    icon: 'ni ni-favourite-28',
+    path: "/dashboard",
+    name: "Donors",
+    icon: "ni ni-favourite-28",
     component: <Dashboard />,
-    layout: '/admin'
+    layout: "/admin",
   },
   //////report
   {
-    path: '/report',
-    name: 'Report',
-    icon: 'ni ni-chart-bar-32',
+    path: "/report",
+    name: "Report",
+    icon: "ni ni-chart-bar-32",
     component: <AdminDashboard donor={1} />,
-    layout: '/donor'
+    layout: "/donor",
   },
-  ,
+
   {
-    path: '/report',
-    name: 'Report',
-    icon: 'ni ni-chart-bar-32',
+    path: "/report",
+    name: "Report",
+    icon: "ni ni-chart-bar-32",
     component: <AdminDashboard />,
-    layout: '/admin'
+    layout: "/admin",
   },
   ////messages
   {
-    path: '/messages',
-    name: 'Messages',
-    icon: 'ni ni-send',
+    path: "/messages",
+    name: "Messages",
+    icon: "ni ni-send",
     component: <MessageDonor />,
-    layout: '/donor'
+    layout: "/donor",
   },
-  ,
+
   {
-    path: '/messages',
-    name: 'Messages',
-    icon: 'ni ni-send',
+    path: "/messages",
+    name: "Messages",
+    icon: "ni ni-send",
     component: <MessageDonor />,
-    layout: '/ngo'
+    layout: "/ngo",
   },
   ///////settings
   {
-    path: '/dashboard',
-    name: 'My Profile',
-    icon: 'ni ni-settings-gear-65',
+    path: "/dashboard",
+    name: "My Profile",
+    icon: "ni ni-settings-gear-65",
     component: <Dashboard />,
-    layout: '/donor'
+    layout: "/donor",
   },
-  ,
+
   {
-    path: '/dashboard',
-    name: 'My Profile',
-    icon: 'ni ni-settings-gear-65',
+    path: "/dashboard",
+    name: "My Profile",
+    icon: "ni ni-settings-gear-65",
     component: <Dashboard />,
-    layout: '/ngo'
+    layout: "/ngo",
   },
   {
-    path: '/dashboard',
-    name: 'Settings',
-    icon: 'ni ni-settings-gear-65',
+    path: "/dashboard",
+    name: "Settings",
+    icon: "ni ni-settings-gear-65",
     component: <Dashboard />,
-    layout: '/admin'
+    layout: "/admin",
   },
   ///upload prev project
   {
-    path: '/projects/add_past',
-    icon: 'ni ni-settings-gear-65',
+    path: "/projects/add_past",
+    icon: "ni ni-settings-gear-65",
     component: <AddPastProject />,
-    layout: '/ngo'
+    layout: "/ngo",
   },
 
   /////money
 
   {
-    path: '/fund_wallet',
-    icon: 'ni ni-settings-gear-65',
+    path: "/fund_wallet",
+    icon: "ni ni-settings-gear-65",
     component: <FundWallets />,
-    layout: '/ngo'
+    layout: "/ngo",
   },
   {
-    path: '/send_money',
-    icon: 'ni ni-settings-gear-65',
+    path: "/send_money",
+    icon: "ni ni-settings-gear-65",
     component: <SendMoney />,
-    layout: '/ngo'
+    layout: "/ngo",
   },
   {
-    path: '/fund_wallet',
-    icon: 'ni ni-settings-gear-65',
+    path: "/fund_wallet",
+    icon: "ni ni-settings-gear-65",
     component: <FundWallets />,
-    layout: '/donor'
+    layout: "/donor",
   },
   {
-    path: '/send_money',
-    icon: 'ni ni-settings-gear-65',
+    path: "/send_money",
+    icon: "ni ni-settings-gear-65",
     component: <SendMoney />,
-    layout: '/donor'
+    layout: "/donor",
   },
   //////breif initiate
   {
-    path: '/brief_initiate',
-    icon: 'ni ni-chart-bar-32',
+    path: "/brief_initiate",
+    icon: "ni ni-chart-bar-32",
     component: <CreateProject />,
-    layout: '/admin'
+    layout: "/admin",
   },
   {
-    path: '/brief_initiate',
-    icon: 'ni ni-send',
+    path: "/brief_initiate",
+    icon: "ni ni-send",
     component: <CreateProject />,
-    layout: '/donor'
-  }
-]
+    layout: "/donor",
+  },
+];
 
-export default routes
+export default routes;
