@@ -733,7 +733,7 @@ const Index = () => {
                   color: "black",
                 }}
               >
-                Hear frome people whose lives have been changed through our
+                Hear from people whose lives have been changed through our
                 platform
               </h2>
             </div>

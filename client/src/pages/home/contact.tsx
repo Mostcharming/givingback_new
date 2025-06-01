@@ -352,10 +352,10 @@ const Contact = () => {
                       </div>
                     </div>
                     <div className="col-12">
-                      <div className="form-field">
+                      <div className="col-lg-12 form-field">
                         <button
-                          style={{ width: "40vw" }}
-                          className="mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
+                          style={{ width: "-webkit-fill-available" }}
+                          className=" mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
                           type="submit"
                           disabled={isSubmitting}
                         >
