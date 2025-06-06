@@ -1,13 +1,12 @@
 import React from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Col, Container, NavbarBrand, Row } from "reactstrap";
 import backgroundImage from "../../assets/images/background.jpg";
+import Logo from "../../assets/images/home/GivingBackNG-logo.svg";
 import routes from "../../routes/routes";
 import { useLoadStyles } from "../../services/styles";
-import Logo from "../../assets/images/home/GivingBackNG-logo.svg";
-import { Link } from "react-router-dom";
 
-const Auth = (props: any) => {
+const Auth = () => {
   useLoadStyles(["argon"]);
 
   const mainContent = React.useRef(null);

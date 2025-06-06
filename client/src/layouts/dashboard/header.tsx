@@ -6,12 +6,8 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-  Form,
   FormGroup,
-  Input,
   InputGroup,
-  InputGroupAddon,
-  InputGroupText,
   Media,
   Nav,
   Navbar,
@@ -22,7 +18,7 @@ import useBackendService from "../../services/backend_service";
 import { useContent } from "../../services/useContext";
 import { logout_auth } from "../../store/reducers/authReducer";
 import { RootState } from "../../types";
-import { FaChevronDown, FaSearch } from "react-icons/fa";
+import { FaChevronDown } from "react-icons/fa";
 
 const AdminNavbar: React.FC<any> = (props) => {
   const { currentState } = useContent();

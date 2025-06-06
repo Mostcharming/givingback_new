@@ -7,8 +7,8 @@ import morgan from "morgan";
 import cron from "node-cron";
 import path from "path";
 
-import { fetchRateFromGoogle } from "../utils/rateUtils";
 import routes from "../components/index";
+import { fetchRateFromGoogle } from "../utils/rateUtils";
 
 const app = express();
 app.set("view engine", "pug");
@@ -16,7 +16,7 @@ app.set("views", path.join(__dirname, "views"));
 app.enable("trust proxy");
 
 const whitelist: string[] = [
-  "http://192.168.1.139:5173",
+  "http://192.168.1.181:5173",
   "https://givebackng.org",
   "https://api.givebackng.org",
   "https://www.givebackng.org",

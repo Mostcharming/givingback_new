@@ -2,6 +2,7 @@
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { useEffect, useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -28,7 +29,6 @@ import {
 } from "../../store/reducers/authReducer";
 import { clearCurrentState } from "../../store/reducers/userReducer";
 import { RootState } from "../../types";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
   const dispatch: ThunkDispatch<RootState, unknown, any> = useDispatch();
