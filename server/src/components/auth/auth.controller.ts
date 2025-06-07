@@ -128,6 +128,154 @@ export const logout = (req: Request, res: Response) => {
   });
   res.status(200).json({ status: "success" });
 };
+export const onboard = async (req: Request, res: Response) => {
+  const {
+    selectedOption,
+    email,
+    password,
+    category,
+    country,
+    state,
+    userType,
+    cpassword,
+    name,
+    interest_area,
+    orgemail,
+    orgphone,
+    phone,
+    cac,
+  } = req.body;
+
+  const mail = email.trim();
+  const token = generateOtp(6); // generate token ONCE and reuse
+
+  try {
+    // === Validate required file ===
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        status: "fail",
+        error: `No userimg files uploaded.`,
+      });
+    }
+
+    const filesToProcess = Array.isArray(req.files)
+      ? req.files.filter((file) => file.fieldname === "userimg")
+      : [];
+
+    if (filesToProcess.length === 0) {
+      return res.status(400).json({
+        status: "fail",
+        error: `No userimg files uploaded.`,
+      });
+    }
+
+    // === Create user ===
+    let newUser: Partial<FullUser>;
+    if (selectedOption === "organization") {
+      newUser = {
+        email: mail,
+        password: hash(password.trim()),
+        role: "NGO",
+        active: 1,
+        token,
+      };
+    } else {
+      newUser = {
+        email: mail,
+        password: hash(password.trim()),
+        role: userType === "individual" ? "donor" : "corporate",
+        active: 1,
+        token,
+      };
+    }
+
+    // === Insert user ===
+    const [userRow] = await db("users")
+      .insert(newUser)
+      .returning(["id", "email", "role", "active", "token"]); // Return full row
+
+    const userId = userRow;
+    const user = await db("users").where({ id: userId }).first();
+
+    const additionalData = {
+      subject: "Welcome to the GivingBack Family!",
+      role: "User",
+    };
+
+    // === Insert org or donor ===
+    if (selectedOption === "organization") {
+      const newOrg = {
+        name: name?.trim(),
+        phone: phone?.trim(),
+        interest_area: interest_area?.trim(),
+        cac: cac?.trim(),
+        user_id: userId,
+      };
+
+      const [orgRow] = await db("organizations").insert(newOrg).returning("id");
+
+      const address = {
+        state: state?.trim(),
+        user_id: userId,
+      };
+
+      await db("address").insert(address);
+
+      await new Email({
+        email: mail,
+        url: "",
+        token,
+        additionalData,
+      }).sendEmail("ngoonb", "Welcome to the GivingBack Family!");
+    } else {
+      const additionalFields = {
+        orgemail: orgemail?.trim(),
+        orgphone: orgphone?.trim(),
+      };
+
+      await db("donors").insert({
+        name: name?.trim(),
+        phoneNumber: phone?.trim(),
+        email: mail,
+        interest_area: interest_area?.trim(),
+        state: state?.trim(),
+        user_id: userId,
+        additional_information: JSON.stringify(additionalFields),
+      });
+
+      await new Email({
+        email: mail,
+        url: "",
+        token,
+        additionalData,
+      }).sendEmail("donoronboard", "Welcome to the GivingBack Family!");
+    }
+
+    await new Email({
+      email: "info@givingbackng.org",
+      url: "",
+      token,
+      additionalData,
+    }).sendEmail("adminonb", "New User");
+
+    // === Upload files ===
+    await Promise.all(
+      filesToProcess.map(async (file: any) => {
+        const doc = {
+          filename: file.location,
+          user_id: userId,
+        };
+        await db("userimg").insert(doc);
+      })
+    );
+
+    // === Send final token ===
+    createSendToken(user, 200, req, res);
+  } catch (error) {
+    console.error("Onboard Error:", error);
+    res.status(500).json({ error: "An error occurred while signing up" });
+  }
+};
 
 export const resend = async (
   req: UserRequest,

@@ -3,7 +3,7 @@ import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { HandHeart, Handshake } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Select from "react-select";
 
 import {
@@ -27,11 +27,12 @@ import { RootState } from "../../types";
 
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
+import Loading from "../../components/home/loading";
 import useBackendService from "../../services/backend_service";
-import Util from "../../services/utils";
 import "./index.css";
 
 const Register = () => {
+  const navigate = useNavigate();
   const dispatch: ThunkDispatch<RootState, unknown, any> = useDispatch();
 
   useEffect(() => {
@@ -150,6 +151,28 @@ const Register = () => {
     } else if (step === 2) {
       setStep(3);
     }
+  };
+  const { mutate: submitDonorForm, isLoading } = useBackendService(
+    "/auth/new/onboard",
+    "POST",
+    {
+      onSuccess: () => {
+        toast.success("Form submitted successfully!");
+        navigate("/dashboard");
+      },
+      onError: () => {
+        toast.error("Form submission failed");
+      },
+    }
+  );
+  const submit = () => {
+    const finalFormData = new FormData();
+
+    Object.keys(formData).forEach((key) => {
+      finalFormData.append(key, formData[key]);
+    });
+    finalFormData.append("userimg", file);
+    submitDonorForm(finalFormData);
   };
 
   // const handleBack = () => {
@@ -709,7 +732,7 @@ const Register = () => {
 
                   <div className="text-center">
                     <Button
-                      onClick={handleNext}
+                      onClick={submit}
                       disabled={!formData.name || !formData.interest_area}
                       className="p-3 mt-4"
                       style={{
@@ -934,7 +957,7 @@ const Register = () => {
                         !formData.state ||
                         !formData.phone
                       }
-                      onClick={handleNext}
+                      onClick={submit}
                       className="p-3 mt-4"
                       style={{
                         border: "none",
@@ -1103,11 +1126,15 @@ const Register = () => {
                       const value = e.target.value;
 
                       try {
-                        await Util.checkIfCompanyRegistrationNumberIsValid(
-                          value
-                        );
+                        // await Util.checkIfCompanyRegistrationNumberIsValid(
+                        //   value
+                        // );
 
                         console.log("CAC is valid");
+                        setFormData((prev) => ({
+                          ...prev,
+                          cac: value,
+                        }));
                       } catch (err) {
                         console.log(err);
                         setFormData((prev) => ({
@@ -1143,7 +1170,7 @@ const Register = () => {
               <div className="text-center">
                 <Button
                   disabled={!formData.cac || !formData.name || !formData.state}
-                  onClick={handleNext}
+                  onClick={submit}
                   className="p-3 mt-4"
                   style={{
                     border: "none",
@@ -1179,7 +1206,8 @@ const Register = () => {
   return (
     <div>
       {renderStepIndicator()}
-      {renderCurrentStep()}
+      {isLoading ? <Loading type="inline" /> : <>{renderCurrentStep()}</>}
+
       <CardHeader
         style={{ border: "none" }}
         className="mt-3 bg-transparent pb-3"
