@@ -161,7 +161,7 @@ const Contact = () => {
                               <p
                                 style={{
                                   fontWeight: "400",
-                                  color: "#34A853",
+                                  color: "#02a95c",
                                 }}
                               >
                                 info@givingbackng.org
@@ -194,7 +194,7 @@ const Contact = () => {
                               <p
                                 style={{
                                   fontWeight: "300",
-                                  color: "#34A853",
+                                  color: "#02a95c",
                                 }}
                               >
                                 Muliner Towers, Alfred Rewane Rd. Ikoyi, Lagos{" "}
@@ -233,7 +233,7 @@ const Contact = () => {
                               <p
                                 style={{
                                   fontWeight: "500",
-                                  color: "#34A853",
+                                  color: "#02a95c",
                                 }}
                               >
                                 +234 908 549 4236
@@ -249,7 +249,7 @@ const Contact = () => {
                               <p
                                 style={{
                                   fontWeight: "600",
-                                  color: "#34A853",
+                                  color: "#02a95c",
                                 }}
                               >
                                 Hours
@@ -257,7 +257,7 @@ const Contact = () => {
                               <p
                                 style={{
                                   fontWeight: "500",
-                                  color: "#34A853",
+                                  color: "#02a95c",
                                 }}
                               >
                                 Monday - Saturday
@@ -265,7 +265,7 @@ const Contact = () => {
                               <p
                                 style={{
                                   fontWeight: "500",
-                                  color: "#34A853",
+                                  color: "#02a95c",
                                 }}
                               >
                                 9am - 5pm

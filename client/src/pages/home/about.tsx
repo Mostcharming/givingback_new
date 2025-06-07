@@ -3,18 +3,18 @@ import { useState } from "react";
 import Layout from "../../layouts/home";
 import { useLoadStyles } from "../../services/styles";
 
+import { toast } from "react-toastify";
+import hands from "../../assets/images/home/main_image/hands.png";
+import hands2 from "../../assets/images/home/new/about_hand.png";
+import greenback from "../../assets/images/home/new/greenback.png";
+import hands3 from "../../assets/images/home/new/hand3.png";
 import madamImage from "../../assets/images/home/new/madam.jpeg";
 import mayImage from "../../assets/images/home/new/may.jpeg";
 import mrpelumiImage from "../../assets/images/home/new/mrpelumi.png";
 import mrsamImage from "../../assets/images/home/new/mrsam.png";
 import pastorImage from "../../assets/images/home/new/pastor.png";
 import pelumi from "../../assets/images/home/new/pelumi.jpeg";
-import { toast } from "react-toastify";
-import hands from "../../assets/images/home/main_image/hands.png";
-import hands2 from "../../assets/images/home/new/about_hand.png";
-import hands3 from "../../assets/images/home/new/hand3.png";
 import smile1 from "../../assets/images/home/new/smile1.png";
-import greenback from "../../assets/images/home/new/greenback.png";
 
 const About = () => {
   const [email, setEmail] = useState("");
@@ -298,7 +298,7 @@ When she’s not deep in Figma or sketching out new concepts, you’ll probably 
             >
               Donors often struggle to assess impact due to unclear reports,
               affecting beneficiaries' support. At{" "}
-              <span style={{ color: "#34A853" }}>GivingBack</span>, we solve
+              <span style={{ color: "#02a95c" }}>GivingBack</span>, we solve
               this by leveraging technology to enable real-time collaboration
               among charity project stakeholders.
             </h6>
@@ -319,7 +319,7 @@ When she’s not deep in Figma or sketching out new concepts, you’ll probably 
               style={{
                 fontSize: "20px",
                 fontStyle: "italic",
-                color: "#34A853",
+                color: "#02a95c",
                 textDecoration: "underline",
               }}
             >
@@ -350,7 +350,7 @@ When she’s not deep in Figma or sketching out new concepts, you’ll probably 
               style={{
                 fontSize: "20px",
                 fontStyle: "italic",
-                color: "#34A853",
+                color: "#02a95c",
                 textDecoration: "underline",
               }}
             >

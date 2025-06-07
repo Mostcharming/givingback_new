@@ -1,6 +1,6 @@
 .accordion-button {
   background-color: #f8f9fa;
-  color: #34a853;
+  color: #02a95c;
   border: none;
   width: 100%;
   text-align: left;
@@ -12,7 +12,7 @@
 
 .accordion-button.active {
   /* border-radius: 9px; */
-  background-color: #34a853;
+  background-color: #02a95c;
   color: white;
 }
 

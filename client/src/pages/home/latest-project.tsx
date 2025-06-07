@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-toastify";
+import p3 from "../../assets/images/home/main_image/3.png";
+import p4 from "../../assets/images/home/main_image/4.png";
 import Loading from "../../components/home/loading";
 import Layout from "../../layouts/home";
 import useBackendService from "../../services/backend_service";
 import { useLoadStyles } from "../../services/styles";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import p3 from "../../assets/images/home/main_image/3.png";
-import p4 from "../../assets/images/home/main_image/4.png";
 
 const LatestProject = () => {
   useLoadStyles(["givingback"]);
@@ -99,7 +99,7 @@ const LatestProject = () => {
       >
         <div
           style={{
-            background: "#34A853db",
+            background: "#02a95cdb",
             backgroundImage: `url(${p4})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -125,14 +125,14 @@ const LatestProject = () => {
                 <circle cx="25" cy="25" r="25" fill="white" />
                 <path
                   d="M19 27L20.45 24.1C20.617 23.7687 20.8728 23.4903 21.1889 23.296C21.505 23.1018 21.869 22.9993 22.24 23H33M33 23C33.3055 22.9995 33.6071 23.0689 33.8816 23.2031C34.1561 23.3372 34.3963 23.5325 34.5836 23.7739C34.7709 24.0152 34.9004 24.2963 34.9622 24.5956C35.024 24.8948 35.0164 25.2042 34.94 25.5L33.39 31.5C33.279 31.9299 33.0281 32.3106 32.6769 32.5822C32.3256 32.8538 31.894 33.0008 31.45 33H17C16.4696 33 15.9609 32.7893 15.5858 32.4142C15.2107 32.0391 15 31.5304 15 31V18C15 16.9 15.9 16 17 16H20.93C21.2594 16.0017 21.5833 16.0848 21.8729 16.2418C22.1625 16.3988 22.4088 16.6249 22.59 16.9L23.41 18.1C23.5912 18.3751 23.8375 18.6012 24.1271 18.7582C24.4167 18.9152 24.7406 18.9983 25.07 19H31C31.5304 19 32.0391 19.2107 32.4142 19.5858C32.7893 19.9609 33 20.4696 33 21V23Z"
-                  stroke="#34A853"
+                  stroke="#02a95c"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 />
                 <path
                   d="M27 29C27.5523 29 28 28.5523 28 28C28 27.4477 27.5523 27 27 27C26.4477 27 26 27.4477 26 28C26 28.5523 26.4477 29 27 29Z"
-                  stroke="#34A853"
+                  stroke="#02a95c"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -236,7 +236,7 @@ const LatestProject = () => {
                           role="progressbar"
                           style={{
                             width: `${progressPercent}%`,
-                            backgroundColor: "#34A853",
+                            backgroundColor: "#02a95c",
                             height: "100%",
                             borderRadius: "5px",
                             transition: "width 0.3s ease-in-out",
@@ -252,7 +252,7 @@ const LatestProject = () => {
                         <strong>{formatter.format(cost)}</strong>
                         <a
                           href="/auth/register"
-                          style={{ color: "#34A853", fontWeight: "600" }}
+                          style={{ color: "#02a95c", fontWeight: "600" }}
                         >
                           Donate Now
                           <span style={{ fontSize: "1rem", marginLeft: "2px" }}>

@@ -4,19 +4,19 @@ import { useEffect, useState } from "react";
 import main8 from "../../assets/images/home/main_image/1.png";
 import p3 from "../../assets/images/home/main_image/3.png";
 import p4 from "../../assets/images/home/main_image/4.png";
+import hands from "../../assets/images/home/main_image/hands.png";
+import Rectangle from "../../assets/images/home/main_image/Rectangle.png";
 import v4 from "../../assets/images/home/main_image/Vector.png";
 import v1 from "../../assets/images/home/main_image/Vector1.png";
 import v2 from "../../assets/images/home/main_image/Vector2.png";
 import v3 from "../../assets/images/home/main_image/Vector3.png";
-import hands from "../../assets/images/home/main_image/hands.png";
-import Rectangle from "../../assets/images/home/main_image/Rectangle.png";
 
-import Layout from "../../layouts/home";
-import useBackendService from "../../services/backend_service";
-import { useLoadStyles } from "../../services/styles";
 import { Image } from "react-bootstrap";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-toastify";
+import Layout from "../../layouts/home";
+import useBackendService from "../../services/backend_service";
+import { useLoadStyles } from "../../services/styles";
 import FAQAccordion from "./faq/faq";
 const Index = () => {
   useLoadStyles(["givingback"]);
@@ -62,7 +62,7 @@ const Index = () => {
                   textAlign: "center",
                   fontWeight: "700",
                   fontSize: "40px",
-                  color: "#34A853",
+                  color: "#02a95c",
                 }}
               >
                 Make Every Donation Count, Support Life-Changing Projects And
@@ -97,7 +97,7 @@ const Index = () => {
                 <a
                   href="/auth/register"
                   className="mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
-                  style={{ backgroundColor: "#F3FAF5", color: "#34A853" }}
+                  style={{ backgroundColor: "#F3FAF5", color: "#02a95c" }}
                 >
                   Create Project
                 </a>
@@ -111,7 +111,7 @@ const Index = () => {
                 <a
                   href="/auth/register"
                   className="ml-4 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
-                  style={{ backgroundColor: "#F3FAF5", color: "#34A853" }}
+                  style={{ backgroundColor: "#F3FAF5", color: "#02a95c" }}
                 >
                   Join as an Organization
                 </a>
@@ -208,7 +208,7 @@ const Index = () => {
                                 <p
                                   style={{
                                     fontWeight: "600",
-                                    color: "#34A853",
+                                    color: "#02a95c",
                                   }}
                                 >
                                   5,000+
@@ -241,7 +241,7 @@ const Index = () => {
                                 <p
                                   style={{
                                     fontWeight: "600",
-                                    color: "#34A853",
+                                    color: "#02a95c",
                                   }}
                                 >
                                   120,000,000+
@@ -280,7 +280,7 @@ const Index = () => {
                                 <p
                                   style={{
                                     fontWeight: "600",
-                                    color: "#34A853",
+                                    color: "#02a95c",
                                   }}
                                 >
                                   1,000+
@@ -312,7 +312,7 @@ const Index = () => {
                                 <p
                                   style={{
                                     fontWeight: "600",
-                                    color: "#34A853",
+                                    color: "#02a95c",
                                   }}
                                 >
                                   10+
@@ -675,7 +675,7 @@ const Index = () => {
                           role="progressbar"
                           style={{
                             width: `${progressPercent}%`,
-                            backgroundColor: "#34A853",
+                            backgroundColor: "#02a95c",
                             height: "100%",
                             borderRadius: "5px",
                             transition: "width 0.3s ease-in-out",
@@ -691,7 +691,7 @@ const Index = () => {
                         <strong>{formatter.format(cost)}</strong>
                         <a
                           href="/auth/register"
-                          style={{ color: "#34A853", fontWeight: "600" }}
+                          style={{ color: "#02a95c", fontWeight: "600" }}
                         >
                           Donate Now
                           <span style={{ fontSize: "1rem", marginLeft: "2px" }}>

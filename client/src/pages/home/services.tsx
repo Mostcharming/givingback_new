@@ -1,15 +1,15 @@
 import Layout from "../../layouts/home";
 import { useLoadStyles } from "../../services/styles";
 
+import { useState } from "react";
+import { toast } from "react-toastify";
+import hands from "../../assets/images/home/main_image/hands.png";
 import one from "../../assets/images/home/new/1.png";
 import two from "../../assets/images/home/new/2.png";
 import three from "../../assets/images/home/new/3.png";
 import four from "../../assets/images/home/new/4.png";
 import five from "../../assets/images/home/new/5.png";
 import six from "../../assets/images/home/new/6.png";
-import { useState } from "react";
-import { toast } from "react-toastify";
-import hands from "../../assets/images/home/main_image/hands.png";
 
 const features = [
   {
@@ -146,7 +146,7 @@ const Services = () => {
                   >
                     <img src={feature.icon} />
                   </div>
-                  <div style={{ color: "#34A853" }} className="m-3">
+                  <div style={{ color: "#02a95c" }} className="m-3">
                     {feature.number}
                   </div>
                   <div className="name-box w-100">

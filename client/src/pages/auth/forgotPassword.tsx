@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
@@ -12,7 +13,6 @@ import {
   Row,
 } from "reactstrap";
 import useBackendService from "../../services/backend_service";
-import { useState } from "react";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -75,7 +75,7 @@ const ForgotPassword = () => {
                 style={{
                   border: "none",
                   color: isFormValid ? "white" : "black",
-                  background: isFormValid ? "#34A853" : "#EEEEEE",
+                  background: isFormValid ? "#02a95c" : "#EEEEEE",
                   width: "-webkit-fill-available",
                 }}
                 type="submit"
@@ -89,10 +89,10 @@ const ForgotPassword = () => {
         <CardHeader style={{ border: "none" }} className="bg-transparent pb-3">
           <div className="btn-wrapper text-center">
             <span className="btn-inner--text">
-              <Link to="/auth/login" style={{ color: "#34A853" }}>
+              <Link to="/auth/login" style={{ color: "#02a95c" }}>
                 Go back
               </Link>
-              {/* <span style={{ color: "#34A853" }}> Sign Up</span> */}
+              {/* <span style={{ color: "#02a95c" }}> Sign Up</span> */}
             </span>
           </div>
         </CardHeader>

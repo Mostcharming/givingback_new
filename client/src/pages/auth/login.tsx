@@ -152,7 +152,7 @@ const Login = () => {
               </InputGroup>
             </FormGroup>
             <a href="/auth/forgot_password" className="">
-              <span style={{ color: "#34A853" }} className="">
+              <span style={{ color: "#02a95c" }} className="">
                 Forgot password?
               </span>
             </a>
@@ -162,7 +162,7 @@ const Login = () => {
                 style={{
                   border: "none",
                   color: isFormValid ? "white" : "black",
-                  background: isFormValid ? "#34A853" : "#EEEEEE",
+                  background: isFormValid ? "#02a95c" : "#EEEEEE",
                   width: "-webkit-fill-available",
                 }}
                 type="submit"
@@ -204,10 +204,10 @@ const Login = () => {
           <div className="btn-wrapper text-center">
             <span className="btn-inner--text">
               Don't have an account?{" "}
-              <Link to="/auth/register" style={{ color: "#34A853" }}>
+              <Link to="/auth/register" style={{ color: "#02a95c" }}>
                 Sign Up
               </Link>
-              {/* <span style={{ color: "#34A853" }}> Sign Up</span> */}
+              {/* <span style={{ color: "#02a95c" }}> Sign Up</span> */}
             </span>
           </div>
         </CardHeader>

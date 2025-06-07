@@ -29,11 +29,11 @@ const Register = () => {
     }
   };
 
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
-  };
+  // const handleBack = () => {
+  //   if (step > 1) {
+  //     setStep(step - 1);
+  //   }
+  // };
 
   const renderStepIndicator = () => (
     <Row>
@@ -127,38 +127,129 @@ const Register = () => {
 
   const renderStepTwo = () => (
     <>
-      <Row className="justify-content-center">
-        <h5 style={{ color: "black" }}>
-          {selectedOption === "donor"
-            ? "Donor Registration Form"
-            : "Organization Registration Form"}
-        </h5>
-      </Row>
-      {/* Example form content */}
-      <Row className="justify-content-center">
-        <p>Step 2 form for: {selectedOption}</p>
-      </Row>
-
-      <div className="d-flex justify-content-between mt-5">
-        <Button onClick={handleBack}>Back</Button>
-        <Button onClick={handleNext}>Continue</Button>
-      </div>
+      {selectedOption === "donor" ? (
+        <>
+          {" "}
+          <Row className="justify-content-center">
+            <h5 style={{ color: "black" }}>
+              {selectedOption === "donor"
+                ? "Donor Registration Form"
+                : "Organization Registration Form"}
+            </h5>
+          </Row>
+          <Row className="justify-content-center">
+            <p>Step 2 form for: {selectedOption}</p>
+          </Row>
+          <div className="text-center">
+            <Button
+              onClick={handleNext}
+              className="p-3 mt-4"
+              style={{
+                border: "none",
+                color: "white",
+                background: "#02a95c",
+                width: "-webkit-fill-available",
+              }}
+              type="submit"
+            >
+              Continue
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          {" "}
+          <Row className="justify-content-center">
+            <h5 style={{ color: "black" }}>
+              {selectedOption === "donor"
+                ? "Donor Registration Form"
+                : "Organization Registration Form"}
+            </h5>
+          </Row>
+          <Row className="justify-content-center">
+            <p>Step 2 form for: {selectedOption}</p>
+          </Row>
+          <div className="text-center">
+            <Button
+              onClick={handleNext}
+              className="p-3 mt-4"
+              style={{
+                border: "none",
+                color: "white",
+                background: "#02a95c",
+                width: "-webkit-fill-available",
+              }}
+              type="submit"
+            >
+              Continue
+            </Button>
+          </div>
+        </>
+      )}
     </>
   );
 
   const renderStepThree = () => (
     <>
-      <Row className="justify-content-center">
-        <h5 style={{ color: "black" }}>Final Step - Confirmation</h5>
-      </Row>
-      <Row className="justify-content-center">
-        <p>You have chosen: {selectedOption}</p>
-      </Row>
-
-      <div className="d-flex justify-content-between mt-5">
-        <Button onClick={handleBack}>Back</Button>
-        <Button type="submit">Submit</Button>
-      </div>
+      {selectedOption === "donor" ? (
+        <>
+          {" "}
+          <Row className="justify-content-center">
+            <h5 style={{ color: "black" }}>
+              {selectedOption === "donor"
+                ? "Donor Registration Form"
+                : "Organization Registration Form"}
+            </h5>
+          </Row>
+          <Row className="justify-content-center">
+            <p>Step 2 form for: {selectedOption}</p>
+          </Row>
+          <div className="text-center">
+            <Button
+              onClick={handleNext}
+              className="p-3 mt-4"
+              style={{
+                border: "none",
+                color: "white",
+                background: "#02a95c",
+                width: "-webkit-fill-available",
+              }}
+              type="submit"
+            >
+              Continue
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          {" "}
+          <Row className="justify-content-center">
+            <h5 style={{ color: "black" }}>
+              {selectedOption === "donor"
+                ? "Donor Registration Form"
+                : "Organization Registration Form"}
+            </h5>
+          </Row>
+          <Row className="justify-content-center">
+            <p>Step 2 form for: {selectedOption}</p>
+          </Row>
+          <div className="text-center">
+            <Button
+              onClick={handleNext}
+              className="p-3 mt-4"
+              style={{
+                border: "none",
+                color: "white",
+                background: "#02a95c",
+                width: "-webkit-fill-available",
+              }}
+              type="submit"
+            >
+              Continue
+            </Button>
+          </div>
+        </>
+      )}
     </>
   );
 
@@ -186,7 +277,7 @@ const Register = () => {
         <div className="btn-wrapper text-center">
           <span className="btn-inner--text">
             Already have an account?{" "}
-            <Link to="/auth/login" style={{ color: "#34A853" }}>
+            <Link to="/auth/login" style={{ color: "#02a95c" }}>
               Sign In
             </Link>
           </span>

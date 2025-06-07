@@ -76,6 +76,7 @@ jobs:
           script: |
             git add .
             git commit -m "hi" || echo "Nothing to commit"
+            git reset --hard HEAD
             git pull origin main
 
       - name: Deploy Frontend Build to Web Server
