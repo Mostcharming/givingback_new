@@ -28,6 +28,7 @@ import { RootState } from "../../types";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import useBackendService from "../../services/backend_service";
+import Util from "../../services/utils";
 import "./index.css";
 
 const Register = () => {
@@ -1098,9 +1099,28 @@ const Register = () => {
                         cac: e.target.value,
                       }))
                     }
+                    onBlur={async (e) => {
+                      const value = e.target.value;
+
+                      try {
+                        await Util.checkIfCompanyRegistrationNumberIsValid(
+                          value
+                        );
+
+                        console.log("CAC is valid");
+                      } catch (err) {
+                        console.log(err);
+                        setFormData((prev) => ({
+                          ...prev,
+                          cac: "",
+                        }));
+                        toast.error("Invalid CAC. Validation not successful");
+                      }
+                    }}
                   />
                 </InputGroup>
-              </FormGroup>{" "}
+              </FormGroup>
+
               <FormGroup className="mb-3">
                 <InputGroup className="input-group-alternative">
                   <Input
@@ -1122,6 +1142,7 @@ const Register = () => {
               </FormGroup>
               <div className="text-center">
                 <Button
+                  disabled={!formData.cac || !formData.name || !formData.state}
                   onClick={handleNext}
                   className="p-3 mt-4"
                   style={{
