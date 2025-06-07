@@ -26,6 +26,7 @@ import { clearCurrentState } from "../../store/reducers/userReducer";
 import { RootState } from "../../types";
 
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { toast } from "react-toastify";
 import useBackendService from "../../services/backend_service";
 import "./index.css";
 
@@ -38,21 +39,70 @@ const Register = () => {
     getAreas({});
   }, []);
 
-  const [selectedOption, setSelectedOption] = useState<string | null>("donor");
+  const [formData, setFormData] = useState({
+    selectedOption: "",
+    email: "",
+    password: "",
+    category: "",
+    country: "",
+    state: "",
+    userType: "",
+    cpassword: "",
+    name: "",
+    interest_area: "",
+    orgemail: "",
+    orgphone: "",
+    phone: "",
+    cac: "",
+  });
+  const [file, setFile] = useState(null);
+
   const [step, setStep] = useState(1);
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState("select");
-
-  // Determine if both fields are filled
-  const isFormValid = email.trim() !== "" && password.trim() !== "";
 
   const provider = new GoogleAuthProvider();
   const auth = getAuth(firebaseApp);
   const [showPassword, setShowPassword] = useState(false);
   const [areas, setAreas] = useState([]);
-  const [category, setCategory] = useState<string>();
+
+  const nigerianStates = [
+    "Abia",
+    "Adamawa",
+    "Akwa Ibom",
+    "Anambra",
+    "Bauchi",
+    "Bayelsa",
+    "Benue",
+    "Borno",
+    "Cross River",
+    "Delta",
+    "Ebonyi",
+    "Edo",
+    "Ekiti",
+    "Enugu",
+    "FCT - Abuja",
+    "Gombe",
+    "Imo",
+    "Jigawa",
+    "Kaduna",
+    "Kano",
+    "Katsina",
+    "Kebbi",
+    "Kogi",
+    "Kwara",
+    "Lagos",
+    "Nasarawa",
+    "Niger",
+    "Ogun",
+    "Ondo",
+    "Osun",
+    "Oyo",
+    "Plateau",
+    "Rivers",
+    "Sokoto",
+    "Taraba",
+    "Yobe",
+    "Zamfara",
+  ];
 
   const { mutate: getAreas } = useBackendService("/areas", "GET", {
     onSuccess: (res2: any) => {
@@ -62,16 +112,31 @@ const Register = () => {
   });
   const onThematicAreaChange = (event: { value: string; label: string }[]) => {
     const interest_area = event.map((item) => item.value).join(",");
-    setCategory(interest_area);
+
+    setFormData((prev) => ({
+      ...prev,
+      interest_area: interest_area,
+    }));
   };
 
   const withGoogle = () => {
     signInWithPopup(auth, provider)
       .then(async (result) => {
-        const email = result.user.email!;
-        const password = "";
-        const uuid = "giveback";
-        // login({ email, password, uuid });
+        setFormData((prev) => ({
+          ...prev,
+          email: result.user.email!,
+          password: "",
+          uuid: "giveback",
+        }));
+        if (formData.selectedOption === "donor") {
+          if (formData.userType) {
+            setStep(3);
+          } else {
+            toast.error("Please select user type");
+          }
+        } else {
+          setStep(3);
+        }
       })
       .catch((error) => {
         console.error(error);
@@ -79,8 +144,7 @@ const Register = () => {
   };
 
   const handleNext = () => {
-    // Only allow next if step 1 and option selected
-    if (step === 1 && selectedOption) {
+    if (step === 1 && formData.selectedOption) {
       setStep(2);
     } else if (step === 2) {
       setStep(3);
@@ -128,9 +192,14 @@ const Register = () => {
         <Col md={6} className="mb-3 mb-md-0">
           <Card
             className={`option-card ${
-              selectedOption === "donor" ? "active" : ""
+              formData.selectedOption === "donor" ? "active" : ""
             }`}
-            onClick={() => setSelectedOption("donor")}
+            onClick={() =>
+              setFormData((prev) => ({
+                ...prev,
+                selectedOption: "donor",
+              }))
+            }
           >
             <CardBody>
               <div className="icon-container mb-3">
@@ -147,9 +216,14 @@ const Register = () => {
         <Col md={6}>
           <Card
             className={`option-card ${
-              selectedOption === "organization" ? "active" : ""
+              formData.selectedOption === "organization" ? "active" : ""
             }`}
-            onClick={() => setSelectedOption("organization")}
+            onClick={() =>
+              setFormData((prev) => ({
+                ...prev,
+                selectedOption: "organization",
+              }))
+            }
           >
             <CardBody>
               <div className="icon-container mb-3">
@@ -170,11 +244,11 @@ const Register = () => {
           style={{
             border: "none",
             width: "-webkit-fill-available",
-            background: selectedOption ? "#02a95c" : "#EEEEEE",
-            color: selectedOption ? "white" : "black",
+            background: formData.selectedOption ? "#02a95c" : "#EEEEEE",
+            color: formData.selectedOption ? "white" : "black",
           }}
           type="button"
-          disabled={!selectedOption}
+          disabled={!formData.selectedOption}
           onClick={handleNext}
         >
           Continue
@@ -185,7 +259,7 @@ const Register = () => {
 
   const renderStepTwo = () => (
     <>
-      {selectedOption === "donor" ? (
+      {formData.selectedOption === "donor" ? (
         <>
           <Row className="justify-content-center">
             <h5 style={{ color: "black" }}>
@@ -204,10 +278,15 @@ const Register = () => {
                     className="form-control p-3"
                     name="userType"
                     required
-                    value={userType}
-                    onChange={(e) => setUserType(e.target.value)}
+                    value={formData.userType}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        userType: e.target.value,
+                      }))
+                    }
                   >
-                    <option value="select" disabled>
+                    <option value="" disabled>
                       Please select user type
                     </option>
                     <option value="individual">
@@ -229,10 +308,14 @@ const Register = () => {
                     placeholder="Email"
                     type="email"
                     name="email"
-                    autoComplete="new-email"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
                   />
                 </InputGroup>
               </FormGroup>
@@ -246,8 +329,13 @@ const Register = () => {
                     name="password"
                     autoComplete="new-password"
                     required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        password: e.target.value,
+                      }))
+                    }
                   />
                   <InputGroupAddon addonType="append">
                     <InputGroupText
@@ -270,11 +358,16 @@ const Register = () => {
                     className="p-3"
                     placeholder="Confirm Password"
                     type={showPassword ? "text" : "password"}
-                    name="password"
+                    name="cpassword"
                     autoComplete="new-password"
                     required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={formData.cpassword}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        cpassword: e.target.value,
+                      }))
+                    }
                   />
                   <InputGroupAddon addonType="append">
                     <InputGroupText
@@ -294,10 +387,13 @@ const Register = () => {
                 <Button
                   onClick={handleNext}
                   className="p-3 mt-4"
+                  disabled={
+                    !formData.userType || !formData.email || !formData.password
+                  }
                   style={{
                     border: "none",
-                    color: isFormValid ? "white" : "black",
-                    background: isFormValid ? "#02a95c" : "#EEEEEE",
+                    color: formData.userType ? "white" : "black",
+                    background: formData.userType ? "#02a95c" : "#EEEEEE",
                     width: "-webkit-fill-available",
                   }}
                   // type="submit"
@@ -360,8 +456,13 @@ const Register = () => {
                     name="email"
                     autoComplete="new-email"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
                   />
                 </InputGroup>
               </FormGroup>
@@ -375,8 +476,13 @@ const Register = () => {
                     name="password"
                     autoComplete="new-password"
                     required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        password: e.target.value,
+                      }))
+                    }
                   />
                   <InputGroupAddon addonType="append">
                     <InputGroupText
@@ -399,11 +505,16 @@ const Register = () => {
                     className="p-3"
                     placeholder="Confirm Password"
                     type={showPassword ? "text" : "password"}
-                    name="password"
+                    name="cpassword"
                     autoComplete="new-password"
                     required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={formData.cpassword}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        cpassword: e.target.value,
+                      }))
+                    }
                   />
                   <InputGroupAddon addonType="append">
                     <InputGroupText
@@ -421,12 +532,13 @@ const Register = () => {
               </FormGroup>
               <div className="text-center">
                 <Button
+                  disabled={!formData.email || !formData.password}
                   onClick={handleNext}
                   className="p-3 mt-4"
                   style={{
                     border: "none",
-                    color: isFormValid ? "white" : "black",
-                    background: isFormValid ? "#02a95c" : "#EEEEEE",
+                    color: "white",
+                    background: "#02a95c",
                     width: "-webkit-fill-available",
                   }}
                   // type="submit"
@@ -473,9 +585,9 @@ const Register = () => {
 
   const renderStepThree = () => (
     <>
-      {selectedOption === "donor" ? (
+      {formData.selectedOption === "donor" ? (
         <>
-          {userType === "individual" ? (
+          {formData.userType === "individual" ? (
             <>
               <Row className="justify-content-center">
                 <h5 style={{ color: "black" }}>Basic information</h5>
@@ -532,7 +644,7 @@ const Register = () => {
                         style={{
                           display: "none",
                         }}
-                        // onChange={(e) => setFile(e.target.files[0])}
+                        onChange={(e) => setFile(e.target.files[0])}
                       />
                     </div>
                   </FormGroup>
@@ -544,11 +656,15 @@ const Register = () => {
                         className="p-3"
                         placeholder="Full name"
                         type="text"
-                        name="email"
-                        autoComplete="new-email"
+                        name="name"
                         required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
                       />
                     </InputGroup>
                   </FormGroup>
@@ -593,11 +709,12 @@ const Register = () => {
                   <div className="text-center">
                     <Button
                       onClick={handleNext}
+                      disabled={!formData.name || !formData.interest_area}
                       className="p-3 mt-4"
                       style={{
                         border: "none",
-                        color: isFormValid ? "white" : "black",
-                        background: isFormValid ? "#02a95c" : "#EEEEEE",
+                        color: "white",
+                        background: "#02a95c",
                         width: "-webkit-fill-available",
                       }}
                       // type="submit"
@@ -658,10 +775,14 @@ const Register = () => {
                         placeholder="Organization name"
                         type="text"
                         name="name"
-                        autoComplete="new-email"
                         required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
                       />
                     </InputGroup>
                   </FormGroup>
@@ -672,11 +793,16 @@ const Register = () => {
                         className="p-3"
                         placeholder="Organization email"
                         type="text"
-                        name="name"
+                        name="orgemail"
                         autoComplete="new-email"
                         required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={formData.orgemail}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            orgemail: e.target.value,
+                          }))
+                        }
                       />
                     </InputGroup>
                   </FormGroup>
@@ -687,19 +813,15 @@ const Register = () => {
                         className="form-control p-3"
                         name="country"
                         required
-                        value={userType}
-                        onChange={(e) => setUserType(e.target.value)}
+                        value={formData.country}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            country: e.target.value,
+                          }))
+                        }
                       >
-                        <option value="" disabled>
-                          Country
-                        </option>
-                        <option value="individual">
-                          Individual donor (personal giving)
-                        </option>
-                        <option value="corporate">
-                          Corporate donor (representing a business or an
-                          organization)
-                        </option>
+                        <option value="Nigeria">Nigeria</option>
                       </select>
                     </InputGroup>
                   </FormGroup>
@@ -708,21 +830,24 @@ const Register = () => {
                       <select
                         style={{ backgroundColor: "#F2F2F2", height: "100%" }}
                         className="form-control p-3"
-                        name="country"
+                        name="state"
                         required
-                        value={userType}
-                        onChange={(e) => setUserType(e.target.value)}
+                        value={formData.state}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            state: e.target.value,
+                          }))
+                        }
                       >
                         <option value="" disabled>
-                          State
+                          Select State
                         </option>
-                        <option value="individual">
-                          Individual donor (personal giving)
-                        </option>
-                        <option value="corporate">
-                          Corporate donor (representing a business or an
-                          organization)
-                        </option>
+                        {nigerianStates.map((nigerianState) => (
+                          <option key={nigerianState} value={nigerianState}>
+                            {nigerianState}
+                          </option>
+                        ))}
                       </select>
                     </InputGroup>
                   </FormGroup>
@@ -769,11 +894,15 @@ const Register = () => {
                         className="p-3"
                         placeholder="Organization registration number (optional)"
                         type="text"
-                        name="name"
-                        autoComplete="new-email"
+                        name="orgphone"
                         required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={formData.orgphone}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            orgphone: e.target.value,
+                          }))
+                        }
                       />
                     </InputGroup>
                   </FormGroup>{" "}
@@ -784,22 +913,32 @@ const Register = () => {
                         className="p-3"
                         placeholder="Phone number"
                         type="text"
-                        name="name"
-                        autoComplete="new-email"
+                        name="phone"
                         required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={formData.phone}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            phone: e.target.value,
+                          }))
+                        }
                       />
                     </InputGroup>
                   </FormGroup>
                   <div className="text-center">
                     <Button
+                      disabled={
+                        !formData.orgemail ||
+                        !formData.name ||
+                        !formData.state ||
+                        !formData.phone
+                      }
                       onClick={handleNext}
                       className="p-3 mt-4"
                       style={{
                         border: "none",
-                        color: isFormValid ? "white" : "black",
-                        background: isFormValid ? "#02a95c" : "#EEEEEE",
+                        color: "white",
+                        background: "#02a95c",
                         width: "-webkit-fill-available",
                       }}
                       // type="submit"
@@ -832,10 +971,14 @@ const Register = () => {
                     placeholder="Organization name"
                     type="text"
                     name="name"
-                    autoComplete="new-email"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
                   />
                 </InputGroup>
               </FormGroup>
@@ -846,11 +989,15 @@ const Register = () => {
                     className="p-3"
                     placeholder="Organization email"
                     type="text"
-                    name="name"
-                    autoComplete="new-email"
+                    name="orgemail"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formData.orgemail}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        orgemail: e.target.value,
+                      }))
+                    }
                   />
                 </InputGroup>
               </FormGroup>
@@ -861,19 +1008,15 @@ const Register = () => {
                     className="form-control p-3"
                     name="country"
                     required
-                    value={userType}
-                    onChange={(e) => setUserType(e.target.value)}
+                    value={formData.country}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        country: e.target.value,
+                      }))
+                    }
                   >
-                    <option value="" disabled>
-                      Country
-                    </option>
-                    <option value="individual">
-                      Individual donor (personal giving)
-                    </option>
-                    <option value="corporate">
-                      Corporate donor (representing a business or an
-                      organization)
-                    </option>
+                    <option value="Nigeria">Nigeria</option>
                   </select>
                 </InputGroup>
               </FormGroup>
@@ -882,21 +1025,24 @@ const Register = () => {
                   <select
                     style={{ backgroundColor: "#F2F2F2", height: "100%" }}
                     className="form-control p-3"
-                    name="country"
+                    name="state"
                     required
-                    value={userType}
-                    onChange={(e) => setUserType(e.target.value)}
+                    value={formData.state}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        state: e.target.value,
+                      }))
+                    }
                   >
                     <option value="" disabled>
-                      State
+                      Select State
                     </option>
-                    <option value="individual">
-                      Individual donor (personal giving)
-                    </option>
-                    <option value="corporate">
-                      Corporate donor (representing a business or an
-                      organization)
-                    </option>
+                    {nigerianStates.map((nigerianState) => (
+                      <option key={nigerianState} value={nigerianState}>
+                        {nigerianState}
+                      </option>
+                    ))}
                   </select>
                 </InputGroup>
               </FormGroup>
@@ -943,11 +1089,15 @@ const Register = () => {
                     className="p-3"
                     placeholder="Organization registration number (CAC)"
                     type="text"
-                    name="name"
-                    autoComplete="new-email"
+                    name="cac"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formData.cac}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        cac: e.target.value,
+                      }))
+                    }
                   />
                 </InputGroup>
               </FormGroup>{" "}
@@ -958,11 +1108,15 @@ const Register = () => {
                     className="p-3"
                     placeholder="Phone number"
                     type="text"
-                    name="name"
-                    autoComplete="new-email"
+                    name="phone"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        phone: e.target.value,
+                      }))
+                    }
                   />
                 </InputGroup>
               </FormGroup>
@@ -972,8 +1126,8 @@ const Register = () => {
                   className="p-3 mt-4"
                   style={{
                     border: "none",
-                    color: isFormValid ? "white" : "black",
-                    background: isFormValid ? "#02a95c" : "#EEEEEE",
+                    color: "white",
+                    background: "#02a95c",
                     width: "-webkit-fill-available",
                   }}
                   // type="submit"
