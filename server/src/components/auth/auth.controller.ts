@@ -427,6 +427,7 @@ export const forgotPassword = async (
 ): Promise<void> => {
   const { email } = req.body;
   const token = generateOtp(9);
+  const encodedToken = Buffer.from(token.toString()).toString("base64");
 
   const user = await db("users").update({ token }).where({ email });
 
@@ -437,7 +438,7 @@ export const forgotPassword = async (
     return;
   }
 
-  const url = `${req.protocol}://givebackng.org/resetPassword/${token}`;
+  const url = `https://givebackng.org/auth/resetPassword/${encodedToken}`;
   await new Email({ email, url, token }).sendEmail(
     "passwordReset",
     "Your password reset token"
@@ -450,12 +451,15 @@ export const resetPassword = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const token = req.params.token;
-  const password = hash(req.body.password.trim());
+  const { token, newPassword } = req.body;
+
+  const password = hash(newPassword.trim());
+
+  const numericToken = Number(token);
 
   const user = await db("users")
     .update({ password, token: 0 })
-    .where({ token });
+    .where({ token: numericToken });
 
   if (!user) {
     res.status(400).json({ error: "Token is invalid" });
@@ -496,8 +500,10 @@ export const changePassword = async (
     return;
   }
 
-  user.password = await bcrypt.hash(newPassword, 12);
-  await db("users").where({ id: user.id }).update({ password: user.password });
+  (user.password = hash(newPassword.trim())),
+    await db("users")
+      .where({ id: user.id })
+      .update({ password: user.password });
 
   res.status(200).json({
     status: "success",

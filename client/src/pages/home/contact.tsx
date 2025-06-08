@@ -52,8 +52,8 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const { name, email, phoneNumber, subject, message } = formData;
-    if (!name || !email || !phoneNumber || !subject || !message) {
+    const { name, email, phoneNumber, message } = formData;
+    if (!name || !email || !phoneNumber || !message) {
       toast.error("Please fill in all fields");
       return;
     }

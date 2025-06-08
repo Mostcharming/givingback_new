@@ -29,6 +29,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Loading from "../../components/home/loading";
 import useBackendService from "../../services/backend_service";
+import Util from "../../services/utils";
 import "./index.css";
 
 const Register = () => {
@@ -1126,9 +1127,9 @@ const Register = () => {
                       const value = e.target.value;
 
                       try {
-                        // await Util.checkIfCompanyRegistrationNumberIsValid(
-                        //   value
-                        // );
+                        await Util.checkIfCompanyRegistrationNumberIsValid(
+                          value
+                        );
 
                         console.log("CAC is valid");
                         setFormData((prev) => ({

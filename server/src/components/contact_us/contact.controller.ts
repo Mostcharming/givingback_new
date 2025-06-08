@@ -7,7 +7,7 @@ export const sendContactEmail = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const { name, email, subject, message, phoneNumber } = req.body;
+  const { name, email, message, phoneNumber } = req.body;
 
   try {
     await new Email({
@@ -20,7 +20,7 @@ export const sendContactEmail = async (
         message,
         phoneNumber,
       },
-    }).sendEmail("contactForm", subject);
+    }).sendEmail("contactForm", "New contact message");
 
     res.status(200).json({
       status: "success",

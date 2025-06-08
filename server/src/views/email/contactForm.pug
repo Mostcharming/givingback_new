@@ -1,0 +1,14 @@
+extends baseEmail
+
+block content
+  p Hello GivingBack Team,
+  p You have received a new message from the contact form on your website:
+  ul
+    li Name: #{name}
+    li Email: #{email}
+    if phoneNumber
+      li Phone Number: #{phoneNumber}
+  p
+    strong Message:
+  p #{message}
+  p Please respond to the user promptly.

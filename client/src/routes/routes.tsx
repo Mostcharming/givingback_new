@@ -4,6 +4,7 @@ import ForgotPassword from "../pages/auth/forgotPassword";
 import Login from "../pages/auth/login";
 import Register from "../pages/auth/ngoregister";
 import OtpVerification from "../pages/auth/otp";
+import ResetPassword from "../pages/auth/ResetPassword";
 import SignUp from "../pages/auth/signup";
 import Briefs from "../pages/briefs";
 import Dashboard from "../pages/Dashboard";
@@ -31,6 +32,13 @@ const routes = [
     name: "ForgotPassword",
     icon: "ni ni-key-25 text-info",
     component: <ForgotPassword />,
+    layout: "/auth",
+  },
+  {
+    path: "/resetPassword/:token",
+    name: "ResetPassword",
+    icon: "ni ni-key-25 text-info",
+    component: <ResetPassword />,
     layout: "/auth",
   },
   {

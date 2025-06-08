@@ -10,6 +10,7 @@ import {
   logout,
   onboard,
   resend,
+  resetPassword,
   signup,
   verify,
 } from "./auth.controller";
@@ -31,6 +32,7 @@ router.post("/new/onboard", uploadimg, verifyNewUser, onboard as any);
 router.route("/verify").post(secureLogin, verify).put(secureLogin, resend);
 
 router.post("/forgotpassword", forgotPassword);
+router.post("/resetpassword", resetPassword);
 
 // Route to get user details (requires secure login)
 router.get("/", secureLogin, getOne);
