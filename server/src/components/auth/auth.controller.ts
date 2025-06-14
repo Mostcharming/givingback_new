@@ -151,23 +151,23 @@ export const onboard = async (req: Request, res: Response) => {
 
   try {
     // === Validate required file ===
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({
-        status: "fail",
-        error: `No userimg files uploaded.`,
-      });
-    }
+    // if (!req.files || req.files.length === 0) {
+    //   return res.status(400).json({
+    //     status: "fail",
+    //     error: `No userimg files uploaded.`,
+    //   });
+    // }
 
     const filesToProcess = Array.isArray(req.files)
       ? req.files.filter((file) => file.fieldname === "userimg")
       : [];
 
-    if (filesToProcess.length === 0) {
-      return res.status(400).json({
-        status: "fail",
-        error: `No userimg files uploaded.`,
-      });
-    }
+    // if (filesToProcess.length === 0) {
+    //   return res.status(400).json({
+    //     status: "fail",
+    //     error: `No userimg files uploaded.`,
+    //   });
+    // }
 
     // === Create user ===
     let newUser: Partial<FullUser>;
@@ -259,15 +259,17 @@ export const onboard = async (req: Request, res: Response) => {
     }).sendEmail("adminonb", "New User");
 
     // === Upload files ===
-    await Promise.all(
-      filesToProcess.map(async (file: any) => {
-        const doc = {
-          filename: file.location,
-          user_id: userId,
-        };
-        await db("userimg").insert(doc);
-      })
-    );
+    if (filesToProcess.length > 0) {
+      await Promise.all(
+        filesToProcess.map(async (file: any) => {
+          const doc = {
+            filename: file.location,
+            user_id: userId,
+          };
+          await db("userimg").insert(doc);
+        })
+      );
+    }
 
     // === Send final token ===
     createSendToken(user, 200, req, res);
