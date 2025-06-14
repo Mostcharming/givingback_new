@@ -26,7 +26,12 @@ router.post("/login", verifyLogin, login);
 // Route to log out a user
 router.get("/logout", logout);
 
-router.post("/new/onboard", uploadimg, verifyNewUser, onboard as any);
+router.post(
+  "/new/onboard",
+  uploadimg,
+  // verifyNewUser,
+  onboard as any
+);
 
 // Routes for verifying and resending
 router.route("/verify").post(secureLogin, verify).put(secureLogin, resend);
