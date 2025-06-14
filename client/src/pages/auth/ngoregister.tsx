@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ThunkDispatch } from "@reduxjs/toolkit";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { HandHeart, Handshake } from "lucide-react";
@@ -40,6 +41,7 @@ const Register = () => {
     dispatch(clearAuthState());
     dispatch(clearCurrentState());
     getAreas({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [formData, setFormData] = useState({
@@ -147,12 +149,38 @@ const Register = () => {
   };
 
   const handleNext = () => {
+    const { email, password, cpassword } = formData;
+    console.log(formData);
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // All validation passed, proceed
     if (step === 1 && formData.selectedOption) {
       setStep(2);
     } else if (step === 2) {
+      if (!email || !password || !cpassword) {
+        toast.error("All fields are required");
+        return;
+      }
+
+      if (!emailRegex.test(email)) {
+        toast.error("Please enter a valid email address");
+        return;
+      }
+
+      if (password.length < 8) {
+        toast.error("Password must be at least 8 characters");
+        return;
+      }
+
+      if (password !== cpassword) {
+        toast.error("Passwords do not match");
+        return;
+      }
       setStep(3);
     }
   };
+
   const { mutate: submitDonorForm, isLoading } = useBackendService(
     "/auth/new/onboard",
     "POST",
