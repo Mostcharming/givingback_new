@@ -323,7 +323,7 @@ const Register = () => {
             <p>Please register your personal details to create account.</p>
           </Row>
           <CardBody className="mt-4 px-lg-3 py-lg-3">
-            <div style={{ width: "40vw" }} role="form">
+            <div style={{ width: "55vw" }} role="form">
               <FormGroup className="mb-3">
                 <InputGroup className="input-group-alternative">
                   <select
@@ -498,7 +498,7 @@ const Register = () => {
             <p>Please register your personal details to create account.</p>
           </Row>
           <CardBody className="mt-4 px-lg-3 py-lg-3">
-            <div style={{ width: "40vw" }} role="form">
+            <div style={{ width: "55vw" }} role="form">
               <FormGroup className="mb-3">
                 <InputGroup className="input-group-alternative">
                   <Input
@@ -652,7 +652,7 @@ const Register = () => {
                 </p>
               </Row>
               <CardBody className="mt-4 px-lg-3 py-lg-3">
-                <div style={{ width: "40vw" }} role="form">
+                <div style={{ width: "55vw" }} role="form">
                   <FormGroup className="mb-3">
                     <div
                       style={{
@@ -819,7 +819,7 @@ const Register = () => {
                 <p>Please register your organization details to continue.</p>
               </Row>
               <CardBody className="mt-4 px-lg-3 py-lg-3">
-                <div style={{ width: "40vw" }} role="form">
+                <div style={{ width: "55vw" }} role="form">
                   <FormGroup className="mb-3">
                     <InputGroup className="input-group-alternative">
                       <Input
@@ -1015,7 +1015,7 @@ const Register = () => {
             <p>Please register your organization details to continue.</p>
           </Row>
           <CardBody className="mt-4 px-lg-3 py-lg-3">
-            <div style={{ width: "40vw" }} role="form">
+            <div style={{ width: "55vw" }} role="form">
               <FormGroup className="mb-3">
                 <InputGroup className="input-group-alternative">
                   <Input
