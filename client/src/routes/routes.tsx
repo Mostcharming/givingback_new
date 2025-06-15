@@ -1,3 +1,20 @@
+import {
+  ChartNoAxesCombined,
+  Clipboard,
+  FolderDot,
+  FolderPlus,
+  FolderSearch2,
+  HandCoins,
+  House,
+  Landmark,
+  Mails,
+  Settings,
+  ShieldUser,
+  User,
+  UserRoundSearch,
+  UsersRound,
+  WalletCards,
+} from "lucide-react";
 import FundWallets from "../pages";
 import Admin_projects from "../pages/admin_projects";
 import ForgotPassword from "../pages/auth/forgotPassword";
@@ -48,13 +65,6 @@ const routes = [
     component: <Register />,
     layout: "/auth",
   },
-  // {
-  //   path: '/donor_register',
-  //   name: 'DonorRegister',
-  //   icon: 'ni ni-key-25 text-info',
-  //   component: <Register isDonor />,
-  //   layout: '/auth'
-  // },
   {
     path: "/verify",
     name: "Verification",
@@ -76,44 +86,175 @@ const routes = [
     component: <SignUp ngo={1} />,
     layout: "/signup",
   },
-  //Dash
+  //Donor
   {
     path: "/dashboard",
-    name: "Dashboard",
-    icon: "ni ni-align-center",
+    name: "Home",
+    icon: <House />,
     component: <Dashboard />,
+    layout: "/donor",
+  },
+  {
+    path: "/projects",
+    name: "Explore Projects",
+    icon: <FolderSearch2 />,
+    component: <DN_Projects />,
     layout: "/donor",
   },
 
   {
-    path: "/dashboard",
-    name: "Dashboard",
-    icon: "ni ni-align-center",
-    component: <Dashboard />,
-    layout: "/ngo",
-  },
-  {
-    path: "/dashboard",
-    name: "Dashboard",
-    icon: "ni ni-align-center",
-    component: <Dashboard />,
-    layout: "/admin",
-  },
-  //ngo_directory
-  {
-    path: "/ngo_directory",
-    name: "NGO Directory",
-    icon: "ni ni-circle-08",
-    component: <Ngo />,
+    path: "/brief_initiate",
+    name: "Create Project",
+    icon: <FolderPlus />,
+    component: <CreateProject />,
     layout: "/donor",
   },
   {
     path: "/ngo_directory",
-    name: "NGO Directory",
-    icon: "ni ni-circle-08",
+    name: "Find NGOs",
+    icon: <UserRoundSearch />,
+    component: <Ngo />,
+    layout: "/donor",
+  },
+  {
+    path: "/fund_management",
+    name: "My Contributions",
+    icon: <WalletCards />,
+    component: <FundsM />,
+    layout: "/donor",
+  },
+  {
+    path: "/reports",
+    name: "Reports",
+    icon: <ChartNoAxesCombined />,
+    component: <AdminDashboard donor={1} />,
+    layout: "/donor",
+  },
+  {
+    path: "/messages",
+    name: "Messages",
+    icon: <Mails />,
+    component: <MessageDonor />,
+    layout: "/donor",
+  },
+  {
+    path: "/projects",
+    name: "Profile",
+    icon: <User />,
+    component: <DN_Projects />,
+    layout: "/donor",
+  },
+
+  //NGOs
+  {
+    path: "/dashboard",
+    name: "Dashboard",
+    icon: <House />,
+    component: <Dashboard />,
+    layout: "/ngo",
+  },
+  {
+    path: "/projects",
+    name: "Projects",
+    icon: <FolderSearch2 />,
+    component: <DN_Projects />,
+    layout: "/ngo",
+  },
+  {
+    path: "/fund_management",
+    name: "Funds",
+    icon: <HandCoins />,
+    component: <FundsM />,
+    layout: "/ngo",
+  },
+  {
+    path: "/briefs",
+    name: "Briefs",
+    icon: <Clipboard />,
+    component: <Briefs />,
+    layout: "/ngo",
+  },
+  {
+    path: "/messages",
+    name: "Messages",
+    icon: <Mails />,
+    component: <MessageDonor />,
+    layout: "/ngo",
+  },
+  {
+    path: "/projects",
+    name: "Profile",
+    icon: <User />,
+    component: <DN_Projects />,
+    layout: "/ngo",
+  },
+
+  //Admins
+  {
+    path: "/dashboard",
+    name: "Dashboard",
+    icon: <House />,
+    component: <Dashboard />,
+    layout: "/admin",
+  },
+
+  {
+    path: "/ngo_directory",
+    name: "NGOs",
+    icon: <UsersRound />,
     component: <Ngo />,
     layout: "/admin",
   },
+  {
+    path: "/projects",
+    name: "Donors",
+    icon: <HandCoins />,
+    component: <Admin_projects />,
+    layout: "/admin",
+  },
+  {
+    path: "/projects",
+    name: "Projects & Briefs",
+    icon: <FolderDot />,
+    component: <Admin_projects />,
+    layout: "/admin",
+  },
+  {
+    path: "/fund_management",
+    name: "Transactions",
+    icon: <Landmark />,
+    component: <FundsM />,
+    layout: "/admin",
+  },
+  {
+    path: "/reports",
+    name: "Reports",
+    icon: <ChartNoAxesCombined />,
+    component: <AdminDashboard />,
+    layout: "/admin",
+  },
+  {
+    path: "/projects",
+    name: "Support",
+    icon: <User />,
+    component: <Admin_projects />,
+    layout: "/admin",
+  },
+  {
+    path: "/projects",
+    name: "Admin users",
+    icon: <ShieldUser />,
+    component: <Admin_projects />,
+    layout: "/admin",
+  },
+  {
+    path: "/projects",
+    name: "Settings",
+    icon: <Settings />,
+    component: <Admin_projects />,
+    layout: "/admin",
+  },
+
   //viewing one ngo
   {
     path: "/ngo/:id",
@@ -127,28 +268,7 @@ const routes = [
     component: <NGODetails />,
     layout: "/admin",
   },
-  ////projects
-  {
-    path: "/projects",
-    name: "Projects",
-    icon: "ni ni-building",
-    component: <DN_Projects />,
-    layout: "/ngo",
-  },
-  {
-    path: "/projects",
-    name: "Projects",
-    icon: "ni ni-building",
-    component: <DN_Projects />,
-    layout: "/donor",
-  },
-  {
-    path: "/projects",
-    name: "Projects",
-    icon: "ni ni-building",
-    component: <Admin_projects />,
-    layout: "/admin",
-  },
+
   ///projectdetails
   {
     path: "/project/:id",
@@ -168,108 +288,7 @@ const routes = [
     component: <ProjectViewDetail />,
     layout: "/admin",
   },
-  ////fund management
-  {
-    path: "/fund_management",
-    name: "FundsManagement",
-    icon: "ni ni-money-coins",
-    component: <FundsM />,
-    layout: "/donor",
-  },
 
-  {
-    path: "/fund_management",
-    name: "FundsManagement",
-    icon: "ni ni-money-coins",
-    component: <FundsM />,
-    layout: "/ngo",
-  },
-  {
-    path: "/fund_management",
-    name: "FundsManagement",
-    icon: "ni ni-money-coins",
-    component: <FundsM />,
-    layout: "/admin",
-  },
-  //////donor/briefs
-  {
-    path: "/briefs",
-    name: "Briefs",
-    icon: "ni ni-archive-2",
-    component: <Briefs />,
-    layout: "/donor",
-  },
-
-  {
-    path: "/briefs",
-    name: "Briefs",
-    icon: "ni ni-archive-2",
-    component: <Briefs />,
-    layout: "/ngo",
-  },
-  /////admin Donor
-  {
-    path: "/dashboard",
-    name: "Donors",
-    icon: "ni ni-favourite-28",
-    component: <Dashboard />,
-    layout: "/admin",
-  },
-  //////report
-  {
-    path: "/report",
-    name: "Report",
-    icon: "ni ni-chart-bar-32",
-    component: <AdminDashboard donor={1} />,
-    layout: "/donor",
-  },
-
-  {
-    path: "/report",
-    name: "Report",
-    icon: "ni ni-chart-bar-32",
-    component: <AdminDashboard />,
-    layout: "/admin",
-  },
-  ////messages
-  {
-    path: "/messages",
-    name: "Messages",
-    icon: "ni ni-send",
-    component: <MessageDonor />,
-    layout: "/donor",
-  },
-
-  {
-    path: "/messages",
-    name: "Messages",
-    icon: "ni ni-send",
-    component: <MessageDonor />,
-    layout: "/ngo",
-  },
-  ///////settings
-  {
-    path: "/dashboard",
-    name: "My Profile",
-    icon: "ni ni-settings-gear-65",
-    component: <Dashboard />,
-    layout: "/donor",
-  },
-
-  {
-    path: "/dashboard",
-    name: "My Profile",
-    icon: "ni ni-settings-gear-65",
-    component: <Dashboard />,
-    layout: "/ngo",
-  },
-  {
-    path: "/dashboard",
-    name: "Settings",
-    icon: "ni ni-settings-gear-65",
-    component: <Dashboard />,
-    layout: "/admin",
-  },
   ///upload prev project
   {
     path: "/projects/add_past",
@@ -277,8 +296,6 @@ const routes = [
     component: <AddPastProject />,
     layout: "/ngo",
   },
-
-  /////money
 
   {
     path: "/fund_wallet",
@@ -310,12 +327,6 @@ const routes = [
     icon: "ni ni-chart-bar-32",
     component: <CreateProject />,
     layout: "/admin",
-  },
-  {
-    path: "/brief_initiate",
-    icon: "ni ni-send",
-    component: <CreateProject />,
-    layout: "/donor",
   },
 ];
 

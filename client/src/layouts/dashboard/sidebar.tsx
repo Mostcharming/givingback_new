@@ -77,15 +77,15 @@ const Sidebar: React.FC<any> = (props) => {
     return routes
       .filter((prop) => prop.layout === compare && prop.name) // Only include routes where the layout matches compare
       .map((prop, key) => (
-        <NavItem key={key} className="custom-nav-item">
+        <NavItem key={key} className="custom-nav-item m-2">
           <NavLink
             to={prop.layout + prop.path}
             tag={NavLinkRRD}
             onClick={closeCollapse}
             className={`custom-nav-link`}
           >
-            <i className={prop.icon} />
-            {prop.name}
+            {prop.icon}
+            <h6 className="pl-2">{prop.name}</h6>
           </NavLink>
         </NavItem>
       ));

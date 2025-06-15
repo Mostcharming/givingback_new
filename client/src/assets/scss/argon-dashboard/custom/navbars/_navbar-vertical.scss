@@ -61,18 +61,30 @@
       padding-left: $navbar-padding-x;
       padding-right: $navbar-padding-x;
       font-size: $navbar-nav-link-font-size;
+      color: rgb(128, 128, 128);
+      h6 {
+        color: rgb(128, 128, 128);
+      }
 
       &.active {
         position: relative;
+        background-color: #12833047;
 
-        &:before {
-          content: "";
-          position: absolute;
-          left: 0;
-          top: $nav-link-padding-y;
-          bottom: $nav-link-padding-y;
-          border-left: 2px solid $primary;
+        color: #128330;
+
+        h6 {
+          color: #128330;
         }
+        border-radius: 10px;
+
+        // &:before {
+        //   content: "";
+        //   position: absolute;
+        //   left: 0;
+        //   top: $nav-link-padding-y;
+        //   bottom: $nav-link-padding-y;
+        //   border-left: 2px solid $primary;
+        // }
       }
 
       // Icon
@@ -209,16 +221,29 @@
           .navbar-nav .nav-link {
             padding: $navbar-vertical-nav-link-padding-y
               $navbar-vertical-nav-link-padding-x;
+            color: rgb(128, 128, 128);
+            h6 {
+              color: rgb(128, 128, 128);
+            }
 
             &.active {
-              &:before {
-                top: $nav-link-padding-y;
-                bottom: $nav-link-padding-y;
-                left: 0;
-                right: auto;
-                border-left: 2px solid $primary;
-                border-bottom: 0;
+              position: relative;
+              background-color: #12833047;
+              color: #128330;
+
+              h6 {
+                color: #128330;
               }
+              border-radius: 10px;
+
+              // &:before {
+              //   top: $nav-link-padding-y;
+              //   bottom: $nav-link-padding-y;
+              //   left: 0;
+              //   right: auto;
+              //   border-left: 2px solid $primary;
+              //   border-bottom: 0;
+              // }
             }
           }
 
