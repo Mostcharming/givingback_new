@@ -89,7 +89,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(128, 0, 128, 0.5); /* Semi-transparent purple */
+  background-color: rgba(22, 21, 22, 0.5); /* Semi-transparent purple */
   backdrop-filter: blur(5px); /* Blur effect */
   z-index: 1040; /* Ensure it appears above the background */
 }
