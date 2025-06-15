@@ -150,24 +150,9 @@ export const onboard = async (req: Request, res: Response) => {
   const token = generateOtp(6); // generate token ONCE and reuse
 
   try {
-    // === Validate required file ===
-    // if (!req.files || req.files.length === 0) {
-    //   return res.status(400).json({
-    //     status: "fail",
-    //     error: `No userimg files uploaded.`,
-    //   });
-    // }
-
     const filesToProcess = Array.isArray(req.files)
       ? req.files.filter((file) => file.fieldname === "userimg")
       : [];
-
-    // if (filesToProcess.length === 0) {
-    //   return res.status(400).json({
-    //     status: "fail",
-    //     error: `No userimg files uploaded.`,
-    //   });
-    // }
 
     // === Create user ===
     let newUser: Partial<FullUser>;
@@ -221,12 +206,19 @@ export const onboard = async (req: Request, res: Response) => {
 
       await db("address").insert(address);
 
+      // await new Email({
+      //   email: mail,
+      //   url: "",
+      //   token,
+      //   additionalData,
+      // }).sendEmail("ngoonb", "Welcome to the GivingBack Family!");
+
       await new Email({
         email: mail,
         url: "",
         token,
         additionalData,
-      }).sendEmail("ngoonb", "Welcome to the GivingBack Family!");
+      }).sendEmail("otp", "Welcome to the GivingBack Family!");
     } else {
       const additionalFields = {
         orgemail: orgemail?.trim(),
@@ -243,13 +235,19 @@ export const onboard = async (req: Request, res: Response) => {
         additional_information: JSON.stringify(additionalFields),
       });
 
-      await new Email({
-        email: mail,
-        url: "",
-        token,
-        additionalData,
-      }).sendEmail("donoronboard", "Welcome to the GivingBack Family!");
+      // await new Email({
+      //   email: mail,
+      //   url: "",
+      //   token,
+      //   additionalData,
+      // }).sendEmail("donoronboard", "Welcome to the GivingBack Family!");
     }
+    await new Email({
+      email: mail,
+      url: "",
+      token,
+      additionalData,
+    }).sendEmail("otp", "Welcome to the GivingBack Family!");
 
     await new Email({
       email: "info@givingbackng.org",
