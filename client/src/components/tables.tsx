@@ -1,3 +1,4 @@
+import { ArrowDownFromLine, ArrowUpFromLine } from "lucide-react";
 import {
   Badge,
   Button,
@@ -134,6 +135,68 @@ const Tables = ({
                             ) : key === "tstatus" ? (
                               <div className="d-flex align-items-center">
                                 <StatusBadge status={row[key]} />
+                              </div>
+                            ) : key === "transactionNo" ? (
+                              <div className="d-flex align-items-center gap-2">
+                                {(() => {
+                                  const type = row.type?.toLowerCase();
+                                  if (type?.includes("fund"))
+                                    return (
+                                      <div
+                                        style={{
+                                          color: "white",
+                                          padding: "0px 5px",
+                                          backgroundColor: "#128330",
+                                          marginRight: "0.2rem",
+                                          borderRadius: "4px",
+                                        }}
+                                      >
+                                        <ArrowDownFromLine size={15} />
+                                      </div>
+                                    );
+                                  if (type?.includes("withdrawal"))
+                                    return (
+                                      <div
+                                        style={{
+                                          color: "white",
+                                          padding: "0px 5px",
+                                          backgroundColor: "red",
+                                          marginRight: "0.2rem",
+                                          borderRadius: "4px",
+                                        }}
+                                      >
+                                        <ArrowUpFromLine size={15} />
+                                      </div>
+                                    );
+                                  if (type?.includes("donated"))
+                                    return (
+                                      <div
+                                        style={{
+                                          color: "white",
+                                          padding: "0px 5px",
+                                          backgroundColor: "red",
+                                          marginRight: "0.2rem",
+                                          borderRadius: "4px",
+                                        }}
+                                      >
+                                        <ArrowUpFromLine size={15} />
+                                      </div>
+                                    );
+                                  return (
+                                    <div
+                                      style={{
+                                        color: "white",
+                                        padding: "0px 5px",
+                                        backgroundColor: "#128330",
+                                        marginRight: "0.2rem",
+                                        borderRadius: "4px",
+                                      }}
+                                    >
+                                      <ArrowDownFromLine size={15} />
+                                    </div>
+                                  );
+                                })()}
+                                <span>{row[key]}</span>
                               </div>
                             ) : (
                               row[key]
