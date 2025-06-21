@@ -29,6 +29,11 @@ const Dashboard = () => {
   const [actions, setActions] = useState([]);
 
   const role = authState.user?.role;
+  const isFirstTimeLogin = authState?.user?.first_time_login === 0;
+  const hasActiveProject = currentState?.activeProjectsCount > 0;
+  const hasBankDetails = currentState?.bank?.length > 0;
+  const hasAddress =
+    Array.isArray(currentState?.address) && currentState.address.length > 0;
 
   // Fetching dashboard details
   const { mutate: getDash } = useBackendService("/donor/dashboard", "GET", {
@@ -64,12 +69,10 @@ const Dashboard = () => {
       onSuccess: (res: any) => {
         const filteredData =
           res.donations?.map((project: any) => ({
-            id: project.id,
-            title: capitalizeFirstLetter(project.project_name),
-            description: capitalizeFirstLetter(project.project_description),
+            transactionNo: `Trx-00${project.id}`,
             amount: project.amount,
             type: capitalizeFirstLetter(project.type),
-            status: capitalizeFirstLetter(project.status) ?? "Completed",
+            tstatus: capitalizeFirstLetter(project.status) ?? "Completed",
             dateTime: formatDate(project.createdAt),
           })) || [];
 
@@ -201,14 +204,7 @@ const Dashboard = () => {
     // Set dynamic headers and actions based on the role
     switch (role) {
       case "NGO":
-        setHeaders([
-          "Title",
-          "Description",
-          "Amount",
-          "Type",
-          "Status",
-          "Date-Time",
-        ]);
+        setHeaders(["Transaction-No", "Amount", "Type", "Status", "Date-Time"]);
         setActions([
           // {
           //   label: 'View',
@@ -218,14 +214,7 @@ const Dashboard = () => {
         break;
       case "donor":
       case "corporate":
-        setHeaders([
-          "Title",
-          "Description",
-          "Amount",
-          "Type",
-          "Status",
-          "Date-Time",
-        ]);
+        setHeaders(["Transaction-No", "Amount", "Type", "Status", "Date-Time"]);
         setActions([
           // {
           //   label: 'View',
@@ -235,8 +224,7 @@ const Dashboard = () => {
         break;
       case "admin":
         setHeaders([
-          "Title",
-          "Description",
+          "Transaction-No",
           "Amount",
           "Type",
           "Status ",
@@ -319,216 +307,255 @@ const Dashboard = () => {
         <Col className="p-4">{renderBreadcrumbs(role)} </Col>
       </Container>
       <DashBox items={dashBoxItems} />
-      <Container fluid className="mt-4">
-        <div
-          style={{
-            backgroundColor: "#128330",
-            color: "white",
-            padding: "2rem",
-            borderRadius: "0.5rem",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
+      {authState.user?.role === "NGO" && (
+        <Container fluid className="mt-4">
           <div
             style={{
-              position: "absolute",
-              top: "1rem",
-              right: "1rem",
-              opacity: 0.2,
+              backgroundColor: "#128330",
+              color: "white",
+              padding: "2rem",
+              borderRadius: "0.5rem",
+              position: "relative",
+              overflow: "hidden",
             }}
           >
-            <div style={{ position: "relative" }}>
-              <div
-                style={{
-                  width: "4rem",
-                  height: "5rem",
-                  backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  borderRadius: "0.5rem",
-                  transform: "rotate(12deg)",
-                }}
-              ></div>
-              <div
-                style={{
-                  width: "4rem",
-                  height: "5rem",
-                  backgroundColor: "rgba(255, 255, 255, 0.3)",
-                  borderRadius: "0.5rem",
-                  transform: "rotate(-6deg)",
-                  position: "absolute",
-                  top: "-0.5rem",
-                  left: "-0.5rem",
-                }}
-              ></div>
-              <div
-                style={{
-                  width: "4rem",
-                  height: "5rem",
-                  backgroundColor: "rgba(255, 255, 255, 0.4)",
-                  borderRadius: "0.5rem",
-                  position: "absolute",
-                  top: "-1rem",
-                  left: "-1rem",
-                }}
-              ></div>
-            </div>
-          </div>
-
-          <div style={{ maxWidth: "72rem" }}>
-            <h4
-              style={{
-                fontWeight: "bold",
-                marginBottom: "1rem",
-                color: "white",
-              }}
-            >
-              Complete Your Profile Setup
-            </h4>
-
-            <p
-              style={{
-                color: "white",
-                marginBottom: "1.25rem",
-              }}
-            >
-              You're almost there! Set up your account to unlock full access and
-              increase visibility. Here's what to do next
-            </p>
-
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: "1.5rem",
+                position: "absolute",
+                top: "1rem",
+                right: "1rem",
+                opacity: 0.2,
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "1.5rem",
-                }}
-              >
+              <div style={{ position: "relative" }}>
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "1rem",
+                    width: "4rem",
+                    height: "5rem",
+                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                    borderRadius: "0.5rem",
+                    transform: "rotate(12deg)",
                   }}
-                >
-                  <Circle
-                    style={{
-                      width: "1rem",
-                      height: "1rem",
-                      marginTop: "0.5rem",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <div>
-                    <p
-                      style={{
-                        textDecoration: "underline",
-                      }}
-                    >
-                      Provide Bank Details – Securely receive donations
-                    </p>
-                  </div>
-                </div>
-
+                ></div>
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "1rem",
+                    width: "4rem",
+                    height: "5rem",
+                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+                    borderRadius: "0.5rem",
+                    transform: "rotate(-6deg)",
+                    position: "absolute",
+                    top: "-0.5rem",
+                    left: "-0.5rem",
                   }}
-                >
-                  <Circle
-                    style={{
-                      width: "1rem",
-                      height: "1rem",
-                      marginTop: "0.5rem",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <div>
-                    <p
-                      style={{
-                        textDecoration: "underline",
-                      }}
-                    >
-                      Add Your Organization's Bio – Tell donors about your
-                      mission
-                    </p>
-                  </div>
-                </div>
+                ></div>
+                <div
+                  style={{
+                    width: "4rem",
+                    height: "5rem",
+                    backgroundColor: "rgba(255, 255, 255, 0.4)",
+                    borderRadius: "0.5rem",
+                    position: "absolute",
+                    top: "-1rem",
+                    left: "-1rem",
+                  }}
+                ></div>
               </div>
+            </div>
 
-              {/* Right column */}
+            <div style={{ maxWidth: "72rem" }}>
+              <h4
+                style={{
+                  fontWeight: "bold",
+                  marginBottom: "1rem",
+                  color: "white",
+                }}
+              >
+                Complete Your Profile Setup
+              </h4>
+
+              <p
+                style={{
+                  color: "white",
+                  marginBottom: "1.25rem",
+                }}
+              >
+                You're almost there! Set up your account to unlock full access
+                and increase visibility. Here's what to do next
+              </p>
+
               <div
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
                   gap: "1.5rem",
                 }}
               >
                 <div
                   style={{
                     display: "flex",
-                    alignItems: "flex-start",
-                    gap: "1rem",
+                    flexDirection: "column",
+                    gap: "1.5rem",
                   }}
                 >
-                  <Circle
+                  <div
                     style={{
-                      width: "1rem",
-                      height: "1rem",
-                      marginTop: "0.5rem",
-                      flexShrink: 0,
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "1rem",
                     }}
-                  />
-                  <div>
-                    <p
-                      style={{
-                        textDecoration: "underline",
-                      }}
-                    >
-                      Create Your First Project – Show donors what you are
-                      capable of{" "}
-                    </p>
+                  >
+                    {hasBankDetails ? (
+                      <CircleCheckBig
+                        style={{
+                          width: "1rem",
+                          height: "1rem",
+                          marginTop: "0.5rem",
+                        }}
+                      />
+                    ) : (
+                      <Circle
+                        style={{
+                          width: "1rem",
+                          height: "1rem",
+                          marginTop: "0.5rem",
+                        }}
+                      />
+                    )}
+                    <div>
+                      <p
+                        style={{
+                          textDecoration: "underline",
+                        }}
+                      >
+                        Provide Bank Details – Securely receive donations
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "1rem",
+                    }}
+                  >
+                    {hasAddress ? (
+                      <CircleCheckBig
+                        style={{
+                          width: "1rem",
+                          height: "1rem",
+                          marginTop: "0.5rem",
+                        }}
+                      />
+                    ) : (
+                      <Circle
+                        style={{
+                          width: "1rem",
+                          height: "1rem",
+                          marginTop: "0.5rem",
+                        }}
+                      />
+                    )}
+                    <div>
+                      <p
+                        style={{
+                          textDecoration: "underline",
+                        }}
+                      >
+                        Add Your Organization's Bio – Tell donors about your
+                        mission
+                      </p>
+                    </div>
                   </div>
                 </div>
 
+                {/* Right column */}
                 <div
                   style={{
                     display: "flex",
-                    alignItems: "flex-start",
-                    gap: "1rem",
+                    flexDirection: "column",
+                    gap: "1.5rem",
                   }}
                 >
-                  <CircleCheckBig
+                  <div
                     style={{
-                      width: "1rem",
-                      height: "1rem",
-                      marginTop: "0.5rem",
-                      flexShrink: 0,
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "1rem",
                     }}
-                  />
-                  <div>
-                    <p
-                      style={{
-                        textDecoration: "underline",
-                      }}
-                    >
-                      Explore the Dashboard – Familiarize yourself with
-                      GivingBack
-                    </p>
+                  >
+                    {hasActiveProject ? (
+                      <CircleCheckBig
+                        style={{
+                          width: "1rem",
+                          height: "1rem",
+                          marginTop: "0.5rem",
+                        }}
+                      />
+                    ) : (
+                      <Circle
+                        style={{
+                          width: "1rem",
+                          height: "1rem",
+                          marginTop: "0.5rem",
+                        }}
+                      />
+                    )}
+                    <div>
+                      <p
+                        style={{
+                          textDecoration: "underline",
+                        }}
+                      >
+                        Create Your First Project – Show donors what you are
+                        capable of{" "}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "1rem",
+                    }}
+                  >
+                    {isFirstTimeLogin ? (
+                      <CircleCheckBig
+                        style={{
+                          width: "1rem",
+                          height: "1rem",
+                          marginTop: "0.5rem",
+                        }}
+                      />
+                    ) : (
+                      <Circle
+                        style={{
+                          width: "1rem",
+                          height: "1rem",
+                          marginTop: "0.5rem",
+                        }}
+                      />
+                    )}
+                    <div>
+                      <p
+                        style={{
+                          textDecoration: "underline",
+                        }}
+                      >
+                        Explore the Dashboard – Familiarize yourself with
+                        GivingBack
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </Container>
+        </Container>
+      )}
+
       <Tables
         tableName="Recent Transactions"
         headers={headers}

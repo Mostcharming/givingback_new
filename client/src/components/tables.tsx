@@ -39,6 +39,41 @@ const Tables = ({
     if (currentPage < totalPages) onPageChange(currentPage + 1);
   };
 
+  const StatusBadge = ({ status }) => {
+    const baseStyle = {
+      padding: "4px 8px",
+      borderRadius: "4px",
+      fontWeight: 500,
+      fontSize: "0.875rem",
+      textTransform: "capitalize",
+    };
+
+    const normalizedStatus = status?.toLowerCase();
+
+    const styles = {
+      completed: { bgColor: "#EDF7ED", color: "#128330" },
+      pending: { bgColor: "#FFF4E5", color: "#F79009" },
+      success: { bgColor: "#E6F4FF", color: "#1570EF" },
+      failed: { bgColor: "#FDECEC", color: "#D92D20" },
+    };
+
+    const { bgColor: bg = "#F0F0F0", color: c = "#333" } =
+      styles[normalizedStatus] || {};
+
+    return (
+      <span
+        style={{
+          ...baseStyle,
+          backgroundColor: bg,
+          color: c,
+          textTransform: "capitalize" as React.CSSProperties["textTransform"],
+        }}
+      >
+        {status}
+      </span>
+    );
+  };
+
   return (
     <Container className="mt-3" fluid>
       <Row>
@@ -95,6 +130,10 @@ const Tables = ({
                                   value={row[key]}
                                   barClassName="bg-success"
                                 />
+                              </div>
+                            ) : key === "tstatus" ? (
+                              <div className="d-flex align-items-center">
+                                <StatusBadge status={row[key]} />
                               </div>
                             ) : (
                               row[key]
