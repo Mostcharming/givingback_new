@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FolderOpenDot, House, Mic } from "lucide-react";
+import { Book, FolderOpenDot, House, Mic, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -109,14 +109,16 @@ const Dashboard = () => {
           {
             title: "Donations Received",
             amount: data.totalDonations,
-            iconClass: <House />,
+            iconClass: <Book />,
             bgColor: "#FFF9E6",
+            color: "#FFC107",
           },
           {
-            title: "Wallet Balance",
-            amount: data.walletBalance,
-            iconClass: <House />,
-            bgColor: "bg-primary",
+            title: "Beneficiries Impacted",
+            amount: data.completedProjectsCount * 3,
+            iconClass: <Users />,
+            bgColor: "#F5E9F7",
+            color: "#9C27B0",
           },
         ];
       case "donor":
