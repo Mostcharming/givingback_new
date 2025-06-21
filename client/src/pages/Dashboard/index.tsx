@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { FolderOpenDot, House, Mic } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -92,27 +93,29 @@ const Dashboard = () => {
       case "NGO":
         return [
           {
-            title: "Completed Projects",
+            title: "Projects Completed",
             amount: data.completedProjectsCount || 0,
-            iconClass: "fas fa-check-circle",
-            bgColor: "bg-success",
+            iconClass: <FolderOpenDot />,
+            bgColor: "#EDF7ED",
+            color: "#128330",
           },
           {
-            title: "Ongoing Projects",
+            title: "Active Campaign",
             amount: data.activeProjectsCount,
-            iconClass: "fas fa-spinner",
-            bgColor: "bg-info",
+            iconClass: <Mic />,
+            bgColor: "#E8F4FE",
+            color: "#2196F3",
           },
           {
             title: "Donations Received",
             amount: data.totalDonations,
-            iconClass: "fas fa-hand-holding-usd",
-            bgColor: "bg-warning",
+            iconClass: <House />,
+            bgColor: "#FFF9E6",
           },
           {
             title: "Wallet Balance",
             amount: data.walletBalance,
-            iconClass: "fas fa-wallet",
+            iconClass: <House />,
             bgColor: "bg-primary",
           },
         ];
@@ -122,25 +125,25 @@ const Dashboard = () => {
           {
             title: "Completed Projects",
             amount: data.completedProjectsCount || 0,
-            iconClass: "fas fa-check-circle",
+            iconClass: <House />,
             bgColor: "bg-success",
           },
           {
             title: "Ongoing Projects",
             amount: data.activeProjectsCount || 0,
-            iconClass: "fas fa-spinner",
+            iconClass: <House />,
             bgColor: "bg-info",
           },
           {
             title: "Total Project Funding",
             amount: data.totalDonations,
-            iconClass: "fas fa-donate",
+            iconClass: <House />,
             bgColor: "bg-warning",
           },
           {
             title: "Wallet Balance",
             amount: data.walletBalance,
-            iconClass: "fas fa-wallet",
+            iconClass: <House />,
             bgColor: "bg-primary",
           },
         ];
@@ -149,25 +152,25 @@ const Dashboard = () => {
           {
             title: "Number of NGOs",
             amount: data.ngoUsersCount,
-            iconClass: "fas fa-users",
+            iconClass: <House />,
             bgColor: "bg-success",
           },
           {
             title: "Pending Requests",
             amount: data.pendingRequests,
-            iconClass: "fas fa-clock",
+            iconClass: <House />,
             bgColor: "bg-warning",
           },
           {
             title: "Total Project Funding",
             amount: data.donationCount,
-            iconClass: "fas fa-donate",
+            iconClass: <House />,
             bgColor: "bg-info",
           },
           {
             title: "Number of Projects",
             amount: data.projectCount,
-            iconClass: "fas fa-tasks",
+            iconClass: <House />,
             bgColor: "bg-primary",
           },
         ];

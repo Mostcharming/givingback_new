@@ -1,50 +1,67 @@
-import React from 'react'
-import { Card, CardBody, CardTitle, Col, Container, Row } from 'reactstrap'
+import React from "react";
+import { Card, CardBody, CardTitle, Col, Container, Row } from "reactstrap";
 
 interface DashBoxItem {
-  title: string
-  amount: string
-  iconClass: string
-  bgColor: string
+  title: string;
+  amount: string;
+  iconClass: string;
+  bgColor: string;
+  color?: string;
 }
 
 interface DashBoxProps {
-  items: DashBoxItem[]
+  items: DashBoxItem[];
 }
 
 const DashBox: React.FC<DashBoxProps> = ({ items }) => {
   return (
     <>
-      <div className='header bg-gradient-info pb-2 '>
+      <div className="header bg-gradient-info pb-2 ">
         <Container fluid>
-          <div className='header-body'>
+          <div className="header-body">
             <Row>
               {items.map((item, index) => (
-                <Col lg='6' xl='3' key={index}>
-                  <Card className='card-stats mb-4 mb-xl-0'>
-                    <CardBody
-                      style={{
-                        border: '1px solid #7B80DD',
-                        borderRadius: '5px'
-                      }}
-                    >
-                      <Row>
-                        <div className='col'>
-                          <CardTitle
-                            tag='h5'
-                            className='text-uppercase text-muted mb-0'
-                          >
-                            {item.title}
-                          </CardTitle>
-                          <span className='h2 font-weight-bold mb-0'>
-                            {item.amount}
-                          </span>
-                        </div>
-                        <Col className='col-auto'>
+                <Col lg="6" xl="3" key={index}>
+                  <Card
+                    style={{
+                      borderRadius: "15px",
+                      boxShadow: "0 4px 9px rgba(0, 0, 0, 0.1)",
+                    }}
+                    className="card-stats mb-4 mb-xl-0"
+                  >
+                    <CardBody>
+                      <Row
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          justifyContent: "flex-start",
+                          flexDirection: "column",
+                        }}
+                      >
+                        <Col className="col-auto">
                           <div
-                            className={`icon icon-shape ${item.bgColor} text-white rounded-circle shadow`}
+                            style={{
+                              backgroundColor: `${item.bgColor}`,
+                              height: "50px",
+                              color: `${item.color}`,
+                              borderRadius: "20%",
+                            }}
+                            className={`icon icon-shape`}
                           >
-                            <i className={item.iconClass} />
+                            {item.iconClass}
+                          </div>
+                        </Col>
+                        <Col className="">
+                          <div className="">
+                            <CardTitle
+                              tag="h6"
+                              className="mt-3 text-muted mb-0"
+                            >
+                              {item.title}
+                            </CardTitle>
+                            <span className="mt-4 h6 font-weight-bold mb-0">
+                              {item.amount}
+                            </span>
                           </div>
                         </Col>
                       </Row>
@@ -57,7 +74,7 @@ const DashBox: React.FC<DashBoxProps> = ({ items }) => {
         </Container>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default DashBox
+export default DashBox;

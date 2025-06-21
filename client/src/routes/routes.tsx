@@ -2,6 +2,7 @@ import {
   ChartNoAxesCombined,
   Clipboard,
   FolderDot,
+  FolderOpenDot,
   FolderPlus,
   FolderSearch2,
   HandCoins,
@@ -156,7 +157,7 @@ const routes = [
   {
     path: "/projects",
     name: "Projects",
-    icon: <FolderSearch2 />,
+    icon: <FolderOpenDot />,
     component: <DN_Projects />,
     layout: "/ngo",
   },

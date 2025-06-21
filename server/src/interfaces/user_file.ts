@@ -1,41 +1,42 @@
-import { Request } from 'express'
+import { Request } from "express";
 
 export interface FullUser {
-  id: string
-  email: string
-  password?: string
-  role?: string
-  status?: number
-  active: number
-  token?: number
+  id: string;
+  email: string;
+  password?: string;
+  role?: string;
+  status?: number;
+  active: number;
+  token?: number;
+  first_time_login?: boolean;
 }
 
 export interface User {
-  id: number
-  role: string
+  id: number;
+  role: string;
 }
 export interface MulterRequest extends Request {
-  file: any
+  file: any;
 }
 export interface UserRequest extends Request {
   body: {
-    uuid?: string
-    email: string
-    password: string
-    otp: number
-    oldPassword: string
-    newPassword: string
-    name: string
-    phoneNumber: string
-    industry: string
-    interest_area: string
-    state: string
-    city_lga: string
-    address: string
-    about: string
-  }
+    uuid?: string;
+    email: string;
+    password: string;
+    otp: number;
+    oldPassword: string;
+    newPassword: string;
+    name: string;
+    phoneNumber: string;
+    industry: string;
+    interest_area: string;
+    state: string;
+    city_lga: string;
+    address: string;
+    about: string;
+  };
   cookies: {
-    giveback?: string
-  }
-  user?: User
+    giveback?: string;
+  };
+  user?: User;
 }
