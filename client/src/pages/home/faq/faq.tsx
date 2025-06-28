@@ -23,7 +23,11 @@ export default function Component() {
       {
         question: "Who is a Partner",
         answer:
-          "A registered Non-Govermental Organizations and Not-for-profit Organizations (NGOs/NPOs) on GivingBack validate the authenticity of the organization with various issuance authority. GivingBack do not nominate, recommend or show preference to any partner but autonomously verify partners on competency, project execution and perfromance on information provided. Our Community partners are spread across all the 6 geopolitical zones of the country. They represent local community and help implement community projects with maximum direct impact to the beneficiaries",
+          "A registered Non-Govermental Organizations and Not-for-profit Organizations (NGOs/NPOs) on GivingBack validate the authenticity of the organization with various issuance authority. <br/> <br/> GivingBack do not nominate, recommend or show preference to any partner but autonomously verify partners on competency, project execution and perfromance on information provided. ,<br/> <br/> Our Community partners are spread across all the 6 geopolitical zones of the country. They represent local community and help implement community projects with maximum direct impact to the beneficiaries",
+      },
+      {
+        question: "How do partners get to participate in a project",
+        answer: `Partners do not need to know the sponsor or project operator tp get invited to participate otr get notification about any project. <br/> <br/>When a project of interest within partner domain of operation is created on the platform or when the sponsor specifically selected or shortlisted or invite partner to participate in the request for proposal, the partners automatically receives notification of interest through email notification with a direct link to the project brief <br/><br/> A partner can choose to participate in the project after reviewing the project brief by enagaging in the request for the proposal process or can also choose to ignore the brief if not interest. This is another value-added services GivingBack platform provides in promoting equall opportunity and accessibility to all based on performance and relevance of the partners and more importantly the overall impack to the beneficiary of the initiative. `,
       },
     ],
     Registration: [
@@ -140,7 +144,11 @@ export default function Component() {
               </button>
               {openItems.includes(`${activeTab}-${index}`) && (
                 <div className="faq-answer">
-                  <div className="answer-content">{item.answer}</div>
+                  <div
+                    className="answer-content"
+                    dangerouslySetInnerHTML={{ __html: item.answer }}
+                  />
+                  {/* <div className="answer-content">{item.answer}</div> */}
                 </div>
               )}
             </div>
