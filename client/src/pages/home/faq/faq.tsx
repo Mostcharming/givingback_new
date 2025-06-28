@@ -45,9 +45,8 @@ export default function Component() {
         answer: `You register by clicking on the login option on our website or <a href="/auth/register" style="color: blue; text-decoration: underline;">click here</a>.<br/><br/> Create an account with your personal email or use your existing Google profile (Gmail Users only).<br/><br/> Once you create an account a One time Password (OTP) will be sent to your email for verification.<br/><br/>Enter the verification code sent to your email.<br/><br/>Create a GivingBack profile by providing relevant information for our KYC process, Pleas kindly note that no personal identification information sucj as NIN, BVN, RC or Credit card is stored by GivingBack. This information is used for verification purposes only and is discarded once the verification is confirmed by the issuance authority.<br/><br/>Complete the registration process and you are set to start funding or create  your first project.`,
       },
       {
-        question: "How long does verification take?",
-        answer:
-          "Verification typically takes 2–5 business days depending on the completeness of your application.",
+        question: "How do i create a project",
+        answer: `To create a project there are two (2) conditions to be met - be a registered user with an existing account on GivingBack platform and have enough funds for your project.`,
       },
     ],
     Process: [
