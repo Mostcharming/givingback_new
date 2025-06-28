@@ -37,24 +37,17 @@ export default function Component() {
           "It allows us to verify our sponsor and partner on our platform. it is required to protect the integrity of our sponsor, partners and platform from fraud and any related financial crime. Lastly, it allows us to keep our platform users safe and protect thier identity from cybercrime",
       },
       {
-        question: "How do I register my organization?",
-        answer:
-          "Click on 'Register', select 'Organization', and fill out the required information.",
+        question: "what personal information do you keep on your platform",
+        answer: `GivingBack does not keep any personal identification information on our platform or in our backend database. Required information are only used for real-time verification purposes and not stored.`,
       },
       {
-        question: "What documents do I need?",
-        answer:
-          "You will need your organization's registration certificate, tax ID, and profile documents.",
+        question: "How do I register?",
+        answer: `You register by clicking on the login option on our website or <a href="/auth/register" style="color: blue; text-decoration: underline;">click here</a>.<br/>`,
       },
       {
         question: "How long does verification take?",
         answer:
           "Verification typically takes 2–5 business days depending on the completeness of your application.",
-      },
-      {
-        question: "How do I create a project?",
-        answer:
-          "Only verified organizations can create projects from their dashboard.",
       },
     ],
     Process: [
