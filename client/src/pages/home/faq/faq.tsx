@@ -16,17 +16,17 @@ export default function Component() {
       },
 
       {
-        question: "Why is registration required?",
-        answer:
-          "It allows us to verify our sponsor and partner on our platform. it is required to protect the integrity of our sponsor, partners and platform from fraud and any related financial crime. Lastly, it allows us to keep our platform users safe and protect thier identity from cybercrime",
-      },
-      {
         question: "What is a project?",
         answer:
           "A project is an initiative created by organizations that require funding to impact lives.",
       },
     ],
     Registration: [
+      {
+        question: "Why is registration required?",
+        answer:
+          "It allows us to verify our sponsor and partner on our platform. it is required to protect the integrity of our sponsor, partners and platform from fraud and any related financial crime. Lastly, it allows us to keep our platform users safe and protect thier identity from cybercrime",
+      },
       {
         question: "How do I register my organization?",
         answer:
