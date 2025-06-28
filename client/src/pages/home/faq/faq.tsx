@@ -10,15 +10,20 @@ export default function Component() {
   const faqData = {
     Terms: [
       {
-        question: "Who is a donor?",
+        question: "Who is a Donor?",
         answer:
           "Any Individual or Organization that donates to a proejct is considered a donor",
       },
 
       {
-        question: "What is a project?",
+        question: "What is a Project?",
         answer:
-          "A project is an initiative created by organizations that require funding to impact lives.",
+          "Project is the initiative or service you are planning to provide in the form of giving back to a community. This varies from sponsoring a child's school education to a building infrastructure facilities for a community - any form of service or act of giving you intend to provide. GivingBack has some streamlined projects already defined that help to align your project with the United Nations Sustanable Development Goals. Aligning your project with some of those goals allows your projects to be a global contributor to the UNSDG and by so doing attract more visibilty and donors to you initiatives. This is essentially one of the greatest benefits and values of givingback platform, attracting global visibililty and funding to local community development projects.",
+      },
+      {
+        question: "Who is a Partner",
+        answer:
+          "A registered Non-Govermental Organizations and Not-for-profit Organizations (NGOs/NPOs) on GivingBack validate the authenticity of the organization with various issuance authority. GivingBack do not nominate, recommend or show preference to any partner but autonomously verify partners on competency, project execution and perfromance on information provided. Our Community partners are spread across all the 6 geopolitical zones of the country. They represent local community and help implement community projects with maximum direct impact to the beneficiaries",
       },
     ],
     Registration: [
