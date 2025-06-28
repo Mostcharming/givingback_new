@@ -976,7 +976,14 @@ const Index = () => {
             </div>
           </div>
         </section>
-        <section className="py-5">
+        <section className="d-flex mt-4 justify-content-center align-items-center">
+          <div className="">
+            <div style={{ width: "80vw" }}>
+              <FAQAccordion />
+            </div>
+          </div>
+        </section>
+        {/* <section className="py-5">
           <div className="container">
             <div className="row g-4">
               <div className="col-md-4">
@@ -998,7 +1005,7 @@ const Index = () => {
               <FAQAccordion />
             </div>
           </div>
-        </section>
+        </section> */}
         <section
           style={{ paddingBottom: "60px", paddingTop: "40px" }}
           className="feature-section feature-section-one"

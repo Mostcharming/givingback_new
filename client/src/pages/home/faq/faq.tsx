@@ -1,90 +1,100 @@
-import React, { useState } from "react";
-import "./index.css";
+import { useState } from "react";
+import "./global.css";
 
-const faqData = [
-  {
-    id: 1,
-    question: "Who is a donor?",
-    answer:
-      "Any individual or organization that donates to a project is considered a donor.",
-  },
-  {
-    id: 2,
-    question: "Who is a partner?",
-    answer:
-      "Partners are organizations or individuals who collaborate with GivingBack to support projects and initiatives.",
-  },
-  {
-    id: 3,
-    question: "How do I give or donate?",
-    answer:
-      'You can donate by selecting a project and clicking the "Donate" button. You’ll be guided through the donation process.',
-  },
-  {
-    id: 4,
-    question: "What is a project?",
-    answer:
-      "A project is an initiative created by an individual or organization seeking support to address a specific need or cause.",
-  },
-  {
-    id: 5,
-    question: "How do I create a project?",
-    answer:
-      'To create a project, sign up or log in to your account, navigate to "Create Project," and follow the guided steps.',
-  },
-];
+export default function Component() {
+  const [activeTab, setActiveTab] = useState("Donors");
+  const [openItems, setOpenItems] = useState<string[]>([]);
 
-export default function FAQAccordion() {
-  const [activeIndex, setActiveIndex] = useState(null);
+  const tabs = ["Donors", "Organizations", "Beneficiaries"];
 
-  const toggleItem = (index) => {
-    setActiveIndex((prevIndex) => (prevIndex === index ? null : index));
+  const faqData = {
+    Donors: [
+      "Who is a donor?",
+      "How do I give or donate?",
+      "How can I register my organization as a donor?",
+      "What is a project?",
+      "How do I create a project?",
+    ],
+    Organizations: [
+      "How do I register my organization?",
+      "What documents do I need?",
+      "How long does verification take?",
+    ],
+    Beneficiaries: [
+      "Who can be a beneficiary?",
+      "How do I apply for assistance?",
+      "What are the eligibility criteria?",
+    ],
+  };
+
+  const toggleItem = (item: string) => {
+    setOpenItems((prev) =>
+      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+    );
   };
 
   return (
-    <div className="col-md-8">
-      <div className="accordion" id="faqAccordion">
-        {faqData.map((item, index) => {
-          const isActive = activeIndex === index;
-          return (
-            <div key={item.id} className=" mb-3">
-              <h2 className="accordion-header">
-                <button
-                  type="button"
-                  style={{ padding: "25px" }}
-                  className={`accordion-button d-flex justify-between align-items-center ${
-                    isActive ? "active" : "collapsed"
+    <div className="faq-container">
+      <div className="faq-content">
+        {/* Header */}
+        <h1 className="faq-title">Frequently asked questions</h1>
+
+        {/* Tab Navigation */}
+        <div className="tab-container">
+          <div className="tab-wrapper">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`tab-button ${
+                  activeTab === tab ? "tab-active" : ""
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* FAQ Items */}
+        <div className="faq-list">
+          {faqData[activeTab as keyof typeof faqData].map((question, index) => (
+            <div key={`${activeTab}-${index}`} className="faq-item">
+              <button
+                className="faq-question"
+                onClick={() => toggleItem(`${activeTab}-${index}`)}
+              >
+                <h3 className="question-text">{question}</h3>
+                <svg
+                  className={`chevron ${
+                    openItems.includes(`${activeTab}-${index}`)
+                      ? "chevron-open"
+                      : ""
                   }`}
-                  onClick={() => toggleItem(index)}
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  <div
-                    style={{
-                      width: "100vw",
-                      display: "flex",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <span style={{ fontSize: "20px" }}>{item.question}</span>
-                    <span style={{ fontSize: "20px" }} className="ms-auto">
-                      {isActive ? "−" : "+"}
-                    </span>
+                  <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
+              </button>
+              {openItems.includes(`${activeTab}-${index}`) && (
+                <div className="faq-answer">
+                  <div className="answer-content">
+                    This is the answer content for "{question}". You can add
+                    detailed information here to help users understand the topic
+                    better.
                   </div>
-                </button>
-                {isActive && (
-                  <div
-                    style={{ fontSize: "18px" }}
-                    // className="accordion-body bg-white"
-                    className={`accordion-button d-flex justify-between align-items-center ${
-                      isActive ? "active" : "collapsed"
-                    }`}
-                  >
-                    {item.answer}
-                  </div>
-                )}
-              </h2>
+                </div>
+              )}
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </div>
   );
