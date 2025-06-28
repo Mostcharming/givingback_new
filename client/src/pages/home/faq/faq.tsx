@@ -62,7 +62,7 @@ export default function Component() {
       },
       {
         question: "How do I fund my account",
-        answer: `Click on the 'fund my wallet' menu item in your profile and follow the steps`,
+        answer: `Click on the 'fund my wallet' menu item in your profile and follow the steps on the screen to transfer funds into GivingBack wallet. Click on Create Project Brief to complete your project profile/brief and submit.`,
       },
       {
         question: "What are the eligibility criteria?",
