@@ -65,14 +65,8 @@ export default function Component() {
         answer: `Click on the 'fund my wallet' menu item in your profile and follow the steps on the screen to transfer funds into GivingBack wallet. Click on Create Project Brief to complete your project profile/brief and submit.`,
       },
       {
-        question: "What are the eligibility criteria?",
-        answer:
-          "Criteria include need-based assessment, supporting documents, and approval by an NGO partner.",
-      },
-      {
-        question: "How do I create a project?",
-        answer:
-          "Only verified organizations can create projects from their dashboard.",
+        question: "I have created and submitted my project brief, what next? ",
+        answer: `When a project brief is created and submitted, all selected NGOs will be notified automatically by email, and interested NGOs will respond through the portal.<br/><br/> Please note that you are in full controll and responsible for the entire process - reviewing and selecting whoe meets your requirements and ultimately who decide to engage.<br/><br/>GivingBack does not participate nor receive any notification related to any of your processes on the platform user's activities`,
       },
     ],
   };
