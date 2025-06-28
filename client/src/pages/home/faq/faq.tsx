@@ -51,9 +51,9 @@ export default function Component() {
     ],
     Process: [
       {
-        question: "How do I give or donate?",
-        answer:
-          "You can donate directly to any project on our website. There is a limi to the maximum donation you can donate towards a project (from our website) without registration",
+        question:
+          "Why do I need to fund my account before i can create a project brief?",
+        answer: `A project brief is simply your project detail and profile. it allows you to talk to about the type of service or initiative you are trying to do, set your expectations, milestones, specific demographic or area you are targeting and the type of organization you are looking to work or collaborate with. Once this process is completed, all relevant or interested partners will have full visibility into the project and hence attract various interest groups that may be interested in collaborating or working with you. For that reason, you must have the required funds allocated for the project ready in your GivingBack wallet on the platform. This helps provide some level of confidence and assurance to our partner's organization (NGO) that all advertised GivingBack projects are geniune and funded, which enhances the quality and promptness of the responses we get from partners.`,
       },
       {
         question: "Who can be a beneficiary?",
@@ -61,9 +61,8 @@ export default function Component() {
           "Anyone in need who meets our eligibility criteria and applies through a verified organization.",
       },
       {
-        question: "How do I apply for assistance?",
-        answer:
-          "Visit the 'Get Help' page and complete the application form. A verified organization will follow up.",
+        question: "How do I fund my account",
+        answer: `Click on the 'fund my wallet' menu item in your profile and follow the steps`,
       },
       {
         question: "What are the eligibility criteria?",
