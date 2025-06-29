@@ -199,10 +199,6 @@ const List = ({ type }) => {
     }
   }, [currentPage]);
 
-  const create = () => {
-    navigate("/ngo/projects/add_past");
-  };
-
   const nextPage = () => {
     if (currentPage * 6 < totalProjects) {
       setCurrentPage(currentPage + 1);
@@ -215,6 +211,17 @@ const List = ({ type }) => {
     }
   };
 
+  const handleAddProject = () => {
+    toast.success("🎉 Project added successfully!", {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+  };
+
   return (
     <div className="min-vh-100 p-4">
       <div className="container-fluid">
@@ -225,7 +232,10 @@ const List = ({ type }) => {
             </h3>
           </div>
           <div className="col-auto">
-            <button className="btn btn-custom-green px-4 py-2 fw-medium rounded-lg">
+            <button
+              onClick={handleAddProject}
+              className="btn btn-custom-green px-4 py-2 fw-medium rounded-lg"
+            >
               Add Project
             </button>
           </div>
@@ -252,7 +262,10 @@ const List = ({ type }) => {
                     add a project, it would appear here.
                   </p>
 
-                  <button className="btn btn-custom-green w-100 px-4 py-3 fw-medium rounded-lg">
+                  <button
+                    onClick={handleAddProject}
+                    className="btn btn-custom-green w-100 px-4 py-3 fw-medium rounded-lg"
+                  >
                     Add project
                   </button>
                 </div>

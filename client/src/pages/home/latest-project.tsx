@@ -3,6 +3,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-toastify";
 import p3 from "../../assets/images/home/main_image/3.png";
 import p4 from "../../assets/images/home/main_image/4.png";
+import place from "../../assets/images/project.png";
 import Loading from "../../components/home/loading";
 import Layout from "../../layouts/home";
 import useBackendService from "../../services/backend_service";
@@ -214,7 +215,7 @@ const LatestProject = () => {
                         src={
                           project?.projectImages?.length
                             ? project.projectImages[0].image
-                            : "assets/images/project/project-1.jpg"
+                            : place
                         }
                         alt={project.title}
                         style={{
