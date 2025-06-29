@@ -3,11 +3,12 @@ import { Image } from "react-bootstrap";
 import { Button, Col, Container, Row } from "reactstrap";
 import place from "../assets/images/project.png";
 
+import { FolderOpenDot } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import cancel from "../assets/images/cancel.svg";
 import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
+import "./emptyProject.css";
 import { formatDate } from "./formatTime";
 import Loading from "./home/loading";
 
@@ -153,7 +154,6 @@ export const ProjectItem = (props: any) => {
 
 const List = ({ type }) => {
   const { authState, currentState } = useContent();
-  const [loading, setLoading] = useState(true);
   const [responseData, setResponseData] = useState([]);
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
@@ -165,13 +165,10 @@ const List = ({ type }) => {
     "GET",
     {
       onSuccess: (res: any) => {
-        // setResponseData(res.projects);
-        // setTotalProjects(res.totalItems || 0);
-        setLoading(false);
+        setResponseData(res.projects);
+        setTotalProjects(res.totalItems || 0);
       },
       onError: (error) => {
-        setLoading(false);
-
         toast.error("Failed to fetch NGOs.");
       },
     }
@@ -185,12 +182,12 @@ const List = ({ type }) => {
       });
     } else {
       if (role === "NGO") {
-        fetchUsers({
-          page: currentPage,
-          projectType: "present",
-          status: "active",
-          organization_id: currentState.user.id,
-        });
+        // fetchUsers({
+        //   page: currentPage,
+        //   projectType: "present",
+        //   status: "active",
+        //   organization_id: currentState.user.id,
+        // });
       } else {
         fetchUsers({
           page: currentPage,
@@ -219,87 +216,104 @@ const List = ({ type }) => {
   };
 
   return (
-    <div className="pb-5">
-      {loading && <Loading type={"inline"} />}
-      {responseData.length === 0 && !loading && (
-        <div className="d-flex align-items-center justify-content-center m-auto">
-          <div className="text-center mt-4">
-            <h6 className="mb-3" style={{ fontSize: "16px" }}>
-              You don’t have any projects currently
-            </h6>
-            <div className="d-flex flex-column align-items-center">
-              <img
-                src={cancel}
-                alt="cancel icon"
-                width="30px"
-                height="30px"
-                className="mb-3"
-              />
-              {type === "past" && (
-                <Button
-                  className="px-3 btn-custom text-white"
-                  variant="primary"
-                  type="button"
-                  onClick={create}
-                >
-                  {"+ Add Past Project"}
-                </Button>
-              )}
-            </div>
+    <div className="min-vh-100 p-4">
+      <div className="container-fluid">
+        <div className="row align-items-center mb-5">
+          <div className="col">
+            <h3 className="text-custom-green fs-2 fw-semibold mb-0">
+              Projects
+            </h3>
+          </div>
+          <div className="col-auto">
+            <button className="btn btn-custom-green px-4 py-2 fw-medium rounded-lg">
+              Add Project
+            </button>
           </div>
         </div>
-      )}
-      {responseData.length > 0 && !loading && (
-        <>
-          <Container>
-            <Row className="pt-5">
-              {responseData.map((project) => {
-                let img;
-                if (type === "past") {
-                  img = project.projectImages[0]?.image;
-                }
-                return (
-                  <ProjectItem
-                    type={type}
-                    project={project}
-                    image={img}
-                    key={project.id}
-                  />
-                );
-              })}
-            </Row>
-          </Container>
+        <div className="pb-5">
+          {isLoading && <Loading type={"inline"} />}
+          {responseData.length === 0 && !isLoading && (
+            <div
+              style={{ marginTop: "200px" }}
+              className="row justify-content-center"
+            >
+              <div className="col-12 col-md-6 col-lg-4">
+                <div className="text-center empty-state-container">
+                  <div className="mb-4">
+                    <FolderOpenDot className="text-custom-muted" size={50} />
+                  </div>
 
-          <div className="d-flex justify-content-between mt-4">
-            <Button
-              style={{
-                backgroundColor: currentPage === 1 ? "grey" : "#7B80DD",
-                color: "white",
-                border: "none",
-                cursor: currentPage === 1 ? "not-allowed" : "pointer",
-              }}
-              onClick={previousPage}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </Button>
-            <Button
-              style={{
-                backgroundColor:
-                  currentPage * 6 >= totalProjects ? "grey" : "#7B80DD",
-                color: "white",
-                border: "none",
-                cursor:
-                  currentPage * 6 >= totalProjects ? "not-allowed" : "pointer",
-              }}
-              onClick={nextPage}
-              disabled={currentPage * 6 >= totalProjects}
-            >
-              Next
-            </Button>
-          </div>
-        </>
-      )}
+                  <h2 className="text-custom-dark fs-4 fw-semibold mb-3">
+                    No projects yet
+                  </h2>
+
+                  <p className="text-custom-muted mb-5 lh-base">
+                    You don't seem to have an projects available yet. When you
+                    add a project, it would appear here.
+                  </p>
+
+                  <button className="btn btn-custom-green w-100 px-4 py-3 fw-medium rounded-lg">
+                    Add project
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {responseData.length > 0 && !isLoading && (
+            <>
+              <Container>
+                <Row className="pt-5">
+                  {responseData.map((project) => {
+                    let img;
+                    if (type === "past") {
+                      img = project.projectImages[0]?.image;
+                    }
+                    return (
+                      <ProjectItem
+                        type={type}
+                        project={project}
+                        image={img}
+                        key={project.id}
+                      />
+                    );
+                  })}
+                </Row>
+              </Container>
+
+              <div className="d-flex justify-content-between mt-4">
+                <Button
+                  style={{
+                    backgroundColor: currentPage === 1 ? "grey" : "#7B80DD",
+                    color: "white",
+                    border: "none",
+                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                  }}
+                  onClick={previousPage}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <Button
+                  style={{
+                    backgroundColor:
+                      currentPage * 6 >= totalProjects ? "grey" : "#7B80DD",
+                    color: "white",
+                    border: "none",
+                    cursor:
+                      currentPage * 6 >= totalProjects
+                        ? "not-allowed"
+                        : "pointer",
+                  }}
+                  onClick={nextPage}
+                  disabled={currentPage * 6 >= totalProjects}
+                >
+                  Next
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
