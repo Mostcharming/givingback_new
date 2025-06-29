@@ -2,9 +2,9 @@
   color: #128330;
 }
 .btn-custom-green {
-  background-color: #128330;
-  border-color: #128330;
-  color: #ffffff;
+  background-color: #128330 !important;
+  border-color: #128330 !important;
+  color: #ffffff !important;
 }
 .btn-custom-green:hover {
   background-color: #0f6b28;
@@ -15,7 +15,7 @@
   color: #1e1e1e;
 }
 .text-custom-muted {
-  color: #373737;
+  color: #9a9ca0;
 }
 .-state-container {
   margin-top: 8rem;

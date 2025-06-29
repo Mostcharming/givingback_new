@@ -6,10 +6,10 @@ import place from "../assets/images/project.png";
 import { FolderOpenDot } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { getStatusBadgeProps } from "../helper";
 import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
 import "./emptyProject.css";
-import { formatDate } from "./formatTime";
 import Loading from "./home/loading";
 
 export const ProjectItem = (props: any) => {
@@ -49,103 +49,113 @@ export const ProjectItem = (props: any) => {
   };
 
   const image = props.image ? `${props.image}` : place;
+  const badgeProps = getStatusBadgeProps(props.project.status);
+  const cost = props.project.cost ?? props.project.allocated ?? 0;
 
+  const totalMilestones = props.project.milestones?.length || 0;
+  const completedMilestones =
+    props.project.milestones?.filter((m) =>
+      m.updates?.some((u) => u.status?.toLowerCase() === "completed")
+    ).length || 0;
+  const completedMilestoneTargets =
+    props.project.milestones
+      ?.filter((m) =>
+        m.updates?.some((u) => u.status?.toLowerCase() === "completed")
+      )
+      .reduce((sum, m) => sum + (m.target || 0), 0) || 0;
+
+  const progressPercent = totalMilestones
+    ? Math.round((completedMilestones / totalMilestones) * 100)
+    : 0;
+  const formatter = new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+  });
   return (
     <Col className="px-3 mt-4" lg={4}>
       <div
-        style={{
-          borderRadius: "8px",
-          backgroundColor: "white",
-          cursor: "pointer",
-        }}
         onMouseEnter={enter}
         onMouseLeave={leave}
+        onClick={details}
+        className="card shadow-sm rounded"
+        style={{ cursor: "pointer", maxWidth: "600px", margin: "0 auto" }}
       >
-        <div style={{ width: "100%", height: "100%", position: "relative" }}>
+        <div className="position-relative">
           <Image
-            fluid={true}
             src={image}
-            style={{
-              width: "100%",
-              height: "200px",
-              borderRadius: "8px 8px 0px 0px",
-              objectFit: "cover",
-              objectPosition: "center",
-            }}
+            alt="Person drinking from water tap"
+            width={600}
+            height={300}
+            className="card-img-top"
+            style={{ height: "300px", objectFit: "cover" }}
           />
-          <div
-            style={{
-              visibility: show ? "visible" : "hidden",
-              top: "0",
-              width: "100%",
-              height: "100%",
-              borderRadius: "8px 8px 0px 0px",
-              backgroundColor: "#0005",
-              position: "absolute",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            {/* <NavDropdown
-              className="m-2"
-              title={
-                <span>
-                  {" "}
-                  <BiCog size="25" />
-                </span>
-              }
+          <div className="position-absolute top-0 end-0 right-0 m-3">
+            <span
+              className="rounded-pill px-3 py-2"
               style={{
-                color: "white",
-                float: "right",
-                display: "flex",
-                justifyContent: "flex-end",
+                backgroundColor: badgeProps.backgroundColor,
+                color: badgeProps.color,
+                fontSize: "14px",
+                fontWeight: "500",
               }}
             >
-              <NavDropdown.Item className="m-auto" onClick={edit}>
-                Edit
-              </NavDropdown.Item>
-              <NavDropdown.Item className="m-auto" onClick={details}>
-                Campaign
-              </NavDropdown.Item>
-              <NavDropdown.Item className="m-auto text-danger">Deactivate</NavDropdown.Item>
-            </NavDropdown> */}
-            <div
-              className="m-auto text-white rounded px-3"
-              style={{ border: "2px solid white" }}
-              onClick={details}
-            >
-              View Project
-            </div>
+              {badgeProps.text}
+            </span>
           </div>
         </div>
-        <div
-          className="p-3"
-          style={
-            {
-              // height: '400px'
-            }
-          }
-        >
-          <label className="mute" style={{ color: "grey" }}>
-            {props.project.status}
-          </label>
-          <h4 style={{ fontWeight: "500" }}>{props.project.title}</h4>
-          <label className="pt-1">{props.project.description}</label>
-          <Row className="pt-2">
-            <Col md={6}>
-              <label className="mute" style={{ color: "grey" }}>
-                Posted on:{" "}
-              </label>
-              <span className="fw-bold">
-                {" "}
-                {formatDate(props.project.createdAt)}
+
+        <div className="card-body p-4">
+          <h2 className="card-title h3 fw-bold text-dark mb-3">
+            {props.project.title}
+          </h2>
+
+          <p
+            className="card-text text-muted mb-4"
+            style={{ fontSize: "16px", lineHeight: "1.5" }}
+          >
+            {props.project.description}
+          </p>
+
+          <div className="mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="text-muted" style={{ fontSize: "16px" }}>
+                Progress
               </span>
-            </Col>
-            <Col md={6}>
-              {/* <label className="mute">Deadline</label> */}
-              {/* <h6>{props.project.deadline}</h6> */}
-            </Col>
-          </Row>
+              <span
+                className="fw-bold text-success"
+                style={{ fontSize: "18px" }}
+              >
+                {progressPercent} %
+              </span>
+            </div>
+
+            <div
+              className="progress"
+              style={{ height: "8px", backgroundColor: "#e9ecef" }}
+            >
+              <div
+                className="progress-bar bg-success"
+                role="progressbar"
+                style={{ width: `${progressPercent}%` }}
+                aria-valuenow={76}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              ></div>
+            </div>
+          </div>
+
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <span className="h5 fw-bold text-dark mb-0">
+                {formatter.format(completedMilestoneTargets)}
+              </span>{" "}
+              <span className="text-muted ms-1"> raised</span>
+            </div>
+            <div className="text-muted">
+              Goal:{" "}
+              <span className="fw-semibold">{formatter.format(cost)}</span>
+            </div>
+          </div>
         </div>
       </div>
     </Col>
@@ -158,18 +168,33 @@ const List = ({ type }) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProjects, setTotalProjects] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const role = authState.user?.role;
+  const [statusFilter, setStatusFilter] = useState("All Projects");
+  const [categoryFilter, setCategoryFilter] = useState("All Categories");
+  const [dateFilter, setDateFilter] = useState("Any time");
 
   const { mutate: fetchUsers, isLoading } = useBackendService(
     "/allprojects",
     "GET",
     {
       onSuccess: (res: any) => {
-        setResponseData(res.projects);
-        setTotalProjects(res.totalItems || 0);
+        if (
+          statusFilter !== "All Projects" ||
+          categoryFilter !== "All Categories" ||
+          dateFilter !== "Any time"
+        ) {
+          if (res.totalItems === 0) {
+            toast.info("No projects found with the selected filters.");
+          }
+        } else {
+          setResponseData(res.projects);
+          setTotalProjects(res.totalItems || 0);
+          setTotalPages(res.totalPages || 1);
+        }
       },
       onError: (error) => {
-        toast.error("Failed to fetch NGOs.");
+        toast.error("Failed to fetch Projects.");
       },
     }
   );
@@ -182,12 +207,12 @@ const List = ({ type }) => {
       });
     } else {
       if (role === "NGO") {
-        // fetchUsers({
-        //   page: currentPage,
-        //   projectType: "present",
-        //   status: "active",
-        //   organization_id: currentState.user.id,
-        // });
+        fetchUsers({
+          page: currentPage,
+          projectType: "present",
+          status: "active",
+          organization_id: currentState.user.id,
+        });
       } else {
         fetchUsers({
           page: currentPage,
@@ -197,7 +222,43 @@ const List = ({ type }) => {
         });
       }
     }
-  }, [currentPage]);
+  }, []);
+  useEffect(() => {
+    const isDefault =
+      statusFilter === "All Projects" &&
+      categoryFilter === "All Categories" &&
+      dateFilter === "Any time";
+
+    const baseQuery = {
+      page: 1,
+      projectType: "present",
+      status: "active",
+      organization_id: currentState.user.id,
+    };
+
+    if (isDefault) {
+      fetchUsers(baseQuery);
+      return;
+    }
+    if (role === "NGO") {
+      fetchUsers({
+        page: currentPage,
+        category: statusFilter !== "All Projects" ? statusFilter : undefined,
+        projectType: "present",
+        startDate: dateFilter !== "Any time" ? dateFilter : undefined,
+        organization_id: currentState.user.id,
+      });
+      // eslint-disable-next-line no-constant-condition
+    } else if (role === "donor" || "corporate") {
+      fetchUsers({
+        page: currentPage,
+        category: statusFilter !== "All Projects" ? statusFilter : undefined,
+        projectType: "present",
+        startDate: dateFilter !== "Any time" ? dateFilter : undefined,
+        donor_id: currentState.user.id,
+      });
+    }
+  }, [currentPage, statusFilter, categoryFilter, dateFilter]);
 
   const nextPage = () => {
     if (currentPage * 6 < totalProjects) {
@@ -274,13 +335,176 @@ const List = ({ type }) => {
           )}
           {responseData.length > 0 && !isLoading && (
             <>
-              <Container>
-                <Row className="pt-5">
+              <div
+                style={{
+                  border: "1px solid rgb(179, 179, 179)",
+                  borderRadius: "10px",
+                }}
+                className="container-fluid p-3"
+              >
+                <div className="row">
+                  {/* Status Filter */}
+                  <div className="mr-2">
+                    <div>
+                      <label className="form-label text-muted small fw-normal">
+                        Status
+                      </label>
+                    </div>
+                    <div className="dropdown">
+                      <button
+                        className="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center"
+                        role="button"
+                        id="dropdownMenuLink"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        style={{
+                          backgroundColor: "white",
+                          border: "1px solid rgb(179, 179, 179)",
+
+                          borderRadius: "8px",
+                          padding: "12px 16px",
+                        }}
+                      >
+                        <span>{statusFilter}</span>
+                      </button>
+                      <ul className="dropdown-menu w-100">
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => setStatusFilter("All Projects")}
+                          >
+                            All Projects
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => setStatusFilter("active")}
+                          >
+                            Active
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => setStatusFilter("completed")}
+                          >
+                            Completed
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => setStatusFilter("closed")}
+                          >
+                            Closed
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Category Filter */}
+                  <div className="mr-2">
+                    <div>
+                      <label className="form-label text-muted small fw-normal">
+                        Category
+                      </label>
+                    </div>
+                    <div className="dropdown">
+                      <button
+                        className="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center"
+                        role="button"
+                        id="dropdownMenuLink"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        style={{
+                          backgroundColor: "white",
+                          border: "1px solid rgb(179, 179, 179)",
+
+                          borderRadius: "8px",
+                          padding: "12px 16px",
+                        }}
+                      >
+                        <span>{categoryFilter}</span>
+                      </button>
+                      <ul className="dropdown-menu w-100">
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => setCategoryFilter("All categories")}
+                          >
+                            All Categories
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => setCategoryFilter("Web Development")}
+                          >
+                            Web Development
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => setCategoryFilter("Mobile App")}
+                          >
+                            Mobile App
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => setCategoryFilter("Design")}
+                          >
+                            Design
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => setCategoryFilter("Marketing")}
+                          >
+                            Marketing
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Date Filter */}
+                  <div className="">
+                    <div>
+                      <label className="form-label text-muted small fw-normal">
+                        Date
+                      </label>
+                    </div>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={dateFilter}
+                      onChange={(e) => setDateFilter(e.target.value)}
+                      style={{
+                        backgroundColor: "white",
+                        border: "1px solid rgb(179, 179, 179)",
+                        borderRadius: "8px",
+                        padding: "24px 16px",
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="row"></div>
+              </div>
+
+              <Container style={{ maxWidth: "unset" }}>
+                <Row>
                   {responseData.map((project) => {
-                    let img;
-                    if (type === "past") {
-                      img = project.projectImages[0]?.image;
-                    }
+                    // if (type === "past") {
+                    const img = project.projectImages[0]?.image;
+                    // }
                     return (
                       <ProjectItem
                         type={type}
@@ -309,16 +533,14 @@ const List = ({ type }) => {
                 <Button
                   style={{
                     backgroundColor:
-                      currentPage * 6 >= totalProjects ? "grey" : "#7B80DD",
+                      currentPage === totalPages ? "grey" : "#7B80DD",
                     color: "white",
                     border: "none",
                     cursor:
-                      currentPage * 6 >= totalProjects
-                        ? "not-allowed"
-                        : "pointer",
+                      currentPage === totalPages ? "not-allowed" : "pointer",
                   }}
                   onClick={nextPage}
-                  disabled={currentPage * 6 >= totalProjects}
+                  disabled={currentPage === totalPages}
                 >
                   Next
                 </Button>
