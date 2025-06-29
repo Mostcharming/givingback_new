@@ -11,7 +11,15 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Col, Container, Row } from "reactstrap";
+import {
+  Button,
+  Col,
+  Container,
+  Modal,
+  ModalBody,
+  ModalHeader,
+  Row,
+} from "reactstrap";
 import DashBox from "../../components/dashbox";
 import { formatDate } from "../../components/formatTime";
 import Tables from "../../components/tables";
@@ -21,14 +29,15 @@ import { useContent } from "../../services/useContext";
 
 const Dashboard = () => {
   const { authState, currentState } = useContent();
-  console.log(authState, currentState);
   const navigate = useNavigate();
   const [dashBoxItems, setDashBoxItems] = useState([]);
   const [tableData, setTableData] = useState([]);
   const [headers, setHeaders] = useState([]);
   const [actions, setActions] = useState([]);
+  const [userBankDetails, setUserBankDetails] = useState(true);
 
   const role = authState.user?.role;
+
   const isFirstTimeLogin = authState?.user?.first_time_login === 0;
   const hasActiveProject = currentState?.activeProjectsCount > 0;
   const hasBankDetails = currentState?.bank?.length > 0;
@@ -39,7 +48,6 @@ const Dashboard = () => {
   const { mutate: getDash } = useBackendService("/donor/dashboard", "GET", {
     onSuccess: (res) => {
       const items = getDashBoxItems(role, res);
-      console.log("Dashboard items:", items);
       setDashBoxItems(items);
     },
     onError: () => {
@@ -88,23 +96,22 @@ const Dashboard = () => {
     }
   );
   useEffect(() => {
-    if (authState.user?.role === "admin") {
+    setUserBankDetails(hasBankDetails);
+
+    if (role === "admin") {
       getDashAdmin({});
       getTableData({});
-    } else if (
-      authState.user?.role === "donor" ||
-      authState.user?.role === "corporate"
-    ) {
+    } else if (role === "donor" || role === "corporate") {
       getDash({});
       getTableData({ projectType: "present", donor_id: currentState?.user.id });
-    } else if (authState.user?.role === "NGO") {
+    } else if (role === "NGO") {
       getDash({});
       getTableData({
         projectType: "present",
         ngo_id: currentState?.user.id,
       });
     }
-  }, [authState.user?.role]);
+  }, []);
 
   const getDashBoxItems = (role, data: any) => {
     // Return dash box items based on role
@@ -244,7 +251,6 @@ const Dashboard = () => {
   };
 
   const handleEmptyStateClick = () => {
-    const role = authState.user?.role;
     switch (role) {
       case "admin":
         navigate("/admin/briefs"); // Redirect to admin briefs
@@ -277,6 +283,7 @@ const Dashboard = () => {
           </>
         );
       case "donor":
+      case "corporate":
         return (
           <>
             <Row>
@@ -303,11 +310,106 @@ const Dashboard = () => {
 
   return (
     <>
+      {role === "NGO" && (
+        <Modal
+          isOpen={!userBankDetails}
+          backdrop="static"
+          centered
+          toggle={() => setUserBankDetails(true)}
+        >
+          <ModalHeader
+            toggle={() => setUserBankDetails(true)}
+            style={{
+              backgroundColor: "white",
+            }}
+          />
+          <ModalBody
+            className="text-center"
+            style={{
+              backgroundColor: "white",
+              color: "black",
+              display: "flex",
+              justifyContent: "space-around",
+              flexDirection: "column",
+            }}
+          >
+            <div className="p-3">
+              <svg
+                width="112"
+                height="112"
+                viewBox="0 0 112 112"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle cx="56" cy="56" r="56" fill="#E6E6E6" />
+                <g clip-path="url(#clip0_45_8596)">
+                  <path
+                    d="M75.1384 64.3897C73.7944 68.0319 71.762 71.1989 69.0966 73.8017C66.0628 76.7642 62.0902 79.1182 57.289 80.7975C57.1314 80.8524 56.967 80.8974 56.8019 80.9306C56.5837 80.9737 56.3616 80.997 56.1415 81H56.0984C55.8638 81 55.6281 80.9764 55.3942 80.9306C55.2291 80.8974 55.0669 80.8524 54.9101 80.7986C50.1032 79.122 46.1257 76.7691 43.0888 73.8066C40.4223 71.2039 38.3902 68.0388 37.0482 64.3965C34.6079 57.7742 34.7468 50.479 34.8586 44.6165L34.8605 44.5265C34.883 44.0424 34.8975 43.5339 34.9055 42.9724C34.9463 40.2155 37.1382 37.9347 39.8955 37.781C45.6442 37.4602 50.0914 35.5852 53.8912 31.8816L53.9244 31.851C54.5554 31.2723 55.3504 30.9885 56.1415 31.0004C56.9045 31.0103 57.6644 31.2937 58.2728 31.851L58.3052 31.8816C62.1058 35.5852 66.553 37.4602 72.3017 37.781C75.059 37.9347 77.2509 40.2155 77.2918 42.9724C77.2998 43.5377 77.3143 44.0455 77.3368 44.5265L77.3379 44.5647C77.4493 50.4382 77.5874 57.7479 75.1384 64.3897Z"
+                    fill="#00DD80"
+                  />
+                  <path
+                    d="M75.1384 64.3893C73.7945 68.0316 71.762 71.1986 69.0967 73.8013C66.0629 76.7638 62.0902 79.1179 57.2891 80.7971C57.1315 80.852 56.9671 80.8971 56.8019 80.9302C56.5837 80.9733 56.3617 80.9966 56.1416 80.9997V31C56.9045 31.0099 57.6644 31.2934 58.2729 31.8507L58.3053 31.8812C62.1059 35.5849 66.5531 37.4598 72.3018 37.7806C75.0591 37.9344 77.251 40.2152 77.2918 42.9721C77.2998 43.5374 77.3143 44.0451 77.3368 44.5262L77.338 44.5643C77.4494 50.4378 77.5875 57.7475 75.1384 64.3893Z"
+                    fill="#00AA63"
+                  />
+                  <path
+                    d="M68.5583 56.0002C68.5583 62.8563 62.9915 68.4372 56.1411 68.4616H56.0972C49.2266 68.4616 43.6357 62.8712 43.6357 56.0002C43.6357 49.1295 49.2266 43.5391 56.0972 43.5391H56.1411C62.9915 43.5635 68.5583 49.1444 68.5583 56.0002Z"
+                    fill="white"
+                  />
+                  <path
+                    d="M68.5588 56.0002C68.5588 62.8563 62.992 68.4372 56.1416 68.4616V43.5391C62.992 43.5635 68.5588 49.1444 68.5588 56.0002Z"
+                    fill="#E1EBF0"
+                  />
+                  <path
+                    d="M61.7539 54.2056L56.1418 59.8186L54.9291 61.0313C54.6426 61.3177 54.2668 61.4608 53.8915 61.4608C53.5157 61.4608 53.1403 61.3177 52.8535 61.0313L50.2461 58.4228C49.6732 57.8498 49.6732 56.9217 50.2461 56.3483C50.8183 55.7754 51.7476 55.7754 52.3206 56.3483L53.8915 57.9192L59.6795 52.1312C60.2525 51.5578 61.1817 51.5578 61.7539 52.1312C62.3269 52.7042 62.3269 53.6334 61.7539 54.2056Z"
+                    fill="#B4D2D7"
+                  />
+                  <path
+                    d="M61.7538 54.2056L56.1416 59.8186V55.6686L59.6794 52.1312C60.2523 51.5578 61.1816 51.5578 61.7538 52.1312C62.3268 52.7042 62.3268 53.6334 61.7538 54.2056Z"
+                    fill="#6FA5AA"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0_45_8596">
+                    <rect
+                      width="50"
+                      height="50"
+                      fill="white"
+                      transform="translate(31 31)"
+                    />
+                  </clipPath>
+                </defs>
+              </svg>
+            </div>
+            <h4 className="p-3">Complete KYC</h4>
+            <p>
+              Hey there, we noticed you haven’t completed your KYC. Please do so
+              to verify your account and get projects.
+            </p>
+
+            <div className="text-center">
+              <Button
+                className="p-3 mt-5 mb-3"
+                style={{
+                  border: "none",
+                  width: "-webkit-fill-available",
+                  background: "#02a95c",
+                  color: "white",
+                }}
+                type="button"
+                onClick={() => navigate("/ngo/profile")}
+              >
+                Get started
+              </Button>
+            </div>
+          </ModalBody>
+        </Modal>
+      )}
+
       <Container>
         <Col className="p-4">{renderBreadcrumbs(role)} </Col>
       </Container>
       <DashBox items={dashBoxItems} />
-      {authState.user?.role === "NGO" && (
+      {role === "NGO" && (
         <Container fluid className="mt-4">
           <div
             style={{
