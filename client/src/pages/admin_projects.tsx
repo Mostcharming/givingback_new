@@ -91,7 +91,7 @@ const Admin_projects = () => {
   };
 
   const handleEmptyStateClick = () => {
-    navigate("/admin/brief_initiate"); // Redirect to admin briefs
+    navigate("/admin/projects/brief_initiate"); // Redirect to admin briefs
   };
 
   ///filters
@@ -290,7 +290,7 @@ const Admin_projects = () => {
               borderRadius: "3px",
               border: "none",
             }}
-            onClick={() => navigate("/admin/brief_initiate")}
+            onClick={() => navigate("/admin/projects/brief_initiate")}
           >
             + Initiate a Project
           </Button>

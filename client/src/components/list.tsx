@@ -281,14 +281,14 @@ const List = ({ type }) => {
   const handleAddProject = () => {
     switch (role) {
       case "admin":
-        navigate("/admin/brief_initiate");
+        navigate("/admin/projects/brief_initiate");
         break;
       case "donor":
       case "corporate":
-        navigate("/donor/brief_initiate");
+        navigate("/donor/projects/brief_initiate");
         break;
       case "NGO":
-        navigate("/ngo/brief_initiate");
+        navigate("/ngo/projects/brief_initiate");
         break;
       default:
         console.log("Invalid role or no role found");

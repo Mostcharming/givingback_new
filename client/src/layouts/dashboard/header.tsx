@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 // reactstrap components
+import { FaChevronDown } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import {
   Container,
@@ -18,7 +19,6 @@ import useBackendService from "../../services/backend_service";
 import { useContent } from "../../services/useContext";
 import { logout_auth } from "../../store/reducers/authReducer";
 import { RootState } from "../../types";
-import { FaChevronDown } from "react-icons/fa";
 
 const AdminNavbar: React.FC<any> = (props) => {
   const { currentState } = useContent();
@@ -33,33 +33,12 @@ const AdminNavbar: React.FC<any> = (props) => {
     onError: () => {},
   });
 
-  const getCurrentRoute = () => {
-    const path = location.pathname;
-
-    if (path.endsWith("/dashboard")) return "DASHBOARD";
-    if (path.endsWith("/ngo_directory")) return "NGO DIRECTORY";
-    if (path.endsWith("/add_past")) return "ADD PAST PROJECT";
-    if (path.endsWith("/fund_management")) return "FUND MANAGEMENT";
-    if (path.endsWith("/fund_wallet")) return "FUND WALLET";
-    if (path.endsWith("/send_money")) return "SEND MONEY";
-    if (path.includes("/briefs")) return "BRIEFS";
-    if (path.includes("/brief_initiate")) return "CREATE BRIEF";
-
-    // Check if the path matches "/ngo/<number>"
-    const ngoDetailsMatch = path.match(/\/ngo\/\d+$/);
-    if (ngoDetailsMatch) return "NGO DETAILS";
-    const projectDetailsMatch = path.match(/\/project\/\d+$/);
-    if (projectDetailsMatch) return "PROJECT DETAILS";
-
-    return path.split("/").pop()?.toUpperCase() || "HOME";
-  };
-
   return (
     <>
       <Navbar
         style={{
           height: "10px",
-          marginBottom: "70px",
+          marginBottom: "63px",
         }}
         className="navbar-top navbar-dark"
         expand="md"

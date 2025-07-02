@@ -102,9 +102,8 @@ const routes = [
     component: <DN_Projects />,
     layout: "/donor",
   },
-
   {
-    path: "/brief_initiate",
+    path: "/projects/brief_initiate",
     name: "Create Project",
     icon: <FolderPlus />,
     component: <CreateProject />,
@@ -324,13 +323,13 @@ const routes = [
   },
   //////breif initiate
   {
-    path: "/brief_initiate",
+    path: "/projects/brief_initiate",
     icon: "ni ni-chart-bar-32",
     component: <CreateProject />,
     layout: "/admin",
   },
   {
-    path: "/brief_initiate",
+    path: "/projects/brief_initiate",
     icon: "ni ni-chart-bar-32",
     component: <CreateProject />,
     layout: "/ngo",

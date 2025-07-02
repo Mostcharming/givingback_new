@@ -57,25 +57,21 @@ const Sidebar: React.FC<any> = (props) => {
     onError: () => {},
   });
 
-  // verifies if routeName is the one active (in browser input)
   const activeRoute = (routeName: string) => {
     return props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
   };
 
-  // toggles collapse between opened and closed (true/false)
   const toggleCollapse = () => {
     setCollapseOpen((data) => !data);
   };
 
-  // closes the collapse
   const closeCollapse = () => {
     setCollapseOpen(false);
   };
 
-  // creates the links that appear in the left menu / Sidebar
   const createLinks = (routes: SidebarRoute[]) => {
     return routes
-      .filter((prop) => prop.layout === compare && prop.name) // Only include routes where the layout matches compare
+      .filter((prop) => prop.layout === compare && prop.name)
       .map((prop, key) => (
         <NavItem key={key} className="custom-nav-item m-2">
           <NavLink

@@ -225,12 +225,6 @@ const Register = () => {
     submitDonorForm(finalFormData);
   };
 
-  // const handleBack = () => {
-  //   if (step > 1) {
-  //     setStep(step - 1);
-  //   }
-  // };
-
   const renderStepIndicator = () => (
     <Row>
       <div className="step-indicator d-flex justify-content-center mb-5">
