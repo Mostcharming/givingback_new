@@ -32,7 +32,7 @@ import MessageDonor from "../pages/messages";
 import AddPastProject from "../pages/ngo/pastproject/past-projects";
 import NGODetails from "../pages/ngo_details";
 import Ngo from "../pages/ngodirectory";
-import CreateProject from "../pages/project/create-project";
+import CreateProject from "../pages/project/create-project-options";
 import ProjectViewDetail from "../pages/project_details";
 import AdminDashboard from "../pages/report/dashboard";
 import SendMoney from "../pages/send";
@@ -328,6 +328,12 @@ const routes = [
     icon: "ni ni-chart-bar-32",
     component: <CreateProject />,
     layout: "/admin",
+  },
+  {
+    path: "/brief_initiate",
+    icon: "ni ni-chart-bar-32",
+    component: <CreateProject />,
+    layout: "/ngo",
   },
 ];
 

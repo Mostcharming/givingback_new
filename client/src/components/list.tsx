@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Image } from "react-bootstrap";
 import { Button, Col, Container, Row } from "reactstrap";
@@ -13,13 +14,9 @@ import "./emptyProject.css";
 import Loading from "./home/loading";
 
 export const ProjectItem = (props: any) => {
-  const [show, setShow] = useState(false);
   const navigate = useNavigate();
   const { authState } = useContent();
   const role = authState.user?.role;
-
-  const enter = (event: React.MouseEvent<HTMLDivElement>) => setShow(true);
-  const leave = (event: React.MouseEvent<HTMLDivElement>) => setShow(false);
 
   const details = () => {
     if (props.type === "past") {
@@ -74,8 +71,6 @@ export const ProjectItem = (props: any) => {
   return (
     <Col className="px-3 mt-4" lg={4}>
       <div
-        onMouseEnter={enter}
-        onMouseLeave={leave}
         onClick={details}
         className="card shadow-sm rounded"
         style={{ cursor: "pointer", maxWidth: "600px", margin: "0 auto" }}
@@ -173,6 +168,17 @@ const List = ({ type }) => {
   const [statusFilter, setStatusFilter] = useState("All Projects");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [dateFilter, setDateFilter] = useState("Any time");
+  const [areas, setAreas] = useState([]);
+  const { mutate: getAreas } = useBackendService("/areas", "GET", {
+    onSuccess: (res2: any) => {
+      setAreas(res2 as any[]);
+    },
+    onError: () => {},
+  });
+
+  useEffect(() => {
+    getAreas({});
+  }, []);
 
   const { mutate: fetchUsers, isLoading } = useBackendService(
     "/allprojects",
@@ -193,7 +199,7 @@ const List = ({ type }) => {
           setTotalPages(res.totalPages || 1);
         }
       },
-      onError: (error) => {
+      onError: () => {
         toast.error("Failed to fetch Projects.");
       },
     }
@@ -273,14 +279,20 @@ const List = ({ type }) => {
   };
 
   const handleAddProject = () => {
-    toast.success("🎉 Project added successfully!", {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    });
+    switch (role) {
+      case "admin":
+        navigate("/admin/brief_initiate");
+        break;
+      case "donor":
+      case "corporate":
+        navigate("/donor/brief_initiate");
+        break;
+      case "NGO":
+        navigate("/ngo/brief_initiate");
+        break;
+      default:
+        console.log("Invalid role or no role found");
+    }
   };
 
   return (
@@ -439,38 +451,16 @@ const List = ({ type }) => {
                             All Categories
                           </button>
                         </li>
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => setCategoryFilter("Web Development")}
-                          >
-                            Web Development
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => setCategoryFilter("Mobile App")}
-                          >
-                            Mobile App
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => setCategoryFilter("Design")}
-                          >
-                            Design
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => setCategoryFilter("Marketing")}
-                          >
-                            Marketing
-                          </button>
-                        </li>
+                        {areas?.map((area) => (
+                          <li key={area.id}>
+                            <button
+                              className="dropdown-item"
+                              onClick={() => setCategoryFilter(area.name)}
+                            >
+                              {area.name}
+                            </button>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>
