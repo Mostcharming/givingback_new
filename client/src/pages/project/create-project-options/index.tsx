@@ -1,30 +1,46 @@
 import { ChevronRight, CircleCheckBig } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Select from "react-select";
+import { Button, FormGroup, Input, InputGroup } from "reactstrap";
+import useBackendService from "../../../services/backend_service";
+import { useContent } from "../../../services/useContext";
 
 const CreateProject = () => {
+  const navigate = useNavigate();
+  const { authState } = useContent();
+  const role = authState.user?.role;
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     status: "",
     duration: "",
-    relatedFields: "",
-    cost: "",
-    amountRaised: "",
-    managerEmail: "",
+    startDate: null,
+    endDate: null,
+    interest_area: "",
   });
   const [step, setStep] = useState(1);
+  const [areas, setAreas] = useState([]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
+  const { mutate: getAreas } = useBackendService("/areas", "GET", {
+    onSuccess: (res2: any) => {
+      setAreas(res2 as any[]);
+    },
+    onError: () => {},
+  });
+  const onThematicAreaChange = (event: { value: string; label: string }[]) => {
+    const interest_area = event.map((item) => item.value).join(",");
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      interest_area: interest_area,
     }));
   };
+
+  useEffect(() => {
+    getAreas({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const progressSteps = [
     { name: "Project details", completed: step > 1 },
@@ -40,6 +56,22 @@ const CreateProject = () => {
   const handleBackStep = (e: React.FormEvent) => {
     e.preventDefault();
     setStep((prev) => prev - 1);
+  };
+  const handleExit = () => {
+    switch (role) {
+      case "admin":
+        navigate(`/admin/projects`);
+        break;
+      case "donor":
+      case "corporate":
+        navigate(`/donor/projects`);
+        break;
+      case "NGO":
+        navigate(`/ngo/projects`);
+        break;
+      default:
+        console.log("Invalid role or no role found");
+    }
   };
   const renderProgress = () => {
     return (
@@ -139,172 +171,185 @@ const CreateProject = () => {
           <p className="text-muted mb-0">Add details about your project here</p>
         </div>
 
-        <form>
-          <div className="mb-4">
-            <label htmlFor="title" className="form-label text-muted">
-              Project title
-            </label>
-            <input
-              type="text"
-              className="form-control border-0 border-bottom rounded-0 px-0"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              style={{
-                boxShadow: "none",
-                borderColor: "#dee2e6 !important",
-              }}
-            />
-          </div>
-
-          {/* Project Description */}
-          <div className="mb-4">
-            <label htmlFor="description" className="form-label text-muted">
-              Project description
-            </label>
-            <textarea
-              className="form-control border-0 border-bottom rounded-0 px-0"
-              id="description"
-              name="description"
-              rows={4}
-              value={formData.description}
-              onChange={handleInputChange}
-              style={{
-                boxShadow: "none",
-                borderColor: "#dee2e6 !important",
-                resize: "none",
-              }}
-            />
-          </div>
-
-          <div className="row mb-4">
-            <div className="col-md-6">
-              <label htmlFor="status" className="form-label text-muted">
-                Project status
-              </label>
-              <select
-                className="form-select border-0 border-bottom rounded-0 px-0"
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                style={{
-                  boxShadow: "none",
-                  borderColor: "#dee2e6 !important",
-                }}
-              >
-                <option value="">Select status</option>
-                <option value="planning">Planning</option>
-                <option value="active">Active</option>
-                <option value="completed">Completed</option>
-              </select>
-            </div>
-            <div className="col-md-6">
-              <label htmlFor="duration" className="form-label text-muted">
-                Project duration
-              </label>
-              <input
-                type="date"
-                className="form-control border-0 border-bottom rounded-0 px-0"
-                id="duration"
-                name="duration"
-                value={formData.duration}
-                onChange={handleInputChange}
-                style={{
-                  boxShadow: "none",
-                  borderColor: "#dee2e6 !important",
-                }}
+        <form className="pr-5">
+          <FormGroup className="">
+            <InputGroup className="input-group-alternative">
+              <Input
+                style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                className="p-3"
+                placeholder="Project title"
+                type="text"
+                name="title"
+                required
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    title: e.target.value,
+                  }))
+                }
               />
-            </div>
-          </div>
-
-          {/* Select Related Fields */}
-          <div className="mb-4">
-            <label htmlFor="relatedFields" className="form-label text-muted">
-              Select related fields
-            </label>
-            <select
-              className="form-select border-0 border-bottom rounded-0 px-0"
-              id="relatedFields"
-              name="relatedFields"
-              value={formData.relatedFields}
-              onChange={handleInputChange}
-              style={{
-                boxShadow: "none",
-                borderColor: "#dee2e6 !important",
-              }}
-            >
-              <option value="">Select fields</option>
-              <option value="technology">Technology</option>
-              <option value="healthcare">Healthcare</option>
-              <option value="education">Education</option>
-            </select>
-          </div>
-
-          {/* Project Cost and Amount Raised Row */}
-          <div className="row mb-4">
-            <div className="col-md-6">
-              <label htmlFor="cost" className="form-label text-muted">
-                Project cost (NGN)
-              </label>
-              <input
-                type="number"
-                className="form-control border-0 border-bottom rounded-0 px-0"
-                id="cost"
-                name="cost"
-                value={formData.cost}
-                onChange={handleInputChange}
-                style={{
-                  boxShadow: "none",
-                  borderColor: "#dee2e6 !important",
-                }}
+            </InputGroup>
+          </FormGroup>
+          <FormGroup className="mt-4">
+            <InputGroup className="input-group-alternative">
+              <Input
+                style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                className="p-3"
+                placeholder="Project description"
+                type="textarea"
+                name="description"
+                rows={5}
+                required
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
               />
-            </div>
+            </InputGroup>
+          </FormGroup>
+          <div className="row mt-4">
             <div className="col-md-6">
-              <label htmlFor="amountRaised" className="form-label text-muted">
-                Amount raised (NGN)
-              </label>
-              <input
-                type="number"
-                className="form-control border-0 border-bottom rounded-0 px-0"
-                id="amountRaised"
-                name="amountRaised"
-                value={formData.amountRaised}
-                onChange={handleInputChange}
-                style={{
-                  boxShadow: "none",
-                  borderColor: "#dee2e6 !important",
-                }}
-              />
+              <FormGroup>
+                <InputGroup className="input-group-alternative">
+                  <select
+                    style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                    className="form-control p-3"
+                    name="status"
+                    required
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        status: e.target.value,
+                      }))
+                    }
+                  >
+                    <option value="" disabled>
+                      Project Status
+                    </option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </InputGroup>
+              </FormGroup>
+            </div>
+
+            <div className="col-md-6">
+              <div className="row">
+                {" "}
+                <div className="col-md-6">
+                  <FormGroup>
+                    <label className="mb-1">Start date</label>
+
+                    <InputGroup className="input-group-alternative">
+                      <Input
+                        style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                        className="p-3"
+                        placeholder="Project duration"
+                        type="date"
+                        name="duration"
+                        rows={5}
+                        required
+                        value={formData.duration}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            duration: e.target.value,
+                          }))
+                        }
+                      />
+                    </InputGroup>
+                  </FormGroup>
+                </div>
+                <div className="col-md-6">
+                  <FormGroup>
+                    <label className="mb-1">End date</label>
+                    <InputGroup className="input-group-alternative">
+                      <Input
+                        style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                        className="p-3"
+                        placeholder="Project duration"
+                        type="date"
+                        name="endDate"
+                        rows={5}
+                        required
+                        value={formData.duration}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            endDate: e.target.value,
+                          }))
+                        }
+                      />
+                    </InputGroup>
+                  </FormGroup>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className="mb-5">
-            <label htmlFor="managerEmail" className="form-label text-muted">
-              Project manager's email
-            </label>
-            <input
-              type="email"
-              className="form-control border-0 border-bottom rounded-0 px-0"
-              id="managerEmail"
-              name="managerEmail"
-              value={formData.managerEmail}
-              onChange={handleInputChange}
-              style={{
-                boxShadow: "none",
-                borderColor: "#dee2e6 !important",
-              }}
-            />
-          </div>
+          <FormGroup className="mt-4">
+            <InputGroup className="input-group-alternative">
+              <Select
+                styles={{
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "#F2F2F2",
+                    minHeight: "100%",
+                    height: "100%",
+                  }),
+                  valueContainer: (provided) => ({
+                    ...provided,
+                    height: "100%",
+                    padding: "0 6px",
+                  }),
+                  input: (provided) => ({
+                    ...provided,
+                    margin: "0px",
+                  }),
+                  indicatorsContainer: (provided) => ({
+                    ...provided,
+                    height: "55px",
+                  }),
+                }}
+                className="w-100"
+                placeholder="Select related fields"
+                required
+                onChange={onThematicAreaChange}
+                options={areas.map((category) => ({
+                  value: category.name,
+                  label: category.name,
+                }))}
+                isMulti
+              />
+            </InputGroup>
+          </FormGroup>
 
           <div className="d-flex justify-content-between pt-4">
-            <button type="button" className="btn btn-outline-success px-4 py-2">
+            <button
+              onClick={handleExit}
+              type="button"
+              className="btn btn-outline-success px-5 py-3"
+            >
               Exit
             </button>
-            <button type="submit" className="btn btn-dark px-4 py-2">
+            <Button
+              onClick={handleNextStep}
+              className="btn px-5 py-3"
+              // disabled={
+              //   !formData.userType || !formData.email || !formData.password
+              // }
+              style={{
+                border: "none",
+
+                background: "#02a95c",
+              }}
+            >
               Continue
-            </button>
+            </Button>
           </div>
         </form>
       </div>

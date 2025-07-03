@@ -253,14 +253,14 @@ const Dashboard = () => {
   const handleEmptyStateClick = () => {
     switch (role) {
       case "admin":
-        navigate("/admin/briefs"); // Redirect to admin briefs
+        navigate("/admin/projects"); // Redirect to admin briefs
         break;
       case "donor":
       case "corporate":
-        navigate("/donor/briefs"); // Redirect to donor briefs
+        navigate("/donor/projects"); // Redirect to donor briefs
         break;
       case "NGO":
-        navigate("/ngo/briefs"); // Redirect to NGO briefs
+        navigate("/ngo/projects"); // Redirect to NGO briefs
         break;
       default:
         console.log("Invalid role or no role found");
