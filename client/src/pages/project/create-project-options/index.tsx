@@ -18,6 +18,9 @@ const CreateProject = () => {
     startDate: null,
     endDate: null,
     interest_area: "",
+    orgemail: "",
+    cost: null,
+    raised: null,
   });
   const [step, setStep] = useState(1);
   const [areas, setAreas] = useState([]);
@@ -327,6 +330,71 @@ const CreateProject = () => {
               />
             </InputGroup>
           </FormGroup>
+          <div className="row">
+            <div className="col-md-6">
+              <FormGroup>
+                <InputGroup className="input-group-alternative">
+                  <Input
+                    style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                    className="p-3"
+                    placeholder="Project cost (NGN)"
+                    type="number"
+                    name="cost"
+                    rows={5}
+                    required
+                    value={formData.cost}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        cost: e.target.value,
+                      }))
+                    }
+                  />
+                </InputGroup>
+              </FormGroup>
+            </div>
+            <div className="col-md-6">
+              <FormGroup>
+                <InputGroup className="input-group-alternative">
+                  <Input
+                    style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                    className="p-3"
+                    placeholder="Amount raised (NGN)"
+                    type="number"
+                    name="raised"
+                    rows={5}
+                    required
+                    value={formData.raised}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        raised: e.target.value,
+                      }))
+                    }
+                  />
+                </InputGroup>
+              </FormGroup>
+            </div>
+          </div>
+          <FormGroup className="">
+            <InputGroup className="input-group-alternative">
+              <Input
+                style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                className="p-3"
+                placeholder="Project manager's email"
+                type="email"
+                name="orgemail"
+                required
+                value={formData.orgemail}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    orgemail: e.target.value,
+                  }))
+                }
+              />
+            </InputGroup>
+          </FormGroup>
 
           <div className="d-flex justify-content-between pt-4">
             <button
@@ -339,12 +407,19 @@ const CreateProject = () => {
             <Button
               onClick={handleNextStep}
               className="btn px-5 py-3"
-              // disabled={
-              //   !formData.userType || !formData.email || !formData.password
-              // }
+              disabled={
+                !formData.title ||
+                !formData.description ||
+                !formData.status ||
+                !formData.duration ||
+                !formData.endDate ||
+                !formData.cost ||
+                !formData.raised ||
+                !formData.orgemail ||
+                !formData.interest_area
+              }
               style={{
                 border: "none",
-
                 background: "#02a95c",
               }}
             >
