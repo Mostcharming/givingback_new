@@ -309,7 +309,7 @@ const List = ({ type }) => {
               onClick={handleAddProject}
               className="btn btn-custom-green px-4 py-2 fw-medium rounded-lg"
             >
-              Add Project
+              Add past project
             </button>
           </div>
         </div>
@@ -339,7 +339,7 @@ const List = ({ type }) => {
                     onClick={handleAddProject}
                     className="btn btn-custom-green w-100 px-4 py-3 fw-medium rounded-lg"
                   >
-                    Add project
+                    Add past project
                   </button>
                 </div>
               </div>
