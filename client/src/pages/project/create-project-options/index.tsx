@@ -5,6 +5,7 @@ import useBackendService from "../../../services/backend_service";
 import { useContent } from "../../../services/useContext";
 import Beneficiary from "./render/Beneficiary";
 import Details from "./render/Details";
+import Images from "./render/Images";
 import MilestoneForm from "./render/mileStones";
 import Progress from "./render/Progress";
 import Sponsor from "./render/Sponsor";
@@ -51,6 +52,7 @@ const CreateProject = () => {
         address: "",
       },
     ],
+    images: [{ file: "", preview: "" }],
   });
   const [step, setStep] = useState(1);
 
@@ -141,6 +143,15 @@ const CreateProject = () => {
       case 4:
         return (
           <Beneficiary
+            formData={formData}
+            setFormData={setFormData}
+            handleNextStep={handleNextStep}
+            handleBackStep={handleBackStep}
+          />
+        );
+      case 5:
+        return (
+          <Images
             formData={formData}
             setFormData={setFormData}
             handleNextStep={handleNextStep}

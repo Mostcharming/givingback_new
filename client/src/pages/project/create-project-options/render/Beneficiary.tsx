@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from "lucide-react";
+import { MapPin, Plus, Trash2 } from "lucide-react";
 import {
   Button,
   FormGroup,
@@ -115,6 +115,16 @@ const Beneficiary = ({
                     handleChange(index, "address", e.target.value)
                   }
                 />
+                <InputGroupAddon addonType="prepend">
+                  <InputGroupText
+                    style={{
+                      backgroundColor: "#F2F2F2",
+                      height: "100%",
+                    }}
+                  >
+                    <MapPin />
+                  </InputGroupText>
+                </InputGroupAddon>
               </InputGroup>
             </FormGroup>
 
@@ -146,7 +156,7 @@ const Beneficiary = ({
             type="button"
             className="btn btn-outline-success px-5 py-3"
           >
-            Back
+            Go Back
           </button>
           <Button
             onClick={handleNextStep}

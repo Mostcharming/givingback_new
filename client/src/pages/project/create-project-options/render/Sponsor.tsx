@@ -155,7 +155,7 @@ const Sponsor = ({ formData, setFormData, handleNextStep, handleBackStep }) => {
             type="button"
             className="btn btn-outline-success px-5 py-3"
           >
-            Back
+            Go Back
           </button>
           <Button
             onClick={handleNextStep}
