@@ -48,7 +48,7 @@ const MilestoneForm = ({
 
       <form className="pr-5">
         {formData.milestones.map((item, index) => (
-          <div key={index} className="mb-4 relative">
+          <div key={index} className="mb-4">
             <FormGroup>
               <InputGroup className="input-group-alternative">
                 <Input
@@ -146,8 +146,6 @@ const MilestoneForm = ({
                 className="text-danger mt-2"
                 style={{
                   cursor: "pointer",
-                  position: "absolute",
-                  right: "70px",
                 }}
                 onClick={() => handleRemoveMilestone(index)}
               >

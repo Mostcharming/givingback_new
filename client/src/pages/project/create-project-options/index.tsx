@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useBackendService from "../../../services/backend_service";
 import { useContent } from "../../../services/useContext";
+import Beneficiary from "./render/Beneficiary";
 import Details from "./render/Details";
 import MilestoneForm from "./render/mileStones";
 import Progress from "./render/Progress";
@@ -40,6 +41,14 @@ const CreateProject = () => {
         sponsor: "",
         logoFile: null,
         sdesc: "",
+      },
+    ],
+    //beneficiaries
+    beneficiaries: [
+      {
+        name: "",
+        contact: "",
+        address: "",
       },
     ],
   });
@@ -123,6 +132,15 @@ const CreateProject = () => {
       case 3:
         return (
           <Sponsor
+            formData={formData}
+            setFormData={setFormData}
+            handleNextStep={handleNextStep}
+            handleBackStep={handleBackStep}
+          />
+        );
+      case 4:
+        return (
+          <Beneficiary
             formData={formData}
             setFormData={setFormData}
             handleNextStep={handleNextStep}
