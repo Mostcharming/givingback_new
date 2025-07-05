@@ -4439,7 +4439,7 @@ a:hover {
 .pagination .page-link {
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  border-radius: 20%;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -4449,7 +4449,7 @@ a:hover {
   -webkit-box-pack: center;
   -ms-flex-pack: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 700;
   line-height: 1.4;
   color: var(--body-color);
@@ -4467,17 +4467,17 @@ a:hover {
 .pagination .page-item:last-child .page-link,
 .pagination .page-item:first-child .page-link {
   color: var(--secondary-color);
-  border-radius: 50%;
-  font-size: 18px;
+  border-radius: 20%;
+  font-size: 10px;
 }
 
 .pagination .page-item.active .page-link,
 .pagination .page-item .page-link:hover {
   color: var(--white);
-  border-color: #7b80dd82;
-  background-color: #7b80dd82;
-  -webkit-box-shadow: #7b80dd49;
-  box-shadow: #7b80dd43;
+  border-color: #2b673b;
+  background-color: #128330;
+  -webkit-box-shadow: #2b673b;
+  box-shadow: #2b673b;
 }
 
 /*======= Blog Sidebar =======*/
@@ -5243,7 +5243,7 @@ a:hover {
 .project-item .status .dot {
   height: 10px;
   width: 10px;
-  border-radius: 50%;
+  border-radius: 20%;
   display: inline-block;
   margin-right: 0.5em;
 }

@@ -299,7 +299,7 @@ const FundsM = () => {
           tableName="All Transactions"
           headers={headers}
           data={tableData}
-          isPagination={false}
+          isPagination={true}
           actions={actions}
           emptyStateContent="No Transactions found found"
           emptyStateButtonLabel="Add funds"
