@@ -1,104 +1,104 @@
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
-import React, { useEffect, useRef, useState } from 'react'
-import { Button, Col, Container, Form, Row } from 'react-bootstrap'
-import { useParams } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import { formatDate, truncateText } from '../components/formatTime'
-import Loading from '../components/home/loading'
-import MileStoneUpdateModal from '../components/MilestoneUpdateModal'
-import Tables from '../components/tables'
-import ViewMileStoneUpdateModal from '../components/ViewMilestoneUpdateModal'
-import useBackendService from '../services/backend_service'
-import { useContent } from '../services/useContext'
-import RespondToBriefModal from './RespondToBriefModal'
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { formatDate, truncateText } from "../components/formatTime";
+import Loading from "../components/home/loading";
+import MileStoneUpdateModal from "../components/MilestoneUpdateModal";
+import Tables from "../components/tables";
+import ViewMileStoneUpdateModal from "../components/ViewMilestoneUpdateModal";
+import useBackendService from "../services/backend_service";
+import { useContent } from "../services/useContext";
+import RespondToBriefModal from "./RespondToBriefModal";
 
 const ProjectViewDetail: React.FC<any> = ({ ngo = null }) => {
-  const [activeTab, setActiveTab] = useState('detail')
-  const [project, setProject] = useState<any>(null)
-  const { id } = useParams<{ id: string }>()
-  const [loading, setLoading] = useState<boolean>(true)
-  const { authState } = useContent()
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState("detail");
+  const [project, setProject] = useState<any>(null);
+  const { id } = useParams<{ id: string }>();
+  const [loading, setLoading] = useState<boolean>(true);
+  const { authState } = useContent();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { mutate: getTableData, isLoading } = useBackendService(
-    '/allprojects',
-    'GET',
+    "/allprojects",
+    "GET",
     {
       onSuccess: (res: any) => {
-        setProject(res.projects[0])
-        setLoading(false)
+        setProject(res.projects[0]);
+        setLoading(false);
       },
       onError: () => {
-        setLoading(false)
-        toast.error('Error getting projects data')
-      }
+        setLoading(false);
+        toast.error("Error getting projects data");
+      },
     }
-  )
+  );
 
   useEffect(() => {
-    getTableData({ projectType: 'present', id: id })
-  }, [id])
+    getTableData({ projectType: "present", id: id });
+  }, [id]);
 
   const renderForm = () => {
-    return activeTab === 'detail' ? (
+    return activeTab === "detail" ? (
       <ProjectSummary project={project} ngo={ngo} />
-    ) : activeTab === 'media' ? (
+    ) : activeTab === "media" ? (
       <Media project={project} />
-    ) : activeTab === 'community' ? (
+    ) : activeTab === "community" ? (
       <Community project={project} />
-    ) : activeTab === 'updates' ? (
+    ) : activeTab === "updates" ? (
       <Updates project={project} />
-    ) : null
-  }
+    ) : null;
+  };
   const renderTabs = () => {
     return (
-      <div className='tabs' style={tabsContainerStyle}>
-        {project?.status === 'brief' ? (
+      <div className="tabs" style={tabsContainerStyle}>
+        {project?.status === "brief" ? (
           <Tab
-            label='Details'
-            active={activeTab === 'detail'}
-            onClick={() => setActiveTab('detail')}
+            label="Details"
+            active={activeTab === "detail"}
+            onClick={() => setActiveTab("detail")}
           />
         ) : (
           <div>
             <Tab
-              label='Details'
-              active={activeTab === 'detail'}
-              onClick={() => setActiveTab('detail')}
+              label="Details"
+              active={activeTab === "detail"}
+              onClick={() => setActiveTab("detail")}
             />
             <Tab
-              label='Updates'
-              active={activeTab === 'updates'}
-              onClick={() => setActiveTab('updates')}
+              label="Updates"
+              active={activeTab === "updates"}
+              onClick={() => setActiveTab("updates")}
             />
             <Tab
-              label='Media'
-              active={activeTab === 'media'}
-              onClick={() => setActiveTab('media')}
+              label="Media"
+              active={activeTab === "media"}
+              onClick={() => setActiveTab("media")}
             />
-            {authState.user.role !== 'NGO' && (
+            {authState.user.role !== "NGO" && (
               <Tab
-                label='Community'
-                active={activeTab === 'community'}
-                onClick={() => setActiveTab('community')}
+                label="Community"
+                active={activeTab === "community"}
+                onClick={() => setActiveTab("community")}
               />
             )}
           </div>
         )}
 
-        {authState.user.role === 'admin' && (
+        {authState.user.role === "admin" && (
           <Button
-            variant='light'
+            variant="light"
             style={exportButtonStyle}
             onClick={() => handleExportClick()}
           >
             Export Project Report
           </Button>
         )}
-        {authState.user.role === 'NGO' && (
+        {authState.user.role === "NGO" && (
           <Button
-            variant='light'
+            variant="light"
             style={exportButtonStyle}
             onClick={() => handleRespond()}
           >
@@ -106,42 +106,42 @@ const ProjectViewDetail: React.FC<any> = ({ ngo = null }) => {
           </Button>
         )}
       </div>
-    )
-  }
+    );
+  };
 
   const handleExportClick = async () => {
-    const doc = new jsPDF('p', 'pt', 'a4')
+    const doc = new jsPDF("p", "pt", "a4");
 
-    const projectSection = document.querySelector('.project-overview')
+    const projectSection = document.querySelector(".project-overview");
     if (projectSection) {
-      const canvas = await html2canvas(projectSection as HTMLElement)
-      const imgData = canvas.toDataURL('image/png')
+      const canvas = await html2canvas(projectSection as HTMLElement);
+      const imgData = canvas.toDataURL("image/png");
 
-      doc.text('Project Report', 20, 30)
-      doc.addImage(imgData, 'PNG', 20, 60, 560, 300)
+      doc.text("Project Report", 20, 30);
+      doc.addImage(imgData, "PNG", 20, 60, 560, 300);
     }
 
-    doc.text(`Project Name: ${project?.title || 'Not available'}`, 20, 380)
-    doc.text(`Cost: ₦${project?.cost || 'Not provided'}`, 20, 400)
-    doc.text(`Amount Raised: ₦${project?.allocated || 0}`, 20, 420)
+    doc.text(`Project Name: ${project?.title || "Not available"}`, 20, 380);
+    doc.text(`Cost: ₦${project?.cost || "Not provided"}`, 20, 400);
+    doc.text(`Amount Raised: ₦${project?.allocated || 0}`, 20, 420);
     doc.text(
       `Start Date: ${
         project?.startDate
           ? new Date(project.startDate).toLocaleDateString()
-          : 'Not available'
+          : "Not available"
       }`,
       20,
       440
-    )
+    );
     doc.text(
       `End Date: ${
         project?.endDate
           ? new Date(project.endDate).toLocaleDateString()
-          : 'Not available'
+          : "Not available"
       }`,
       20,
       460
-    )
+    );
 
     if (project?.milestones && project.milestones.length > 0) {
       project.milestones.forEach((milestone: any, index: number) => {
@@ -149,49 +149,49 @@ const ProjectViewDetail: React.FC<any> = ({ ngo = null }) => {
           `Milestone ${index + 1}: ${milestone.milestone}`,
           20,
           480 + index * 20
-        )
-      })
+        );
+      });
     } else {
-      doc.text('No milestones available', 20, 480)
+      doc.text("No milestones available", 20, 480);
     }
 
-    doc.save(`${project?.title || 'Project'}_Report_givingback.pdf`)
-    toast.success('Project report exported successfully!')
-  }
+    doc.save(`${project?.title || "Project"}_Report_givingback.pdf`);
+    toast.success("Project report exported successfully!");
+  };
   const handleRespond = async () => {
-    setIsModalOpen(true)
-  }
+    setIsModalOpen(true);
+  };
 
   const closeModal = () => {
-    setIsModalOpen(false)
-  }
+    setIsModalOpen(false);
+  };
 
   return (
     <div>
-      {loading && <Loading type={'inline'} />}
-      <Container className='mt-2'>
+      {loading && <Loading type={"inline"} />}
+      <Container className="mt-2">
         <div
           style={{
-            background: '#7B80DD',
-            boxShadow: '1px 4px 11px 0px #CEBDE4',
-            height: '55px',
-            borderRadius: '5px 0px 0px 0px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between', // Space between tabs and button
+            background: "#7B80DD",
+            boxShadow: "1px 4px 11px 0px #CEBDE4",
+            height: "55px",
+            borderRadius: "5px 0px 0px 0px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between", // Space between tabs and button
             opacity: 0.9,
-            paddingLeft: '20px',
-            paddingRight: '20px', // Added paddingRight for spacing
-            color: '#fff',
-            fontFamily: 'Nunito Sans',
-            fontSize: '18px',
-            fontWeight: 400
+            paddingLeft: "20px",
+            paddingRight: "20px", // Added paddingRight for spacing
+            color: "#fff",
+            fontFamily: "Nunito Sans",
+            fontSize: "18px",
+            fontWeight: 400,
           }}
         >
           {renderTabs()}
         </div>
 
-        <div className='form-container mt-4'>{renderForm()}</div>
+        <div className="form-container mt-4">{renderForm()}</div>
       </Container>
       <RespondToBriefModal
         open={isModalOpen}
@@ -200,157 +200,157 @@ const ProjectViewDetail: React.FC<any> = ({ ngo = null }) => {
         id={project?.id}
       />
     </div>
-  )
-}
+  );
+};
 
 const Tab: React.FC<{
-  label: string
-  active: boolean
-  onClick?: () => void
+  label: string;
+  active: boolean;
+  onClick?: () => void;
 }> = ({ label, active, onClick }) => (
   <span
-    className={`tab ${active ? 'active' : ''}`}
+    className={`tab ${active ? "active" : ""}`}
     onClick={onClick}
     style={tabStyle(active)}
   >
     {label}
   </span>
-)
+);
 
 const tabStyle = (isActive: boolean) => ({
-  padding: '5px 20px',
-  cursor: 'pointer',
-  borderBottom: isActive ? '2px solid white' : '2px solid transparent',
-  fontWeight: isActive ? 600 : 400
-})
+  padding: "5px 20px",
+  cursor: "pointer",
+  borderBottom: isActive ? "2px solid white" : "2px solid transparent",
+  fontWeight: isActive ? 600 : 400,
+});
 
 const exportButtonStyle = {
-  background: '#fff',
-  color: '#7B80DD',
+  background: "#fff",
+  color: "#7B80DD",
   fontWeight: 600,
-  borderRadius: '5px',
-  padding: '5px 10px'
-}
+  borderRadius: "5px",
+  padding: "5px 10px",
+};
 
 const tabsContainerStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  width: '100%',
-  alignItems: 'center'
-}
+  display: "flex",
+  justifyContent: "space-between",
+  width: "100%",
+  alignItems: "center",
+};
 
 const ProjectSummary: React.FC<any> = ({ project, ngo = null }) => {
-  const [comment, setComment] = useState('')
+  const [comment, setComment] = useState("");
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setComment(e.target.value)
-  }
-  const { id } = useParams<{ id: string }>()
-  const { authState } = useContent()
+    setComment(e.target.value);
+  };
+  const { id } = useParams<{ id: string }>();
+  const { authState } = useContent();
   const endpoint =
-    authState.user.role === 'admin'
+    authState.user.role === "admin"
       ? `/admin/project/${id}/message`
-      : `/donor/project/${id}/message`
+      : `/donor/project/${id}/message`;
 
   const { mutate: getTableData, isLoading } = useBackendService(
     endpoint,
-    'POST',
+    "POST",
     {
       onSuccess: (res: any) => {
-        toast.success('Feedback/Comment submitted successfully!')
-        setComment('')
+        toast.success("Feedback/Comment submitted successfully!");
+        setComment("");
       },
       onError: () => {
-        toast.error('Failed to submit feedback/comment. Please try again.')
-      }
+        toast.error("Failed to submit feedback/comment. Please try again.");
+      },
     }
-  )
+  );
 
   const handleCommentSubmit = async () => {
-    getTableData({ comment: comment })
-  }
-  if (!project) return <p>No project data available</p>
-  const categories = project.category ? project.category.split(',') : []
+    getTableData({ comment: comment });
+  };
+  if (!project) return <p>No project data available</p>;
+  const categories = project.category ? project.category.split(",") : [];
   const calculatePercentage = (achievement: number, target: number) => {
-    if (target === 0 || !target) return 'N/A'
-    return ((achievement / target) * 100).toFixed(2) + '%'
-  }
+    if (target === 0 || !target) return "N/A";
+    return ((achievement / target) * 100).toFixed(2) + "%";
+  };
 
   return (
     <>
-      <div className='mt-4' style={{ backgroundColor: 'white' }}>
-        <div style={{ padding: '30px' }}>
+      <div className="mt-4" style={{ backgroundColor: "white" }}>
+        <div style={{ padding: "30px" }}>
           {project.images && project.images.length > 0 ? (
             <img
               src={project.images[0]?.image}
-              alt='Project'
-              style={{ width: '100%' }}
+              alt="Project"
+              style={{ width: "100%" }}
             />
           ) : (
             <p>No image available</p>
           )}
 
-          <div className='mt-4'>
+          <div className="mt-4">
             <span
-              className='rounded px-2 py-1 fw-bold'
-              style={{ backgroundColor: '#C9ECCB' }}
+              className="rounded px-2 py-1 fw-bold"
+              style={{ backgroundColor: "#C9ECCB" }}
             >
               {/* Ensure status exists */}
               {project.status
                 ? project.status.charAt(0).toUpperCase() +
                   project.status.slice(1)
-                : 'Unknown status'}
+                : "Unknown status"}
             </span>
           </div>
           <br />
-          <h3 className='detail-header' style={{ backgroundColor: '#F0F1FB' }}>
-            <span style={{ padding: '10px' }}>Project Overview</span>
+          <h3 className="detail-header" style={{ backgroundColor: "#F0F1FB" }}>
+            <span style={{ padding: "10px" }}>Project Overview</span>
           </h3>
-          <p>{project.description || 'No description available'}</p>
+          <p>{project.description || "No description available"}</p>
           <br />
           <Row>
             <Col md={4}>
-              <h3 className='detail-header'>Cost</h3>
-              <p>{project.cost ? `₦${project.cost}` : 'Not provided'}</p>
+              <h3 className="detail-header">Cost</h3>
+              <p>{project.cost ? `₦${project.cost}` : "Not provided"}</p>
             </Col>
             <Col md={4}>
-              <h3 className='detail-header'>Amount raised</h3>
+              <h3 className="detail-header">Amount raised</h3>
               <p>₦{project.allocated || 0}</p>
             </Col>
-            <Col style={{ display: 'flex' }} md={4}>
-              <div className='pr-5'>
-                <h3 className='detail-header'>Start Date</h3>
+            <Col style={{ display: "flex" }} md={4}>
+              <div className="pr-5">
+                <h3 className="detail-header">Start Date</h3>
                 <p>
                   {project.startDate
                     ? new Date(project.startDate).toLocaleDateString()
-                    : 'Start date not available'}{' '}
+                    : "Start date not available"}{" "}
                 </p>
               </div>
               <div>
-                <h3 className='detail-header'>End Date</h3>
+                <h3 className="detail-header">End Date</h3>
                 <p>
                   {project.endDate
                     ? new Date(project.endDate).toLocaleDateString()
-                    : 'End date not available'}
+                    : "End date not available"}
                 </p>
               </div>
             </Col>
           </Row>
 
-          <h3 className='detail-header mt-5'>Sponsors</h3>
-          <Row style={{ backgroundColor: '#F0F1FB' }} className='p-2'>
+          <h3 className="detail-header mt-5">Sponsors</h3>
+          <Row style={{ backgroundColor: "#F0F1FB" }} className="p-2">
             <Col xs={3}>Name</Col>
             <Col xs={9}>Description</Col>
           </Row>
-          <Row key={project?.donor.name} className='p-2'>
+          <Row key={project?.donor.name} className="p-2">
             <Col xs={3}>
               <img
                 src={project?.donor.image}
-                alt='logo'
-                style={{ width: '50px', height: '50px', marginRight: '10px' }}
+                alt="logo"
+                style={{ width: "50px", height: "50px", marginRight: "10px" }}
               />
               {project?.donor.name}
             </Col>
-            <Col xs={9} className='mt-2'>
+            <Col xs={9} className="mt-2">
               {project?.donor.about}
             </Col>
           </Row>
@@ -358,19 +358,19 @@ const ProjectSummary: React.FC<any> = ({ project, ngo = null }) => {
 
           <Row>
             <Col md={4}>
-              <h3 className='detail-header'>Focus Category</h3>
+              <h3 className="detail-header">Focus Category</h3>
               <p>
                 {categories.length > 0 ? (
                   categories.map((category, index) => (
                     <span
                       key={index}
                       style={{
-                        display: 'inline-block',
-                        backgroundColor: '#E0E0E0',
-                        padding: '5px 10px',
-                        borderRadius: '5px',
-                        marginRight: '10px',
-                        marginBottom: '10px'
+                        display: "inline-block",
+                        backgroundColor: "#E0E0E0",
+                        padding: "5px 10px",
+                        borderRadius: "5px",
+                        marginRight: "10px",
+                        marginBottom: "10px",
                       }}
                     >
                       {category.trim()}
@@ -382,20 +382,20 @@ const ProjectSummary: React.FC<any> = ({ project, ngo = null }) => {
               </p>
             </Col>
           </Row>
-          <h3 className='detail-header p-2 mt-3'>Objectives</h3>
-          <Row style={{ backgroundColor: '#F0F1FB' }} className='p-2'>
+          <h3 className="detail-header p-2 mt-3">Objectives</h3>
+          <Row style={{ backgroundColor: "#F0F1FB" }} className="p-2">
             <Col>S/N</Col>
             <Col md={11}>Objective</Col>
           </Row>
-          <Row className='p-2'>
+          <Row className="p-2">
             <Col>1</Col>
-            <Col md={11}>{project.objectives || 'No objectives available'}</Col>
+            <Col md={11}>{project.objectives || "No objectives available"}</Col>
           </Row>
 
           <hr />
 
-          <h3 className='detail-header p-2'>Target Beneficiaries</h3>
-          <Row style={{ backgroundColor: '#F0F1FB' }} className='p-2'>
+          <h3 className="detail-header p-2">Target Beneficiaries</h3>
+          <Row style={{ backgroundColor: "#F0F1FB" }} className="p-2">
             <Col>Community</Col>
             <Col>Location</Col>
             <Col>Details</Col>
@@ -403,18 +403,18 @@ const ProjectSummary: React.FC<any> = ({ project, ngo = null }) => {
           {/* Ensure beneficiary array exists */}
           {project.beneficiary && project.beneficiary.length > 0 ? (
             project.beneficiary.map((beneficiary: any, index: number) => (
-              <Row key={index} className='p-2'>
-                <Col>{beneficiary.city || 'N/A'}</Col>
-                <Col>{beneficiary.state || 'N/A'}</Col>
-                <Col>{beneficiary.community || 'N/A'}</Col>
+              <Row key={index} className="p-2">
+                <Col>{beneficiary.city || "N/A"}</Col>
+                <Col>{beneficiary.state || "N/A"}</Col>
+                <Col>{beneficiary.community || "N/A"}</Col>
               </Row>
             ))
           ) : (
             <p>No beneficiary data available</p>
           )}
           <hr />
-          <h3 className='detail-header p-2'>Milestones</h3>
-          <Row style={{ backgroundColor: '#F0F1FB' }} className='p-2'>
+          <h3 className="detail-header p-2">Milestones</h3>
+          <Row style={{ backgroundColor: "#F0F1FB" }} className="p-2">
             <Col md={1}>S/N</Col>
             <Col md={2}>Milestone</Col>
             <Col md={1}>Target</Col>
@@ -425,24 +425,24 @@ const ProjectSummary: React.FC<any> = ({ project, ngo = null }) => {
           </Row>
           {project.milestones && project.milestones.length > 0 ? (
             project.milestones.map((milestone: any, index: number) => {
-              const update = milestone.updates?.[0]
+              const update = milestone.updates?.[0];
               return (
-                <Row key={milestone.id} className='p-2'>
+                <Row key={milestone.id} className="p-2">
                   <Col md={1}>{index + 1}</Col>
                   <Col md={2}>{milestone.milestone}</Col>
-                  <Col md={1}>{milestone.target || 'N/A'}</Col>
-                  <Col md={1}>{update?.achievement || 'N/A'}</Col>
+                  <Col md={1}>{milestone.target || "N/A"}</Col>
+                  <Col md={1}>{update?.achievement || "N/A"}</Col>
                   <Col md={1}>
                     {update
                       ? calculatePercentage(
                           update.achievement,
                           milestone.target
                         )
-                      : 'N/A'}
+                      : "N/A"}
                   </Col>
-                  <Col>{update?.narration || 'No details available'}</Col>
+                  <Col>{update?.narration || "No details available"}</Col>
                 </Row>
-              )
+              );
             })
           ) : (
             <p>No milestones available</p>
@@ -450,43 +450,43 @@ const ProjectSummary: React.FC<any> = ({ project, ngo = null }) => {
           <hr />
         </div>
       </div>
-      {project?.status !== 'brief' && (
+      {project?.status !== "brief" && (
         <>
-          {(authState.user.role === 'donor' ||
-            authState.user.role === 'corporate' ||
-            authState.user.role === 'admin') && (
+          {(authState.user.role === "donor" ||
+            authState.user.role === "corporate" ||
+            authState.user.role === "admin") && (
             <div
               style={{
-                marginTop: '20px',
-                padding: '20px',
-                backgroundColor: 'white'
+                marginTop: "20px",
+                padding: "20px",
+                backgroundColor: "white",
               }}
             >
-              <h3 className='detail-header p-2'>
-                {authState.user.role === 'admin'
+              <h3 className="detail-header p-2">
+                {authState.user.role === "admin"
                   ? "Admin's Feedback"
-                  : 'Comment'}
+                  : "Comment"}
               </h3>
               <Form>
-                <Form.Group controlId='comment'>
+                <Form.Group controlId="comment">
                   <Form.Control
-                    as='textarea'
+                    as="textarea"
                     rows={4}
                     value={comment}
                     onChange={handleCommentChange}
-                    placeholder='Write your comment here...'
-                    style={{ resize: 'none' }}
+                    placeholder="Write your comment here..."
+                    style={{ resize: "none" }}
                   />
                 </Form.Group>
                 <Button
                   style={{
-                    backgroundColor: '#7B80DD',
-                    borderColor: '#7B80DD',
-                    width: '100%',
-                    padding: '10px',
-                    marginTop: '30px'
+                    backgroundColor: "#7B80DD",
+                    borderColor: "#7B80DD",
+                    width: "100%",
+                    padding: "10px",
+                    marginTop: "30px",
                   }}
-                  variant='primary'
+                  variant="primary"
                   onClick={handleCommentSubmit}
                 >
                   Submit
@@ -497,11 +497,11 @@ const ProjectSummary: React.FC<any> = ({ project, ngo = null }) => {
         </>
       )}
     </>
-  )
-}
+  );
+};
 
 const Community: React.FC<any> = ({ project }) => {
-  const [messages, setMessages] = useState<any[]>()
+  const [messages, setMessages] = useState<any[]>();
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -510,17 +510,17 @@ const Community: React.FC<any> = ({ project }) => {
         // console.log(project)
         // setMessages(res.data.messages)
       } catch (err) {
-        toast.error('Error fetching community details')
+        toast.error("Error fetching community details");
       }
-    }
+    };
 
-    fetchProject()
-  }, [project])
+    fetchProject();
+  }, [project]);
 
-  const comment = useRef(null)
+  const comment = useRef(null);
 
   return (
-    <div className='comment__container'>
+    <div className="comment__container">
       {/* <h4>Community Responses</h4> */}
       <hr />
       {/* <div className='user-comment__area'>
@@ -541,7 +541,7 @@ const Community: React.FC<any> = ({ project }) => {
           </div>
         </div>
       </div> */}
-      <div className='comment-reply__container w-[70vw]'>
+      <div className="comment-reply__container w-[70vw]">
         {/* {messages?.map((messages) => {
           return <CommentCard key={messages.id} message={messages} />
         })} */}
@@ -554,16 +554,16 @@ const Community: React.FC<any> = ({ project }) => {
         </button> */}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const Media: React.FC<any> = ({ project }) => {
   if (!project || !project.images || project.images.length === 0) {
-    return <p>No media available</p>
+    return <p>No media available</p>;
   }
 
   return (
-    <div className='media-container' style={mediaContainerStyle}>
+    <div className="media-container" style={mediaContainerStyle}>
       {project.images.map((image: any, index: number) => (
         <img
           key={index}
@@ -573,41 +573,41 @@ const Media: React.FC<any> = ({ project }) => {
         />
       ))}
     </div>
-  )
-}
+  );
+};
 const Updates: React.FC<any> = ({ project }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
-  const [milestones, setMilestones] = useState<any[]>(project.milestones)
-  const [currentMilestone, setCurrentMilestone] = useState<number>(0)
-  const [milestoneUpdateData, setMilestoneUpdateData] = useState<any>()
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [milestones, setMilestones] = useState<any[]>(project.milestones);
+  const [currentMilestone, setCurrentMilestone] = useState<number>(0);
+  const [milestoneUpdateData, setMilestoneUpdateData] = useState<any>();
   const [headers, setHeaders] = useState([
-    'Date',
-    'Achievement',
-    'Position',
-    'Status',
-    'Narration',
-    'FeedBack'
-  ])
+    "Date",
+    "Achievement",
+    "Position",
+    "Status",
+    "Narration",
+    "FeedBack",
+  ]);
   const [actions, setActions] = useState([
     {
-      label: 'Update',
-      onClick: (row) => onCellClicked(row)
-    }
-  ])
+      label: "Update",
+      onClick: (row) => onCellClicked(row),
+    },
+  ]);
 
   const updateStatus = () => {
-    setIsModalOpen(true)
-  }
+    setIsModalOpen(true);
+  };
   const updateStatusD = () => {
     // setIsModalOpen(true)
-  }
+  };
 
   const changeMilestone = (index) => {
-    setCurrentMilestone(index)
-  }
+    setCurrentMilestone(index);
+  };
 
-  let rows = []
+  let rows = [];
 
   if (milestones) {
     rows = milestones[currentMilestone].updates.map((milestone, index) => {
@@ -618,70 +618,70 @@ const Updates: React.FC<any> = ({ project }) => {
         position: milestone.position,
         status: milestone.status,
         narration: truncateText(milestone.narration),
-        feedBack: 'feedBack'
-      }
-    })
+        feedBack: "feedBack",
+      };
+    });
   }
   const onCellClicked = (row) => {
-    setMilestoneUpdateData(row)
-    setIsViewModalOpen(true)
-  }
-  const { authState } = useContent()
+    setMilestoneUpdateData(row);
+    setIsViewModalOpen(true);
+  };
+  const { authState } = useContent();
 
   return (
     <>
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'space-evenly', // Evenly spaces items
-          marginTop: '20px' // Optional, for spacing above
+          display: "flex",
+          justifyContent: "space-evenly", // Evenly spaces items
+          marginTop: "20px", // Optional, for spacing above
         }}
       >
         {milestones?.map((milestone, index) => {
-          const isActive = currentMilestone === index // Assuming activeMilestone stores the active milestone index
+          const isActive = currentMilestone === index; // Assuming activeMilestone stores the active milestone index
 
           return (
             <span
               className={`p-2 px-3 me-2 bg-white cursor-pointer ${
-                isActive ? 'active-milestone' : ''
+                isActive ? "active-milestone" : ""
               }`}
               key={index}
               onClick={() => changeMilestone(index)}
               style={{
-                backgroundColor: isActive ? '#7B80DD' : 'white', // Purple for active
-                color: isActive ? 'white' : 'black', // Text color adjustment
-                borderRadius: '5px', // Optional, for rounded corners
-                textAlign: 'center', // Center text
-                minWidth: '30px' // Consistent size
+                backgroundColor: isActive ? "#7B80DD" : "white", // Purple for active
+                color: isActive ? "white" : "black", // Text color adjustment
+                borderRadius: "5px", // Optional, for rounded corners
+                textAlign: "center", // Center text
+                minWidth: "30px", // Consistent size
               }}
             >
               {index + 1}
             </span>
-          )
+          );
         })}
       </div>
 
       {milestones && (
-        <Row className='mb-4'>
+        <Row className="mb-4">
           <Col lg={6}>
             <Row>
               <Col lg={7}>
-                <Form.Group className='mb-4' style={{ textAlign: 'left' }}>
+                <Form.Group className="mb-4" style={{ textAlign: "left" }}>
                   <Form.Label>Milestone</Form.Label>
                   <Form.Control
                     required
-                    type='text'
+                    type="text"
                     value={milestones[currentMilestone].milestone}
                     readOnly
                   />
                 </Form.Group>
               </Col>
               <Col lg={4}>
-                <Form.Group className='mb-4' style={{ textAlign: 'left' }}>
+                <Form.Group className="mb-4" style={{ textAlign: "left" }}>
                   <Form.Label>Target</Form.Label>
                   <Form.Control
                     required
-                    type='text'
+                    type="text"
                     value={milestones[currentMilestone].target}
                     readOnly
                   />
@@ -689,15 +689,15 @@ const Updates: React.FC<any> = ({ project }) => {
               </Col>
             </Row>
           </Col>
-          {authState.user.role === 'NGO' && (
+          {authState.user.role === "NGO" && (
             <Col lg={6}>
               <Button
-                className='float-end mt-4'
+                className="float-end mt-4"
                 style={{
-                  backgroundColor: '#7B80DD',
-                  color: '#fff',
-                  borderRadius: '3px',
-                  border: 'none'
+                  backgroundColor: "#7B80DD",
+                  color: "#fff",
+                  borderRadius: "3px",
+                  border: "none",
                 }}
                 onClick={updateStatus}
               >
@@ -708,21 +708,21 @@ const Updates: React.FC<any> = ({ project }) => {
         </Row>
       )}
       <Tables
-        tableName='MileStones'
+        tableName="MileStones"
         headers={headers}
         data={rows}
         isPagination={false}
-        actions={authState.user.role === 'admin' ? actions : []}
-        emptyStateContent='No Milestone update'
+        actions={authState.user.role === "admin" ? actions : []}
+        emptyStateContent="No Milestone update"
         emptyStateButtonLabel={
-          authState.user.role === 'NGO' ? 'Create New update' : 'No Updates Yet'
+          authState.user.role === "NGO" ? "Create New update" : "No Updates Yet"
         }
         onEmptyStateButtonClick={
-          authState.user.role === 'NGO' ? updateStatus : updateStatusD
+          authState.user.role === "NGO" ? updateStatus : updateStatusD
         }
-        currentPage={''}
-        totalPages={''}
-        onPageChange={''}
+        currentPage={""}
+        totalPages={""}
+        onPageChange={""}
       />
 
       <ViewMileStoneUpdateModal
@@ -736,21 +736,21 @@ const Updates: React.FC<any> = ({ project }) => {
         id={milestones && milestones[currentMilestone].id}
       />
     </>
-  )
-}
+  );
+};
 
 const mediaContainerStyle = {
-  display: 'flex',
-  flexWrap: 'wrap' as 'wrap',
-  justifyContent: 'center',
-  gap: '20px'
-}
+  display: "flex",
+  flexWrap: "wrap" as "wrap",
+  justifyContent: "center",
+  gap: "20px",
+};
 
 const imageStyle = {
-  width: '200px',
-  height: '200px',
-  objectFit: 'cover' as 'cover',
-  borderRadius: '10px'
-}
+  width: "200px",
+  height: "200px",
+  objectFit: "cover" as "cover",
+  borderRadius: "10px",
+};
 
-export default ProjectViewDetail
+export default ProjectViewDetail;

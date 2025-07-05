@@ -121,7 +121,8 @@ export const getProjects = async (
       const projectId = project.id;
 
       // Fetch related details for previous projects
-      const sponsors = await db("project_sponsor")
+
+      const sponsors = await db("previousprojects_sponsors")
         .where({ project_id: projectId })
         .select("name", "image", "description");
 
@@ -168,6 +169,10 @@ export const getProjects = async (
         .where({ project_id: projectId })
         .select("id", "milestone", "target");
 
+      const sponsors = await db("project_sponsor")
+        .where({ project_id: projectId })
+        .select("name", "image", "description");
+
       const detailedMilestones = await Promise.all(
         milestones.map(async (milestone) => {
           const updates = await db("milestone_update")
@@ -197,6 +202,7 @@ export const getProjects = async (
         donor: donorDetails,
         milestones: detailedMilestones,
         beneficiaries,
+        sponsors,
         projectImages,
       };
     })
