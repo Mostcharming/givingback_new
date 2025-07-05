@@ -22,7 +22,7 @@ export const ProjectItem = (props: any) => {
     if (props.type === "past") {
       switch (role) {
         case "NGO":
-          navigate(`/ngo/project/${props.project.id}`);
+          navigate(`/ngo/projects/${props.project.id}`);
           break;
         default:
           console.log("Invalid role or no role found");
@@ -30,14 +30,14 @@ export const ProjectItem = (props: any) => {
     } else {
       switch (role) {
         case "admin":
-          navigate(`/admin/project/${props.project.id}`);
+          navigate(`/admin/projects/${props.project.id}`);
           break;
         case "donor":
         case "corporate":
-          navigate(`/donor/project/${props.project.id}`);
+          navigate(`/donor/projects/${props.project.id}`);
           break;
         case "NGO":
-          navigate(`/ngo/project/${props.project.id}`);
+          navigate(`/ngo/projects/${props.project.id}`);
           break;
         default:
           console.log("Invalid role or no role found");

@@ -4,14 +4,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { formatDate, truncateText } from "../components/formatTime";
-import Loading from "../components/home/loading";
-import MileStoneUpdateModal from "../components/MilestoneUpdateModal";
-import Tables from "../components/tables";
-import ViewMileStoneUpdateModal from "../components/ViewMilestoneUpdateModal";
-import useBackendService from "../services/backend_service";
-import { useContent } from "../services/useContext";
-import RespondToBriefModal from "./RespondToBriefModal";
+import { formatDate, truncateText } from "../../../components/formatTime";
+import Loading from "../../../components/home/loading";
+import MileStoneUpdateModal from "../../../components/MilestoneUpdateModal";
+import Tables from "../../../components/tables";
+import ViewMileStoneUpdateModal from "../../../components/ViewMilestoneUpdateModal";
+import useBackendService from "../../../services/backend_service";
+import { useContent } from "../../../services/useContext";
+import RespondToBriefModal from "../../RespondToBriefModal";
 
 const ProjectViewDetail: React.FC<any> = ({ ngo = null }) => {
   const [activeTab, setActiveTab] = useState("detail");

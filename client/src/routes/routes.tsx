@@ -33,7 +33,7 @@ import AddPastProject from "../pages/ngo/pastproject/past-projects";
 import NGODetails from "../pages/ngo_details";
 import Ngo from "../pages/ngodirectory";
 import CreateProject from "../pages/project/create-project-options";
-import ProjectViewDetail from "../pages/project_details";
+import ProjectViewDetail from "../pages/project/single";
 import AdminDashboard from "../pages/report/dashboard";
 import SendMoney from "../pages/send";
 
@@ -271,19 +271,19 @@ const routes = [
 
   ///projectdetails
   {
-    path: "/project/:id",
+    path: "/projects/:id",
     icon: "ni ni-circle-08",
     component: <ProjectViewDetail />,
     layout: "/donor",
   },
   {
-    path: "/project/:id",
+    path: "/projects/:id",
     icon: "ni ni-circle-08",
     component: <ProjectViewDetail />,
     layout: "/ngo",
   },
   {
-    path: "/project/:id",
+    path: "/projects/:id",
     icon: "ni ni-circle-08",
     component: <ProjectViewDetail />,
     layout: "/admin",
