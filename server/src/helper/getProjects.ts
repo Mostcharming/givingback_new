@@ -167,7 +167,14 @@ export const getProjects = async (
 
       const milestones = await db("milestone")
         .where({ project_id: projectId })
-        .select("id", "milestone", "target");
+        .select(
+          "id",
+          "milestone",
+          "target",
+          "description",
+          "status",
+          "createdAt"
+        );
 
       const sponsors = await db("project_sponsor")
         .where({ project_id: projectId })

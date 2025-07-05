@@ -436,7 +436,6 @@ export const respondBrief = async (req: any, res: Response) => {
 };
 
 export const createProject = async (req: Request, res: Response) => {
-  console.log(req);
   const trx = await db.transaction();
   try {
     const {
@@ -485,6 +484,8 @@ export const createProject = async (req: Request, res: Response) => {
     if (milestones && milestones.length > 0) {
       const milestoneData = milestones.map((m: any) => ({
         milestone: m.milestone,
+        status: m.mstatus,
+        description: m.miledes,
         target: 0,
         project_id,
         organization_id: organization.id,

@@ -1,3 +1,10 @@
+import {
+  differenceInCalendarDays,
+  differenceInMonths,
+  format,
+  isBefore,
+} from "date-fns";
+
 export function getStatusBadgeProps(status: string) {
   switch (status.toLowerCase()) {
     case "active":
@@ -20,3 +27,22 @@ export function getStatusBadgeProps(status: string) {
       };
   }
 }
+
+export const getDateInfo = (startDate, endDate) => {
+  const today = startDate ? new Date(startDate) : new Date("2025-01-01");
+  const end = endDate ? new Date(endDate) : new Date("2025-01-01");
+
+  const formattedEndDate = format(end, "MMM d, yyyy");
+  const formattedStartDate = format(today, "MMM d, yyyy");
+
+  const daysRemaining = differenceInCalendarDays(end, today);
+  const monthsDuration = differenceInMonths(end, today);
+
+  return {
+    daysRemaining: daysRemaining > 0 ? daysRemaining : 0,
+    isEnded: isBefore(end, today),
+    formattedEndDate,
+    formattedStartDate,
+    durationInMonths: monthsDuration > 0 ? monthsDuration : 0,
+  };
+};
