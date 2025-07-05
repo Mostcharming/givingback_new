@@ -6,6 +6,7 @@ import {
   addMilestoneUpdate,
   create,
   createp,
+  createProject,
   respondBrief,
   withdraw,
 } from "./ngo.controller";
@@ -26,7 +27,8 @@ router.route("/onboard").post(
 router.route("/previous-project").post(uploadimg, createp as any);
 router.route("/milestone").post(uploadimg, addMilestoneUpdate as any);
 router.route("/withdraw_request").post(withdraw as any);
-
 router.route("/projects/:id").put(respondBrief as any);
+
+router.route("/project_v2").post(uploadimg, createProject as any);
 
 export default router;

@@ -8,6 +8,7 @@ import cron from "node-cron";
 import path from "path";
 
 import routes from "../components/index";
+
 import { fetchRateFromGoogle } from "../utils/rateUtils";
 
 const app = express();

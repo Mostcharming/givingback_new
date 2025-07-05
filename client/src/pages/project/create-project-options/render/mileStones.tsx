@@ -52,7 +52,7 @@ const MilestoneForm = ({
             <FormGroup>
               <InputGroup className="input-group-alternative">
                 <Input
-                  style={{ backgroundColor: "#F2F2F2" }}
+                  style={{ backgroundColor: "#F2F2F2", height: "100%" }}
                   className="p-3"
                   placeholder="Milestone title"
                   type="text"
@@ -67,7 +67,7 @@ const MilestoneForm = ({
             <FormGroup className="mt-3">
               <InputGroup className="input-group-alternative">
                 <Input
-                  style={{ backgroundColor: "#F2F2F2" }}
+                  style={{ backgroundColor: "#F2F2F2", height: "100%" }}
                   className="p-3"
                   placeholder="Milestone description"
                   type="textarea"
@@ -110,7 +110,7 @@ const MilestoneForm = ({
                       <label>Start date</label>
                       <InputGroup className="input-group-alternative">
                         <Input
-                          style={{ backgroundColor: "#F2F2F2" }}
+                          style={{ backgroundColor: "#F2F2F2", height: "100%" }}
                           className="p-3"
                           type="date"
                           value={item.mstartDate}
@@ -126,7 +126,7 @@ const MilestoneForm = ({
                       <label>End date</label>
                       <InputGroup className="input-group-alternative">
                         <Input
-                          style={{ backgroundColor: "#F2F2F2" }}
+                          style={{ backgroundColor: "#F2F2F2", height: "100%" }}
                           className="p-3"
                           type="date"
                           value={item.mendDate}

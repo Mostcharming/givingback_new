@@ -1,7 +1,16 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import db from "../../config";
 import { User } from "../../interfaces";
 import Email from "../../utils/mail";
+
+// Extend Express Request interface to include 'user'
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
 
 export const create = async (req: any, res: Response, next: NextFunction) => {
   try {
@@ -249,8 +258,6 @@ export const createp = async (req: any, res: Response) => {
     };
 
     await new Email({
-      // email: 'mostcharming920@yahoo.com',
-
       email: "info@givingbackng.org",
       url,
       token,
@@ -425,5 +432,111 @@ export const respondBrief = async (req: any, res: Response) => {
     res.status(200).json({ message: "Project accepted" });
   } catch (error) {
     res.status(500).json({ error: "Unable to update project" });
+  }
+};
+
+export const createProject = async (req: Request, res: Response) => {
+  console.log(req);
+  const trx = await db.transaction();
+  try {
+    const {
+      title,
+      description,
+      status,
+      duration,
+      startDate,
+      endDate,
+      interest_area,
+      orgemail,
+      cost,
+      raised,
+      milestones,
+      sponsors,
+      beneficiaries,
+    } = req.body;
+
+    // const organization = await db("organizations")
+    //   .where({ email: orgemail })
+    //   .first();
+    // if (!organization)
+    //   return res.status(404).json({ error: "Organization not found" });
+    const organization = await db("organizations")
+      .where("user_id", req.user.id)
+      .first();
+    if (!organization) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found.",
+      });
+    }
+
+    const [project_id] = await trx("project").insert({
+      title,
+      description,
+      status,
+      startDate,
+      endDate,
+      category: interest_area,
+      cost,
+      allocated: raised,
+      organization_id: organization.id,
+    });
+
+    if (milestones && milestones.length > 0) {
+      const milestoneData = milestones.map((m: any) => ({
+        milestone: m.milestone,
+        target: 0,
+        project_id,
+        organization_id: organization.id,
+      }));
+      await trx("milestone").insert(milestoneData);
+    }
+
+    if (sponsors && sponsors.length > 0) {
+      const sponsorUploads = Array.isArray(req.files)
+        ? req.files.filter((file: any) =>
+            file.fieldname.startsWith("sponsors[")
+          )
+        : [];
+      for (let i = 0; i < sponsors.length; i++) {
+        await trx("project_sponsor").insert({
+          name: sponsors[i].sponsor,
+          image: (sponsorUploads?.[i] as any)?.location || null,
+          description: sponsors[i].sdesc,
+          project_id,
+        });
+      }
+    }
+
+    if (beneficiaries && beneficiaries.length > 0) {
+      const beneficiaryData = beneficiaries.map((b: any) => ({
+        state: b.state || "",
+        city: b.city || "",
+        community: b.address,
+        contact: b.contact,
+        project_id,
+      }));
+      await trx("beneficiary").insert(beneficiaryData);
+    }
+
+    const imageUploads = Array.isArray(req.files)
+      ? req.files.filter((file: any) => file.fieldname.startsWith("images["))
+      : [];
+
+    if (imageUploads && imageUploads.length > 0) {
+      const imageData = imageUploads.map((img: any) => ({
+        image: img.location,
+        project_id,
+      }));
+      await trx("project_images").insert(imageData);
+    }
+
+    await trx.commit();
+    res
+      .status(201)
+      .json({ message: "Project created successfully", project_id });
+  } catch (error: any) {
+    await trx.rollback();
+    res.status(500).json({ error: error.message });
   }
 };
