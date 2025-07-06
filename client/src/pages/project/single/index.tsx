@@ -12,9 +12,11 @@ import { useContent } from "../../../services/useContext";
 import Overview from "./render/Details/Overview";
 import Timeline from "./render/Details/TimeLine";
 import Main from "./render/main";
+import MediaGallery from "./render/media";
 import Details from "./render/sidebar/Details";
 import Progress from "./render/sidebar/Progress";
 import Sponsor from "./render/sidebar/Sponsor";
+import Transactions from "./render/transactions";
 import MileStoneUpdates from "./render/updates";
 
 const TABS = ["Details", "Updates", "Media", "Transactions"];
@@ -97,9 +99,9 @@ const ProjectViewDetail: React.FC<any> = () => {
       case "Updates":
         return <MileStoneUpdates logo={logo} project={project} />;
       case "Media":
-        return <div>Media content here</div>;
+        return <MediaGallery project={project} />;
       case "Transactions":
-        return <div>Transactions content here</div>;
+        return <Transactions project={project} />;
       default:
         return null;
     }
