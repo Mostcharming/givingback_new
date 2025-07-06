@@ -15,6 +15,7 @@ import Main from "./render/main";
 import Details from "./render/sidebar/Details";
 import Progress from "./render/sidebar/Progress";
 import Sponsor from "./render/sidebar/Sponsor";
+import MileStoneUpdates from "./render/updates";
 
 const TABS = ["Details", "Updates", "Media", "Transactions"];
 
@@ -94,7 +95,7 @@ const ProjectViewDetail: React.FC<any> = () => {
           </>
         );
       case "Updates":
-        return <div>Updates content here</div>;
+        return <MileStoneUpdates logo={logo} project={project} />;
       case "Media":
         return <div>Media content here</div>;
       case "Transactions":
@@ -110,7 +111,6 @@ const ProjectViewDetail: React.FC<any> = () => {
         <Loading type={"inline"} />
       ) : (
         <>
-          {" "}
           <div className="container-fluid py-4">
             <div className="d-flex justify-content-between align-items-center">
               <nav style={{ background: "white" }} className="mb-4">
@@ -148,7 +148,10 @@ const ProjectViewDetail: React.FC<any> = () => {
                 />
 
                 {/* Tab Navigation */}
-                <ul className="nav nav-tabs mb-4 border-bottom border-2">
+                <ul
+                  style={{ width: "80vw" }}
+                  className="nav nav-tabs mb-4 border-bottom border-2"
+                >
                   {TABS.map((tab) => (
                     <li className="nav-item" key={tab}>
                       <button

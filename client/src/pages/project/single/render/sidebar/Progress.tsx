@@ -36,7 +36,7 @@ const Progress = ({ project }) => {
   return (
     <div
       style={{ border: "none", background: "rgba(18, 131, 48, 0.04)" }}
-      className="card mb-4"
+      className="card mb-4 d-none d-md-block"
     >
       <div className="card-body">
         <h6 className="card-title text-muted mb-3">Funding progress</h6>

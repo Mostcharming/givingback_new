@@ -187,6 +187,7 @@ export const getProjects = async (
             .select(
               "achievement",
               "position",
+              "image",
               "status",
               "narration",
               "createdAt"
