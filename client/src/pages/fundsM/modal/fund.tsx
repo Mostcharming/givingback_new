@@ -1,3 +1,4 @@
+import { loadStripe } from "@stripe/stripe-js";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import {
@@ -11,6 +12,7 @@ import {
   ModalHeader,
 } from "reactstrap";
 import useBackendService from "../../../services/backend_service";
+import { useContent } from "../../../services/useContext";
 
 interface FundWalletModalProps {
   isOpen: boolean;
@@ -28,6 +30,8 @@ export default function FundWalletModal({
     remark: "",
     paymentMethod: "",
   });
+  const { authState, currentState } = useContent();
+  const [clientSecret, setClientSecret] = useState(null);
 
   const [paystackPublicKey, setPaystackPublicKey] = useState<string | null>(
     null
@@ -51,29 +55,6 @@ export default function FundWalletModal({
       ...prev,
       [name]: value,
     }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isFormComplete) return;
-
-    if (formData.paymentMethod === "paystack") {
-      if (!paystackPublicKey) {
-        toast.error("Paystack key missing");
-        return;
-      }
-
-      // TODO: Implement Paystack logic here
-      toast.success("Paystack payment initiated");
-    } else if (formData.paymentMethod === "stripe") {
-      if (!stripePublicKey) {
-        toast.error("Stripe key missing");
-        return;
-      }
-
-      // TODO: Implement Stripe logic here
-      toast.success("Stripe payment initiated");
-    }
   };
 
   const { mutate: paymentGateways } = useBackendService(
@@ -104,12 +85,91 @@ export default function FundWalletModal({
       },
     }
   );
+  const { mutate: fundPost } = useBackendService("/fund", "POST", {
+    onSuccess: (res2: any) => {
+      toggle();
+    },
+    onError: () => {},
+  });
+  const { mutate: stripeS } = useBackendService("/stripe_session", "POST", {
+    onSuccess: (res2: any) => {
+      if (res2?.wholeResponse) {
+        console.log(clientSecret);
+        clientSecret.redirectToCheckout({ sessionId: res2.wholeResponse.id });
+      } else {
+        toast.error("Stripe session creation failed");
+      }
+    },
+    onError: () => {},
+  });
 
   useEffect(() => {
     if (isOpen) {
       paymentGateways({});
     }
   }, [isOpen]);
+
+  const handlePaystackPayment = () => {
+    if (!paystackPublicKey) return;
+    const paymentData = {
+      email: currentState.user.email,
+      amount: parseFloat(formData.amount) * 100,
+      reference: Date.now().toString(),
+      currency: "NGN",
+    };
+
+    const handler = (window as any).PaystackPop.setup({
+      key: paystackPublicKey,
+      email: paymentData.email,
+      amount: paymentData.amount,
+      currency: paymentData.currency,
+      ref: paymentData.reference,
+      metadata: {
+        project: formData.project,
+        remark: formData.remark,
+      },
+      callback: function (response: any) {
+        toast.success("Payment successful: " + response.reference);
+
+        const paymentDetails = {
+          user_id: authState.user.id,
+          payment_gateway: "Paystack",
+          transactionId: response.reference,
+          status: response.status,
+          currency: paymentData.currency,
+          amount: parseFloat(formData.amount),
+        };
+        fundPost(paymentDetails);
+      },
+      onClose: function () {
+        toast.info("Payment cancelled.");
+      },
+    });
+
+    handler.openIframe();
+  };
+  const handleStripePayment = async () => {
+    if (!stripePublicKey) return;
+
+    const stripe = await loadStripe(stripePublicKey);
+    if (!stripe) {
+      toast.error("Stripe failed to initialize");
+      return;
+    }
+    setClientSecret(stripe);
+
+    stripeS({ amount: +formData.amount * 100, currency: "usd" });
+  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isFormComplete) return;
+
+    if (formData.paymentMethod === "paystack") {
+      handlePaystackPayment();
+    } else if (formData.paymentMethod === "stripe") {
+      handleStripePayment();
+    }
+  };
 
   return (
     <Modal
