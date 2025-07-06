@@ -1,6 +1,11 @@
-import { BanknoteArrowUp, HandCoins, Landmark, Wallet } from "lucide-react";
+import {
+  BanknoteArrowUp,
+  Copy,
+  HandCoins,
+  Landmark,
+  Wallet,
+} from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button } from "reactstrap";
 import DashBox from "../../components/dashbox";
@@ -9,26 +14,32 @@ import Tables from "../../components/tables";
 import useBackendService from "../../services/backend_service";
 import { capitalizeFirstLetter } from "../../services/capitalize";
 import { useContent } from "../../services/useContext";
+import FundWalletModal from "./modal/fund";
 
 const FundsM = () => {
   const { authState, currentState } = useContent();
-
-  const navigate = useNavigate();
   const [dashBoxItems, setDashBoxItems] = useState([]);
   const [tableData, setTableData] = useState([]);
   const [headers, setHeaders] = useState([]);
   const [actions, setActions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const closeModal = async () => {
-    setIsModalOpen(false);
-  };
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
+  const [fundmodalOpen, setFundModalOpen] = useState(false);
+  const [withdrawmodalOpen, setWithdrawModalOpen] = useState(false);
+
+  const ftoggleModal = () => setFundModalOpen(!fundmodalOpen);
+  const wtoggleModal = () => setWithdrawModalOpen(!withdrawmodalOpen);
 
   const role = authState.user?.role;
+
+  const accountNumber = currentState?.bank?.[0]?.accountNumber;
+
+  const handleCopy = () => {
+    if (accountNumber) {
+      navigator.clipboard.writeText(accountNumber);
+      toast.success("Account number copied!");
+    }
+  };
 
   // Fetching dashboard details
   const { mutate: getDash } = useBackendService("/donor/dashboard", "GET", {
@@ -138,11 +149,40 @@ const FundsM = () => {
           },
           {
             title: "Withdrawal Account",
-            amount: "---",
+            amount: accountNumber ? (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <span>{accountNumber}</span>
+                <Copy
+                  size={16}
+                  color="#128330"
+                  style={{ cursor: "pointer" }}
+                  onClick={handleCopy}
+                />
+              </div>
+            ) : (
+              <span
+                style={{
+                  textDecoration: "underline",
+                  color: "#128330",
+                  cursor: "pointer",
+                }}
+              >
+                Add account
+              </span>
+            ),
             iconClass: <Landmark />,
             bgColor: "#DD7723",
             color: "white",
           },
+          // {
+          //   title: "Withdrawal Account",
+          //   amount: "---",
+          //   iconClass: <Landmark />,
+          //   bgColor: "#DD7723",
+          //   color: "white",
+          // },
         ];
       case "donor":
       case "corporate":
@@ -248,24 +288,11 @@ const FundsM = () => {
   };
 
   const handleEmptyStateClick = () => {};
-  const fund = () => {
-    if (authState.user.role === "NGO") {
-      navigate("/ngo/fund_wallet");
-    } else {
-      navigate("/donor/fund_wallet");
-    }
-  };
-  const send = () => {
-    if (authState.user.role === "NGO") {
-      navigate("/ngo/send_money");
-    } else {
-      navigate("/donor/send_money");
-    }
-  };
 
   return (
     <div className="min-vh-100 p-4">
       <div className="container-fluid">
+        <FundWalletModal isOpen={fundmodalOpen} toggle={ftoggleModal} />
         <div className="row align-items-center mb-5">
           <div className="col">
             <h3 className="text-custom-green fs-2 fw-semibold mb-0">
@@ -274,8 +301,7 @@ const FundsM = () => {
           </div>
           <div className="col-auto">
             <Button
-              // onClick={handleAddProject}
-
+              onClick={ftoggleModal}
               className="btn px-5 py-3"
               style={{
                 border: "none",
@@ -285,7 +311,7 @@ const FundsM = () => {
               Fund Wallet
             </Button>
             <button
-              // onClick={handleAddProject}
+              onClick={wtoggleModal}
               type="button"
               className="btn btn-outline-success px-5 py-3"
             >
