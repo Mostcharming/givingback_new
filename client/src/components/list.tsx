@@ -69,7 +69,7 @@ export const ProjectItem = (props: any) => {
     currency: "NGN",
   });
   return (
-    <Col className="px-3 mt-4" lg={4}>
+    <Col className="px-3 mt-4" lg={6}>
       <div
         onClick={details}
         className="card shadow-sm rounded"
@@ -192,6 +192,10 @@ const List = ({ type }) => {
         ) {
           if (res.totalItems === 0) {
             toast.info("No projects found with the selected filters.");
+          } else {
+            setResponseData(res.projects);
+            setTotalProjects(res.totalItems || 0);
+            setTotalPages(res.totalPages || 1);
           }
         } else {
           setResponseData(res.projects);
@@ -249,8 +253,11 @@ const List = ({ type }) => {
     if (role === "NGO") {
       fetchUsers({
         page: currentPage,
-        category: statusFilter !== "All Projects" ? statusFilter : undefined,
+        category:
+          categoryFilter !== "All Categories" ? categoryFilter : undefined,
         projectType: "present",
+        status: statusFilter !== "All Projects" ? statusFilter : undefined,
+
         startDate: dateFilter !== "Any time" ? dateFilter : undefined,
         organization_id: currentState.user.id,
       });
@@ -258,7 +265,10 @@ const List = ({ type }) => {
     } else if (role === "donor" || "corporate") {
       fetchUsers({
         page: currentPage,
-        category: statusFilter !== "All Projects" ? statusFilter : undefined,
+        category:
+          categoryFilter !== "All Categories" ? categoryFilter : undefined,
+        status: statusFilter !== "All Projects" ? statusFilter : undefined,
+
         projectType: "present",
         startDate: dateFilter !== "Any time" ? dateFilter : undefined,
         donor_id: currentState.user.id,
@@ -296,248 +306,244 @@ const List = ({ type }) => {
   };
 
   return (
-    <div className="min-vh-100 p-4">
-      <div className="container-fluid">
-        <div className="row align-items-center mb-5">
-          <div className="col">
-            <h3 className="text-custom-green fs-2 fw-semibold mb-0">
-              Projects
-            </h3>
-          </div>
-          <div className="col-auto">
-            <button
-              onClick={handleAddProject}
-              className="btn btn-custom-green px-4 py-2 fw-medium rounded-lg"
-            >
-              Add past project
-            </button>
-          </div>
+    <div className=" p-4">
+      <div className="row align-items-center mb-5">
+        <div className="col">
+          <h3 className="text-custom-green fs-2 fw-semibold mb-0">Projects</h3>
         </div>
-        <div className="pb-5">
-          {isLoading && <Loading type={"inline"} />}
-          {responseData.length === 0 && !isLoading && (
-            <div
-              style={{ marginTop: "200px" }}
-              className="row justify-content-center"
-            >
-              <div className="col-12 col-md-6 col-lg-4">
-                <div className="text-center empty-state-container">
-                  <div className="mb-4">
-                    <FolderOpenDot className="text-custom-muted" size={50} />
-                  </div>
-
-                  <h2 className="text-custom-dark fs-4 fw-semibold mb-3">
-                    No projects yet
-                  </h2>
-
-                  <p className="text-custom-muted mb-5 lh-base">
-                    You don't seem to have an projects available yet. When you
-                    add a project, it would appear here.
-                  </p>
-
-                  <button
-                    onClick={handleAddProject}
-                    className="btn btn-custom-green w-100 px-4 py-3 fw-medium rounded-lg"
-                  >
-                    Add past project
-                  </button>
+        <div className="col-auto">
+          <button
+            onClick={handleAddProject}
+            className="btn btn-custom-green px-4 py-2 fw-medium rounded-lg"
+          >
+            Add past project
+          </button>
+        </div>
+      </div>
+      <div className="pb-5">
+        {isLoading && <Loading type={"inline"} />}
+        {responseData.length === 0 && !isLoading && (
+          <div
+            style={{ marginTop: "200px" }}
+            className="row justify-content-center"
+          >
+            <div className="col-12 col-md-6 col-lg-4">
+              <div className="text-center empty-state-container">
+                <div className="mb-4">
+                  <FolderOpenDot className="text-custom-muted" size={50} />
                 </div>
+
+                <h2 className="text-custom-dark fs-4 fw-semibold mb-3">
+                  No projects yet
+                </h2>
+
+                <p className="text-custom-muted mb-5 lh-base">
+                  You don't seem to have an projects available yet. When you add
+                  a project, it would appear here.
+                </p>
+
+                <button
+                  onClick={handleAddProject}
+                  className="btn btn-custom-green w-100 px-4 py-3 fw-medium rounded-lg"
+                >
+                  Add past project
+                </button>
               </div>
             </div>
-          )}
-          {responseData.length > 0 && !isLoading && (
-            <>
-              <div
-                style={{
-                  border: "1px solid rgb(179, 179, 179)",
-                  borderRadius: "10px",
-                }}
-                className="container-fluid p-3"
-              >
-                <div className="row">
-                  {/* Status Filter */}
-                  <div className="mr-2">
-                    <div>
-                      <label className="form-label text-muted small fw-normal">
-                        Status
-                      </label>
-                    </div>
-                    <div className="dropdown">
-                      <button
-                        className="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center"
-                        role="button"
-                        id="dropdownMenuLink"
-                        data-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        style={{
-                          backgroundColor: "white",
-                          border: "1px solid rgb(179, 179, 179)",
-
-                          borderRadius: "8px",
-                          padding: "12px 16px",
-                        }}
-                      >
-                        <span>{statusFilter}</span>
-                      </button>
-                      <ul className="dropdown-menu w-100">
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => setStatusFilter("All Projects")}
-                          >
-                            All Projects
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => setStatusFilter("active")}
-                          >
-                            Active
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => setStatusFilter("completed")}
-                          >
-                            Completed
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => setStatusFilter("closed")}
-                          >
-                            Closed
-                          </button>
-                        </li>
-                      </ul>
-                    </div>
+          </div>
+        )}
+        {responseData.length > 0 && !isLoading && (
+          <>
+            <div
+              style={{
+                border: "1px solid rgb(179, 179, 179)",
+                borderRadius: "10px",
+              }}
+              className="container-fluid p-3"
+            >
+              <div className="row">
+                {/* Status Filter */}
+                <div className="mr-2">
+                  <div>
+                    <label className="form-label text-muted small fw-normal">
+                      Status
+                    </label>
                   </div>
-
-                  {/* Category Filter */}
-                  <div className="mr-2">
-                    <div>
-                      <label className="form-label text-muted small fw-normal">
-                        Category
-                      </label>
-                    </div>
-                    <div className="dropdown">
-                      <button
-                        className="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center"
-                        role="button"
-                        id="dropdownMenuLink"
-                        data-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        style={{
-                          backgroundColor: "white",
-                          border: "1px solid rgb(179, 179, 179)",
-
-                          borderRadius: "8px",
-                          padding: "12px 16px",
-                        }}
-                      >
-                        <span>{categoryFilter}</span>
-                      </button>
-                      <ul className="dropdown-menu w-100">
-                        <li>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => setCategoryFilter("All categories")}
-                          >
-                            All Categories
-                          </button>
-                        </li>
-                        {areas?.map((area) => (
-                          <li key={area.id}>
-                            <button
-                              className="dropdown-item"
-                              onClick={() => setCategoryFilter(area.name)}
-                            >
-                              {area.name}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Date Filter */}
-                  <div className="">
-                    <div>
-                      <label className="form-label text-muted small fw-normal">
-                        Date
-                      </label>
-                    </div>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={dateFilter}
-                      onChange={(e) => setDateFilter(e.target.value)}
+                  <div className="dropdown">
+                    <button
+                      className="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center"
+                      role="button"
+                      id="dropdownMenuLink"
+                      data-toggle="dropdown"
+                      aria-haspopup="true"
+                      aria-expanded="false"
                       style={{
                         backgroundColor: "white",
                         border: "1px solid rgb(179, 179, 179)",
+
                         borderRadius: "8px",
-                        padding: "24px 16px",
+                        padding: "12px 16px",
                       }}
-                    />
+                    >
+                      <span>{statusFilter}</span>
+                    </button>
+                    <ul className="dropdown-menu w-100">
+                      <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => setStatusFilter("All Projects")}
+                        >
+                          All Projects
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => setStatusFilter("active")}
+                        >
+                          Active
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => setStatusFilter("completed")}
+                        >
+                          Completed
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => setStatusFilter("closed")}
+                        >
+                          Closed
+                        </button>
+                      </li>
+                    </ul>
                   </div>
                 </div>
-                <div className="row"></div>
-              </div>
 
-              <Container style={{ maxWidth: "unset" }}>
-                <Row>
-                  {responseData.map((project) => {
-                    // if (type === "past") {
-                    const img = project.projectImages[0]?.image;
-                    // }
-                    return (
-                      <ProjectItem
-                        type={type}
-                        project={project}
-                        image={img}
-                        key={project.id}
-                      />
-                    );
-                  })}
-                </Row>
-              </Container>
+                {/* Category Filter */}
+                <div className="mr-2">
+                  <div>
+                    <label className="form-label text-muted small fw-normal">
+                      Category
+                    </label>
+                  </div>
+                  <div className="dropdown">
+                    <button
+                      className="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center"
+                      role="button"
+                      id="dropdownMenuLink"
+                      data-toggle="dropdown"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                      style={{
+                        backgroundColor: "white",
+                        border: "1px solid rgb(179, 179, 179)",
 
-              <div className="d-flex justify-content-between mt-4">
-                <Button
-                  style={{
-                    backgroundColor: currentPage === 1 ? "grey" : "#7B80DD",
-                    color: "white",
-                    border: "none",
-                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                  }}
-                  onClick={previousPage}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-                <Button
-                  style={{
-                    backgroundColor:
-                      currentPage === totalPages ? "grey" : "#7B80DD",
-                    color: "white",
-                    border: "none",
-                    cursor:
-                      currentPage === totalPages ? "not-allowed" : "pointer",
-                  }}
-                  onClick={nextPage}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </Button>
+                        borderRadius: "8px",
+                        padding: "12px 16px",
+                      }}
+                    >
+                      <span>{categoryFilter}</span>
+                    </button>
+                    <ul className="dropdown-menu w-100">
+                      <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => setCategoryFilter("All categories")}
+                        >
+                          All Categories
+                        </button>
+                      </li>
+                      {areas?.map((area) => (
+                        <li key={area.id}>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => setCategoryFilter(area.name)}
+                          >
+                            {area.name}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Date Filter */}
+                <div className="">
+                  <div>
+                    <label className="form-label text-muted small fw-normal">
+                      Date
+                    </label>
+                  </div>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    style={{
+                      backgroundColor: "white",
+                      border: "1px solid rgb(179, 179, 179)",
+                      borderRadius: "8px",
+                      padding: "24px 16px",
+                    }}
+                  />
+                </div>
               </div>
-            </>
-          )}
-        </div>
+              <div className="row"></div>
+            </div>
+
+            <Container style={{ maxWidth: "unset" }}>
+              <Row>
+                {responseData.map((project) => {
+                  // if (type === "past") {
+                  const img = project.projectImages[0]?.image;
+                  // }
+                  return (
+                    <ProjectItem
+                      type={type}
+                      project={project}
+                      image={img}
+                      key={project.id}
+                    />
+                  );
+                })}
+              </Row>
+            </Container>
+
+            <div className="d-flex justify-content-between mt-4">
+              <Button
+                style={{
+                  backgroundColor: currentPage === 1 ? "grey" : "#7B80DD",
+                  color: "white",
+                  border: "none",
+                  cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                }}
+                onClick={previousPage}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <Button
+                style={{
+                  backgroundColor:
+                    currentPage === totalPages ? "grey" : "#7B80DD",
+                  color: "white",
+                  border: "none",
+                  cursor:
+                    currentPage === totalPages ? "not-allowed" : "pointer",
+                }}
+                onClick={nextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

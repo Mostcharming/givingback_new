@@ -124,15 +124,15 @@ export const getProjects = async (
 
       const sponsors = await db("previousprojects_sponsors")
         .where({ project_id: projectId })
-        .select("name", "image", "description");
+        .select("id", "name", "image", "description");
 
       const beneficiaries = await db("previousprojects_beneficiaries")
         .where({ project_id: projectId })
-        .select("name", "contact", "location");
+        .select("id", "name", "contact", "location");
 
       const projectImages = await db("previousprojects_images")
         .where({ project_id: projectId })
-        .select("image");
+        .select("id", "image");
 
       return {
         ...project,
@@ -152,6 +152,7 @@ export const getProjects = async (
       const donorDetails = await db("donors")
         .where({ id: project.donor_id })
         .select(
+          "id",
           "name",
           "phoneNumber",
           "industry",
@@ -178,13 +179,14 @@ export const getProjects = async (
 
       const sponsors = await db("project_sponsor")
         .where({ project_id: projectId })
-        .select("name", "image", "description");
+        .select("id", "name", "image", "description");
 
       const detailedMilestones = await Promise.all(
         milestones.map(async (milestone) => {
           const updates = await db("milestone_update")
             .where({ milestone_id: milestone.id })
             .select(
+              "id",
               "achievement",
               "position",
               "image",
@@ -198,11 +200,11 @@ export const getProjects = async (
 
       const beneficiaries = await db("beneficiary")
         .where({ project_id: projectId })
-        .select("state", "city", "community", "contact");
+        .select("id", "state", "city", "community", "contact");
 
       const projectImages = await db("project_images")
         .where({ project_id: projectId })
-        .select("image");
+        .select("id", "image");
 
       return {
         ...project,

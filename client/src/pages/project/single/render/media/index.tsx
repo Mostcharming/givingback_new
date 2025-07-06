@@ -1,6 +1,9 @@
-import { Play, Trash2, Video } from "lucide-react";
+import { ArrowLeft, ArrowRight, Play, Trash2, Video, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function MediaGallery({ project }) {
+  const [lightboxIndex, setLightboxIndex] = useState(null);
+
   const isVideoFile = (url) => {
     if (!url) return false;
     const videoExtensions = [
@@ -29,23 +32,39 @@ export default function MediaGallery({ project }) {
     console.log(`Delete item with id: ${itemId}`);
   };
 
-  const handlePlayVideo = (videoSrc) => {
-    console.log(`Play video: ${videoSrc}`);
-  };
-
   const handleUploadMedia = () => {
     console.log("Upload new media");
   };
 
+  const openLightbox = (index) => setLightboxIndex(index);
+  const closeLightbox = () => setLightboxIndex(null);
+  const prevItem = () =>
+    setLightboxIndex((prev) => (prev > 0 ? prev - 1 : mediaItems.length - 1));
+  const nextItem = () =>
+    setLightboxIndex((prev) => (prev + 1) % mediaItems.length);
+
+  // Prevent scroll on modal open
+  useEffect(() => {
+    if (lightboxIndex !== null) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [lightboxIndex]);
+
   return (
     <>
       <style>{`
+        body.modal-open {
+          overflow: hidden;
+        }
         .media-item {
           position: relative;
           border-radius: 12px;
           overflow: hidden;
           aspect-ratio: 3/2;
           background-color: #e9ecef;
+          cursor: pointer;
         }
         .media-item img,
         .media-item video {
@@ -63,13 +82,6 @@ export default function MediaGallery({ project }) {
           padding: 6px;
           color: white;
           cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background-color 0.2s;
-        }
-        .delete-btn:hover {
-          background: rgba(0, 0, 0, 0.8);
         }
         .play-overlay {
           position: absolute;
@@ -77,18 +89,9 @@ export default function MediaGallery({ project }) {
           left: 50%;
           transform: translate(-50%, -50%);
           background: rgba(0, 0, 0, 0.6);
-          border: none;
           border-radius: 50%;
           padding: 12px;
           color: white;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background-color 0.2s;
-        }
-        .play-overlay:hover {
-          background: rgba(0, 0, 0, 0.8);
         }
         .video-indicator {
           position: absolute;
@@ -108,10 +111,6 @@ export default function MediaGallery({ project }) {
           font-weight: 500;
           font-size: 16px;
           cursor: pointer;
-          transition: background-color 0.2s;
-        }
-        .upload-btn:hover {
-          background-color: #218838;
         }
         .no-media {
           text-align: center;
@@ -121,14 +120,67 @@ export default function MediaGallery({ project }) {
           border-radius: 8px;
           border: 2px dashed #dee2e6;
         }
-        .media-error {
+        .lightbox-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: black;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
-          background-color: #f8d7da;
-          color: #721c24;
-          font-size: 14px;
+          z-index: 1000;
+        }
+        .lightbox-content {
+          max-width: 90vw;
+          max-height: 80vh;
+          position: relative;
+        }
+        .lightbox-content img,
+        .lightbox-content video {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+        }
+        .lightbox-nav {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          color: white;
+          background: rgba(0, 0, 0, 0.5);
+          border: none;
           padding: 10px;
+          cursor: pointer;
+        }
+        .lightbox-close {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          color: white;
+          background: rgba(0, 0, 0, 0.5);
+          border: none;
+          border-radius: 50%;
+          padding: 8px;
+          cursor: pointer;
+        }
+        .thumbnail-strip {
+          display: flex;
+          gap: 8px;
+          overflow-x: auto;
+          padding: 1rem;
+          max-width: 90vw;
+        }
+        .thumbnail-strip img,
+        .thumbnail-strip video {
+          height: 80px;
+          cursor: pointer;
+          border: 2px solid transparent;
+          border-radius: 8px;
+        }
+        .thumbnail-strip .active {
+          border-color: white;
         }
       `}</style>
 
@@ -136,7 +188,7 @@ export default function MediaGallery({ project }) {
         {/* Date Header */}
         <div className="row mb-4">
           <div className="col">
-            <h5 className="mb-0 text-dark fw-normal">
+            <h5 className="mb-0 text-black fw-normal">
               {project?.startDate
                 ? new Date(project.startDate).toLocaleDateString("en-US", {
                     month: "long",
@@ -147,66 +199,31 @@ export default function MediaGallery({ project }) {
           </div>
         </div>
 
-        {/* Media Grid or No Media Message */}
+        {/* Media Grid */}
         {mediaItems.length > 0 ? (
           <div className="row g-3 mb-4">
-            {mediaItems.map((item) => (
+            {mediaItems.map((item, index) => (
               <div key={item.id} className="col-12 col-md-6 col-lg-4 p-2">
-                <div className="media-item">
+                <div className="media-item" onClick={() => openLightbox(index)}>
                   {item.type === "video" ? (
-                    <video
-                      src={item.src}
-                      preload="metadata"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                        if ((e.target as HTMLImageElement).nextSibling) {
-                          (
-                            (e.target as HTMLImageElement)
-                              .nextSibling as HTMLElement
-                          ).style.display = "flex";
-                        }
-                      }}
-                    />
+                    <video src={item.src} preload="metadata" />
                   ) : (
-                    <img
-                      src={item.src}
-                      alt={item.alt}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                        if ((e.target as HTMLImageElement).nextSibling) {
-                          (
-                            (e.target as HTMLImageElement)
-                              .nextSibling as HTMLElement
-                          ).style.display = "flex";
-                        }
-                      }}
-                    />
+                    <img src={item.src} alt={item.alt} />
                   )}
-
-                  {/* Error fallback */}
-                  <div className="media-error" style={{ display: "none" }}>
-                    Failed to load media
-                  </div>
-
-                  {/* Delete Button */}
                   <button
                     className="delete-btn"
-                    aria-label="Delete media"
-                    onClick={() => handleDelete(item.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(item.id);
+                    }}
                   >
                     <Trash2 size={16} />
                   </button>
-
-                  {/* Video Indicators */}
                   {item.type === "video" && (
                     <>
-                      <button
-                        className="play-overlay"
-                        aria-label="Play video"
-                        onClick={() => handlePlayVideo(item.src)}
-                      >
+                      <div className="play-overlay">
                         <Play size={20} fill="white" />
-                      </button>
+                      </div>
                       <div className="video-indicator">
                         <Video size={14} />
                       </div>
@@ -232,6 +249,61 @@ export default function MediaGallery({ project }) {
           </div>
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      {lightboxIndex !== null && (
+        <div className="lightbox-overlay">
+          <button className="lightbox-close" onClick={closeLightbox}>
+            <X />
+          </button>
+          <button
+            className="lightbox-nav"
+            style={{ left: 20 }}
+            onClick={prevItem}
+          >
+            <ArrowLeft />
+          </button>
+          <div className="lightbox-content">
+            {mediaItems[lightboxIndex].type === "video" ? (
+              <video src={mediaItems[lightboxIndex].src} controls autoPlay />
+            ) : (
+              <img
+                src={mediaItems[lightboxIndex].src}
+                alt={mediaItems[lightboxIndex].alt}
+              />
+            )}
+          </div>
+          <button
+            className="lightbox-nav"
+            style={{ right: 20 }}
+            onClick={nextItem}
+          >
+            <ArrowRight />
+          </button>
+
+          {/* Thumbnail Strip */}
+          <div className="thumbnail-strip">
+            {mediaItems.map((item, idx) => (
+              <div key={item.id}>
+                {item.type === "video" ? (
+                  <video
+                    className={idx === lightboxIndex ? "active" : ""}
+                    src={item.src}
+                    onClick={() => setLightboxIndex(idx)}
+                  />
+                ) : (
+                  <img
+                    className={idx === lightboxIndex ? "active" : ""}
+                    src={item.src}
+                    alt={item.alt}
+                    onClick={() => setLightboxIndex(idx)}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </>
   );
 }

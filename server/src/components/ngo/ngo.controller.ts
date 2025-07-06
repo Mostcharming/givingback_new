@@ -435,6 +435,7 @@ export const respondBrief = async (req: any, res: Response) => {
   }
 };
 
+//v2
 export const createProject = async (req: Request, res: Response) => {
   const trx = await db.transaction();
   try {
@@ -541,3 +542,158 @@ export const createProject = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+export const addMilestones = async (req: Request, res: Response) => {
+  const { project_id } = req.params;
+  const { milestones } = req.body;
+  const organization = await db("organizations")
+    .where("user_id", req.user.id)
+    .first();
+
+  if (!organization) {
+    return res.status(404).json({ message: "Organization not found" });
+  }
+
+  const milestoneData = milestones.map((m: any) => ({
+    milestone: m.milestone,
+    status: m.mstatus,
+    description: m.miledes,
+    target: 0,
+    project_id,
+    organization_id: organization.id,
+  }));
+
+  try {
+    await db("milestone").insert(milestoneData);
+    res.status(201).json({ message: "Milestones added successfully" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+export const addSponsors = async (req: Request, res: Response) => {
+  const { project_id } = req.params;
+  const { sponsors } = req.body;
+  const sponsorUploads = Array.isArray(req.files)
+    ? req.files.filter((file: any) => file.fieldname.startsWith("sponsors["))
+    : [];
+
+  const sponsorData = sponsors.map((s: any, i: number) => ({
+    name: s.sponsor,
+    image: (sponsorUploads?.[i] as any)?.location || null,
+    description: s.sdesc,
+    project_id,
+  }));
+
+  try {
+    await db("project_sponsor").insert(sponsorData);
+    res.status(201).json({ message: "Sponsors added successfully" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+export const addBeneficiaries = async (req: Request, res: Response) => {
+  const { project_id } = req.params;
+  const { beneficiaries } = req.body;
+
+  const data = beneficiaries.map((b: any) => ({
+    state: b.state || "",
+    city: b.city || "",
+    community: b.address,
+    contact: b.contact,
+    project_id,
+  }));
+
+  try {
+    await db("beneficiary").insert(data);
+    res.status(201).json({ message: "Beneficiaries added successfully" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+export const addProjectImages = async (req: Request, res: Response) => {
+  const { project_id } = req.params;
+
+  const imageUploads = Array.isArray(req.files)
+    ? req.files.filter((file: any) => file.fieldname.startsWith("images["))
+    : [];
+
+  const imageData = imageUploads.map((img: any) => ({
+    image: img.location,
+    project_id,
+  }));
+
+  try {
+    await db("project_images").insert(imageData);
+    res.status(201).json({ message: "Images uploaded successfully" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+export const deleteMilestone = async (req: Request, res: Response) => {
+  const { milestone_id } = req.params;
+  try {
+    await db("milestone").where({ id: milestone_id }).del();
+    res.json({ message: "Milestone removed" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+};
+export const deleteSponsor = async (req: Request, res: Response) => {
+  const { sponsor_id } = req.params;
+  try {
+    const deleted = await db("project_sponsor").where({ id: sponsor_id }).del();
+
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "Sponsor not found" });
+    }
+
+    res
+      .status(200)
+      .json({ status: "success", message: "Sponsor deleted successfully" });
+  } catch (error: any) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+// Delete Beneficiary
+export const deleteBeneficiary = async (req: Request, res: Response) => {
+  const { beneficiary_id } = req.params;
+  try {
+    const deleted = await db("beneficiary").where({ id: beneficiary_id }).del();
+
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "Beneficiary not found" });
+    }
+
+    res
+      .status(200)
+      .json({ status: "success", message: "Beneficiary deleted successfully" });
+  } catch (error: any) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+// Delete Project Image
+export const deleteImage = async (req: Request, res: Response) => {
+  const { image_id } = req.params;
+  try {
+    const deleted = await db("project_images").where({ id: image_id }).del();
+
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "Image not found" });
+    }
+
+    res
+      .status(200)
+      .json({ status: "success", message: "Image deleted successfully" });
+  } catch (error: any) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+// Similarly for sponsor, beneficiary, image...
