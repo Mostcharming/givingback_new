@@ -47,7 +47,7 @@ const Register = () => {
   }, []);
 
   const [formData, setFormData] = useState({
-    selectedOption: "",
+    selectedOption: "organization",
     email: "",
     password: "",
     category: "",
@@ -262,11 +262,12 @@ const Register = () => {
             className={`option-card ${
               formData.selectedOption === "donor" ? "active" : ""
             }`}
-            onClick={() =>
-              setFormData((prev) => ({
-                ...prev,
-                selectedOption: "donor",
-              }))
+            onClick={
+              () => toast.info("Only NGO sign up is enabled at the moment")
+              // setFormData((prev) => ({
+              //   ...prev,
+              //   selectedOption: "donor",
+              // }))
             }
           >
             <CardBody>
