@@ -32,6 +32,7 @@ import MessageDonor from "../pages/messages";
 import AddPastProject from "../pages/ngo/pastproject/past-projects";
 import NGODetails from "../pages/ngo_details";
 import Ngo from "../pages/ngodirectory";
+import Profile from "../pages/profile";
 import CreateProject from "../pages/project/create-project-options";
 import ProjectViewDetail from "../pages/project/single";
 import AdminDashboard from "../pages/report/dashboard";
@@ -138,10 +139,10 @@ const routes = [
     layout: "/donor",
   },
   {
-    path: "/projects",
+    path: "/profile",
     name: "Profile",
     icon: <User />,
-    component: <DN_Projects />,
+    component: <Profile />,
     layout: "/donor",
   },
 
@@ -182,10 +183,10 @@ const routes = [
     layout: "/ngo",
   },
   {
-    path: "/projects",
+    path: "/profile",
     name: "Profile",
     icon: <User />,
-    component: <DN_Projects />,
+    component: <Profile />,
     layout: "/ngo",
   },
 

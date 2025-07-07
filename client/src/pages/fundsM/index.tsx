@@ -15,6 +15,7 @@ import useBackendService from "../../services/backend_service";
 import { capitalizeFirstLetter } from "../../services/capitalize";
 import { useContent } from "../../services/useContext";
 import FundWalletModal from "./modal/fund";
+import WithdrawFundsModal from "./modal/withdraw";
 
 const FundsM = () => {
   const { authState, currentState } = useContent();
@@ -293,6 +294,8 @@ const FundsM = () => {
     <div className="min-vh-100 p-4">
       <div className="container-fluid">
         <FundWalletModal isOpen={fundmodalOpen} toggle={ftoggleModal} />
+        <WithdrawFundsModal isOpen={withdrawmodalOpen} toggle={wtoggleModal} />
+
         <div className="row align-items-center mb-5">
           <div className="col">
             <h3 className="text-custom-green fs-2 fw-semibold mb-0">
