@@ -31,12 +31,13 @@ export default function FundWalletModal({
     paymentMethod: "",
   });
   const { authState, currentState } = useContent();
-  const [clientSecret, setClientSecret] = useState(null);
-
+  const [stripe, setStripe] = useState<any>(null);
+  const [projects, setProjects] = useState([]);
   const [paystackPublicKey, setPaystackPublicKey] = useState<string | null>(
     null
   );
   const [stripePublicKey, setStripePublicKey] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const isFormComplete =
     formData.country &&
@@ -57,6 +58,20 @@ export default function FundWalletModal({
     }));
   };
 
+  const { mutate: fetchUsers } = useBackendService("/allprojects", "GET", {
+    onSuccess: (res: any) => {
+      setProjects(
+        res.projects.map((project) => ({
+          value: project.id,
+          label: project.title,
+        }))
+      );
+    },
+    onError: () => {
+      toast.error("Failed to fetch Projects.");
+    },
+  });
+
   const { mutate: paymentGateways } = useBackendService(
     "/admin/payment-gateways",
     "GET",
@@ -71,11 +86,11 @@ export default function FundWalletModal({
           toast.error("Paystack configuration not found.");
         }
 
-        const stripe = res2.find(
+        const stripeGateway = res2.find(
           (gateway: any) => gateway.name.toLowerCase() === "stripe"
         );
-        if (stripe?.public_key) {
-          setStripePublicKey(stripe.public_key);
+        if (stripeGateway?.public_key) {
+          setStripePublicKey(stripeGateway.public_key);
         } else {
           toast.error("Stripe configuration not found.");
         }
@@ -85,32 +100,130 @@ export default function FundWalletModal({
       },
     }
   );
+
   const { mutate: fundPost } = useBackendService("/fund", "POST", {
-    onSuccess: (res2: any) => {
+    onSuccess: () => {
+      toast.success("Payment recorded successfully!");
+      window.location.reload();
       toggle();
     },
-    onError: () => {},
-  });
-  const { mutate: stripeS } = useBackendService("/stripe_session", "POST", {
-    onSuccess: (res2: any) => {
-      if (res2?.wholeResponse) {
-        console.log(clientSecret);
-        clientSecret.redirectToCheckout({ sessionId: res2.wholeResponse.id });
-      } else {
-        toast.error("Stripe session creation failed");
-      }
+    onError: (error: any) => {
+      toast.error(
+        "Failed to record payment: " + (error?.message || "Unknown error")
+      );
     },
-    onError: () => {},
   });
+
+  const { mutate: verifyStripePayment } = useBackendService(
+    "/verify-stripe-payment",
+    "POST",
+    {
+      onSuccess: (res: any) => {
+        if (res.success) {
+          toast.success("Payment verified successfully!");
+          toggle();
+        } else {
+          toast.error("Payment verification failed");
+        }
+      },
+      onError: (error: any) => {
+        toast.error(
+          "Failed to verify payment: " + (error?.message || "Unknown error")
+        );
+      },
+    }
+  );
+  const { mutate: createStripeSession } = useBackendService(
+    "/stripe_session",
+    "POST",
+    {
+      onSuccess: (res2: any) => {
+        if (res2?.sessionId) {
+          localStorage.setItem("stripe_session_id", res2?.sessionId);
+          if (stripe) {
+            stripe.redirectToCheckout({ sessionId: res2.sessionId });
+          } else {
+            toast.error("Stripe not initialized properly");
+          }
+        } else {
+          toast.error("Stripe session creation failed");
+        }
+        setIsProcessing(false);
+      },
+      onError: (error: any) => {
+        toast.error(
+          "Failed to create Stripe session: " +
+            (error?.message || "Unknown error")
+        );
+        setIsProcessing(false);
+      },
+    }
+  );
+
+  useEffect(() => {
+    const checkStripeCallback = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const status = urlParams.get("status");
+
+      if (status) {
+        try {
+          const sessionId = localStorage.getItem("stripe_session_id");
+
+          verifyStripePayment({
+            sessionId: sessionId,
+            status: status,
+            user_id: authState.user?.id,
+            amount: formData.amount,
+          });
+
+          localStorage.removeItem("stripe_session_id");
+        } catch (error) {
+          console.error("Error decoding session ID:", error);
+          toast.error("Invalid payment callback");
+        }
+      }
+    };
+
+    if (authState.user?.id) {
+      checkStripeCallback();
+    }
+  }, [authState.user?.id]);
+
+  useEffect(() => {
+    const initializeStripe = async () => {
+      if (stripePublicKey) {
+        try {
+          const stripeInstance = await loadStripe(stripePublicKey);
+          setStripe(stripeInstance);
+        } catch (error) {
+          console.error("Failed to initialize Stripe:", error);
+          toast.error("Failed to initialize Stripe");
+        }
+      }
+    };
+
+    initializeStripe();
+  }, [stripePublicKey]);
 
   useEffect(() => {
     if (isOpen) {
       paymentGateways({});
+      fetchUsers({
+        limit: 1000,
+        projectType: "present",
+        status: "active",
+        organization_id: currentState.user.id,
+      });
     }
   }, [isOpen]);
 
   const handlePaystackPayment = () => {
-    if (!paystackPublicKey) return;
+    if (!paystackPublicKey) {
+      toast.error("Paystack not configured");
+      return;
+    }
+
+    setIsProcessing(true);
     const paymentData = {
       email: currentState.user.email,
       amount: parseFloat(formData.amount) * 100,
@@ -120,7 +233,7 @@ export default function FundWalletModal({
 
     const handler = (window as any).PaystackPop.setup({
       key: paystackPublicKey,
-      email: paymentData.email,
+      email: "mostcharming920@gmail.com",
       amount: paymentData.amount,
       currency: paymentData.currency,
       ref: paymentData.reference,
@@ -138,31 +251,53 @@ export default function FundWalletModal({
           status: response.status,
           currency: paymentData.currency,
           amount: parseFloat(formData.amount),
+          project_id: formData.project,
+          remark: formData.remark,
         };
         fundPost(paymentDetails);
+        setIsProcessing(false);
       },
       onClose: function () {
         toast.info("Payment cancelled.");
+        setIsProcessing(false);
       },
     });
 
     handler.openIframe();
   };
-  const handleStripePayment = async () => {
-    if (!stripePublicKey) return;
 
-    const stripe = await loadStripe(stripePublicKey);
-    if (!stripe) {
-      toast.error("Stripe failed to initialize");
+  const handleStripePayment = async () => {
+    if (!stripePublicKey || !stripe) {
+      toast.error("Stripe not initialized");
       return;
     }
-    setClientSecret(stripe);
 
-    stripeS({ amount: +formData.amount * 100, currency: "usd" });
+    setIsProcessing(true);
+
+    try {
+      const baseUrl = window.location.origin + window.location.pathname;
+
+      const sessionData = {
+        amount: Math.round(parseFloat(formData.amount) * 100),
+        currency: "usd",
+        project_id: formData.project,
+        remark: formData.remark,
+        user_id: authState.user.id,
+        success_url: `${baseUrl}?status=success`,
+        cancel_url: `${baseUrl}?status=cancelled`,
+      };
+
+      createStripeSession(sessionData);
+    } catch (error) {
+      console.error("Stripe payment error:", error);
+      toast.error("Failed to initiate Stripe payment");
+      setIsProcessing(false);
+    }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormComplete) return;
+    if (!isFormComplete || isProcessing) return;
 
     if (formData.paymentMethod === "paystack") {
       handlePaystackPayment();
@@ -202,18 +337,20 @@ export default function FundWalletModal({
               <option value="" disabled>
                 Select country
               </option>
-              <option value="us">Nigeria</option>
-              <option value="uk">International</option>
+              <option value="ng">Nigeria</option>
+              <option value="intl">International</option>
             </Input>
           </FormGroup>
 
           <FormGroup className="mb-3">
             <Input
-              type="text"
+              type="number"
               name="amount"
               placeholder="Enter amount"
               value={formData.amount}
               onChange={handleInputChange}
+              min="1"
+              step="0.01"
               className="form-control-lg bg-light border-0"
               style={{
                 borderRadius: "12px",
@@ -241,9 +378,11 @@ export default function FundWalletModal({
               <option value="" disabled>
                 Attach project
               </option>
-              <option value="project1">Project Alpha</option>
-              <option value="project2">Project Beta</option>
-              <option value="project3">Project Gamma</option>
+              {projects.map((project) => (
+                <option key={project.value} value={project.value}>
+                  {project.label}
+                </option>
+              ))}
             </Input>
           </FormGroup>
 
@@ -265,10 +404,10 @@ export default function FundWalletModal({
                 <option value="" disabled>
                   Select Payment Method
                 </option>
-                {formData.country === "us" && paystackPublicKey && (
+                {formData.country === "ng" && paystackPublicKey && (
                   <option value="paystack">Paystack</option>
                 )}
-                {formData.country === "uk" && stripePublicKey && (
+                {formData.country === "intl" && stripePublicKey && (
                   <option value="stripe">Stripe</option>
                 )}
               </Input>
@@ -300,18 +439,22 @@ export default function FundWalletModal({
         <Button
           type="submit"
           className={`w-100 btn-lg fw-normal border-0 ${
-            isFormComplete ? "text-white" : "text-dark bg-light"
+            isFormComplete && !isProcessing
+              ? "text-white"
+              : "text-dark bg-light"
           }`}
           style={{
-            backgroundColor: isFormComplete ? "#128330" : "transparent",
+            backgroundColor:
+              isFormComplete && !isProcessing ? "#128330" : "transparent",
             borderRadius: "12px",
             padding: "20px",
             fontSize: "16px",
             height: "auto",
           }}
           onClick={handleSubmit}
+          disabled={!isFormComplete || isProcessing}
         >
-          Fund Wallet
+          {isProcessing ? "Processing..." : "Fund Wallet"}
         </Button>
       </ModalFooter>
 

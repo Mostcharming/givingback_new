@@ -1,21 +1,23 @@
-import express from 'express'
+import express from "express";
 
 import {
   getAllNames,
   getAllProjectsForAllUsers,
   handleDonation,
+  handleStripeCheckoutSuccess,
   makeDonation,
-  stripeHandler
-} from './landing.controller'
+  stripeHandler,
+} from "./landing.controller";
 
-const router = express.Router()
+const router = express.Router();
 
-router.get('/allprojects', getAllProjectsForAllUsers)
-router.get('/areas', getAllNames)
+router.get("/allprojects", getAllProjectsForAllUsers);
+router.get("/areas", getAllNames);
 
-router.route('/donate').post(makeDonation)
-router.route('/fund').post(handleDonation)
+router.route("/donate").post(makeDonation);
+router.route("/fund").post(handleDonation);
+router.route("/verify-stripe-payment").post(handleStripeCheckoutSuccess as any);
 
-router.route('/stripe_session').post(stripeHandler)
+router.route("/stripe_session").post(stripeHandler);
 
-export default router
+export default router;

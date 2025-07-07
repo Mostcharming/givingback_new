@@ -180,7 +180,8 @@ export const makeDonation = async (req: Request, res: any): Promise<void> => {
         message: "User not found.",
       });
     }
-    const email = userData.email;
+    const userDataE = await db("users").where("id", ngoId).first();
+    const email = userDataE.email;
 
     const token = 0;
     const url = userData.name;
@@ -215,7 +216,7 @@ export const stripeHandler = async (
   try {
     const stripe = await initializeStripe();
 
-    const { amount, currency } = req.body;
+    const { amount, currency, success_url, cancel_url } = req.body;
 
     const missingFields: string[] = [];
     if (!amount) missingFields.push("amount");
@@ -229,14 +230,35 @@ export const stripeHandler = async (
       return;
     }
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency,
-    });
+    // const paymentIntent = await stripe.paymentIntents.create({
+    //   amount,
+    //   currency,
+    // });
 
+    // res.json({
+    //   wholeResponse: paymentIntent,
+    //   clientSecret: paymentIntent.client_secret,
+    // });
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency,
+            product_data: {
+              name: "GivingBack",
+            },
+            unit_amount: amount,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: success_url,
+      cancel_url: cancel_url,
+    });
     res.json({
-      wholeResponse: paymentIntent,
-      clientSecret: paymentIntent.client_secret,
+      sessionId: session.id,
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -344,7 +366,134 @@ export const handleDonation = async (req: Request, res: any): Promise<void> => {
       donation_id: donationId,
     });
   } catch (error) {
+    console.log(error);
     await trx.rollback();
     res.status(500).json({ error: "Unable to process donation." });
+  }
+};
+
+export const handleStripeCheckoutSuccess = async (
+  req: Request,
+  res: Response
+) => {
+  const { sessionId, status, user_id, amount } = req.body;
+  if (!sessionId) {
+    return res.status(400).json({ error: "Missing session_id" });
+  }
+
+  const trx = await db.transaction();
+
+  try {
+    const stripe = await initializeStripe();
+
+    const session = await stripe.checkout.sessions.retrieve(
+      sessionId as string
+    );
+
+    if (session.payment_status === "paid") {
+      let amounts = (session.amount_total ?? 0) / 100;
+      let conversionRate = 1;
+      const transactionId = session.payment_intent;
+      const rateEntry = await db("rates").select("rate").first();
+      if (!rateEntry) {
+        res.status(500).json({ error: "Exchange rate not found." });
+        await trx.rollback();
+        return;
+      }
+      conversionRate = rateEntry.rate;
+      amounts = amounts * conversionRate;
+
+      let donor = await db("donors").where({ user_id }).select("id").first();
+      let donationId: any;
+
+      // Check if the user is a donor first
+      if (!donor) {
+        // If not a donor, check if the user is an organization
+        const organization = await db("organizations")
+          .where({ user_id })
+          .select("id")
+          .first();
+
+        // If the user is an organization, insert the donation into the database with the NGO ID
+        if (organization) {
+          [donationId] = await trx("donations")
+            .insert({
+              amount: amounts,
+              ngo_id: organization.id,
+              type: "Wallet fund",
+            })
+            .returning("id");
+        } else {
+          // Handle the case where neither donor nor organization is found
+          return res.status(404).json({ error: "User not found." });
+        }
+      } else {
+        [donationId] = await trx("donations")
+          .insert({
+            amount: amounts,
+            donor_id: donor.id,
+            type: "Wallet fund",
+          })
+          .returning("id");
+      }
+
+      await trx("donation_rates").insert({
+        donation_id: donationId,
+        rate: conversionRate,
+      });
+
+      await trx("transactions").insert({
+        donation_id: donationId,
+        payment_gateway: "Stripe",
+        status: "success",
+        transaction_id: transactionId,
+      });
+
+      await trx("wallet")
+        .where("user_id", user_id)
+        .increment("balance", amounts);
+
+      await trx.commit();
+
+      let userData = await db("organizations")
+        .where("user_id", user_id)
+        .first();
+      if (!userData) {
+        userData = await db("donors").where("user_id", user_id).first();
+      }
+
+      const userDataE = await db("users").where("id", user_id).first();
+      const email = userDataE.email;
+
+      const token = 0;
+      const url = userData.name;
+      const additionalData = {
+        currency: "usd",
+        transactionId: transactionId,
+        ngoName: userData.name,
+        userName: userData.name,
+        amount: amount,
+      };
+      await new Email({ email: email, url, token, additionalData }).sendEmail(
+        "fundngo",
+        "Funding Received"
+      );
+      await new Email({
+        email: "info@givingbackng.org",
+        url,
+        token,
+        additionalData,
+      }).sendEmail("adminwallet", "New Funding");
+
+      return res.json({
+        success: true,
+        message: "Stripe checkout verfied and completed",
+      });
+    } else {
+      return res.json({ success: false, status: session.payment_status });
+    }
+  } catch (error) {
+    console.error("Stripe verification error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
