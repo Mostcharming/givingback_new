@@ -1,3 +1,5 @@
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Select from "react-select";
 import {
   Button,
@@ -7,7 +9,7 @@ import {
   InputGroupAddon,
   InputGroupText,
 } from "reactstrap";
-
+import "./datepicker-custom.css";
 const Details = ({
   formData,
   setFormData,
@@ -94,53 +96,31 @@ const Details = ({
 
           <div className="col-md-6">
             <div className="row">
-              <div className="col-md-6">
-                <FormGroup>
-                  <label className="">Start date</label>
-
-                  <InputGroup className="input-group-alternative">
-                    <Input
-                      style={{ backgroundColor: "#F2F2F2", height: "100%" }}
-                      className="p-3"
-                      placeholder="Project duration"
-                      type="date"
-                      name="duration"
-                      rows={5}
-                      required
-                      value={formData.startDate}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          startDate: e.target.value,
-                        }))
-                      }
-                    />
-                  </InputGroup>
-                </FormGroup>
-              </div>
-              <div className="col-md-6">
-                <FormGroup>
-                  <label className="">End date</label>
-                  <InputGroup className="input-group-alternative">
-                    <Input
-                      style={{ backgroundColor: "#F2F2F2", height: "100%" }}
-                      className="p-3"
-                      placeholder="Project duration"
-                      type="date"
-                      name="endDate"
-                      rows={5}
-                      required
-                      value={formData.endDate}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          endDate: e.target.value,
-                        }))
-                      }
-                    />
-                  </InputGroup>
-                </FormGroup>
-              </div>
+              <InputGroup
+                style={{ backgroundColor: "#F2F2F2", paddingBottom: "8px" }}
+                className="input-group-alternative"
+              >
+                <DatePicker
+                  selected={formData.dateRange?.[0] || null}
+                  onChange={(dates) => {
+                    const [start, end] = dates;
+                    setFormData((prev) => ({
+                      ...prev,
+                      dateRange: [start, end],
+                      startDate: start
+                        ? start.toISOString().split("T")[0]
+                        : null,
+                      endDate: end ? end.toISOString().split("T")[0] : null,
+                    }));
+                  }}
+                  startDate={formData.dateRange?.[0] || null}
+                  endDate={formData.dateRange?.[1] || null}
+                  selectsRange
+                  placeholderText="Duration"
+                  className="calendar-input p-2"
+                  calendarClassName="custom-calendar"
+                />
+              </InputGroup>
             </div>
           </div>
         </div>
