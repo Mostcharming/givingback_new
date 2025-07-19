@@ -1,15 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import GiveBackLogo from "../../assets/images/home/GivingBackNG-logo.svg";
-// import DonateModal from '../componenets/modals/DonateModal'
+import "./Header.css";
 import { stickyNav } from "./util";
-
 const Header = ({ transparentTop, transparentHeader, topSecondaryBg }) => {
   const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
   useEffect(() => {
     window.addEventListener("scroll", stickyNav);
   });
+  const navItems = [
+    { name: "Home", to: "/" },
+    { name: "About us", to: "/about_us" },
+    { name: "Services", to: "/services" },
+    { name: "Project", to: "/latest-projects" },
+    { name: "Contact", to: "/contact" },
+  ];
+  const [hovered, setHovered] = useState(null);
   return (
     <>
       <header
@@ -31,23 +38,25 @@ const Header = ({ transparentTop, transparentHeader, topSecondaryBg }) => {
 
               <div className="ml-3 navbar-extra d-flex align-items-center">
                 <div className="nav-menu pr-4" id="menu">
-                  <ul>
-                    <li className="ml-3">
-                      <Link to="/">Home</Link>
-                    </li>
-                    <li className="ml-3">
-                      <Link to="/about_us">About us</Link>
-                    </li>
-                    <li className="ml-3">
-                      <Link to="/services">Services</Link>
-                    </li>
-
-                    <li className="ml-3">
-                      <Link to="/latest-projects">Project</Link>
-                    </li>
-                    <li className="ml-3">
-                      <Link to="/contact">Contact</Link>
-                    </li>
+                  <ul className="d-flex align-items-center">
+                    {navItems.map((item, index) => (
+                      <li className="ml-3" key={index}>
+                        <NavLink
+                          to={item.to}
+                          className={({ isActive }) => {
+                            const isHovered = hovered === index;
+                            return `
+      nav-link-custom 
+      ${isHovered || isActive ? "nav-link-active nav-link-hover" : ""}
+    `;
+                          }}
+                          onMouseEnter={() => setHovered(index)}
+                          onMouseLeave={() => setHovered(null)}
+                        >
+                          {item.name}
+                        </NavLink>
+                      </li>
+                    ))}
                   </ul>
                 </div>
 

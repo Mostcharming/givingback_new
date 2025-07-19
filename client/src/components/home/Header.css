@@ -1,0 +1,11 @@
+.nav-link-custom {
+  color: #212529 !important;
+  text-decoration: none !important;
+  transition: color 0.3s ease !important;
+}
+
+.nav-link-hover,
+.nav-link-active {
+  color: #02a95c !important;
+  text-decoration: underline !important;
+}
