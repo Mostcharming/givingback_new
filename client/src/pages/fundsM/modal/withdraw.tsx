@@ -53,7 +53,7 @@ export default function WithdrawFundsModal({
         toggle();
       },
       onError: (error: any) => {
-        const msg = error?.message || "Something went wrong.";
+        const msg = "Something went wrong.";
         toast.error(msg);
         setMessage(msg);
       },

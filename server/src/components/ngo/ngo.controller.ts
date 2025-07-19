@@ -346,6 +346,16 @@ export const withdraw = async (req: any, res: Response) => {
       message: "A new withdrawal request has been created.",
       subject: "Withdrawal Request",
     });
+    if (saveAccount) {
+      const newBank = {
+        bankName: bank,
+        accountName: "",
+        accountNumber,
+        user_id: req.user.id,
+      };
+      await trx("banks").insert(newBank);
+    }
+
     trx.commit();
 
     const token = 0;
