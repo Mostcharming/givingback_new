@@ -16,15 +16,12 @@ import useBackendService from "../../../services/backend_service";
 import { Banks } from "../../../services/banks";
 import { useContent } from "../../../services/useContext";
 
-interface WithdrawFundsModalProps {
-  isOpen: boolean;
-  toggle: () => void;
-}
-
 export default function WithdrawFundsModal({
   isOpen,
   toggle,
-}: WithdrawFundsModalProps) {
+  setShowSuccessModal,
+  setShowErrorModal,
+}) {
   const { currentState } = useContent();
   const [amount, setAmount] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
@@ -51,11 +48,15 @@ export default function WithdrawFundsModal({
         setBank("");
         setSaveAccount(false);
         toggle();
+        setShowSuccessModal(true);
       },
+
       onError: (error: any) => {
         const msg = "Something went wrong.";
         toast.error(msg);
         setMessage(msg);
+        toggle();
+        setShowErrorModal(true);
       },
     }
   );
