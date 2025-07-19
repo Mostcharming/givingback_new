@@ -497,8 +497,8 @@ export const getAllUserPresentProjects = async (
         "status",
         "createdAt",
         "updatedAt"
-      );
-
+      )
+      .orderBy("createdAt", "desc");
     // Filter conditions
     if (status) {
       query = query.where(db.raw("LOWER(status)"), "=", status.toLowerCase());
@@ -831,8 +831,7 @@ export const getMessage = async (
   try {
     const { user_id, sender_type } = req.query;
 
-    let query = db("messages");
-
+    let query = db("messages").orderBy("created_at", "desc");
     if (user_id) {
       query = query.where("user_id", user_id);
     }

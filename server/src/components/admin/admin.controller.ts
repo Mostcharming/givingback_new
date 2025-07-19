@@ -540,20 +540,21 @@ export const getAllDonors = async (
   try {
     const { name, industry, interest_area, state, city_lga } = req.query;
 
-    let query = db("donors").select(
-      "id",
-      "name",
-      "phoneNumber",
-      "industry",
-      "email",
-      "interest_area",
-      "state",
-      "city_lga",
-      "address",
-      "about",
-      "image"
-    );
-
+    let query = db("donors")
+      .select(
+        "id",
+        "name",
+        "phoneNumber",
+        "industry",
+        "email",
+        "interest_area",
+        "state",
+        "city_lga",
+        "address",
+        "about",
+        "image"
+      )
+      .orderBy("createdAt", "desc");
     if (name) {
       query = query.where(db.raw("LOWER(name)"), "=", name.toLowerCase());
     }

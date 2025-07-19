@@ -54,8 +54,8 @@ export const fetchDonations = async (filters: {
       db.raw('IFNULL(project.description, "") as project_description'), // Return empty string if no project description
       "transactions.status",
       "transactions.transaction_id"
-    );
-
+    )
+    .orderBy("createdAt", "desc");
   // Apply filters
   if (project_id) query = query.where("donations.project_id", project_id);
   if (ngo_id) query = query.where("donations.ngo_id", ngo_id);
