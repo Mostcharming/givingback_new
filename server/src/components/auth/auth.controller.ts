@@ -242,6 +242,19 @@ export const onboard = async (req: Request, res: Response) => {
       //   additionalData,
       // }).sendEmail("donoronboard", "Welcome to the GivingBack Family!");
     }
+    if (filesToProcess.length > 0) {
+      await Promise.all(
+        filesToProcess.map(async (file: any) => {
+          const doc = {
+            filename: file.location,
+            user_id: userId,
+          };
+          await db("userimg").insert(doc);
+        })
+      );
+    }
+    createSendToken(user, 200, req, res);
+
     await new Email({
       email: mail,
       url: "",
@@ -255,22 +268,6 @@ export const onboard = async (req: Request, res: Response) => {
       token,
       additionalData,
     }).sendEmail("adminonb", "New User");
-
-    // === Upload files ===
-    if (filesToProcess.length > 0) {
-      await Promise.all(
-        filesToProcess.map(async (file: any) => {
-          const doc = {
-            filename: file.location,
-            user_id: userId,
-          };
-          await db("userimg").insert(doc);
-        })
-      );
-    }
-
-    // === Send final token ===
-    createSendToken(user, 200, req, res);
   } catch (error) {
     console.error("Onboard Error:", error);
     res.status(500).json({ error: "An error occurred while signing up" });

@@ -318,7 +318,7 @@ export const addMilestoneUpdate = async (req: any, res: Response) => {
 
 export const withdraw = async (req: any, res: Response) => {
   try {
-    const { subject, amount, message } = req.body;
+    const { amount, accountNumber, bank, saveAccount } = req.body;
 
     const trx = await db.transaction();
 
@@ -342,10 +342,12 @@ export const withdraw = async (req: any, res: Response) => {
     });
     await trx("donation_messages").insert({
       donation_id: donationId,
-      message,
-      subject,
+      message: "A new withdrawal request has been created.",
+      subject: "Withdrawal Request",
     });
     trx.commit();
+    res.status(201).json({ message: "Request Submitted" });
+
     const token = 0;
     const url = "name";
     const currentDate = new Date();
@@ -367,8 +369,6 @@ export const withdraw = async (req: any, res: Response) => {
       token,
       additionalData,
     }).sendEmail("adminwithdraw", "New withdrawal Request");
-
-    res.status(201).json({ message: "Request Submitted" });
   } catch (error) {
     console.error("Error creating withdrawal request", error);
     res.status(500).json({ error: "Unable to complete process" });

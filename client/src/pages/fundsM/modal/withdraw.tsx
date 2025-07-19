@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import {
   Button,
   Col,
@@ -11,6 +12,9 @@ import {
   ModalHeader,
   Row,
 } from "reactstrap";
+import useBackendService from "../../../services/backend_service";
+import { Banks } from "../../../services/banks";
+import { useContent } from "../../../services/useContext";
 
 interface WithdrawFundsModalProps {
   isOpen: boolean;
@@ -21,55 +25,53 @@ export default function WithdrawFundsModal({
   isOpen,
   toggle,
 }: WithdrawFundsModalProps) {
+  const { currentState } = useContent();
   const [amount, setAmount] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [bank, setBank] = useState("");
   const [saveAccount, setSaveAccount] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState("");
+  // const exisitngAccount = currentState?.bank?.[0];
+  const existingAccounts = currentState?.bank || [];
+  const [selectedExistingIndex, setSelectedExistingIndex] = useState<
+    number | null
+  >(null);
 
   const isFormComplete =
     amount.trim() !== "" && accountNumber.trim() !== "" && bank !== "";
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!isFormComplete) return;
-
-    setIsProcessing(true);
-    setMessage("");
-
-    try {
-      const response = await fetch("/api/withdraw", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount,
-          accountNumber,
-          bank,
-          saveAccount,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage("Withdrawal request sent successfully.");
+  const { mutate: withdrawFunds, isLoading: isProcessing } = useBackendService(
+    "/ngo/withdraw_request",
+    "POST",
+    {
+      onSuccess: (res: any) => {
+        toast.success("Withdrawal request sent successfully.");
+        setMessage("");
         setAmount("");
         setAccountNumber("");
         setBank("");
         setSaveAccount(false);
         toggle();
-      } else {
-        setMessage(data.message || "Something went wrong.");
-      }
-    } catch (e) {
-      setMessage("Failed to connect. Please try again.");
-    } finally {
-      setIsProcessing(false);
+      },
+      onError: (error: any) => {
+        const msg = error?.message || "Something went wrong.";
+        toast.error(msg);
+        setMessage(msg);
+      },
     }
+  );
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!isFormComplete) return;
+
+    setMessage("");
+
+    withdrawFunds({
+      amount,
+      accountNumber,
+      bank,
+      saveAccount,
+    });
   };
 
   return (
@@ -131,10 +133,11 @@ export default function WithdrawFundsModal({
               }}
             >
               <option value="">Select bank</option>
-              <option value="GT Bank">GT Bank</option>
-              <option value="First Bank">First Bank</option>
-              <option value="Access Bank">Access Bank</option>
-              <option value="Zenith Bank">Zenith Bank</option>
+              {Banks.map((b) => (
+                <option key={b.id} value={b.name}>
+                  {b.name}
+                </option>
+              ))}
             </Input>
           </FormGroup>
 
@@ -163,7 +166,60 @@ export default function WithdrawFundsModal({
               </Col>
             </Row>
           </FormGroup>
+          {existingAccounts.length > 0 && (
+            <>
+              <div className="d-flex align-items-center my-3 text-muted">
+                <hr className="flex-grow-1 me-2" />
+                <span>or</span>
+                <hr className="flex-grow-1 ms-2" />
+              </div>
 
+              {existingAccounts.map((account, index) => (
+                <FormGroup check className="mb-3" key={index}>
+                  <Row className="align-items-center">
+                    <Col xs="auto">
+                      <Input
+                        type="radio"
+                        name="existingAccount"
+                        checked={selectedExistingIndex === index}
+                        onChange={() => {
+                          setSelectedExistingIndex(index);
+                          setAccountNumber(account.accountNumber);
+                          setBank(account.bankName);
+                        }}
+                        style={{
+                          borderRadius: "12px",
+                          padding: "20px",
+                          fontSize: "16px",
+                          height: "auto",
+                        }}
+                      />
+                    </Col>
+                    <Col>
+                      <div
+                        className="text-dark fw-medium"
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
+                          <p className="mb-1">{account.accountName}</p>
+                          <small className="text-muted">
+                            {account.accountNumber}
+                          </small>
+                        </div>
+                        <div>{account.bankName}</div>
+                      </div>
+                    </Col>
+                  </Row>
+                </FormGroup>
+              ))}
+            </>
+          )}
           {message && (
             <div
               className="text-center text-danger mb-3"

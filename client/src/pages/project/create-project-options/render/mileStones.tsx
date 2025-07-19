@@ -1,6 +1,8 @@
 import { Plus, Trash2 } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { Button, FormGroup, Input, InputGroup } from "reactstrap";
-
+import "./datepicker-custom.css";
 const MilestoneForm = ({
   formData,
   setFormData,
@@ -105,38 +107,33 @@ const MilestoneForm = ({
 
               <div className="col-md-6">
                 <div className="row">
-                  <div className="col-md-6">
-                    <FormGroup>
-                      <label>Start date</label>
-                      <InputGroup className="input-group-alternative">
-                        <Input
-                          style={{ backgroundColor: "#F2F2F2", height: "100%" }}
-                          className="p-3"
-                          type="date"
-                          value={item.mstartDate}
-                          onChange={(e) =>
-                            handleChange(index, "mstartDate", e.target.value)
-                          }
-                        />
-                      </InputGroup>
-                    </FormGroup>
-                  </div>
-                  <div className="col-md-6">
-                    <FormGroup>
-                      <label>End date</label>
-                      <InputGroup className="input-group-alternative">
-                        <Input
-                          style={{ backgroundColor: "#F2F2F2", height: "100%" }}
-                          className="p-3"
-                          type="date"
-                          value={item.mendDate}
-                          onChange={(e) =>
-                            handleChange(index, "mendDate", e.target.value)
-                          }
-                        />
-                      </InputGroup>
-                    </FormGroup>
-                  </div>
+                  <InputGroup
+                    style={{ backgroundColor: "#F2F2F2", paddingBottom: "8px" }}
+                    className="input-group-alternative"
+                  >
+                    <DatePicker
+                      selectsRange
+                      startDate={
+                        item.mstartDate ? new Date(item.mstartDate) : null
+                      }
+                      endDate={item.mendDate ? new Date(item.mendDate) : null}
+                      onChange={([start, end]) => {
+                        handleChange(
+                          index,
+                          "mstartDate",
+                          start ? start.toISOString().split("T")[0] : ""
+                        );
+                        handleChange(
+                          index,
+                          "mendDate",
+                          end ? end.toISOString().split("T")[0] : ""
+                        );
+                      }}
+                      placeholderText="Duration"
+                      className="calendar-input p-2"
+                      calendarClassName="custom-calendar"
+                    />
+                  </InputGroup>
                 </div>
               </div>
             </div>

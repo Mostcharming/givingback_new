@@ -123,6 +123,10 @@ export const newDonor = async (
     });
 
     await transaction.commit();
+    res.status(201).json({
+      message: "Donor created successfully",
+      donor: newDonor,
+    });
 
     //email
     const token = 0;
@@ -138,11 +142,6 @@ export const newDonor = async (
       token,
       additionalData,
     }).sendEmail("adminonb", "New user");
-
-    res.status(201).json({
-      message: "Donor created successfully",
-      donor: newDonor,
-    });
   } catch (error) {
     await transaction.rollback();
     console.error(error);
