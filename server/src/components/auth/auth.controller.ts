@@ -253,7 +253,6 @@ export const onboard = async (req: Request, res: Response) => {
         })
       );
     }
-    createSendToken(user, 200, req, res);
 
     await new Email({
       email: mail,
@@ -268,9 +267,10 @@ export const onboard = async (req: Request, res: Response) => {
       token,
       additionalData,
     }).sendEmail("adminonb", "New User");
+    createSendToken(user, 200, req, res);
   } catch (error) {
     console.error("Onboard Error:", error);
-    res.status(500).json({ error: "An error occurred while signing up" });
+    // res.status(500).json({ error: "An error occurred while signing up" });
   }
 };
 
@@ -286,12 +286,12 @@ export const resend = async (
     await db("users").where({ id: userId }).update({ token: newToken });
     const userEmail = user.email;
     const url = "";
-    res.status(200).json({ status: "success" });
 
     await new Email({ email: userEmail, url, token: newToken }).sendEmail(
       "welcome",
       "Welcome to the GivingBack Family!"
     );
+    res.status(200).json({ status: "success" });
   } else {
     res.status(404).json({ status: "error", error: "User not found" });
   }

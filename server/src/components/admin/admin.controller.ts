@@ -743,7 +743,6 @@ export const createProject = async (
       })
     );
     await transaction.commit();
-    res.status(201).json({ message: "Briefs created successfully" });
 
     const donor2 = await db("donors").where({ id: donor_id }).first();
     const donor = await db("users").where({ id: donor2.user_id }).first();
@@ -767,10 +766,11 @@ export const createProject = async (
       token,
       additionalData: adminAdditionalData,
     }).sendEmail("adminbriefngodonor", "New Project assigned");
+    res.status(201).json({ message: "Briefs created successfully" });
   } catch (error) {
     await transaction.rollback();
 
     console.error("Error creating projects:", error);
-    res.status(500).json({ error: "Unable to create projects" });
+    // res.status(500).json({ error: "Unable to create projects" });
   }
 };

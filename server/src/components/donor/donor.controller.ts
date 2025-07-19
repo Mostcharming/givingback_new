@@ -123,10 +123,6 @@ export const newDonor = async (
     });
 
     await transaction.commit();
-    res.status(201).json({
-      message: "Donor created successfully",
-      donor: newDonor,
-    });
 
     //email
     const token = 0;
@@ -142,6 +138,11 @@ export const newDonor = async (
       token,
       additionalData,
     }).sendEmail("adminonb", "New user");
+
+    res.status(201).json({
+      message: "Donor created successfully",
+      donor: newDonor,
+    });
   } catch (error) {
     await transaction.rollback();
     console.error(error);
@@ -401,11 +402,7 @@ export const donate = async (req: any, res: Response) => {
       donorName: userData2.name,
       donationDate: currentDate,
     };
-    res.status(201).json({
-      message: "Donation added successfully",
-      donationId,
-      updatedBalance,
-    });
+
     await new Email({
       email: userData4.email,
       url,
@@ -422,6 +419,12 @@ export const donate = async (req: any, res: Response) => {
       token,
       additionalData,
     }).sendEmail("admindonate", "New Donation");
+
+    res.status(201).json({
+      message: "Donation added successfully",
+      donationId,
+      updatedBalance,
+    });
   } catch (error) {
     await trx.rollback();
     console.error(error);
@@ -791,7 +794,6 @@ export const addbrief = async (
       .decrement("balance", totalFunds);
 
     await transaction.commit();
-    res.status(201).json({ message: "Briefs created successfully" });
 
     const adminEmail = "info@givingbackng.org";
 
@@ -812,6 +814,8 @@ export const addbrief = async (
       token,
       additionalData: adminAdditionalData,
     }).sendEmail("admindonorbriefngo", "New Project assigned");
+
+    res.status(201).json({ message: "Briefs created successfully" });
   } catch (error) {
     await transaction.rollback();
     console.error("Error creating projects:", error);

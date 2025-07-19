@@ -179,13 +179,24 @@ export default function WithdrawFundsModal({
                   <Row className="align-items-center">
                     <Col xs="auto">
                       <Input
-                        type="radio"
+                        type="checkbox"
                         name="existingAccount"
                         checked={selectedExistingIndex === index}
+                        // onChange={() => {
+                        //   setSelectedExistingIndex(index);
+                        //   setAccountNumber(account.accountNumber);
+                        //   setBank(account.bankName);
+                        // }}
                         onChange={() => {
-                          setSelectedExistingIndex(index);
-                          setAccountNumber(account.accountNumber);
-                          setBank(account.bankName);
+                          if (selectedExistingIndex === index) {
+                            setSelectedExistingIndex(null);
+                            setAccountNumber("");
+                            setBank("");
+                          } else {
+                            setSelectedExistingIndex(index);
+                            setAccountNumber(account.accountNumber);
+                            setBank(account.bankName);
+                          }
                         }}
                         style={{
                           borderRadius: "12px",
