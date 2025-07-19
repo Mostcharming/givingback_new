@@ -80,6 +80,8 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
     const token = 0;
     const url = name;
     const additionalData = { role: "NGO" };
+    res.status(200).json(response);
+
     await new Email({ email: email, url, token, additionalData }).sendEmail(
       "donoronboard",
       "Welcome to the GivingBack Family!"
@@ -90,7 +92,6 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
       token,
       additionalData,
     }).sendEmail("adminonb", "New User");
-    res.status(200).json(response);
   } catch (error) {
     console.error("Error in create organization:", error);
     res.status(500).json({
@@ -256,6 +257,7 @@ export const createp = async (req: any, res: Response) => {
       projectTitle: title,
       projectDescription: description,
     };
+    res.status(201).json({ message: "Previous Project created successfully" });
 
     await new Email({
       email: "info@givingbackng.org",
@@ -263,7 +265,6 @@ export const createp = async (req: any, res: Response) => {
       token,
       additionalData,
     }).sendEmail("pastpadmin", "New Past Project");
-    res.status(201).json({ message: "Previous Project created successfully" });
   } catch (error) {
     await transaction.rollback();
 
@@ -415,6 +416,8 @@ export const respondBrief = async (req: any, res: Response) => {
       ngoName: userData.name,
       donorName: userData2.name,
     };
+    res.status(200).json({ message: "Project accepted" });
+
     await new Email({
       email: userData4.email,
       url,
@@ -428,8 +431,6 @@ export const respondBrief = async (req: any, res: Response) => {
       token,
       additionalData,
     }).sendEmail("adminngoacceptbrief", "Project Acceptance");
-
-    res.status(200).json({ message: "Project accepted" });
   } catch (error) {
     res.status(500).json({ error: "Unable to update project" });
   }

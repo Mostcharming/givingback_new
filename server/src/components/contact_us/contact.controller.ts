@@ -10,6 +10,10 @@ export const sendContactEmail = async (
   const { name, email, message, phoneNumber } = req.body;
 
   try {
+    res.status(200).json({
+      status: "success",
+      message: "Your message has been sent successfully!",
+    });
     await new Email({
       email: "info@givingbackng.org",
       url: "",
@@ -21,11 +25,6 @@ export const sendContactEmail = async (
         phoneNumber,
       },
     }).sendEmail("contactForm", "New contact message");
-
-    res.status(200).json({
-      status: "success",
-      message: "Your message has been sent successfully!",
-    });
   } catch (err) {
     console.error("Error sending email:", err);
     res.status(500).json({

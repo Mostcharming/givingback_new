@@ -286,12 +286,12 @@ export const resend = async (
     await db("users").where({ id: userId }).update({ token: newToken });
     const userEmail = user.email;
     const url = "";
+    res.status(200).json({ status: "success" });
+
     await new Email({ email: userEmail, url, token: newToken }).sendEmail(
       "welcome",
       "Welcome to the GivingBack Family!"
     );
-
-    res.status(200).json({ status: "success" });
   } else {
     res.status(404).json({ status: "error", error: "User not found" });
   }
@@ -434,14 +434,13 @@ export const forgotPassword = async (
       .json({ error: "There is no user associated with this email address" });
     return;
   }
+  res.status(200).json({ status: "success", message: "Token sent to email!" });
 
   const url = `https://givebackng.org/auth/resetPassword/${encodedToken}`;
   await new Email({ email, url, token }).sendEmail(
     "passwordReset",
     "Your password reset token"
   );
-
-  res.status(200).json({ status: "success", message: "Token sent to email!" });
 };
 
 export const resetPassword = async (

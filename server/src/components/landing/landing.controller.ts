@@ -192,6 +192,8 @@ export const makeDonation = async (req: Request, res: any): Promise<void> => {
       ngoName: userData.name,
       amount: amount,
     };
+    res.status(200).json({ message: "Donation successful." });
+
     await new Email({ email: email, url, token, additionalData }).sendEmail(
       "donatengo",
       "Donation Received"
@@ -202,8 +204,6 @@ export const makeDonation = async (req: Request, res: any): Promise<void> => {
       token,
       additionalData,
     }).sendEmail("admindonate", "New Donation");
-
-    res.status(200).json({ message: "Donation successful." });
   } catch (error) {
     res.status(500).json({ error: "Unable to process donation." });
   }
@@ -350,6 +350,10 @@ export const handleDonation = async (req: Request, res: any): Promise<void> => {
       userName: userData.name,
       amount: amount,
     };
+    res.status(200).json({
+      message: "Donation and transaction processed successfully.",
+      donation_id: donationId,
+    });
     await new Email({ email: email, url, token, additionalData }).sendEmail(
       "fundngo",
       "Funding Received"
@@ -360,11 +364,6 @@ export const handleDonation = async (req: Request, res: any): Promise<void> => {
       token,
       additionalData,
     }).sendEmail("adminwallet", "New Funding");
-
-    res.status(200).json({
-      message: "Donation and transaction processed successfully.",
-      donation_id: donationId,
-    });
   } catch (error) {
     console.log(error);
     await trx.rollback();
@@ -474,6 +473,10 @@ export const handleStripeCheckoutSuccess = async (
         userName: userData.name,
         amount: amount,
       };
+      res.json({
+        success: true,
+        message: "Stripe checkout verfied and completed",
+      });
       await new Email({ email: email, url, token, additionalData }).sendEmail(
         "fundngo",
         "Funding Received"
@@ -484,11 +487,6 @@ export const handleStripeCheckoutSuccess = async (
         token,
         additionalData,
       }).sendEmail("adminwallet", "New Funding");
-
-      return res.json({
-        success: true,
-        message: "Stripe checkout verfied and completed",
-      });
     } else {
       return res.json({ success: false, status: session.payment_status });
     }
