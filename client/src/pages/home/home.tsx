@@ -12,7 +12,6 @@ import v2 from "../../assets/images/home/main_image/Vector2.png";
 import v3 from "../../assets/images/home/main_image/Vector3.png";
 import place from "../../assets/images/project.png";
 
-import { Image } from "react-bootstrap";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Layout from "../../layouts/home";
@@ -875,10 +874,10 @@ const Index = () => {
                     </p>
                     <div className="d-flex align-items-center">
                       <div
-                        className="ms-auto rounded-circle bg-success text-white d-flex align-items-center justify-content-center"
+                        className="mr-2 ms-auto rounded-circle bg-success text-white d-flex align-items-center justify-content-center"
                         style={{ width: "32px", height: "32px" }}
                       >
-                        JU
+                        AA
                       </div>
                       <div>
                         <p className="fw-medium mb-0">Adeola O. Akinyele</p>
@@ -908,16 +907,10 @@ const Index = () => {
                     </p>
                     <div className="d-flex align-items-center">
                       <div
-                        className="rounded-circle bg-light overflow-hidden me-3"
-                        style={{ width: "48px", height: "48px" }}
+                        className="mr-2 ms-auto rounded-circle bg-success text-white d-flex align-items-center justify-content-center"
+                        style={{ width: "32px", height: "32px" }}
                       >
-                        <Image
-                          src="/placeholder.svg?height=48&width=48"
-                          alt="Ngozi I. Eze"
-                          width={48}
-                          height={48}
-                          className="img-fluid"
-                        />
+                        NE
                       </div>
                       <div>
                         <p className="fw-medium mb-0">Ngozi I. Eze</p>
@@ -948,16 +941,10 @@ const Index = () => {
                     </p>
                     <div className="d-flex align-items-center">
                       <div
-                        className="rounded-circle bg-light overflow-hidden me-3"
-                        style={{ width: "48px", height: "48px" }}
+                        className="mr-2 ms-auto rounded-circle bg-success text-white d-flex align-items-center justify-content-center"
+                        style={{ width: "32px", height: "32px" }}
                       >
-                        <Image
-                          src="/placeholder.svg?height=48&width=48"
-                          alt="Chinonso M. Olawale"
-                          width={48}
-                          height={48}
-                          className="img-fluid"
-                        />
+                        CO
                       </div>
                       <div>
                         <p className="fw-medium mb-0">Chinonso M. Olawale</p>

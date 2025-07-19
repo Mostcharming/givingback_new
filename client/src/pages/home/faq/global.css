@@ -8,9 +8,9 @@
 }
 
 .faq-title {
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   font-weight: 600;
-  color: #444444;
+  color: #000000;
   text-align: center;
   margin-bottom: 48px;
   line-height: 1.2;
@@ -37,7 +37,7 @@
   width: 20vw;
   border-radius: 6px;
   font-weight: 500;
-  font-size: 1.5rem;
+  font-size: 1.05rem;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -89,7 +89,7 @@
 }
 
 .question-text {
-  font-size: 1.5rem;
+  font-size: 1.05rem;
   font-weight: 500;
   color: #444444;
   margin: 0;
@@ -114,7 +114,7 @@
 
 .answer-content {
   color: #666666;
-  font-size: 1.3rem;
+  font-size: 1.05rem;
   line-height: 1.6;
 }
 
@@ -157,7 +157,7 @@
   }
 
   .question-text {
-    font-size: 1rem;
+    font-size: 1.05rem;
   }
 
   .faq-question {
