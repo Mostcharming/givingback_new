@@ -10,6 +10,7 @@ import v4 from "../../assets/images/home/main_image/Vector.png";
 import v1 from "../../assets/images/home/main_image/Vector1.png";
 import v2 from "../../assets/images/home/main_image/Vector2.png";
 import v3 from "../../assets/images/home/main_image/Vector3.png";
+import place from "../../assets/images/project.png";
 
 import { Image } from "react-bootstrap";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
@@ -653,7 +654,7 @@ const Index = () => {
                         src={
                           project?.projectImages?.length
                             ? project.projectImages[0].image
-                            : "assets/images/project/project-1.jpg"
+                            : place
                         }
                         alt={project.title}
                         style={{
