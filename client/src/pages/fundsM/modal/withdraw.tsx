@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import {
   Button,
@@ -15,6 +16,7 @@ import {
 import useBackendService from "../../../services/backend_service";
 import { Banks } from "../../../services/banks";
 import { useContent } from "../../../services/useContext";
+import { addBankAccount } from "../../../store/reducers/userReducer";
 
 export default function WithdrawFundsModal({
   isOpen,
@@ -22,12 +24,13 @@ export default function WithdrawFundsModal({
   setShowSuccessModal,
   setShowErrorModal,
 }) {
-  const { currentState } = useContent();
+  const { currentState, authState } = useContent();
   const [amount, setAmount] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [bank, setBank] = useState("");
   const [saveAccount, setSaveAccount] = useState(false);
   const [message, setMessage] = useState("");
+  const dispatch = useDispatch();
   // const exisitngAccount = currentState?.bank?.[0];
   const existingAccounts = currentState?.bank || [];
   const [selectedExistingIndex, setSelectedExistingIndex] = useState<
@@ -40,7 +43,18 @@ export default function WithdrawFundsModal({
     "/ngo/withdraw_request",
     "POST",
     {
-      onSuccess: (res: any) => {
+      onSuccess: () => {
+        if (saveAccount) {
+          dispatch(
+            addBankAccount({
+              accountName: "",
+              accountNumber,
+              bankName: bank,
+              bvn: null, // or add BVN logic if available
+            })
+          );
+        }
+
         toast.success("Withdrawal request sent successfully.");
         setMessage("");
         setAmount("");
@@ -51,7 +65,7 @@ export default function WithdrawFundsModal({
         setShowSuccessModal(true);
       },
 
-      onError: (error: any) => {
+      onError: () => {
         const msg = "Something went wrong.";
         toast.error(msg);
         setMessage(msg);
