@@ -70,8 +70,8 @@ const CreateProject = () => {
   const [showModal, setShowModal] = useState(false);
 
   const { mutate: getAreas } = useBackendService("/areas", "GET", {
-    onSuccess: (res2: any) => {
-      setAreas(res2 as any[]);
+    onSuccess: (res2: unknown) => {
+      setAreas(res2 as unknown[]);
     },
     onError: () => {},
   });
@@ -220,6 +220,7 @@ const CreateProject = () => {
             setFormData={setFormData}
             handleNextStep={handleSubmit}
             handleBackStep={handleBackStep}
+            isLoading={isSubmitting}
           />
         );
 

@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import logo from "../../../assets/images/logo.png";
 import place from "../../../assets/images/project.png";
-
 import Loading from "../../../components/home/loading";
 import { getStatusBadgeProps } from "../../../helper";
 import useBackendService from "../../../services/backend_service";

@@ -2,7 +2,13 @@ import { Upload } from "lucide-react";
 import { useRef } from "react";
 import { Button, FormGroup } from "reactstrap";
 
-const Images = ({ formData, setFormData, handleNextStep, handleBackStep }) => {
+const Images = ({
+  formData,
+  setFormData,
+  handleNextStep,
+  handleBackStep,
+  isLoading,
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e) => {
@@ -134,7 +140,7 @@ const Images = ({ formData, setFormData, handleNextStep, handleBackStep }) => {
             className="btn px-5 py-3"
             style={{ border: "none", background: "#02a95c" }}
           >
-            Continue
+            {isLoading ? "Loading...." : "Continue"}
           </Button>
         </div>
       </form>
