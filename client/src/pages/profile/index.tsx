@@ -1,10 +1,64 @@
-import Loading from "../../components/home/loading";
+import { useState } from "react";
 
 function Profile() {
+  const TABS = [
+    "Profile Information",
+    "Bank Details",
+    "Security",
+    "Notifications",
+    "Website",
+    "Support",
+  ];
+  const [activeTab, setActiveTab] = useState("Profile Information");
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "Profile Information":
+        return <div></div>;
+      case "Bank Details":
+        return <div></div>;
+      case "Security":
+        return <div></div>;
+      case "Notifications":
+        return <div></div>;
+      default:
+        return null;
+    }
+  };
   return (
-    <>
-      <Loading type={"inline"} />
-    </>
+    <div className="container-fluid px-4 border-bottom border-2">
+      <div className="row">
+        <div className="col-lg-8 ">
+          <ul
+            style={{ width: "80vw", border: "none" }}
+            className="nav nav-tabs "
+          >
+            {TABS.map((tab) => (
+              <li className="nav-item" key={tab}>
+                <button
+                  onClick={() => setActiveTab(tab)}
+                  className={`nav-link border-0 p-4 ${
+                    activeTab === tab ? "text-success " : "text-muted"
+                  }`}
+                >
+                  <span
+                    style={{
+                      background: "transparent",
+                      borderBottom:
+                        activeTab === tab ? "4px solid #198754" : "",
+                    }}
+                  >
+                    {tab}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          {renderTabContent()}
+        </div>
+      </div>
+    </div>
   );
 }
 

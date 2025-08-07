@@ -112,7 +112,7 @@ const Sidebar: React.FC<any> = (props) => {
       className="navbar-vertical fixed-left navbar-light bg-white"
       expand="md"
       id="sidenav-main"
-      style={{ border: "1px solid #ccc" }}
+      style={{ border: "1px solid #ccc", overflow: "clip" }}
     >
       <Container fluid>
         {/* Toggler */}
