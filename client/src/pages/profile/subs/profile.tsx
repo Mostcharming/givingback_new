@@ -1,33 +1,30 @@
-import { User } from "lucide-react";
-import { useState } from "react";
-
 const ProfileData = () => {
-  const [formData, setFormData] = useState({
-    orgName: "",
-    orgEmail: "",
-    country: "",
-    state: "",
-    cac: null,
-    phone_number: "",
-    email: "",
-    bio: "",
-    website: "",
-    socialLinks: [{ platform: "", url: "" }],
-    profile_photo: null,
-  });
-  const fileInputRef = useRef(null);
-  const handleFileChange = (file) => {
-    setFormData((prev) => ({
-      ...prev,
-      profile_photo: file,
-    }));
-  };
+  // const [formData, setFormData] = useState({
+  //   orgName: "",
+  //   orgEmail: "",
+  //   country: "",
+  //   state: "",
+  //   cac: null,
+  //   phone_number: "",
+  //   email: "",
+  //   bio: "",
+  //   website: "",
+  //   socialLinks: [{ platform: "", url: "" }],
+  //   profile_photo: null,
+  // });
+  // const fileInputRef = useRef(null);
+  // const handleFileChange = (file) => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     profile_photo: file,
+  //   }));
+  // };
 
-  const handleUploadClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
+  // const handleUploadClick = () => {
+  //   if (fileInputRef.current) {
+  //     fileInputRef.current.click();
+  //   }
+  // };
 
   return (
     <div className="">
@@ -48,7 +45,7 @@ const ProfileData = () => {
               className="border rounded-lg d-flex align-items-center justify-content-center bg-light overflow-hidden"
               style={{ width: "80px", height: "80px" }}
             >
-              {s.logoFile ? (
+              {/* {s.logoFile ? (
                 <img
                   src={URL.createObjectURL(s.logoFile)}
                   alt="Sponsor Logo"
@@ -60,20 +57,20 @@ const ProfileData = () => {
                 />
               ) : (
                 <User size={32} className="text-success" />
-              )}
+              )} */}
             </div>
             <button
               type="button"
               className="ml-4 btn btn-outline-secondary"
-              onClick={() => fileInputs.current[index].click()}
+              // onClick={() => fileInputs.current[index].click()}
             >
               Upload
             </button>
             <input
               type="file"
               accept="image/*"
-              ref={(el) => (fileInputs.current[index] = el)}
-              onChange={(e) => handleFileChange(index, e.target.files[0])}
+              // ref={(el) => (fileInputs.current[index] = el)}
+              // onChange={(e) => handleFileChange(index, e.target.files[0])}
               style={{ display: "none" }}
             />
           </div>
