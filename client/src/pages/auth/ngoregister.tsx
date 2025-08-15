@@ -257,7 +257,7 @@ const Register = () => {
         </p>
       </Row>
       <Row style={{ width: "70vw" }} className="mt-5">
-        <Col md={6} className="mb-3 mb-md-0">
+        <Col md={4} className="mb-3 mb-md-0">
           <Card
             className={`option-card ${
               formData.selectedOption === "donor" ? "active" : ""
@@ -274,7 +274,7 @@ const Register = () => {
               <div className="icon-container mb-3">
                 <HandHeart size={32} />
               </div>
-              <h3 className="option-title mb-3">Join as a donor</h3>
+              <h3 className="option-title mb-3">Join as a Donor</h3>
               <p className="option-text">
                 Use GivingBack to donate and impact people's lives by finding
                 the right cause and organization
@@ -282,7 +282,7 @@ const Register = () => {
             </CardBody>
           </Card>
         </Col>
-        <Col md={6}>
+        <Col md={4}>
           <Card
             className={`option-card ${
               formData.selectedOption === "organization" ? "active" : ""
@@ -298,7 +298,33 @@ const Register = () => {
               <div className="icon-container mb-3">
                 <Handshake size={32} />
               </div>
-              <h3 className="option-title mb-3">Join as an organization</h3>
+              <h3 className="option-title mb-3">
+                Join as an Non Governmental Organization (NGO) /Advocacy group
+              </h3>
+              <p className="option-text">
+                Use GivingBack to empower your organization, post causes and get
+                funded.
+              </p>
+            </CardBody>
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card
+            className={`option-card ${
+              formData.selectedOption === "organization" ? "active" : ""
+            }`}
+            onClick={() =>
+              setFormData((prev) => ({
+                ...prev,
+                selectedOption: "government",
+              }))
+            }
+          >
+            <CardBody>
+              <div className="icon-container mb-3">
+                <Handshake size={32} />
+              </div>
+              <h3 className="option-title mb-3">Join as a Government Agency</h3>
               <p className="option-text">
                 Use GivingBack to empower your organization, post causes and get
                 funded.

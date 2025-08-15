@@ -22,7 +22,7 @@ const Sponsor = ({ formData, setFormData, handleNextStep, handleBackStep }) => {
   };
 
   const handleAddSponsor = () => {
-    setFormData((prev) => ({
+    setFormData((prev: any) => ({
       ...prev,
       sponsors: [
         ...prev.sponsors,

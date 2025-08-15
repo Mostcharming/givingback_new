@@ -14,12 +14,18 @@ function Profile() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "Profile Information":
+        // return <ProfileData />;
+
         return <div></div>;
       case "Bank Details":
         return <div></div>;
       case "Security":
         return <div></div>;
       case "Notifications":
+        return <div></div>;
+      case "Website":
+        return <div></div>;
+      case "Support":
         return <div></div>;
       default:
         return null;
