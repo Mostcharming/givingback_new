@@ -76,18 +76,25 @@ export const verify = async (
   req: UserRequest,
   res: Response
 ): Promise<void> => {
-  const otp = Number(req.body.otp);
-  const id = (req.user as User)?.id;
-  const user = await db("users").where({ id }).first();
+  try {
+    const otp = Number(req.body.otp);
+    const user = await db("users").where({ token: otp }).first();
 
-  if (otp === user?.token) {
-    await db("users").update({ status: 1, token: 0 }).where({ id });
+    if (!user) {
+      res.status(400).json({ error: "Invalid OTP" });
+      return;
+    }
 
-    res.status(200).json("Email Verified");
-    return;
-  } else {
-    res.status(400).json({ error: "Invalid OTP" });
-    return;
+    if (otp === user.token) {
+      await db("users").update({ status: 1, token: 0 }).where({ id: user.id });
+
+      res.status(200).json({ message: "Email Verified" });
+    } else {
+      res.status(400).json({ error: "Invalid OTP" });
+    }
+  } catch (error) {
+    console.error("Verification error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 

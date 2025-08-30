@@ -29,7 +29,7 @@ router.get("/logout", logout);
 router.post("/new/onboard", uploadimg, verifyNewUser, onboard as any);
 
 // Routes for verifying and resending
-router.route("/verify").post(secureLogin, verify).put(secureLogin, resend);
+router.route("/verify").post(verify).put(secureLogin, resend);
 
 router.post("/forgotpassword", forgotPassword);
 router.post("/resetpassword", resetPassword);

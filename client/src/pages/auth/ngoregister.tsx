@@ -311,7 +311,7 @@ const Register = () => {
                 color: "white",
               }}
               type="button"
-              onClick={() => navigate("/auth/login")}
+              onClick={() => navigate("/auth/verify")}
             >
               Continue
             </Button>
