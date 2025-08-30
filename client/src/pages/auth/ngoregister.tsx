@@ -317,7 +317,7 @@ const Register = () => {
           </div>
         </ModalBody>
       </Modal>
-      <RenderStepIndicator step={step} />
+      <RenderStepIndicator step={step} setStep={setStep} />
       {isLoading ? <Loading type="inline" /> : <>{renderCurrentStep()}</>}
 
       <CardHeader

@@ -1,4 +1,5 @@
 import { Handshake, Heart, ShieldCheck, User, UsersRound } from "lucide-react";
+import React from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Select from "react-select";
 import { toast } from "react-toastify";
@@ -8,29 +9,41 @@ import {
   CardBody,
   CardHeader,
   Col,
+  Container,
+  Form,
   FormGroup,
   Input,
   InputGroup,
   InputGroupAddon,
   InputGroupText,
+  Label,
   Row,
 } from "reactstrap";
 import Util from "../../../services/utils";
 
-export const RenderStepIndicator = ({ step }) => (
+export const RenderStepIndicator = ({ step, setStep }) => (
   <Row>
-    <div className="step-indicator d-flex justify-content-center mb-5">
+    <div className="step-indicator d-flex justify-content-center mb-5 ">
       {[1, 2, 3].map((s) => (
-        <>
+        <React.Fragment key={s}>
           <div
             className={`step ${step >= s ? "active" : ""} ${
               step === s ? "current" : ""
             }`}
+            onClick={() => {
+              if (s <= step) {
+                setStep(s);
+              }
+            }}
+            style={{
+              cursor: s <= step ? "pointer" : "default",
+              zIndex: 100000,
+            }}
           >
             {s}
           </div>
           {s < 3 && <div className="step-line"></div>}
-        </>
+        </React.Fragment>
       ))}
     </div>
   </Row>
@@ -144,10 +157,6 @@ export const RenderStepOne = ({ formData, setFormData, handleNext }) => (
             option={option}
             isActive={formData.selectedOption === option.key}
             onClick={() =>
-              // setFormData((prev) => ({
-              //   ...prev,
-              //   selectedOption: option.key,
-              // }))
               setFormData((prev) => {
                 let userType = prev.userType || "";
 
@@ -211,34 +220,6 @@ export const RenderStepTwo = ({
         </Row>
         <CardBody className="mt-4 px-lg-3 py-lg-3">
           <div style={{ width: "55vw" }} role="form">
-            {/* <FormGroup className="mb-3">
-              <InputGroup className="input-group-alternative">
-                <select
-                  style={{ backgroundColor: "#F2F2F2", height: "100%" }}
-                  className="form-control p-3"
-                  name="userType"
-                  required
-                  value={formData.userType}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      userType: e.target.value,
-                    }))
-                  }
-                >
-                  <option value="" disabled>
-                    Please select user type
-                  </option>
-                  <option value="individual">
-                    Individual donor (personal giving)
-                  </option>
-                  <option value="corporate">
-                    Corporate donor (representing a business or an organization)
-                  </option>
-                </select>
-              </InputGroup>
-            </FormGroup> */}
-
             <FormGroup className="mb-3">
               <InputGroup className="input-group-alternative">
                 <Input
@@ -370,6 +351,282 @@ export const RenderStepTwo = ({
           </div>
         </CardHeader>
       </>
+    ) : formData.selectedOption === "government" ? (
+      <>
+        <Row className="justify-content-center">
+          <h5 style={{ color: "black" }}>Government Body Registration</h5>
+        </Row>
+        <Row className="justify-content-center">
+          <p>Please provide your information to create your account</p>
+        </Row>
+        <div
+          style={{
+            width: "100vw",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "2rem 1rem",
+          }}
+        >
+          <Container style={{ maxWidth: "1000px" }}>
+            <div
+              style={{
+                backgroundColor: "white",
+                borderRadius: "8px",
+                padding: "3rem 2.5rem",
+                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "2rem",
+                  fontWeight: "600",
+                  color: "#212529",
+                  textAlign: "center",
+                  marginBottom: "2.5rem",
+                }}
+              >
+                Create Your Account
+              </h1>
+
+              <Form>
+                {/* Organization Name - Full Width */}
+                <FormGroup style={{ marginBottom: "1.5rem" }}>
+                  <Label
+                    for="organization"
+                    style={{
+                      color: "#212529",
+                      fontWeight: "500",
+                      marginBottom: "0.5rem",
+                      display: "block",
+                    }}
+                  >
+                    Organization Name
+                  </Label>
+                  <Input
+                    type="text"
+                    name="organization"
+                    id="organization"
+                    placeholder="Enter your organization name"
+                    style={{
+                      height: "3rem",
+                      fontSize: "1rem",
+                      border: "1px solid #dee2e6",
+                      borderRadius: "6px",
+                      padding: "0.75rem 1rem",
+                    }}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
+                  />
+                </FormGroup>
+
+                {/* Contact Person and Phone Number - Side by Side */}
+                <Row style={{ marginBottom: "1.5rem" }}>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label
+                        for="contact"
+                        style={{
+                          color: "#212529",
+                          fontWeight: "500",
+                          marginBottom: "0.5rem",
+                          display: "block",
+                        }}
+                      >
+                        Contact Person
+                      </Label>
+                      <Input
+                        type="text"
+                        name="contact"
+                        id="contact"
+                        placeholder="Enter organization contact person name"
+                        style={{
+                          height: "3rem",
+                          fontSize: "1rem",
+                          border: "1px solid #dee2e6",
+                          borderRadius: "6px",
+                          padding: "0.75rem 1rem",
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label
+                        for="phone"
+                        style={{
+                          color: "#212529",
+                          fontWeight: "500",
+                          marginBottom: "0.5rem",
+                          display: "block",
+                        }}
+                      >
+                        Phone Number
+                      </Label>
+                      <Input
+                        type="tel"
+                        name="phone"
+                        id="phone"
+                        placeholder="Enter your phone number"
+                        style={{
+                          height: "3rem",
+                          fontSize: "1rem",
+                          border: "1px solid #dee2e6",
+                          borderRadius: "6px",
+                          padding: "0.75rem 1rem",
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
+                </Row>
+
+                {/* Email and Registration Number - Side by Side */}
+                <Row style={{ marginBottom: "1.5rem" }}>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label
+                        for="email"
+                        style={{
+                          color: "#212529",
+                          fontWeight: "500",
+                          marginBottom: "0.5rem",
+                          display: "block",
+                        }}
+                      >
+                        Email Address
+                      </Label>
+                      <Input
+                        type="email"
+                        name="email"
+                        id="email"
+                        placeholder="Enter your email address"
+                        style={{
+                          height: "3rem",
+                          fontSize: "1rem",
+                          border: "1px solid #dee2e6",
+                          borderRadius: "6px",
+                          padding: "0.75rem 1rem",
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label
+                        for="registration"
+                        style={{
+                          color: "#212529",
+                          fontWeight: "500",
+                          marginBottom: "0.5rem",
+                          display: "block",
+                        }}
+                      >
+                        Registration Number
+                      </Label>
+                      <Input
+                        type="text"
+                        name="registration"
+                        id="registration"
+                        placeholder="Enter your official registration number"
+                        style={{
+                          height: "3rem",
+                          fontSize: "1rem",
+                          border: "1px solid #dee2e6",
+                          borderRadius: "6px",
+                          padding: "0.75rem 1rem",
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
+                </Row>
+
+                {/* Password and Confirm Password - Side by Side */}
+                <Row style={{ marginBottom: "2rem" }}>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label
+                        for="password"
+                        style={{
+                          color: "#212529",
+                          fontWeight: "500",
+                          marginBottom: "0.5rem",
+                          display: "block",
+                        }}
+                      >
+                        Password
+                      </Label>
+                      <Input
+                        type="password"
+                        name="password"
+                        id="password"
+                        placeholder="Enter your password"
+                        style={{
+                          height: "3rem",
+                          fontSize: "1rem",
+                          border: "1px solid #dee2e6",
+                          borderRadius: "6px",
+                          padding: "0.75rem 1rem",
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
+                  <Col md={6}>
+                    <FormGroup>
+                      <Label
+                        for="confirmPassword"
+                        style={{
+                          color: "#212529",
+                          fontWeight: "500",
+                          marginBottom: "0.5rem",
+                          display: "block",
+                        }}
+                      >
+                        Confirm Password
+                      </Label>
+                      <Input
+                        type="password"
+                        name="confirmPassword"
+                        id="confirmPassword"
+                        placeholder="Confirm password"
+                        style={{
+                          height: "3rem",
+                          fontSize: "1rem",
+                          border: "1px solid #dee2e6",
+                          borderRadius: "6px",
+                          padding: "0.75rem 1rem",
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
+                </Row>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  block
+                  style={{
+                    height: "3rem",
+                    backgroundColor: "#e9ecef",
+                    borderColor: "#e9ecef",
+                    color: "#6c757d",
+                    fontSize: "1rem",
+                    fontWeight: "500",
+                    borderRadius: "6px",
+                  }}
+                >
+                  Create Account
+                </Button>
+              </Form>
+            </div>
+          </Container>
+        </div>
+      </>
+    ) : formData.selectedOption === "beneficiary" ? (
+      <div>Coming Soon</div>
     ) : (
       <>
         <Row className="justify-content-center">
