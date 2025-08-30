@@ -4,7 +4,8 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "build": "tsc && npm run copy-views",
+    "copy-views": "cp -r src/views dist/src/views",
     "start": "node dist/src/index.js",
     "migrate": "npx knex migrate:latest --env development",
     "dev": "nodemon src/index.ts"

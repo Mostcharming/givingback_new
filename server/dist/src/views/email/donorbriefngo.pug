@@ -1,0 +1,11 @@
+extends baseEmail
+
+block content
+  p Hello #{ngoName},
+  p A new project has been created by #{donorName}, and you have been selected to execute it.
+  p Project Details:
+  p - Title: #{projectTitle}
+  p - Description: #{projectDescription}
+  p - Funding Amount: #{fundingAmount} #{currency}
+  p Please review the project details and accept or decline the project from your dashboard.
+  p If you have any questions, feel free to contact us.

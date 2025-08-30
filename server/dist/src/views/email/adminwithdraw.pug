@@ -1,0 +1,9 @@
+extends baseEmail
+
+block content
+  p Admin Notification:
+  p A withdrawal request has been submitted by an NGO.
+  p NGO Name: #{ngoName}
+  p Amount: #{amount} #{currency}
+  p Requested Date: #{requestDate}
+  p Please review and process the request at your earliest convenience.

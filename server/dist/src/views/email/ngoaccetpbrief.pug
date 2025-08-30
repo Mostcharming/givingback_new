@@ -1,0 +1,11 @@
+extends baseEmail
+
+block content
+  p Hello #{ngoName},
+  p You have successfully accepted the project "#{projectTitle}" from the donor #{donorName}.
+  p Project Details:
+  p - Title: #{projectTitle}
+  p - Description: #{projectDescription}
+  p - Funding Amount: #{fundingAmount} #{currency}
+  p Thank you for taking on this project. We wish you success in achieving its goals.
+  p If you have any questions or need assistance, feel free to reach out to our support team.

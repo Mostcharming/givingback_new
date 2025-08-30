@@ -1,0 +1,9 @@
+extends baseEmail
+
+block content
+  p Admin Notification:
+  p A new user has joined GivingBack!
+  p Name: #{url}
+  p Email: #{email}
+  p Role: #{role} 
+  p Please review their account and verify if required.
