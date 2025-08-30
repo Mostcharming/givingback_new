@@ -18,6 +18,9 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            git add .
+            git commit -m "hi" || echo "Nothing to commit"
+            git reset --hard HEAD
             git pull origin main
 
       - name: Clean Backend Directories
