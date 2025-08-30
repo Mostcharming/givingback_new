@@ -255,6 +255,7 @@ const Register = () => {
         return null;
     }
   };
+  console.log(formData);
 
   return (
     <div>

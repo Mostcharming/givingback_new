@@ -144,10 +144,25 @@ export const RenderStepOne = ({ formData, setFormData, handleNext }) => (
             option={option}
             isActive={formData.selectedOption === option.key}
             onClick={() =>
-              setFormData((prev) => ({
-                ...prev,
-                selectedOption: option.key,
-              }))
+              // setFormData((prev) => ({
+              //   ...prev,
+              //   selectedOption: option.key,
+              // }))
+              setFormData((prev) => {
+                let userType = prev.userType || "";
+
+                if (option.key === "donor") {
+                  userType = "individual";
+                } else if (option.key === "corporate") {
+                  userType = "corporate";
+                }
+
+                return {
+                  ...prev,
+                  selectedOption: option.key,
+                  ...(userType && { userType }),
+                };
+              })
             }
           />
         </Col>
@@ -183,7 +198,8 @@ export const RenderStepTwo = ({
   google,
 }) => (
   <>
-    {formData.selectedOption === "donor" ? (
+    {formData.selectedOption === "donor" ||
+    formData.selectedOption === "corporate" ? (
       <>
         <Row className="justify-content-center">
           <h5 style={{ color: "black" }}>
@@ -195,7 +211,7 @@ export const RenderStepTwo = ({
         </Row>
         <CardBody className="mt-4 px-lg-3 py-lg-3">
           <div style={{ width: "55vw" }} role="form">
-            <FormGroup className="mb-3">
+            {/* <FormGroup className="mb-3">
               <InputGroup className="input-group-alternative">
                 <select
                   style={{ backgroundColor: "#F2F2F2", height: "100%" }}
@@ -221,7 +237,7 @@ export const RenderStepTwo = ({
                   </option>
                 </select>
               </InputGroup>
-            </FormGroup>
+            </FormGroup> */}
 
             <FormGroup className="mb-3">
               <InputGroup className="input-group-alternative">
@@ -514,7 +530,8 @@ export const RenderStepThree = ({
   nigerianStates,
 }) => (
   <>
-    {formData.selectedOption === "donor" ? (
+    {formData.selectedOption === "donor" ||
+    formData.selectedOption === "corporate" ? (
       <>
         {formData.userType === "individual" ? (
           <>
