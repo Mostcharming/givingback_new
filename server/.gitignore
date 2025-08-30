@@ -9,9 +9,6 @@ lerna-debug.log*
 
 node_modules
 env
-dist-ssr
-dist
-/dist
 .ssh
 .bash_history
 .cache/*
