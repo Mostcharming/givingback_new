@@ -1,7 +1,5 @@
-"use client";
-
-import { ShieldCheck, Trash2, User } from "lucide-react";
-import { useState } from "react";
+import { ShieldCheck, User } from "lucide-react";
+import { useRef, useState } from "react";
 import {
   Alert,
   Badge,
@@ -12,9 +10,11 @@ import {
   Form,
   FormGroup,
   Input,
+  InputGroup,
   Label,
   Row,
 } from "reactstrap";
+import { useContent } from "../../../services/useContext";
 
 export default function ProfileUpdateForm() {
   const [selectedInterests, setSelectedInterests] = useState([
@@ -30,40 +30,74 @@ export default function ProfileUpdateForm() {
         : [...prev, interest]
     );
   };
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { currentState } = useContent();
+  const [formData, setFormData] = useState({
+    image: null,
+    title: "",
+
+    imageUrl: currentState?.userimage?.filename || null,
+  });
+  const handleFileChange = (file) => {
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        image: file, // store selected file
+        imageUrl: null, // clear backend image
+      }));
+    }
+  };
 
   return (
-    <Container className="py-5" style={{ width: "80vw" }}>
+    <Container className="py-3" style={{ width: "80vw" }}>
       <CardBody className="p-4">
         <Form>
           <Row className="mb-4">
             <Col md={7}>
-              <Label className="fw-bold mb-3">Profile photo</Label>
-              <div className="d-flex align-items-center gap-3">
+              <label className="form-label fw-medium">Profile Photo</label>
+              <div className="d-flex align-items-center gap-3 mb-3">
                 <div
-                  className="d-flex align-items-center justify-content-center border rounded"
-                  style={{
-                    width: "80px",
-                    height: "80px",
-                    backgroundColor: "#f8f9fa",
-                    borderColor: "#dee2e6",
-                  }}
+                  className="border rounded-lg d-flex align-items-center justify-content-center bg-light overflow-hidden"
+                  style={{ width: "80px", height: "80px" }}
                 >
-                  <User size={32} style={{ color: "#28a745" }} />
+                  {formData.image ? (
+                    <img
+                      src={URL.createObjectURL(formData.image)}
+                      alt="Sponsor Logo"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : formData.imageUrl ? (
+                    <img
+                      src={formData.imageUrl}
+                      alt="Sponsor Logo"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <User size={32} className="text-success" />
+                  )}
                 </div>
-                <Button
-                  color="link"
-                  className="p-0 me-3"
-                  style={{ color: "#6c757d" }}
+                <button
+                  type="button"
+                  className="ml-4 btn btn-outline-secondary"
+                  onClick={() => fileInputRef.current?.click()}
                 >
                   Upload
-                </Button>
-                <Button
-                  color="link"
-                  className="p-0"
-                  style={{ color: "#dc3545" }}
-                >
-                  <Trash2 size={16} />
-                </Button>
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={(e) => handleFileChange(e.target.files[0])}
+                  style={{ display: "none" }}
+                />
               </div>
             </Col>
             <Col md={5}>
@@ -85,11 +119,7 @@ export default function ProfileUpdateForm() {
                 >
                   <ShieldCheck size={32} color={"#ffffff"} />
                 </div>
-                {/* <CheckCircle
-                  size={20}
-                  className="me-3"
-                  style={{ color: "#28a745" }}
-                /> */}
+
                 <div className="pl-3">
                   <div className="fw-bold" style={{ color: "#155724" }}>
                     Let's update your account
@@ -108,16 +138,25 @@ export default function ProfileUpdateForm() {
           {/* Organization Details */}
           <Row className="mb-3">
             <Col md={6}>
-              <FormGroup>
+              <FormGroup className="">
                 <Label className="fw-bold">Organization name</Label>
-                <Input
-                  type="text"
-                  defaultValue="The helping hand"
-                  style={{
-                    backgroundColor: "#f8f9fa",
-                    border: "1px solid #dee2e6",
-                  }}
-                />
+                <InputGroup className="input-group-alternative">
+                  <Input
+                    style={{ backgroundColor: "#f2f2f247", height: "100%" }}
+                    className="p-3"
+                    // placeholder="Project title"
+                    type="text"
+                    name="title"
+                    required
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
+                  />
+                </InputGroup>
               </FormGroup>
             </Col>
             <Col md={6}>
