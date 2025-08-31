@@ -323,9 +323,10 @@ export default function ProfileUpdateForm() {
                 Provide your organization documents and credentials
               </div>
             </div>
-            <Button color="success" size="sm" outline>
+            {/* <Button color="success" size="sm" outline>
               Update
-            </Button>
+            </Button> */}
+            <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
           </div>
         </div>
 
@@ -337,9 +338,10 @@ export default function ProfileUpdateForm() {
                 Provide your organization documents and credentials
               </div>
             </div>
-            <Button color="success" size="sm" outline>
+            {/* <Button color="success" size="sm" outline>
               Update
-            </Button>
+            </Button> */}
+            <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
           </div>
         </div>
 
@@ -351,9 +353,10 @@ export default function ProfileUpdateForm() {
                 Provide your organization documents and credentials
               </div>
             </div>
-            <Button color="success" size="sm" outline>
+            {/* <Button color="success" size="sm" outline>
               Update
-            </Button>
+            </Button> */}
+            <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
           </div>
         </div>
       </CardBody>
