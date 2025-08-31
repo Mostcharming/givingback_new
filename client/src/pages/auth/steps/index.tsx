@@ -164,6 +164,8 @@ export const RenderStepOne = ({ formData, setFormData, handleNext }) => (
                   userType = "individual";
                 } else if (option.key === "corporate") {
                   userType = "corporate";
+                } else if (option.key === "government") {
+                  userType = "government";
                 }
 
                 return {
@@ -205,6 +207,7 @@ export const RenderStepTwo = ({
   handleNext,
   withGoogle,
   google,
+  submit,
 }) => (
   <>
     {formData.selectedOption === "donor" ||
@@ -405,8 +408,8 @@ export const RenderStepTwo = ({
                   </Label>
                   <Input
                     type="text"
-                    name="organization"
-                    id="organization"
+                    name="name"
+                    id="name"
                     placeholder="Enter your organization name"
                     style={{
                       height: "3rem",
@@ -418,7 +421,7 @@ export const RenderStepTwo = ({
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        email: e.target.value,
+                        name: e.target.value,
                       }))
                     }
                   />
@@ -441,8 +444,8 @@ export const RenderStepTwo = ({
                       </Label>
                       <Input
                         type="text"
-                        name="contact"
-                        id="contact"
+                        name="orgemail"
+                        id="orgemail"
                         placeholder="Enter organization contact person name"
                         style={{
                           height: "3rem",
@@ -451,6 +454,12 @@ export const RenderStepTwo = ({
                           borderRadius: "6px",
                           padding: "0.75rem 1rem",
                         }}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            orgemail: e.target.value,
+                          }))
+                        }
                       />
                     </FormGroup>
                   </Col>
@@ -479,6 +488,12 @@ export const RenderStepTwo = ({
                           borderRadius: "6px",
                           padding: "0.75rem 1rem",
                         }}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            phone: e.target.value,
+                          }))
+                        }
                       />
                     </FormGroup>
                   </Col>
@@ -503,6 +518,7 @@ export const RenderStepTwo = ({
                         type="email"
                         name="email"
                         id="email"
+                        autoComplete="new-email"
                         placeholder="Enter your email address"
                         style={{
                           height: "3rem",
@@ -511,6 +527,12 @@ export const RenderStepTwo = ({
                           borderRadius: "6px",
                           padding: "0.75rem 1rem",
                         }}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            email: e.target.value,
+                          }))
+                        }
                       />
                     </FormGroup>
                   </Col>
@@ -529,8 +551,8 @@ export const RenderStepTwo = ({
                       </Label>
                       <Input
                         type="text"
-                        name="registration"
-                        id="registration"
+                        name="cac"
+                        id="cac"
                         placeholder="Enter your official registration number"
                         style={{
                           height: "3rem",
@@ -539,6 +561,12 @@ export const RenderStepTwo = ({
                           borderRadius: "6px",
                           padding: "0.75rem 1rem",
                         }}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            cac: e.target.value,
+                          }))
+                        }
                       />
                     </FormGroup>
                   </Col>
@@ -564,6 +592,7 @@ export const RenderStepTwo = ({
                         name="password"
                         id="password"
                         placeholder="Enter your password"
+                        autoComplete="new-password"
                         style={{
                           height: "3rem",
                           fontSize: "1rem",
@@ -571,6 +600,12 @@ export const RenderStepTwo = ({
                           borderRadius: "6px",
                           padding: "0.75rem 1rem",
                         }}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            password: e.target.value,
+                          }))
+                        }
                       />
                     </FormGroup>
                   </Col>
@@ -589,9 +624,10 @@ export const RenderStepTwo = ({
                       </Label>
                       <Input
                         type="password"
-                        name="confirmPassword"
-                        id="confirmPassword"
+                        name="cpassword"
+                        id="cpassword"
                         placeholder="Confirm password"
+                        autoComplete="new-password"
                         style={{
                           height: "3rem",
                           fontSize: "1rem",
@@ -599,20 +635,35 @@ export const RenderStepTwo = ({
                           borderRadius: "6px",
                           padding: "0.75rem 1rem",
                         }}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            cpassword: e.target.value,
+                          }))
+                        }
                       />
                     </FormGroup>
                   </Col>
                 </Row>
 
-                {/* Submit Button */}
                 <Button
-                  type="submit"
+                  onClick={submit}
                   block
+                  disabled={
+                    !formData.userType ||
+                    !formData.email ||
+                    !formData.password ||
+                    !formData.name ||
+                    !formData.orgemail ||
+                    !formData.phone ||
+                    !formData.cac ||
+                    !formData.cpassword
+                  }
                   style={{
                     height: "3rem",
-                    backgroundColor: "#e9ecef",
                     borderColor: "#e9ecef",
-                    color: "#6c757d",
+                    color: formData.userType ? "white" : "black",
+                    background: formData.userType ? "#02a95c" : "#EEEEEE",
                     fontSize: "1rem",
                     fontWeight: "500",
                     borderRadius: "6px",
@@ -626,7 +677,7 @@ export const RenderStepTwo = ({
         </div>
       </>
     ) : formData.selectedOption === "beneficiary" ? (
-      <div>Coming Soon</div>
+      <h4>Coming Soon</h4>
     ) : (
       <>
         <Row className="justify-content-center">

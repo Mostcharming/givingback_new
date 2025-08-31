@@ -233,6 +233,7 @@ const Register = () => {
             handleNext={handleNext}
             withGoogle={withGoogle}
             google={google}
+            submit={submit}
           />
         );
       case 3:
@@ -255,7 +256,7 @@ const Register = () => {
         return null;
     }
   };
-
+  console.log(formData);
   return (
     <div>
       <Modal isOpen={showModal} backdrop="static" centered>

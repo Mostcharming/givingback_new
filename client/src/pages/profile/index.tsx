@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ProfileUpdateForm from "./subs/profile";
 
 function Profile() {
   const TABS = [
@@ -14,9 +15,8 @@ function Profile() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "Profile Information":
-        // return <ProfileData />;
+        return <ProfileUpdateForm />;
 
-        return <div></div>;
       case "Bank Details":
         return <div></div>;
       case "Security":
