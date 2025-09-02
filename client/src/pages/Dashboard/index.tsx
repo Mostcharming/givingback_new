@@ -1,18 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Book,
+  BookOpen,
   Circle,
   CircleCheckBig,
+  Clock,
   FolderOpenDot,
+  Heart,
   House,
+  Info,
+  Map,
   Mic,
+  Plus,
+  Send,
   Users,
+  UsersRound,
+  Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   Button,
+  Card,
+  CardBody,
   Col,
   Container,
   Modal,
@@ -35,7 +46,7 @@ const Dashboard = () => {
   const [headers, setHeaders] = useState([]);
   const [actions, setActions] = useState([]);
   const [userBankDetails, setUserBankDetails] = useState(true);
-
+  const [lastUpdated, setLastUpdated] = useState("");
   const role = authState.user?.role;
 
   const isFirstTimeLogin = authState?.user?.first_time_login === 0;
@@ -98,6 +109,17 @@ const Dashboard = () => {
   useEffect(() => {
     setUserBankDetails(hasBankDetails);
 
+    const now = new Date();
+    const formattedTime = now.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const formattedDate =
+      now.toDateString() === new Date().toDateString()
+        ? `Today, ${formattedTime}`
+        : `${now.toLocaleDateString()}, ${formattedTime}`;
+    setLastUpdated(formattedDate);
+
     if (role === "admin") {
       getDashAdmin({});
       getTableData({});
@@ -114,7 +136,6 @@ const Dashboard = () => {
   }, []);
 
   const getDashBoxItems = (role, data: any) => {
-    // Return dash box items based on role
     switch (role) {
       case "NGO":
         return [
@@ -151,28 +172,32 @@ const Dashboard = () => {
       case "corporate":
         return [
           {
-            title: "Completed Projects",
-            amount: data.completedProjectsCount || 0,
-            iconClass: <House />,
-            bgColor: "bg-success",
-          },
-          {
-            title: "Ongoing Projects",
+            title: "Active Projects",
             amount: data.activeProjectsCount || 0,
-            iconClass: <House />,
-            bgColor: "bg-info",
+            iconClass: <FolderOpenDot />,
+            bgColor: "#F3F4F6",
+            color: "#3B82F6",
           },
           {
-            title: "Total Project Funding",
-            amount: data.totalDonations,
-            iconClass: <House />,
-            bgColor: "bg-warning",
+            title: "Total Donated",
+            amount: data.totalDonations || 0,
+            iconClass: <Wallet />,
+            bgColor: "#F3F4F6",
+            color: "#128330",
           },
           {
-            title: "Wallet Balance",
-            amount: data.walletBalance,
-            iconClass: <House />,
-            bgColor: "bg-primary",
+            title: "NGO's Patnered",
+            amount: data.activeProjectsCount,
+            iconClass: <UsersRound />,
+            bgColor: "#F3F4F6",
+            color: "#9C27B0",
+          },
+          {
+            title: "States Covered",
+            amount: data.completedProjectsCount,
+            iconClass: <Map />,
+            bgColor: "#F3F4F6",
+            color: "#3B82F6",
           },
         ];
       case "admin":
@@ -657,20 +682,188 @@ const Dashboard = () => {
           </div>
         </Container>
       )}
+      {role === "NGO" && (
+        <Tables
+          tableName="Recent Transactions"
+          headers={headers}
+          data={tableData}
+          isPagination={false}
+          actions={actions}
+          emptyStateContent="No Transactions found found"
+          emptyStateButtonLabel="Create New Project"
+          onEmptyStateButtonClick={handleEmptyStateClick}
+          currentPage={""}
+          totalPages={""}
+          onPageChange={""}
+        />
+      )}
+      {(role === "donor" || role === "corporate") && (
+        <div
+          style={{
+            padding: "20px",
+            minHeight: "100vh",
+          }}
+        >
+          <Container>
+            {lastUpdated && (
+              <div
+                className="hidden md:inline-flex items-center gap-2 px-4 py-2"
+                style={{
+                  width: "21vw",
+                  backgroundColor: "#e2efe9",
+                  borderRadius: "3.5rem",
+                }}
+              >
+                <Clock className="w-4 h-4 mr-2" style={{ color: "#128330" }} />
+                <span
+                  className="text-sm font-medium"
+                  style={{ color: "#128330" }}
+                >
+                  Last updated: {lastUpdated}
+                </span>
+              </div>
+            )}
 
-      <Tables
-        tableName="Recent Transactions"
-        headers={headers}
-        data={tableData}
-        isPagination={false}
-        actions={actions}
-        emptyStateContent="No Transactions found found"
-        emptyStateButtonLabel="Create New Project"
-        onEmptyStateButtonClick={handleEmptyStateClick}
-        currentPage={""}
-        totalPages={""}
-        onPageChange={""}
-      />
+            <Row className="mb-5 mt-5">
+              <Col>
+                <Card className="border-0 shadow-sm">
+                  <CardBody className="text-center py-5">
+                    <div className="mb-4">
+                      <Map
+                        size={48}
+                        className="text-primary mx-auto"
+                        style={{
+                          color: "#007bff",
+                          backgroundColor: "#e9ecef",
+                          borderRadius: "50%",
+                          padding: "8px",
+                        }}
+                      />
+                    </div>
+                    <p className="mb-3" style={{ fontWeight: 600 }}>
+                      No impact highlights yet
+                    </p>
+                    <p
+                      className="text-muted mb-4"
+                      style={{ maxWidth: "400px", margin: "0 auto" }}
+                    >
+                      Once your projects begin making an impact, you'll see
+                      highlights showcased here.
+                    </p>
+                    <Button
+                      color="success"
+                      size="lg"
+                      className="px-4"
+                      style={{
+                        backgroundColor: "#28a745",
+                        borderColor: "#28a745",
+                        fontWeight: 500,
+                      }}
+                      onClick={handleEmptyStateClick}
+                    >
+                      Create your first project
+                    </Button>
+                  </CardBody>
+                </Card>
+              </Col>
+            </Row>
+
+            {/* Bottom section */}
+            <Row>
+              {/* Recent activities */}
+              <Col md={6} className="mb-4">
+                <h5 className="mb-3" style={{ fontWeight: 600 }}>
+                  Recent activities
+                </h5>
+                <Card className="border-0 shadow-sm">
+                  <CardBody className="text-center py-5">
+                    <div className="mb-3">
+                      <Info
+                        size={24}
+                        className="text-muted mx-auto"
+                        style={{
+                          backgroundColor: "#e9ecef",
+                          borderRadius: "50%",
+                          padding: "8px",
+                          width: "40px",
+                          height: "40px",
+                        }}
+                      />
+                    </div>
+                    <p
+                      className="text-muted mb-0"
+                      style={{ fontSize: "0.875rem" }}
+                    >
+                      You have no activities so far. Once you start to make
+                      activities it would appear here
+                    </p>
+                  </CardBody>
+                </Card>
+              </Col>
+
+              {/* Quick actions */}
+              <Col md={6}>
+                <h5 className="mb-3" style={{ fontWeight: 600 }}>
+                  Quick actions
+                </h5>
+                <div className="d-grid gap-3">
+                  <Button
+                    color="success"
+                    className="d-flex align-items-center justify-content-center gap-2 py-3"
+                    style={{
+                      backgroundColor: "#28a745",
+                      borderColor: "#28a745",
+                      fontWeight: 500,
+                    }}
+                  >
+                    <Plus size={20} />
+                    Create a new project brief
+                  </Button>
+
+                  <Button
+                    color="primary"
+                    className="d-flex align-items-center justify-content-center gap-2 py-3"
+                    style={{
+                      backgroundColor: "#007bff",
+                      borderColor: "#007bff",
+                      fontWeight: 500,
+                    }}
+                  >
+                    <Heart size={20} />
+                    Donate to projects
+                  </Button>
+
+                  <Button
+                    className="d-flex align-items-center justify-content-center gap-2 py-3"
+                    style={{
+                      backgroundColor: "#8e44ad",
+                      borderColor: "#8e44ad",
+                      color: "white",
+                      fontWeight: 500,
+                    }}
+                  >
+                    <BookOpen size={20} />
+                    View NGO directory
+                  </Button>
+
+                  <Button
+                    color="dark"
+                    className="d-flex align-items-center justify-content-center gap-2 py-3"
+                    style={{
+                      backgroundColor: "#343a40",
+                      borderColor: "#343a40",
+                      fontWeight: 500,
+                    }}
+                  >
+                    <Send size={20} />
+                    Send message
+                  </Button>
+                </div>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+      )}
     </>
   );
 };

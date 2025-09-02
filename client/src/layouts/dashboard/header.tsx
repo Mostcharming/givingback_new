@@ -98,9 +98,9 @@ const AdminNavbar: React.FC<any> = (props) => {
                 </Media>
               </DropdownToggle>
               <DropdownMenu className="dropdown-menu-arrow" right>
-                <DropdownItem className="noti-title" header tag="div">
+                {/* <DropdownItem className="noti-title" header tag="div">
                   <h6 className="text-overflow m-0">Welcome!</h6>
-                </DropdownItem>
+                </DropdownItem> */}
 
                 <DropdownItem divider />
                 <DropdownItem
