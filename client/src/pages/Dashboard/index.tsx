@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Book,
-  BookOpen,
   Circle,
   CircleCheckBig,
   Clock,
@@ -772,10 +771,17 @@ const Dashboard = () => {
             <Row>
               {/* Recent activities */}
               <Col md={6} className="mb-4">
-                <h5 className="mb-3" style={{ fontWeight: 600 }}>
-                  Recent activities
-                </h5>
                 <Card className="border-0 shadow-sm">
+                  <h5
+                    className=" fw-normal pl-2 pt-2"
+                    style={{ fontSize: "1.5rem", color: "#333" }}
+                  >
+                    Recent activities
+                  </h5>
+
+                  {/* Divider */}
+                  <hr style={{ borderColor: "#e5e5e5" }} />
+
                   <CardBody className="text-center py-5">
                     <div className="mb-3">
                       <Info
@@ -802,63 +808,84 @@ const Dashboard = () => {
               </Col>
 
               {/* Quick actions */}
-              <Col md={6}>
-                <h5 className="mb-3" style={{ fontWeight: 600 }}>
-                  Quick actions
-                </h5>
-                <div className="d-grid gap-3">
-                  <Button
-                    color="success"
-                    className="d-flex align-items-center justify-content-center gap-2 py-3"
-                    style={{
-                      backgroundColor: "#28a745",
-                      borderColor: "#28a745",
-                      fontWeight: 500,
-                    }}
-                  >
-                    <Plus size={20} />
-                    Create a new project brief
-                  </Button>
 
-                  <Button
-                    color="primary"
-                    className="d-flex align-items-center justify-content-center gap-2 py-3"
-                    style={{
-                      backgroundColor: "#007bff",
-                      borderColor: "#007bff",
-                      fontWeight: 500,
-                    }}
+              <Col md={6} className="mb-4">
+                <Card className="border-0 shadow-sm">
+                  <h5
+                    className=" fw-normal pl-2 pt-2"
+                    style={{ fontSize: "1.5rem", color: "#333" }}
                   >
-                    <Heart size={20} />
-                    Donate to projects
-                  </Button>
+                    Quick Actions
+                  </h5>
 
-                  <Button
-                    className="d-flex align-items-center justify-content-center gap-2 py-3"
-                    style={{
-                      backgroundColor: "#8e44ad",
-                      borderColor: "#8e44ad",
-                      color: "white",
-                      fontWeight: 500,
-                    }}
-                  >
-                    <BookOpen size={20} />
-                    View NGO directory
-                  </Button>
+                  {/* Divider */}
+                  <hr style={{ borderColor: "#e5e5e5" }} />
 
-                  <Button
-                    color="dark"
-                    className="d-flex align-items-center justify-content-center gap-2 py-3"
-                    style={{
-                      backgroundColor: "#343a40",
-                      borderColor: "#343a40",
-                      fontWeight: 500,
-                    }}
-                  >
-                    <Send size={20} />
-                    Send message
-                  </Button>
-                </div>
+                  <div className="">
+                    <div className="d-flex flex-column align-items-center justify-content-center">
+                      <Button
+                        color="success"
+                        size="lg"
+                        className="d-flex align-items-center justify-content-center py-3 w-75"
+                        style={{
+                          margin: "15px",
+                          backgroundColor: "#4ade80",
+                          borderColor: "#4ade80",
+                        }}
+                        onClick={() =>
+                          navigate("/donor/projects/brief_initiate")
+                        }
+                      >
+                        <Plus className="mr-2" size={20} />
+                        Create a new project brief
+                      </Button>
+
+                      <Button
+                        color="primary"
+                        size="lg"
+                        className="d-flex align-items-center justify-content-center py-3 w-75"
+                        style={{
+                          margin: "15px",
+                          backgroundColor: "#3b82f6",
+                          borderColor: "#3b82f6",
+                        }}
+                        onClick={() => navigate("/donor/fund_management")}
+                      >
+                        <Heart className="mr-2" size={20} />
+                        Donate to projects
+                      </Button>
+
+                      <Button
+                        size="lg"
+                        className="d-flex align-items-center justify-content-center py-3 text-white w-75"
+                        style={{
+                          margin: "15px",
+                          backgroundColor: "#a855f7",
+                          borderColor: "#a855f7",
+                        }}
+                        onClick={() => navigate("/donor/ngo_directory")}
+                      >
+                        <Book className="mr-2" size={20} />
+                        View NGO directory
+                      </Button>
+
+                      <Button
+                        color="dark"
+                        size="lg"
+                        className="d-flex align-items-center justify-content-center py-3 rounded-3 w-75"
+                        style={{
+                          margin: "15px",
+                          backgroundColor: "#374151",
+                          borderColor: "#374151",
+                        }}
+                        onClick={() => navigate("/donor/messages")}
+                      >
+                        <Send className="mr-2" size={20} />
+                        Send message
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
               </Col>
             </Row>
           </Container>
