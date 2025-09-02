@@ -1,7 +1,7 @@
 import { Plus, Search, Send } from "lucide-react";
 import { Image } from "react-bootstrap";
 
-const MileStoneUpdates = ({ logo, project }) => {
+const MileStoneUpdates = ({ logo, project, role }) => {
   const hasUpdates = project?.milestones?.some(
     (m) => m.updates && m.updates.length > 0
   );
@@ -41,7 +41,7 @@ const MileStoneUpdates = ({ logo, project }) => {
             </div>
           </div>
         ) : (
-          project?.milestones?.map((milestone, idx) =>
+          project?.milestones?.map((milestone) =>
             milestone.updates?.map((update, updateIdx) => (
               <div className="d-flex mb-4" key={`${milestone.id}-${updateIdx}`}>
                 <div className="flex-shrink-0 me-3">
@@ -82,33 +82,35 @@ const MileStoneUpdates = ({ logo, project }) => {
         )}
 
         {/* Add new update */}
-        <div className="bg-white border">
-          <div className="container-fluid h-100">
-            <div className="row h-100 align-items-center">
-              <div className="col">
-                <div className="d-flex align-items-center justify-content-between py-4 px-3">
-                  <span className="text-muted" style={{ fontSize: "16px" }}>
-                    Add new update
-                  </span>
-                  <div className="d-flex gap-3">
-                    <button
-                      className="btn btn-link p-0 text-muted"
-                      style={{ border: "none", background: "none" }}
-                    >
-                      <Plus size={20} />
-                    </button>
-                    <button
-                      className="btn btn-link p-0 text-muted"
-                      style={{ border: "none", background: "none" }}
-                    >
-                      <Send size={20} />
-                    </button>
+        {role === "NGO" && (
+          <div className="bg-white border">
+            <div className="container-fluid h-100">
+              <div className="row h-100 align-items-center">
+                <div className="col">
+                  <div className="d-flex align-items-center justify-content-between py-4 px-3">
+                    <span className="text-muted" style={{ fontSize: "16px" }}>
+                      Add new update
+                    </span>
+                    <div className="d-flex gap-3">
+                      <button
+                        className="btn btn-link p-0 text-muted"
+                        style={{ border: "none", background: "none" }}
+                      >
+                        <Plus size={20} />
+                      </button>
+                      <button
+                        className="btn btn-link p-0 text-muted"
+                        style={{ border: "none", background: "none" }}
+                      >
+                        <Send size={20} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

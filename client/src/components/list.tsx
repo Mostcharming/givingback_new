@@ -271,7 +271,7 @@ const List = ({ type }) => {
 
         projectType: "present",
         startDate: dateFilter !== "Any time" ? dateFilter : undefined,
-        donor_id: currentState.user.id,
+        // donor_id: currentState.user.id,
       });
     }
   }, [currentPage, statusFilter, categoryFilter, dateFilter]);
@@ -312,12 +312,14 @@ const List = ({ type }) => {
           <h3 className="text-custom-green fs-2 fw-semibold mb-0">Projects</h3>
         </div>
         <div className="col-auto">
-          <button
-            onClick={handleAddProject}
-            className="btn btn-custom-green px-4 py-2 fw-medium rounded-lg"
-          >
-            Add past project
-          </button>
+          {role === "NGO" && (
+            <button
+              onClick={handleAddProject}
+              className="btn btn-custom-green px-4 py-2 fw-medium rounded-lg"
+            >
+              Add past project
+            </button>
+          )}
         </div>
       </div>
       <div className="pb-5">
@@ -332,22 +334,28 @@ const List = ({ type }) => {
                 <div className="mb-4">
                   <FolderOpenDot className="text-custom-muted" size={50} />
                 </div>
-
                 <h2 className="text-custom-dark fs-4 fw-semibold mb-3">
                   No projects yet
                 </h2>
-
-                <p className="text-custom-muted mb-5 lh-base">
-                  You don't seem to have an projects available yet. When you add
-                  a project, it would appear here.
-                </p>
-
-                <button
-                  onClick={handleAddProject}
-                  className="btn btn-custom-green w-100 px-4 py-3 fw-medium rounded-lg"
-                >
-                  Add past project
-                </button>
+                {role === "NGO" && (
+                  <p className="text-custom-muted mb-5 lh-base">
+                    You don't seem to have an projects available yet. When you
+                    add a project, it would appear here.
+                  </p>
+                )}{" "}
+                {role !== "NGO" && (
+                  <p className="text-custom-muted mb-5 lh-base">
+                    There are currently no projects available.
+                  </p>
+                )}
+                {role === "NGO" && (
+                  <button
+                    onClick={handleAddProject}
+                    className="btn btn-custom-green w-100 px-4 py-3 fw-medium rounded-lg"
+                  >
+                    Add past project
+                  </button>
+                )}
               </div>
             </div>
           </div>

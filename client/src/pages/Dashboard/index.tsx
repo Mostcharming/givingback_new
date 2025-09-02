@@ -833,9 +833,7 @@ const Dashboard = () => {
                           backgroundColor: "#4ade80",
                           borderColor: "#4ade80",
                         }}
-                        onClick={() =>
-                          navigate("/donor/projects/brief_initiate")
-                        }
+                        onClick={() => navigate("/donor/brief_initiate")}
                       >
                         <Plus className="mr-2" size={20} />
                         Create a new project brief

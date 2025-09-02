@@ -4,11 +4,11 @@ import ProfileUpdateForm from "./subs/profile";
 function Profile() {
   const TABS = [
     "Profile Information",
-    "Bank Details",
-    "Security",
-    "Notifications",
-    "Website",
-    "Support",
+    // "Bank Details",
+    // "Security",
+    // "Notifications",
+    // "Website",
+    // "Support",
   ];
   const [activeTab, setActiveTab] = useState("Profile Information");
 

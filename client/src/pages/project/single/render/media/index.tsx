@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, Play, Trash2, Video, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export default function MediaGallery({ project }) {
+export default function MediaGallery({ project, role }) {
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
   const isVideoFile = (url) => {
@@ -210,15 +210,18 @@ export default function MediaGallery({ project }) {
                   ) : (
                     <img src={item.src} alt={item.alt} />
                   )}
-                  <button
-                    className="delete-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(item.id);
-                    }}
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {role === "NGO" && (
+                    <button
+                      className="delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(item.id);
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+
                   {item.type === "video" && (
                     <>
                       <div className="play-overlay">
@@ -239,15 +242,16 @@ export default function MediaGallery({ project }) {
             <small>Upload images or videos to get started.</small>
           </div>
         )}
-
-        {/* Upload Button */}
-        <div className="row">
-          <div className="col">
-            <button className="upload-btn w-50" onClick={handleUploadMedia}>
-              Upload New Media
-            </button>
+        {role === "NGO" && (
+          <div className="row">
+            <div className="col">
+              <button className="upload-btn w-50" onClick={handleUploadMedia}>
+                Upload New Media
+              </button>
+            </div>
           </div>
-        </div>
+        )}
+        {/* Upload Button */}
       </div>
 
       {/* Lightbox Modal */}

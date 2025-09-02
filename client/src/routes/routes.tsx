@@ -104,7 +104,7 @@ const routes = [
     layout: "/donor",
   },
   {
-    path: "/projects/brief_initiate",
+    path: "/brief_initiate",
     name: "Create Project",
     icon: <FolderPlus />,
     component: <CreateProject />,

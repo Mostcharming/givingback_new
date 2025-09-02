@@ -19,8 +19,6 @@ import Sponsor from "./render/sidebar/Sponsor";
 import Transactions from "./render/transactions";
 import MileStoneUpdates from "./render/updates";
 
-const TABS = ["Details", "Updates", "Media", "Transactions"];
-
 const ProjectViewDetail: React.FC<any> = () => {
   const [project, setProject] = useState<any>({});
   const [activeTab, setActiveTab] = useState("Details");
@@ -29,6 +27,11 @@ const ProjectViewDetail: React.FC<any> = () => {
   const { authState, currentState } = useContent();
   const navigate = useNavigate();
   const role = authState.user?.role;
+
+  const TABS =
+    role === "NGO"
+      ? ["Details", "Updates", "Media", "Transactions"]
+      : ["Details", "Updates", "Media"];
 
   const { mutate: getTableData, isLoading } = useBackendService(
     "/allprojects",
@@ -97,9 +100,9 @@ const ProjectViewDetail: React.FC<any> = () => {
           </>
         );
       case "Updates":
-        return <MileStoneUpdates logo={logo} project={project} />;
+        return <MileStoneUpdates logo={logo} project={project} role={role} />;
       case "Media":
-        return <MediaGallery project={project} />;
+        return <MediaGallery project={project} role={role} />;
       case "Transactions":
         return <Transactions project={project} />;
       default:
@@ -188,11 +191,13 @@ const ProjectViewDetail: React.FC<any> = () => {
                       currentUser={currentState}
                       project={project}
                     />
-                    <Sponsor
-                      handleMessage={handleMessage}
-                      logo={logo}
-                      project={project}
-                    />
+                    {role === "NGO" && (
+                      <Sponsor
+                        handleMessage={handleMessage}
+                        logo={logo}
+                        project={project}
+                      />
+                    )}
                   </>
                 ) : (
                   <Progress project={project} />
