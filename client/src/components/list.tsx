@@ -228,7 +228,7 @@ const List = ({ type }) => {
           page: currentPage,
           projectType: "present",
           status: "active",
-          donor_id: currentState.user.id,
+          // donor_id: currentState.user.id,
         });
       }
     }
