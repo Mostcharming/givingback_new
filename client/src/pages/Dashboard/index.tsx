@@ -706,11 +706,12 @@ const Dashboard = () => {
           <Container>
             {lastUpdated && (
               <div
-                className="hidden md:inline-flex items-center gap-2 px-4 py-2"
+                className=" items-center gap-2 px-4 py-2"
                 style={{
                   width: "21vw",
                   backgroundColor: "#e2efe9",
                   borderRadius: "3.5rem",
+                  display: window.innerWidth < 768 ? "none" : "inline-flex",
                 }}
               >
                 <Clock className="w-4 h-4 mr-2" style={{ color: "#128330" }} />

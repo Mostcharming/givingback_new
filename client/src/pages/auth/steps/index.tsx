@@ -19,7 +19,6 @@ import {
   Label,
   Row,
 } from "reactstrap";
-import Util from "../../../services/utils";
 
 export const RenderStepIndicator = ({ step, setStep }) => (
   <Row>
@@ -1396,9 +1395,9 @@ export const RenderStepThree = ({
                     const value = e.target.value;
 
                     try {
-                      await Util.checkIfCompanyRegistrationNumberIsValid(value);
+                      // await Util.checkIfCompanyRegistrationNumberIsValid(value);
 
-                      console.log("CAC is valid");
+                      // console.log("CAC is valid");
                       setFormData((prev) => ({
                         ...prev,
                         cac: value,
