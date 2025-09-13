@@ -147,10 +147,7 @@ const LatestProject = () => {
               <h6 className="m-4" style={{ color: "white", fontSize: "17px" }}>
                 Send help where it’s needed most at the moment, with vetted
                 charities helping in times of crisis, or organizations dedicated
-                to a cause currently in the spotlight. Send help where it’s
-                needed most at the moment, with vetted charities helping in
-                times of crisis, or organizations dedicated to a cause currently
-                in the spotlight.
+                to a cause currently in the spotlight.
               </h6>
               <h6 className="m-4" style={{ color: "white", fontSize: "17px" }}>
                 Learn more &#x27A1;
