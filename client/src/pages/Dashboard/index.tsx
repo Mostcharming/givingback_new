@@ -759,7 +759,7 @@ const Dashboard = () => {
                         borderColor: "#28a745",
                         fontWeight: 500,
                       }}
-                      onClick={() => navigate("/donor/projects/brief_initiate")}
+                      onClick={() => navigate("/donor/brief_initiate")}
                     >
                       Create your first project
                     </Button>

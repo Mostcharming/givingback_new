@@ -199,7 +199,7 @@ const Register = () => {
         // navigate("/dashboard");
       },
       onError: () => {
-        toast.error("Form submission failed");
+        toast.error("Error creating Account. Please try again");
       },
     }
   );

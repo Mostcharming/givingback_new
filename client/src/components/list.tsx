@@ -295,7 +295,7 @@ const List = ({ type }) => {
         break;
       case "donor":
       case "corporate":
-        navigate("/donor/projects/brief_initiate");
+        navigate("/donor/brief_initiate");
         break;
       case "NGO":
         navigate("/ngo/projects/brief_initiate");
