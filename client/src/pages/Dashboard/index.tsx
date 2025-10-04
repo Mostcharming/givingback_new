@@ -671,12 +671,13 @@ const Dashboard = () => {
           style={{
             padding: "20px",
             minHeight: "100vh",
+            margin: 0,
           }}
         >
-          <Container>
+          <Container style={{ margin: 0, maxWidth: "none" }}>
             {lastUpdated && (
               <div
-                className=" items-center gap-2 px-4 py-2"
+                className="items-center gap-2 px-4 py-2"
                 style={{
                   width: "21vw",
                   backgroundColor: "#e2efe9",
