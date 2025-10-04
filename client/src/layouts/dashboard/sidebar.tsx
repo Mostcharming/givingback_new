@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, NavLink as NavLinkRRD, useNavigate } from "react-router-dom";
@@ -27,13 +28,6 @@ import useBackendService from "../../services/backend_service";
 import { useContent } from "../../services/useContext";
 import { logout_auth } from "../../store/reducers/authReducer";
 import { RootState } from "../../types";
-
-interface SidebarLogo {
-  innerLink?: string;
-  outterLink?: string;
-  imgSrc: string;
-  imgAlt: string;
-}
 
 interface SidebarRoute {
   layout: string;
@@ -112,7 +106,7 @@ const Sidebar: React.FC<any> = (props) => {
       className="navbar-vertical fixed-left navbar-light bg-white"
       expand="md"
       id="sidenav-main"
-      style={{ border: "1px solid #ccc", overflow: "clip" }}
+      style={{ border: "1px solid #ccc" }}
     >
       <Container fluid>
         {/* Toggler */}
