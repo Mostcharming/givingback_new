@@ -30,6 +30,7 @@ import {
   ModalHeader,
   Row,
 } from "reactstrap";
+import BoxIcon from "../../assets/images/box.svg";
 import DashBox from "../../components/dashbox";
 import { formatDate } from "../../components/formatTime";
 import Tables from "../../components/tables";
@@ -448,44 +449,13 @@ const Dashboard = () => {
             <div
               style={{
                 position: "absolute",
-                top: "1rem",
-                right: "1rem",
+                top: "0.1rem",
+                right: "0.1rem",
                 opacity: 0.2,
               }}
             >
               <div style={{ position: "relative" }}>
-                <div
-                  style={{
-                    width: "4rem",
-                    height: "5rem",
-                    backgroundColor: "rgba(255, 255, 255, 0.2)",
-                    borderRadius: "0.5rem",
-                    transform: "rotate(12deg)",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    width: "4rem",
-                    height: "5rem",
-                    backgroundColor: "rgba(255, 255, 255, 0.3)",
-                    borderRadius: "0.5rem",
-                    transform: "rotate(-6deg)",
-                    position: "absolute",
-                    top: "-0.5rem",
-                    left: "-0.5rem",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    width: "4rem",
-                    height: "5rem",
-                    backgroundColor: "rgba(255, 255, 255, 0.4)",
-                    borderRadius: "0.5rem",
-                    position: "absolute",
-                    top: "-1rem",
-                    left: "-1rem",
-                  }}
-                ></div>
+                <img src={BoxIcon} />
               </div>
             </div>
 

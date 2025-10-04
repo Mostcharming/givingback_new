@@ -38,6 +38,7 @@ export default function FundWalletModal({
   );
   const [stripePublicKey, setStripePublicKey] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const role = authState.user?.role;
 
   const isFormComplete =
     formData.country &&
@@ -208,12 +209,29 @@ export default function FundWalletModal({
   useEffect(() => {
     if (isOpen) {
       paymentGateways({});
+
       fetchUsers({
         limit: 1000,
         projectType: "present",
         status: "active",
         organization_id: currentState.user.id,
       });
+
+      if (role === "NGO") {
+        fetchUsers({
+          limit: 1000,
+          projectType: "present",
+          status: "active",
+          organization_id: currentState.user.id,
+        });
+      } else {
+        fetchUsers({
+          limit: 1000,
+          projectType: "present",
+          status: "active",
+          // donor_id: currentState.user.id,
+        });
+      }
     }
   }, [isOpen]);
 
