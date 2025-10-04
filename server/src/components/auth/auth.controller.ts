@@ -408,9 +408,9 @@ export const getOne = async (
   const bank = await getBank(id);
   const address = await getAddress(id);
   const userImage = await getUserImage(id);
-  const allProjectsCount = await getTotalProjectsCount(id);
-  const activeProjectsCount = await getActiveProjectsCount(id);
-  const donationsCount = await getDonationsCount(id);
+  const allProjectsCount = await getTotalProjectsCount(user.id);
+  const activeProjectsCount = await getActiveProjectsCount(user.id);
+  const donationsCount = await getDonationsCount(user.id);
   const wallet = await getOrCreateWallet(id);
 
   res.status(200).json({
