@@ -19,10 +19,12 @@ export const getCountsHandler = async (
       .first();
 
     let isDonor = !!donor;
-    let donorId = donor.id;
-    let orgId: string | undefined;
 
-    if (!donor) {
+    let orgId: string | undefined;
+    let donorId: string | undefined;
+    if (donor) {
+      let donorId = donor.id;
+    } else {
       const organization = await db("organizations")
         .where({ user_id: userId })
         .select("id")
@@ -40,6 +42,7 @@ export const getCountsHandler = async (
 
     res.status(200).json(counts);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Unable to fetch dashboard data" });
   }
 };
