@@ -388,10 +388,11 @@ const List = ({ type }) => {
                       style={{
                         backgroundColor: "white",
                         border: "1px solid rgb(179, 179, 179)",
-
                         borderRadius: "8px",
                         padding: "12px 16px",
+                        color: "#212529",
                       }}
+                      onMouseOver={(e) => e.currentTarget.style.color = "#212529"}
                     >
                       <span>{statusFilter}</span>
                     </button>
@@ -400,6 +401,7 @@ const List = ({ type }) => {
                         <button
                           className="dropdown-item"
                           onClick={() => setStatusFilter("All Projects")}
+                          style={{ color: "#212529 !important" }}
                         >
                           All Projects
                         </button>
@@ -408,6 +410,7 @@ const List = ({ type }) => {
                         <button
                           className="dropdown-item"
                           onClick={() => setStatusFilter("active")}
+                          style={{ color: "#212529 !important" }}
                         >
                           Active
                         </button>
@@ -416,6 +419,7 @@ const List = ({ type }) => {
                         <button
                           className="dropdown-item"
                           onClick={() => setStatusFilter("completed")}
+                          style={{ color: "#212529 !important" }}
                         >
                           Completed
                         </button>
@@ -424,6 +428,7 @@ const List = ({ type }) => {
                         <button
                           className="dropdown-item"
                           onClick={() => setStatusFilter("closed")}
+                          style={{ color: "#212529 !important" }}
                         >
                           Closed
                         </button>
@@ -450,10 +455,11 @@ const List = ({ type }) => {
                       style={{
                         backgroundColor: "white",
                         border: "1px solid rgb(179, 179, 179)",
-
                         borderRadius: "8px",
                         padding: "12px 16px",
+                        color: "#212529",
                       }}
+                      onMouseOver={(e) => e.currentTarget.style.color = "#212529"}
                     >
                       <span>{categoryFilter}</span>
                     </button>
