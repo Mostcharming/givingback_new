@@ -19,6 +19,7 @@ export const getCountsHandler = async (
       .first();
 
     let isDonor = !!donor;
+    let donorId = donor.id;
     let orgId: string | undefined;
 
     if (!donor) {
@@ -35,7 +36,7 @@ export const getCountsHandler = async (
       orgId = organization.id;
     }
 
-    const counts = await getCounts(userId, isDonor, orgId);
+    const counts = await getCounts(userId, isDonor, orgId, donorId);
 
     res.status(200).json(counts);
   } catch (error) {

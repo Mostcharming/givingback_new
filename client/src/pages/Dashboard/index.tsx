@@ -48,14 +48,12 @@ const Dashboard = () => {
   const [userBankDetails, setUserBankDetails] = useState(true);
   const [lastUpdated, setLastUpdated] = useState("");
   const role = authState.user?.role;
-
   const isFirstTimeLogin = authState?.user?.first_time_login === 0;
   const hasActiveProject = currentState?.activeProjectsCount > 0;
   const hasBankDetails = currentState?.bank?.length > 0;
   const hasAddress =
     Array.isArray(currentState?.address) && currentState.address.length > 0;
 
-  // Fetching dashboard details
   const { mutate: getDash } = useBackendService("/donor/dashboard", "GET", {
     onSuccess: (res) => {
       const items = getDashBoxItems(role, res);
@@ -80,7 +78,6 @@ const Dashboard = () => {
     }
   );
 
-  // Fetching table data
   const { mutate: getTableData } = useBackendService(
     "/admin/transactions",
     "GET",
@@ -95,7 +92,6 @@ const Dashboard = () => {
             dateTime: formatDate(project.createdAt),
           })) || [];
 
-        // Update the table data with filtered data
         setTableData(filteredData);
         setupTableAttributes(role);
       },
