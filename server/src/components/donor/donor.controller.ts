@@ -23,7 +23,7 @@ export const getCountsHandler = async (
     let orgId: string | undefined;
     let donorId: string | undefined;
     if (donor) {
-      let donorId = donor.id;
+      donorId = donor.id;
     } else {
       const organization = await db("organizations")
         .where({ user_id: userId })
