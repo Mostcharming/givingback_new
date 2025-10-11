@@ -322,7 +322,7 @@ const routes = [
     component: <SendMoney />,
     layout: "/donor",
   },
-  //////breif initiate
+
   {
     path: "/projects/brief_initiate",
     icon: "ni ni-chart-bar-32",
