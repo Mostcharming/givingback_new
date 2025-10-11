@@ -51,9 +51,9 @@ const Sidebar: React.FC<any> = (props) => {
     onError: () => {},
   });
 
-  const activeRoute = (routeName: string) => {
-    return props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
-  };
+  // const activeRoute = (routeName: string) => {
+  //   return props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
+  // };
 
   const toggleCollapse = () => {
     setCollapseOpen((data) => !data);
@@ -106,7 +106,11 @@ const Sidebar: React.FC<any> = (props) => {
       className="navbar-vertical fixed-left navbar-light bg-white"
       expand="md"
       id="sidenav-main"
-      style={{ border: "1px solid #ccc" }}
+      style={{
+        border: "1px solid #ccc",
+        overflow: window.innerWidth >= 992 ? "clip" : "visible",
+        clipPath: window.innerWidth >= 992 ? "inset(0)" : "none",
+      }}
     >
       <Container fluid>
         {/* Toggler */}
@@ -200,7 +204,7 @@ const Sidebar: React.FC<any> = (props) => {
           </div>
           {/* Form */}
 
-          <Form className="mt-4 mb-3 d-md-none">
+          <Form style={{ display: "none" }} className="mt-4 mb-3 d-md-none">
             <InputGroup className="input-group-rounded input-group-merge">
               <Input
                 aria-label="Search"
