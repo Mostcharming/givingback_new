@@ -79,7 +79,6 @@ const Dashboard = () => {
       },
     }
   );
-
   const { mutate: getTableData } = useBackendService(
     "/admin/transactions",
     "GET",
@@ -483,7 +482,11 @@ const Dashboard = () => {
                 </span>
               </div>
             )}
-            {donorImpacts ? <Highlights /> : <NoHighlights />}
+            {donorImpacts ? (
+              <Highlights currentState={currentState} />
+            ) : (
+              <NoHighlights />
+            )}
 
             {/* Bottom section */}
             <Row>

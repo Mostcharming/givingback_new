@@ -392,7 +392,9 @@ const List = ({ type }) => {
                         padding: "12px 16px",
                         color: "#212529",
                       }}
-                      onMouseOver={(e) => e.currentTarget.style.color = "#212529"}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.color = "#212529")
+                      }
                     >
                       <span>{statusFilter}</span>
                     </button>
@@ -459,7 +461,9 @@ const List = ({ type }) => {
                         padding: "12px 16px",
                         color: "#212529",
                       }}
-                      onMouseOver={(e) => e.currentTarget.style.color = "#212529"}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.color = "#212529")
+                      }
                     >
                       <span>{categoryFilter}</span>
                     </button>
