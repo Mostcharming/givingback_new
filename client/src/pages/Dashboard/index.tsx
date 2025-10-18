@@ -19,7 +19,6 @@ import { toast } from "react-toastify";
 import {
   Button,
   Card,
-  CardBody,
   Col,
   Container,
   Modal,
@@ -33,6 +32,8 @@ import Tables from "../../components/tables";
 import useBackendService from "../../services/backend_service";
 import { capitalizeFirstLetter } from "../../services/capitalize";
 import { useContent } from "../../services/useContext";
+import Highlights from "./Donor/highlights/highlight";
+import NoHighlights from "./Donor/highlights/nohighlight";
 import Content from "./Donor/recent/content";
 import NoContent from "./Donor/recent/noContent";
 import NGOChecks from "./NGO/checks";
@@ -45,6 +46,7 @@ const Dashboard = () => {
   const [headers, setHeaders] = useState([]);
   const [actions, setActions] = useState([]);
   const [userBankDetails, setUserBankDetails] = useState(true);
+  const [donorImpacts, setDonorImpacts] = useState(false);
   const [lastUpdated, setLastUpdated] = useState("");
   const role = authState.user?.role;
   const isFirstTimeLogin = authState?.user?.first_time_login === 0;
@@ -54,9 +56,10 @@ const Dashboard = () => {
     Array.isArray(currentState?.address) && currentState.address.length > 0;
 
   const { mutate: getDash } = useBackendService("/donor/dashboard", "GET", {
-    onSuccess: (res) => {
+    onSuccess: (res: any) => {
       const items = getDashBoxItems(role, res);
       setDashBoxItems(items);
+      setDonorImpacts(res?.activeProjectsCount > 0);
     },
     onError: () => {
       toast.error("Error getting Dashboard details");
@@ -480,50 +483,7 @@ const Dashboard = () => {
                 </span>
               </div>
             )}
-
-            <Row className="mb-5 mt-5">
-              <Col>
-                <Card className="border-0 shadow-sm">
-                  <CardBody className="text-center py-5">
-                    <div className="mb-4">
-                      <Map
-                        size={48}
-                        className="text-primary mx-auto"
-                        style={{
-                          color: "#007bff",
-                          backgroundColor: "#e9ecef",
-                          borderRadius: "50%",
-                          padding: "8px",
-                        }}
-                      />
-                    </div>
-                    <p className="mb-3" style={{ fontWeight: 600 }}>
-                      No impact highlights yet
-                    </p>
-                    <p
-                      className="text-muted mb-4"
-                      style={{ maxWidth: "400px", margin: "0 auto" }}
-                    >
-                      Once your projects begin making an impact, you'll see
-                      highlights showcased here.
-                    </p>
-                    <Button
-                      color="success"
-                      size="lg"
-                      className="px-4"
-                      style={{
-                        backgroundColor: "#28a745",
-                        borderColor: "#28a745",
-                        fontWeight: 500,
-                      }}
-                      onClick={() => navigate("/donor/brief_initiate")}
-                    >
-                      Create your first project
-                    </Button>
-                  </CardBody>
-                </Card>
-              </Col>
-            </Row>
+            {donorImpacts ? <Highlights /> : <NoHighlights />}
 
             {/* Bottom section */}
             <Row>
