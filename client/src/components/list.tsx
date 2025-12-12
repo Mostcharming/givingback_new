@@ -243,7 +243,7 @@ const List = ({ type }) => {
       page: 1,
       projectType: "present",
       status: "active",
-      organization_id: currentState.user.id,
+      // organization_id: currentState.user.id,
     };
 
     if (isDefault) {
