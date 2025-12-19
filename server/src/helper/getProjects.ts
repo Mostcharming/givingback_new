@@ -38,6 +38,9 @@ export const getProjects = async (
       "category",
       "donor_id",
       "cost",
+      "state",
+      "country",
+      "city",
       "scope",
       "allocated",
       "beneficiary_overview",
@@ -85,6 +88,17 @@ export const getProjects = async (
         );
         presentProjectsQuery = presentProjectsQuery.where(
           db.raw("LOWER(status)"),
+          "=",
+          (value as string).toLowerCase()
+        );
+      } else if (key === "state") {
+        previousProjectsQuery = previousProjectsQuery.where(
+          db.raw("LOWER(state)"),
+          "=",
+          (value as string).toLowerCase()
+        );
+        presentProjectsQuery = presentProjectsQuery.where(
+          db.raw("LOWER(state)"),
           "=",
           (value as string).toLowerCase()
         );

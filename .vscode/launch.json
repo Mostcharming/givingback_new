@@ -21,5 +21,11 @@
       "skipFiles": ["<node_internals>/**"],
       "console": "externalTerminal"
     }
+  ],
+  "compounds": [
+    {
+      "name": "Start Client & Server",
+      "configurations": ["Start Client", "Start Server"]
+    }
   ]
 }
