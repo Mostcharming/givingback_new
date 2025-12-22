@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { MapPin } from "lucide-react";
 import { Image } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { Col } from "reactstrap";
@@ -139,7 +140,7 @@ export const ProjectItem = (props: ProjectItemProps) => {
             </div>
           </div>
 
-          <div className="d-flex justify-content-between align-items-center">
+          <div className="d-flex justify-content-between align-items-center mb-3">
             <div>
               <span className="h5 fw-bold text-dark mb-0">
                 {formatter.format(completedMilestoneTargets)}
@@ -151,6 +152,31 @@ export const ProjectItem = (props: ProjectItemProps) => {
               <span className="fw-semibold">{formatter.format(cost)}</span>
             </div>
           </div>
+
+          {(role === "donor" || role === "corporate") && (
+            <div className="d-flex justify-content-between align-items-center pt-3 border-top">
+              <div className="d-flex align-items-center gap-2">
+                <MapPin size={20} className="text-muted" />
+                <span className="text-muted" style={{ fontSize: "14px" }}>
+                  {props.project.state || "N/A"}
+                </span>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  details();
+                }}
+                className="btn btn-success"
+                style={{
+                  fontSize: "14px",
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                }}
+              >
+                Donate - View details
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </Col>

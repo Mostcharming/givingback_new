@@ -19,10 +19,12 @@ const List = ({ type }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProjects, setTotalProjects] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [activeTab, setActiveTab] = useState("All Projects");
   const role = authState.user?.role;
   const [statusFilter, setStatusFilter] = useState("All Projects");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [dateFilter, setDateFilter] = useState("Any time");
+  const [locationFilter, setLocationFilter] = useState("All locations");
   const [areas, setAreas] = useState([]);
   const { mutate: getAreas } = useBackendService("/areas", "GET", {
     onSuccess: (res2: any) => {
@@ -43,7 +45,8 @@ const List = ({ type }) => {
         if (
           statusFilter !== "All Projects" ||
           categoryFilter !== "All Categories" ||
-          dateFilter !== "Any time"
+          dateFilter !== "Any time" ||
+          locationFilter !== "All locations"
         ) {
           if (res.totalItems === 0) {
             toast.info("No projects found with the selected filters.");
@@ -92,7 +95,8 @@ const List = ({ type }) => {
     const isDefault =
       statusFilter === "All Projects" &&
       categoryFilter === "All Categories" &&
-      dateFilter === "Any time";
+      dateFilter === "Any time" &&
+      locationFilter === "All locations";
 
     const baseQuery = {
       page: 1,
@@ -126,11 +130,22 @@ const List = ({ type }) => {
 
         projectType: "present",
         startDate: dateFilter !== "Any time" ? dateFilter : undefined,
+        state: locationFilter !== "All locations" ? locationFilter : undefined,
         // donor_id: currentState.user.id,
       });
     }
-  }, [currentPage, statusFilter, categoryFilter, dateFilter]);
+  }, [currentPage, statusFilter, categoryFilter, dateFilter, locationFilter]);
 
+  useEffect(() => {
+    if (activeTab === "Contributed to" || activeTab === "Sponsoring") {
+      fetchUsers({
+        page: currentPage,
+        projectType: "present",
+        status: "active",
+        donor_id: currentState.user.id,
+      });
+    }
+  }, [activeTab, currentPage, currentState.user.id, fetchUsers]);
   const nextPage = () => {
     if (currentPage * 6 < totalProjects) {
       setCurrentPage(currentPage + 1);
@@ -226,7 +241,43 @@ const List = ({ type }) => {
               onStatusChange={setStatusFilter}
               onCategoryChange={setCategoryFilter}
               onDateChange={setDateFilter}
+              locationFilter={locationFilter}
+              onLocationChange={setLocationFilter}
             />
+            {/* Tab Navigation */}
+            <div style={{ marginLeft: "-1.5rem", marginRight: "-1.5rem" }}>
+              <ul
+                className="nav nav-tabs mt-4 border-bottom border-2"
+                style={{
+                  paddingLeft: "1.5rem",
+                  paddingRight: "1.5rem",
+                  marginBottom: "-2px",
+                }}
+              >
+                {["All Projects", "Contributed to", "Sponsoring"].map((tab) => (
+                  <li className="nav-item" key={tab}>
+                    <button
+                      onClick={() => setActiveTab(tab)}
+                      className={`nav-link border-0 ${
+                        activeTab === tab ? "text-success " : "text-muted"
+                      }`}
+                    >
+                      <span
+                        style={{
+                          background: "transparent",
+                          borderBottom:
+                            activeTab === tab ? "2px solid #198754" : "",
+                          paddingBottom: "8px",
+                          display: "inline-block",
+                        }}
+                      >
+                        {tab}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             <Container style={{ maxWidth: "unset" }}>
               <Row>

@@ -8,6 +8,8 @@ interface ProjectFiltersProps {
   onStatusChange: (status: string) => void;
   onCategoryChange: (category: string) => void;
   onDateChange: (date: string) => void;
+  locationFilter?: string;
+  onLocationChange?: (location: string) => void;
 }
 
 export const ProjectFilters = ({
@@ -19,8 +21,50 @@ export const ProjectFilters = ({
   onStatusChange,
   onCategoryChange,
   onDateChange,
+  locationFilter = "All locations",
+  onLocationChange,
 }: ProjectFiltersProps) => {
   const isDonorOrCorporate = role === "donor" || role === "corporate";
+
+  const nigerianStates = [
+    "Abia",
+    "Adamawa",
+    "Akwa Ibom",
+    "Anambra",
+    "Bauchi",
+    "Bayelsa",
+    "Benue",
+    "Borno",
+    "Cross River",
+    "Delta",
+    "Ebonyi",
+    "Edo",
+    "Ekiti",
+    "Enugu",
+    "FCT",
+    "Gombe",
+    "Imo",
+    "Jigawa",
+    "Kaduna",
+    "Kano",
+    "Katsina",
+    "Kebbi",
+    "Kogi",
+    "Kwara",
+    "Lagos",
+    "Nasarawa",
+    "Niger",
+    "Ogun",
+    "Ondo",
+    "Osun",
+    "Oyo",
+    "Plateau",
+    "Rivers",
+    "Sokoto",
+    "Taraba",
+    "Yobe",
+    "Zamfara",
+  ];
 
   return (
     <div
@@ -190,6 +234,59 @@ export const ProjectFilters = ({
             )}
           </div>
         </div>
+
+        {/* Location Filter - Only show for Donor and Corporate */}
+        {isDonorOrCorporate && (
+          <div className="ml-2">
+            <div>
+              <label className="form-label text-muted small fw-normal">
+                Location
+              </label>
+            </div>
+            <div className="dropdown">
+              <button
+                className="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center"
+                role="button"
+                id="dropdownMenuLocationLink"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                style={{
+                  backgroundColor: "white",
+                  border: "1px solid rgb(179, 179, 179)",
+                  borderRadius: "8px",
+                  padding: "12px 16px",
+                  color: "#212529",
+                }}
+                onMouseOver={(e) => (e.currentTarget.style.color = "#212529")}
+              >
+                <span>{locationFilter}</span>
+              </button>
+              <ul className="dropdown-menu w-100">
+                <li>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => onLocationChange?.("All locations")}
+                    style={{ color: "#212529 !important" }}
+                  >
+                    All locations
+                  </button>
+                </li>
+                {nigerianStates.map((state) => (
+                  <li key={state}>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => onLocationChange?.(state)}
+                      style={{ color: "#212529 !important" }}
+                    >
+                      {state}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
       <div className="row"></div>
     </div>
