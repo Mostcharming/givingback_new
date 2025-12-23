@@ -69,6 +69,19 @@ export const ProjectItem = (props: ProjectItemProps) => {
     currency: "NGN",
   });
 
+  // Truncate description for donor/corporate users to maintain consistent card height
+  const truncateDescription = (text: string, maxLength: number = 100) => {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + "...";
+    }
+    return text;
+  };
+
+  const displayDescription =
+    role === "donor" || role === "corporate"
+      ? truncateDescription(props.project.description)
+      : props.project.description;
+
   return (
     <Col className="px-3 mt-4" lg={6}>
       <div
@@ -107,9 +120,15 @@ export const ProjectItem = (props: ProjectItemProps) => {
 
           <p
             className="card-text text-muted mb-4"
-            style={{ fontSize: "16px", lineHeight: "1.5" }}
+            style={{
+              fontSize: "16px",
+              lineHeight: "1.5",
+              minHeight: "60px",
+              display: "flex",
+              alignItems: "flex-start",
+            }}
           >
-            {props.project.description}
+            {displayDescription}
           </p>
 
           <div className="mb-4">
