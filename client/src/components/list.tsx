@@ -42,24 +42,9 @@ const List = ({ type }) => {
     "GET",
     {
       onSuccess: (res: any) => {
-        if (
-          statusFilter !== "All Projects" ||
-          categoryFilter !== "All Categories" ||
-          dateFilter !== "Any time" ||
-          locationFilter !== "All locations"
-        ) {
-          if (res.totalItems === 0) {
-            toast.info("No projects found with the selected filters.");
-          } else {
-            setResponseData(res.projects);
-            setTotalProjects(res.totalItems || 0);
-            setTotalPages(res.totalPages || 1);
-          }
-        } else {
-          setResponseData(res.projects);
-          setTotalProjects(res.totalItems || 0);
-          setTotalPages(res.totalPages || 1);
-        }
+        setResponseData(res.projects);
+        setTotalProjects(res.totalItems || 0);
+        setTotalPages(res.totalPages || 1);
       },
       onError: () => {
         toast.error("Failed to fetch Projects.");
@@ -194,43 +179,7 @@ const List = ({ type }) => {
       </div>
       <div className="pb-5">
         {isLoading && <Loading type={"inline"} />}
-        {responseData.length === 0 && !isLoading && (
-          <div
-            style={{ marginTop: "200px" }}
-            className="row justify-content-center"
-          >
-            <div className="col-12 col-md-6 col-lg-4">
-              <div className="text-center empty-state-container">
-                <div className="mb-4">
-                  <FolderOpenDot className="text-custom-muted" size={50} />
-                </div>
-                <h2 className="text-custom-dark fs-4 fw-semibold mb-3">
-                  No projects yet
-                </h2>
-                {role === "NGO" && (
-                  <p className="text-custom-muted mb-5 lh-base">
-                    You don't seem to have an projects available yet. When you
-                    add a project, it would appear here.
-                  </p>
-                )}{" "}
-                {role !== "NGO" && (
-                  <p className="text-custom-muted mb-5 lh-base">
-                    There are currently no projects available.
-                  </p>
-                )}
-                {role === "NGO" && (
-                  <button
-                    onClick={handleAddProject}
-                    className="btn btn-custom-green w-100 px-4 py-3 fw-medium rounded-lg"
-                  >
-                    Add past project
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-        {responseData.length > 0 && !isLoading && (
+        {!isLoading && (
           <>
             <ProjectFilters
               statusFilter={statusFilter}
@@ -279,52 +228,91 @@ const List = ({ type }) => {
               </ul>
             </div>
 
-            <Container style={{ maxWidth: "unset" }}>
-              <Row>
-                {responseData.map((project) => {
-                  // if (type === "past") {
-                  const img = project.projectImages[0]?.image;
-                  // }
-                  return (
-                    <ProjectItem
-                      type={type}
-                      project={project}
-                      image={img}
-                      key={project.id}
-                    />
-                  );
-                })}
-              </Row>
-            </Container>
+            {responseData.length === 0 ? (
+              <div
+                style={{ marginTop: "200px" }}
+                className="row justify-content-center"
+              >
+                <div className="col-12 col-md-6 col-lg-4">
+                  <div className="text-center empty-state-container">
+                    <div className="mb-4">
+                      <FolderOpenDot className="text-custom-muted" size={50} />
+                    </div>
+                    <h2 className="text-custom-dark fs-4 fw-semibold mb-3">
+                      No projects yet
+                    </h2>
+                    {role === "NGO" && (
+                      <p className="text-custom-muted mb-5 lh-base">
+                        You don't seem to have an projects available yet. When
+                        you add a project, it would appear here.
+                      </p>
+                    )}{" "}
+                    {role !== "NGO" && (
+                      <p className="text-custom-muted mb-5 lh-base">
+                        There are currently no projects available.
+                      </p>
+                    )}
+                    {role === "NGO" && (
+                      <button
+                        onClick={handleAddProject}
+                        className="btn btn-custom-green w-100 px-4 py-3 fw-medium rounded-lg"
+                      >
+                        Add past project
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Container style={{ maxWidth: "unset" }}>
+                  <Row>
+                    {responseData.map((project) => {
+                      // if (type === "past") {
+                      const img = project.projectImages[0]?.image;
+                      // }
+                      return (
+                        <ProjectItem
+                          type={type}
+                          project={project}
+                          image={img}
+                          key={project.id}
+                        />
+                      );
+                    })}
+                  </Row>
+                </Container>
 
-            <div className="d-flex justify-content-between mt-4">
-              <Button
-                style={{
-                  backgroundColor: currentPage === 1 ? "grey" : "#7B80DD",
-                  color: "white",
-                  border: "none",
-                  cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                }}
-                onClick={previousPage}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </Button>
-              <Button
-                style={{
-                  backgroundColor:
-                    currentPage === totalPages ? "grey" : "#7B80DD",
-                  color: "white",
-                  border: "none",
-                  cursor:
-                    currentPage === totalPages ? "not-allowed" : "pointer",
-                }}
-                onClick={nextPage}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </Button>
-            </div>
+                <div className="d-flex justify-content-between mt-4">
+                  <Button
+                    style={{
+                      backgroundColor: currentPage === 1 ? "grey" : "#7B80DD",
+                      color: "white",
+                      border: "none",
+                      cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                    }}
+                    onClick={previousPage}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    style={{
+                      backgroundColor:
+                        currentPage === totalPages ? "grey" : "#7B80DD",
+                      color: "white",
+                      border: "none",
+                      cursor:
+                        currentPage === totalPages ? "not-allowed" : "pointer",
+                    }}
+                    onClick={nextPage}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
