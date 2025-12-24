@@ -129,8 +129,23 @@ const List = ({ type }) => {
         status: "active",
         donor_id: currentState.user.id,
       });
+    } else if (activeTab === "All Projects") {
+      if (role === "NGO") {
+        fetchUsers({
+          page: currentPage,
+          projectType: "present",
+          status: "active",
+          organization_id: currentState.user.id,
+        });
+      } else {
+        fetchUsers({
+          page: currentPage,
+          projectType: "present",
+          status: "active",
+        });
+      }
     }
-  }, [activeTab, currentPage, currentState.user.id, fetchUsers]);
+  }, [activeTab, currentPage, currentState.user.id, fetchUsers, role]);
   const nextPage = () => {
     if (currentPage * 6 < totalProjects) {
       setCurrentPage(currentPage + 1);
