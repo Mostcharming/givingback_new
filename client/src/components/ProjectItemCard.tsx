@@ -177,7 +177,7 @@ export const ProjectItem = (props: ProjectItemProps) => {
               <div className="d-flex align-items-center gap-2">
                 <MapPin size={20} className="text-muted" />
                 <span className="text-muted" style={{ fontSize: "14px" }}>
-                  {props.project.state || "N/A"}
+                  {props.project.state || "No location specified"}
                 </span>
               </div>
               <button
