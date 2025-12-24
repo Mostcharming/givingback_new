@@ -18,10 +18,12 @@ import Progress from "./render/sidebar/Progress";
 import Sponsor from "./render/sidebar/Sponsor";
 import Transactions from "./render/transactions";
 import MileStoneUpdates from "./render/updates";
+import ShareModal from "./ShareModal";
 
 const ProjectViewDetail: React.FC<any> = () => {
   const [project, setProject] = useState<any>({});
   const [activeTab, setActiveTab] = useState("Details");
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const { id } = useParams<{ id: string }>();
   const { authState, currentState } = useContent();
@@ -48,7 +50,7 @@ const ProjectViewDetail: React.FC<any> = () => {
 
   useEffect(() => {
     getTableData({ projectType: "present", id: id });
-  }, [id]);
+  }, [id, getTableData]);
 
   const handleBack = () => {
     switch (role) {
@@ -204,9 +206,71 @@ const ProjectViewDetail: React.FC<any> = () => {
                 )}
               </div>
             </div>
+
+            {/* Support Card for Donors and Corporate */}
+            {(role === "donor" || role === "corporate") && (
+              <div className="row mt-5 mb-4">
+                <div className="col">
+                  <div
+                    style={{
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "12px",
+                      padding: "40px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    {/* Left side text */}
+                    <div>
+                      <div
+                        style={{
+                          fontSize: "20px",
+                          fontWeight: "bold",
+                          lineHeight: "1.2",
+                          marginBottom: "5px",
+                        }}
+                      >
+                        Support this project
+                      </div>
+                      <div
+                        style={{
+                          color: "#666",
+                        }}
+                      >
+                        Help make a lasting impact
+                      </div>
+                    </div>
+
+                    {/* Right side buttons */}
+                    <div style={{ display: "flex", gap: "15px" }}>
+                      <button
+                        type="button"
+                        className="btn btn-outline-dark px-4 py-2"
+                        style={{ borderRadius: "6px" }}
+                        onClick={() => setShareModalOpen(true)}
+                      >
+                        Share
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-success px-4 py-2"
+                        style={{ borderRadius: "6px" }}
+                      >
+                        Donate Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}
+      <ShareModal
+        isOpen={shareModalOpen}
+        toggle={() => setShareModalOpen(!shareModalOpen)}
+      />
     </div>
   );
 };

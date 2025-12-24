@@ -90,26 +90,34 @@ export default function TimelineMile({ project }) {
                     </button>
                   </div>
 
-                  {/* Title */}
-                  <h5
-                    className="fw-normal text-dark mb-2"
-                    style={{ fontSize: "18px" }}
-                  >
-                    {milestone.milestone}
-                  </h5>
+                  {/* Milestone content - shown when expanded */}
+                  {isExpanded && (
+                    <>
+                      {/* Title */}
+                      <h5
+                        className="fw-normal text-dark mb-2"
+                        style={{ fontSize: "18px" }}
+                      >
+                        {milestone.milestone}
+                      </h5>
 
-                  {/* Date */}
-                  <p className="text-muted mb-3" style={{ fontSize: "14px" }}>
-                    {formattedStartDate}
-                  </p>
+                      {/* Date */}
+                      <p
+                        className="text-muted mb-3"
+                        style={{ fontSize: "14px" }}
+                      >
+                        {formattedStartDate}
+                      </p>
 
-                  {/* Description */}
-                  <p
-                    className="text-muted mb-0"
-                    style={{ fontSize: "14px", lineHeight: "1.5" }}
-                  >
-                    {milestone.description}
-                  </p>
+                      {/* Description */}
+                      <p
+                        className="text-muted mb-0"
+                        style={{ fontSize: "14px", lineHeight: "1.5" }}
+                      >
+                        {milestone.description}
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 {/* Attachments - assuming from updates */}
