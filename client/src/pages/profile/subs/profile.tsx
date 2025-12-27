@@ -31,7 +31,8 @@ export default function ProfileUpdateForm() {
     );
   };
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { currentState } = useContent();
+  const { currentState, authState } = useContent();
+  const role = authState.user?.role;
   const [formData, setFormData] = useState({
     image: null,
     title: "",
@@ -100,39 +101,41 @@ export default function ProfileUpdateForm() {
                 />
               </div>
             </Col>
-            <Col md={5}>
-              <Alert
-                color="success"
-                className="d-flex align-items-center mb-4"
-                style={{
-                  backgroundColor: "#f0f9f0",
-                  border: "1px solid #d4edda",
-                }}
-              >
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle"
+            {!(role === "donor" || role === "corporate") && (
+              <Col md={5}>
+                <Alert
+                  color="success"
+                  className="d-flex align-items-center mb-4"
                   style={{
-                    width: "4rem",
-                    height: "4rem",
-                    backgroundColor: "#128330",
+                    backgroundColor: "#f0f9f0",
+                    border: "1px solid #d4edda",
                   }}
                 >
-                  <ShieldCheck size={32} color={"#ffffff"} />
-                </div>
+                  <div
+                    className="d-flex align-items-center justify-content-center rounded-circle"
+                    style={{
+                      width: "4rem",
+                      height: "4rem",
+                      backgroundColor: "#128330",
+                    }}
+                  >
+                    <ShieldCheck size={32} color={"#ffffff"} />
+                  </div>
 
-                <div className="pl-3">
-                  <div className="fw-bold" style={{ color: "#155724" }}>
-                    Let's update your account
+                  <div className="pl-3">
+                    <div className="fw-bold" style={{ color: "#155724" }}>
+                      Let's update your account
+                    </div>
+                    <div style={{ color: "#155724", fontSize: "14px" }}>
+                      Improve your platform experience
+                    </div>
+                    <div style={{ color: "#28a745", fontSize: "14px" }}>
+                      2 new suggestions
+                    </div>
                   </div>
-                  <div style={{ color: "#155724", fontSize: "14px" }}>
-                    Improve your platform experience
-                  </div>
-                  <div style={{ color: "#28a745", fontSize: "14px" }}>
-                    2 new suggestions
-                  </div>
-                </div>
-              </Alert>
-            </Col>
+                </Alert>
+              </Col>
+            )}
           </Row>
 
           {/* Organization Details */}
@@ -307,59 +310,61 @@ export default function ProfileUpdateForm() {
         </Form>
       </CardBody>
 
-      <CardBody className="p-4">
-        <div className="mb-3">
-          <h5 className="fw-bold mb-1">KYC</h5>
-          <p className="text-muted mb-0" style={{ fontSize: "14px" }}>
-            Update your KYC details to verify your account
-          </p>
-        </div>
-
-        <div className="border-bottom py-3">
-          <div className="d-flex justify-content-between align-items-center">
-            <div>
-              <div className="fw-bold">Organization Documents</div>
-              <div className="text-muted" style={{ fontSize: "14px" }}>
-                Provide your organization documents and credentials
-              </div>
-            </div>
-            {/* <Button color="success" size="sm" outline>
-              Update
-            </Button> */}
-            <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
+      {!(role === "donor" || role === "corporate") && (
+        <CardBody className="p-4">
+          <div className="mb-3">
+            <h5 className="fw-bold mb-1">KYC</h5>
+            <p className="text-muted mb-0" style={{ fontSize: "14px" }}>
+              Update your KYC details to verify your account
+            </p>
           </div>
-        </div>
 
-        <div className="border-bottom py-3">
-          <div className="d-flex justify-content-between align-items-center">
-            <div>
-              <div className="fw-bold">Bank verification number (BVN)</div>
-              <div className="text-muted" style={{ fontSize: "14px" }}>
-                Provide your organization documents and credentials
+          <div className="border-bottom py-3">
+            <div className="d-flex justify-content-between align-items-center">
+              <div>
+                <div className="fw-bold">Organization Documents</div>
+                <div className="text-muted" style={{ fontSize: "14px" }}>
+                  Provide your organization documents and credentials
+                </div>
               </div>
+              {/* <Button color="success" size="sm" outline>
+                Update
+              </Button> */}
+              <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
             </div>
-            {/* <Button color="success" size="sm" outline>
-              Update
-            </Button> */}
-            <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
           </div>
-        </div>
 
-        <div className="py-3">
-          <div className="d-flex justify-content-between align-items-center">
-            <div>
-              <div className="fw-bold">National identity number (NIN)</div>
-              <div className="text-muted" style={{ fontSize: "14px" }}>
-                Provide your organization documents and credentials
+          <div className="border-bottom py-3">
+            <div className="d-flex justify-content-between align-items-center">
+              <div>
+                <div className="fw-bold">Bank verification number (BVN)</div>
+                <div className="text-muted" style={{ fontSize: "14px" }}>
+                  Provide your organization documents and credentials
+                </div>
               </div>
+              {/* <Button color="success" size="sm" outline>
+                Update
+              </Button> */}
+              <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
             </div>
-            {/* <Button color="success" size="sm" outline>
-              Update
-            </Button> */}
-            <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
           </div>
-        </div>
-      </CardBody>
+
+          <div className="py-3">
+            <div className="d-flex justify-content-between align-items-center">
+              <div>
+                <div className="fw-bold">National identity number (NIN)</div>
+                <div className="text-muted" style={{ fontSize: "14px" }}>
+                  Provide your organization documents and credentials
+                </div>
+              </div>
+              {/* <Button color="success" size="sm" outline>
+                Update
+              </Button> */}
+              <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
+            </div>
+          </div>
+        </CardBody>
+      )}
     </Container>
   );
 }

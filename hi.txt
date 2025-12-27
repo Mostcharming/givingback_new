@@ -1,0 +1,57 @@
+1. creates brief
+Brief 1-
+support 1000 women, 1000 men, 1000 kids (total of 1,000,000)
+set goals
+specify if anonymous donation is allowed
+
+2. brief is live
+10 NGOs signs up- goes to the brief section
+
+3. NGO accepts brief (systems makes sure they ppt,docx,excel,pdf,links for videos)
+checks the goal (align with the goal)
+NGO A accepts brief - ngo specifies amount it would cost to achieve this goal for (100men,100women,100kids)(NGN300,000)
+NGO B accepts brief - ngo specifies amount it would cost to achieve this goal for (75men,25women,50kids)(NGN125,000)
+NGO C accepts brief - ngo specifies amount it would cost to achieve this goal for (300men,300women,300kids)(NGN400,000)
+NGO D accepts brief - ngo specifies amount it would cost to achieve this goal for (250men,300women,300kids)(NGN350,000)
+NGO E accepts brief - ngo specifies amount it would cost to achieve this goal for (120men,300women,300kids)(NGN650,000)
+NGO F accepts brief - ngo specifies amount it would cost to achieve this goal for (30men,25women,100kids)(NGN255,000)
+NGO G accepts brief - ngo specifies amount it would cost to achieve this goal for (100men,100women,100kids)(NGN200,000)
+NGO H accepts brief - ngo specifies amount it would cost to achieve this goal for (75men,25women,50kids)(NGN225,000)-()
+
+4. Donor Reviews Proposals
+Likes NGO F,A,H,C -1,180,000
+(Donor edits to fit accepted NGOs values(number of ppl and amount)  or negotiates with NGO(in app))
+scenario 1
+donor edits brief goal or amount
+scenario 2
+NGO edits Proposals----numbers must tally (value and amount)
+
+5. Donor approves all (and pays into the system)
+project starts
+brief shown but status is not open (completed)
+
+* 6. Reminders (in app (emails))
+schedule
+
+7 NGOs starts work
+updates milestones 
+date constant for F,A,H,C
+each goal(milestone). 
+system knows the target and auto calculates the percentage to be given out -- admin(donor) (system admin sees everything) also approves with pictorial evidence or onsite checks
+****(at the point withdrawal - 5% for processing add fixed/percentage/cap  set by admin)*****
+
+8.How anonymous donations will be disbursed
+notify donor for anonymous donation
+notify ngos for anonymous donation
+goes to the system () - until money is cleared -
+---when cash is cleared
+give to the donor, keep on the system
+wallet(main balance)---reserved balance/ anonymous donated (never withdraw)-
+
+
+3. Added - Project structure-
+One project
+seperate milestones for each NGOs
+
+
+seperate timeline and milestone
