@@ -4,6 +4,7 @@ import ProfileUpdateForm from "./subs/profile";
 
 function Profile() {
   const { authState, currentState } = useContent();
+  console.log(currentState);
   const role = authState.user?.role;
 
   const TABS =

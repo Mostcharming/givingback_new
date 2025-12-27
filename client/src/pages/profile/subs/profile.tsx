@@ -1,4 +1,4 @@
-import { ShieldCheck, User } from "lucide-react";
+import { ShieldCheck, Trash2, User } from "lucide-react";
 import { useRef, useState } from "react";
 import {
   Alert,
@@ -49,6 +49,17 @@ export default function ProfileUpdateForm() {
     }
   };
 
+  const handleRemoveImage = () => {
+    setFormData((prev) => ({
+      ...prev,
+      image: null,
+      imageUrl: null,
+    }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <Container className="py-3" style={{ width: "80vw" }}>
       <CardBody className="p-4">
@@ -92,6 +103,16 @@ export default function ProfileUpdateForm() {
                 >
                   Upload
                 </button>
+                {(formData.image || formData.imageUrl) && (
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger d-flex align-items-center gap-2"
+                    onClick={handleRemoveImage}
+                    style={{ padding: "0.375rem 0.75rem" }}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
                 <input
                   type="file"
                   accept="image/*"
