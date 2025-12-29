@@ -497,20 +497,286 @@ export const changePassword = async (
     return;
   }
 
+  if (!oldPassword || typeof oldPassword !== "string") {
+    res.status(400).json({ error: "Old password is required" });
+    return;
+  }
+
+  if (!user.password) {
+    res.status(400).json({ error: "No existing password for this user" });
+    return;
+  }
+
+  if (!newPassword || typeof newPassword !== "string") {
+    res.status(400).json({ error: "New password is required" });
+    return;
+  }
+
   const passwordIsValid = await bcrypt.compare(oldPassword, user.password);
   if (!passwordIsValid) {
     res.status(400).json({ error: "Old password is incorrect" });
     return;
   }
 
-  (user.password = hash(newPassword.trim())),
-    await db("users")
-      .where({ id: user.id })
-      .update({ password: user.password });
+  user.password = hash(newPassword.trim());
+  await db("users").where({ id: user.id }).update({ password: user.password });
 
   res.status(200).json({
     status: "success",
     message: "Password has been changed successfully!",
   });
   return;
+};
+
+export const updateOne = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  const id = (req.user as User)?.id;
+  const {
+    name,
+    phone,
+    phoneNumber,
+    email,
+    website,
+    interest_area,
+    cac,
+    industry,
+    state,
+    city_lga,
+    address,
+    about,
+    orgemail,
+    orgphone,
+    additional_information,
+    bankName,
+    accountName,
+    accountNumber,
+    bvn,
+  } = req.body;
+
+  try {
+    // Handle image upload
+    const filesToProcess = Array.isArray(req.files)
+      ? req.files.filter((file: any) => file.fieldname === "userimg")
+      : [];
+
+    if (filesToProcess.length > 0) {
+      // Delete old image(s) if they exist
+      await db("userimg").where({ user_id: id }).del();
+
+      // Insert new image(s)
+      await Promise.all(
+        filesToProcess.map(async (file: any) => {
+          const doc = {
+            filename: file.location,
+            user_id: id,
+          };
+          await db("userimg").insert(doc);
+        })
+      );
+    }
+
+    // Check if user is an organization
+    let orgUser = await db("organizations").where({ user_id: id }).first();
+
+    if (orgUser) {
+      // Update organization details
+      const updateData: any = {};
+
+      if (name !== undefined) updateData.name = name?.trim();
+      if (phone !== undefined) updateData.phone = phone?.trim();
+      if (website !== undefined) updateData.website = website?.trim();
+      if (interest_area !== undefined)
+        updateData.interest_area = interest_area?.trim();
+      if (cac !== undefined) updateData.cac = cac?.trim();
+
+      if (Object.keys(updateData).length > 0) {
+        await db("organizations").where({ user_id: id }).update(updateData);
+      }
+
+      // Update address
+      const addressData: any = {};
+      if (state !== undefined) addressData.state = state?.trim();
+      if (city_lga !== undefined) addressData.city_lga = city_lga?.trim();
+      if (address !== undefined) addressData.address = address?.trim();
+
+      if (Object.keys(addressData).length > 0) {
+        const existingAddress = await db("address")
+          .where({ user_id: id })
+          .first();
+
+        if (existingAddress) {
+          await db("address").where({ user_id: id }).update(addressData);
+        } else {
+          addressData.user_id = id;
+          await db("address").insert(addressData);
+        }
+      }
+
+      // Update bank details
+      const bankData: any = {};
+      if (bankName !== undefined) bankData.bankName = bankName?.trim();
+      if (accountName !== undefined) bankData.accountName = accountName?.trim();
+      if (accountNumber !== undefined)
+        bankData.accountNumber = accountNumber?.trim();
+      if (bvn !== undefined) bankData.bvn = bvn?.trim();
+
+      if (Object.keys(bankData).length > 0) {
+        const existingBank = await db("banks").where({ user_id: id }).first();
+
+        if (existingBank) {
+          await db("banks").where({ user_id: id }).update(bankData);
+        } else {
+          bankData.user_id = id;
+          await db("banks").insert(bankData);
+        }
+      }
+
+      // Fetch and return updated organization details
+      const updatedOrg = await db("organizations")
+        .where({ user_id: id })
+        .select(
+          "id",
+          "name",
+          "phone",
+          "website",
+          "interest_area",
+          "cac",
+          "active"
+        )
+        .first();
+
+      const bank = await getBank(id);
+      const address_data = await getAddress(id);
+      const userImage = await getUserImage(id);
+      const allProjectsCount = await getTotalProjectsCount(updatedOrg.id);
+      const activeProjectsCount = await getActiveProjectsCount(updatedOrg.id);
+      const donationsCount = await getDonationsCount(updatedOrg.id);
+      const wallet = await getOrCreateWallet(id);
+
+      res.status(200).json({
+        message: "Organization details updated successfully",
+        user: updatedOrg,
+        bank,
+        address: address_data,
+        userImage,
+        allProjectsCount,
+        activeProjectsCount,
+        donationsCount,
+        wallet,
+      });
+      return;
+    }
+
+    // Check if user is a donor
+    let donorUser = await db("donors").where({ user_id: id }).first();
+
+    if (donorUser) {
+      // Update donor details
+      const updateData: any = {};
+
+      if (name !== undefined) updateData.name = name?.trim();
+      if (phoneNumber !== undefined)
+        updateData.phoneNumber = phoneNumber?.trim();
+      if (email !== undefined) updateData.email = email?.trim();
+      if (industry !== undefined) updateData.industry = industry?.trim();
+      if (interest_area !== undefined)
+        updateData.interest_area = interest_area?.trim();
+      if (state !== undefined) updateData.state = state?.trim();
+      if (city_lga !== undefined) updateData.city_lga = city_lga?.trim();
+      if (address !== undefined) updateData.address = address?.trim();
+      if (about !== undefined) updateData.about = about?.trim();
+      if (additional_information !== undefined) {
+        updateData.additional_information = JSON.stringify({
+          orgemail: orgemail?.trim(),
+          orgphone: orgphone?.trim(),
+        });
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        await db("donors").where({ user_id: id }).update(updateData);
+      }
+
+      // Update address
+      const addressData: any = {};
+      if (state !== undefined) addressData.state = state?.trim();
+      if (city_lga !== undefined) addressData.city_lga = city_lga?.trim();
+      if (address !== undefined) addressData.address = address?.trim();
+
+      if (Object.keys(addressData).length > 0) {
+        const existingAddress = await db("address")
+          .where({ user_id: id })
+          .first();
+
+        if (existingAddress) {
+          await db("address").where({ user_id: id }).update(addressData);
+        } else {
+          addressData.user_id = id;
+          await db("address").insert(addressData);
+        }
+      }
+
+      // Update bank details
+      const bankData: any = {};
+      if (bankName !== undefined) bankData.bankName = bankName?.trim();
+      if (accountName !== undefined) bankData.accountName = accountName?.trim();
+      if (accountNumber !== undefined)
+        bankData.accountNumber = accountNumber?.trim();
+      if (bvn !== undefined) bankData.bvn = bvn?.trim();
+
+      if (Object.keys(bankData).length > 0) {
+        const existingBank = await db("banks").where({ user_id: id }).first();
+
+        if (existingBank) {
+          await db("banks").where({ user_id: id }).update(bankData);
+        } else {
+          bankData.user_id = id;
+          await db("banks").insert(bankData);
+        }
+      }
+
+      // Fetch and return updated donor details
+      const updatedDonor = await db("donors")
+        .where({ user_id: id })
+        .select(
+          "id",
+          "name",
+          "phoneNumber",
+          "industry",
+          "email",
+          "interest_area",
+          "state",
+          "city_lga",
+          "address",
+          "about",
+          "image",
+          "additional_information"
+        )
+        .first();
+
+      const bank = await getBank(id);
+      const address_data = await getAddress(id);
+      const userImage = await getUserImage(id);
+      const wallet = await getOrCreateWallet(id);
+
+      res.status(200).json({
+        message: "Donor details updated successfully",
+        user: updatedDonor,
+        bank,
+        address: address_data,
+        userImage,
+        wallet,
+      });
+      return;
+    }
+
+    // User not associated with any account
+    res.status(404).json({ error: "User not associated with any account" });
+  } catch (error) {
+    console.error("Update Error:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while updating user details" });
+  }
 };

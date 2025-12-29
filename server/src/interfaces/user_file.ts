@@ -18,25 +18,38 @@ export interface User {
 export interface MulterRequest extends Request {
   file: any;
 }
+
 export interface UserRequest extends Request {
   body: {
     uuid?: string;
-    email: string;
-    password: string;
-    otp: number;
-    oldPassword: string;
-    newPassword: string;
-    name: string;
-    phoneNumber: string;
-    industry: string;
-    interest_area: string;
-    state: string;
-    city_lga: string;
-    address: string;
-    about: string;
+    email?: string;
+    password?: string;
+    otp?: number;
+    oldPassword?: string;
+    newPassword?: string;
+    name?: string;
+    phone?: string;
+    phoneNumber?: string;
+    industry?: string;
+    interest_area?: string;
+    state?: string;
+    city_lga?: string;
+    address?: string;
+    about?: string;
+    website?: string;
+    cac?: string;
+    orgemail?: string;
+    orgphone?: string;
+    additional_information?: string;
+    bankName?: string;
+    accountName?: string;
+    accountNumber?: string;
+    bvn?: string;
+    [key: string]: any;
   };
   cookies: {
     giveback?: string;
   };
   user?: User;
+  files?: any;
 }

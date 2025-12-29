@@ -12,6 +12,7 @@ import {
   resend,
   resetPassword,
   signup,
+  updateOne,
   verify,
 } from "./auth.controller";
 
@@ -36,6 +37,9 @@ router.post("/resetpassword", resetPassword);
 
 // Route to get user details (requires secure login)
 router.get("/", secureLogin, getOne);
+
+// Route to update user details (requires secure login) - with optional image upload
+router.put("/", secureLogin, uploadimg, updateOne);
 
 // Route to change password (requires secure login)
 router.post("/changepassword", secureLogin, changePassword);

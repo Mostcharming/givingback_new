@@ -3,8 +3,7 @@ import { useContent } from "../../services/useContext";
 import ProfileUpdateForm from "./subs/profile";
 
 function Profile() {
-  const { authState, currentState } = useContent();
-  console.log(currentState);
+  const { authState } = useContent();
   const role = authState.user?.role;
 
   const TABS =

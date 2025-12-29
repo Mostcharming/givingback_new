@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ShieldCheck, Trash2, User } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Select from "react-select";
 import {
   Alert,
-  Badge,
   Button,
   CardBody,
   Col,
@@ -11,40 +12,52 @@ import {
   FormGroup,
   Input,
   InputGroup,
+  InputGroupAddon,
+  InputGroupText,
   Label,
   Row,
 } from "reactstrap";
+import useBackendService from "../../../services/backend_service";
 import { useContent } from "../../../services/useContext";
 
 export default function ProfileUpdateForm() {
-  const [selectedInterests, setSelectedInterests] = useState([
-    "Health",
-    "Education",
-    "Slum",
-  ]);
-
-  const toggleInterest = (interest: string) => {
-    setSelectedInterests((prev) =>
-      prev.includes(interest)
-        ? prev.filter((i) => i !== interest)
-        : [...prev, interest]
-    );
-  };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { currentState, authState } = useContent();
   const role = authState.user?.role;
+
+  const [areas, setAreas] = useState([]);
+  const { mutate: getAreas } = useBackendService("/areas", "GET", {
+    onSuccess: (res2: any) => {
+      setAreas(res2 as any[]);
+    },
+    onError: () => {},
+  });
+
+  useEffect(() => {
+    getAreas({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [formData, setFormData] = useState({
     image: null,
-    title: "",
-
+    name: currentState?.user?.name || "",
+    email: currentState?.user?.email || "",
+    orgEmail: "",
+    phone: "",
+    country: currentState?.address?.[0]?.address || "Nigeria",
+    state: currentState?.address?.[0]?.state || "",
+    registrationNumber: "",
+    personalEmail: currentState?.user?.email || "",
+    areasOfInterest: [],
     imageUrl: currentState?.userimage?.filename || null,
   });
+
   const handleFileChange = (file) => {
     if (file) {
       setFormData((prev) => ({
         ...prev,
-        image: file, // store selected file
-        imageUrl: null, // clear backend image
+        image: file,
+        imageUrl: null,
       }));
     }
   };
@@ -60,22 +73,45 @@ export default function ProfileUpdateForm() {
     }
   };
 
+  const handleAreasChange = (selectedOptions) => {
+    setFormData((prev) => ({
+      ...prev,
+      areasOfInterest: selectedOptions || [],
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // TODO: Add API call to submit form data
+    const submissionData = {
+      ...formData,
+      areasOfInterest: formData.areasOfInterest
+        .map((area) => area.value)
+        .join(","),
+    };
+    console.log("Form submitted:", submissionData);
+  };
+
   return (
     <Container className="py-3" style={{ width: "80vw" }}>
       <CardBody className="p-4">
-        <Form>
+        <Form onSubmit={handleSubmit}>
           <Row className="mb-4">
             <Col md={7}>
-              <label className="form-label fw-medium">Profile Photo</label>
+              <label className="form-label fw-bold mb-3">Profile Photo</label>
               <div className="d-flex align-items-center gap-3 mb-3">
                 <div
                   className="border rounded-lg d-flex align-items-center justify-content-center bg-light overflow-hidden"
-                  style={{ width: "80px", height: "80px" }}
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    backgroundColor: "#f2f4f6",
+                  }}
                 >
                   {formData.image ? (
                     <img
                       src={URL.createObjectURL(formData.image)}
-                      alt="Sponsor Logo"
+                      alt="Profile"
                       style={{
                         width: "100%",
                         height: "100%",
@@ -85,7 +121,7 @@ export default function ProfileUpdateForm() {
                   ) : formData.imageUrl ? (
                     <img
                       src={formData.imageUrl}
-                      alt="Sponsor Logo"
+                      alt="Profile"
                       style={{
                         width: "100%",
                         height: "100%",
@@ -93,25 +129,37 @@ export default function ProfileUpdateForm() {
                       }}
                     />
                   ) : (
-                    <User size={32} className="text-success" />
+                    <User size={32} color="#64748b" />
                   )}
                 </div>
-                <button
+                <Button
                   type="button"
-                  className="ml-4 btn btn-outline-secondary"
+                  color="secondary"
+                  outline
                   onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    marginLeft: "20px",
+                    padding: "0.5rem 1rem",
+                    borderColor: "#dee2e6",
+                  }}
                 >
                   Upload
-                </button>
+                </Button>
                 {(formData.image || formData.imageUrl) && (
-                  <button
+                  <Button
                     type="button"
-                    className="btn btn-outline-danger d-flex align-items-center gap-2"
+                    color="danger"
+                    outline
                     onClick={handleRemoveImage}
-                    style={{ padding: "0.375rem 0.75rem" }}
+                    style={{
+                      padding: "0.5rem 0.75rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
                   >
                     <Trash2 size={18} />
-                  </button>
+                  </Button>
                 )}
                 <input
                   type="file"
@@ -130,6 +178,8 @@ export default function ProfileUpdateForm() {
                   style={{
                     backgroundColor: "#f0f9f0",
                     border: "1px solid #d4edda",
+                    padding: "1rem",
+                    borderRadius: "0.5rem",
                   }}
                 >
                   <div
@@ -138,12 +188,13 @@ export default function ProfileUpdateForm() {
                       width: "4rem",
                       height: "4rem",
                       backgroundColor: "#128330",
+                      flexShrink: 0,
                     }}
                   >
-                    <ShieldCheck size={32} color={"#ffffff"} />
+                    <ShieldCheck size={32} color="#ffffff" />
                   </div>
 
-                  <div className="pl-3">
+                  <div style={{ marginLeft: "1rem" }}>
                     <div className="fw-bold" style={{ color: "#155724" }}>
                       Let's update your account
                     </div>
@@ -162,21 +213,32 @@ export default function ProfileUpdateForm() {
           {/* Organization Details */}
           <Row className="mb-3">
             <Col md={6}>
-              <FormGroup className="">
-                <Label className="fw-bold">Organization name</Label>
+              <FormGroup>
+                <Label className="fw-bold">
+                  {role === "donor" || role === "corporate"
+                    ? "Full Name"
+                    : "Organization Name"}
+                </Label>
                 <InputGroup className="input-group-alternative">
                   <Input
-                    style={{ backgroundColor: "#f2f2f247", height: "100%" }}
-                    className="p-3"
-                    // placeholder="Project title"
+                    style={{
+                      backgroundColor: "#F2F2F2",
+                      height: "100%",
+                      padding: "0.75rem",
+                    }}
+                    placeholder={
+                      role === "donor" || role === "corporate"
+                        ? "Enter your full name"
+                        : "Enter organization name"
+                    }
                     type="text"
-                    name="title"
+                    name="name"
                     required
-                    value={formData.title}
+                    value={formData.name}
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        title: e.target.value,
+                        name: e.target.value,
                       }))
                     }
                   />
@@ -185,13 +247,24 @@ export default function ProfileUpdateForm() {
             </Col>
             <Col md={6}>
               <FormGroup>
-                <Label className="fw-bold">Organization email</Label>
+                <Label className="fw-bold">
+                  {role === "donor" || role === "corporate"
+                    ? "Email"
+                    : "Organization Email"}
+                </Label>
                 <Input
                   type="email"
-                  defaultValue="support@thehelpinghand.com"
+                  placeholder={
+                    role === "donor" || role === "corporate"
+                      ? "your.email@example.com"
+                      : "organization@example.com"
+                  }
+                  value={formData.email}
+                  readOnly
                   style={{
-                    backgroundColor: "#f8f9fa",
+                    backgroundColor: "#F2F2F2",
                     border: "1px solid #dee2e6",
+                    padding: "0.75rem",
                   }}
                 />
               </FormGroup>
@@ -204,10 +277,18 @@ export default function ProfileUpdateForm() {
                 <Label className="fw-bold">Country</Label>
                 <Input
                   type="text"
-                  defaultValue="Nigeria"
+                  placeholder="Nigeria"
+                  value={formData.country}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      country: e.target.value,
+                    }))
+                  }
                   style={{
-                    backgroundColor: "#f8f9fa",
+                    backgroundColor: "#F2F2F2",
                     border: "1px solid #dee2e6",
+                    padding: "0.75rem",
                   }}
                 />
               </FormGroup>
@@ -217,10 +298,18 @@ export default function ProfileUpdateForm() {
                 <Label className="fw-bold">State</Label>
                 <Input
                   type="text"
-                  defaultValue="Lagos"
+                  placeholder="Lagos"
+                  value={formData.state}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      state: e.target.value,
+                    }))
+                  }
                   style={{
-                    backgroundColor: "#f8f9fa",
+                    backgroundColor: "#F2F2F2",
                     border: "1px solid #dee2e6",
+                    padding: "0.75rem",
                   }}
                 />
               </FormGroup>
@@ -231,38 +320,69 @@ export default function ProfileUpdateForm() {
           <Row className="mb-3">
             <Col md={6}>
               <FormGroup>
-                <Label className="fw-bold">Areas of intrest</Label>
-                <div className="d-flex gap-2 flex-wrap mt-2">
-                  {["Health", "Education", "Slum"].map((interest) => (
-                    <Badge
-                      key={interest}
-                      color="light"
-                      className="px-3 py-2"
-                      style={{
-                        backgroundColor: selectedInterests.includes(interest)
-                          ? "#e9ecef"
-                          : "#f8f9fa",
-                        color: "#495057",
+                <Label className="fw-bold">Areas of Interest</Label>
+                <InputGroup className="input-group-alternative">
+                  <Select
+                    styles={{
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "#F2F2F2",
+                        minHeight: "44px",
+                        height: "100%",
                         border: "1px solid #dee2e6",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => toggleInterest(interest)}
-                    >
-                      {interest}
-                    </Badge>
-                  ))}
-                </div>
+                      }),
+                      valueContainer: (provided) => ({
+                        ...provided,
+                        height: "100%",
+                        padding: "0 6px",
+                      }),
+                      input: (provided) => ({
+                        ...provided,
+                        margin: "0px",
+                      }),
+                      indicatorsContainer: (provided) => ({
+                        ...provided,
+                        height: "44px",
+                      }),
+                    }}
+                    className="w-100"
+                    placeholder="Select areas of interest"
+                    onChange={handleAreasChange}
+                    value={formData.areasOfInterest}
+                    options={areas.map((category) => ({
+                      value: category.name,
+                      label: category.name,
+                    }))}
+                    isMulti
+                  />
+                </InputGroup>
               </FormGroup>
             </Col>
             <Col md={6}>
               <FormGroup>
-                <Label className="fw-bold">Registration number</Label>
+                <Label className="fw-bold">
+                  {role === "donor" || role === "corporate"
+                    ? "Registration Number"
+                    : "Registration Number (CAC)"}
+                </Label>
                 <Input
                   type="text"
-                  defaultValue="1234567890"
+                  placeholder={
+                    role === "donor" || role === "corporate"
+                      ? "Enter your Registration number"
+                      : "Enter CAC registration number"
+                  }
+                  value={formData.registrationNumber}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      registrationNumber: e.target.value,
+                    }))
+                  }
                   style={{
-                    backgroundColor: "#f8f9fa",
+                    backgroundColor: "#F2F2F2",
                     border: "1px solid #dee2e6",
+                    padding: "0.75rem",
                   }}
                 />
               </FormGroup>
@@ -273,40 +393,53 @@ export default function ProfileUpdateForm() {
           <Row className="mb-4">
             <Col md={6}>
               <FormGroup>
-                <Label className="fw-bold">Phone number</Label>
-                <div className="d-flex">
+                <Label className="fw-bold">Phone Number</Label>
+                <InputGroup className="input-group-alternative">
+                  <InputGroupAddon addonType="prepend">
+                    <InputGroupText
+                      style={{
+                        backgroundColor: "#F2F2F2",
+                        height: "100%",
+                      }}
+                    >
+                      +234 |
+                    </InputGroupText>
+                  </InputGroupAddon>
                   <Input
+                    style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                    className="p-3"
+                    placeholder="812 3456 789"
                     type="text"
-                    defaultValue="+234"
-                    style={{
-                      width: "80px",
-                      backgroundColor: "#f8f9fa",
-                      border: "1px solid #dee2e6",
-                      borderRight: "none",
-                    }}
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        phone: e.target.value,
+                      }))
+                    }
                   />
-                  <Input
-                    type="text"
-                    defaultValue="812 3456 789"
-                    className="flex-grow-1"
-                    style={{
-                      backgroundColor: "#f8f9fa",
-                      border: "1px solid #dee2e6",
-                      borderLeft: "none",
-                    }}
-                  />
-                </div>
+                </InputGroup>
               </FormGroup>
             </Col>
             <Col md={6}>
               <FormGroup>
-                <Label className="fw-bold">Personal email</Label>
+                <Label className="fw-bold">Personal Email</Label>
                 <Input
                   type="email"
-                  defaultValue="myself@gmail.com"
+                  placeholder="yourself@example.com"
+                  value={formData.personalEmail}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      personalEmail: e.target.value,
+                    }))
+                  }
                   style={{
-                    backgroundColor: "#f8f9fa",
+                    backgroundColor: "#F2F2F2",
                     border: "1px solid #dee2e6",
+                    padding: "0.75rem",
                   }}
                 />
               </FormGroup>
@@ -316,16 +449,17 @@ export default function ProfileUpdateForm() {
           {/* Update Button */}
           <div className="text-center mb-4">
             <Button
-              color="secondary"
-              size="lg"
-              className="px-5"
+              type="submit"
               style={{
-                backgroundColor: "#e9ecef",
-                borderColor: "#e9ecef",
-                color: "#495057",
+                backgroundColor: "#02a95c",
+                borderColor: "#02a95c",
+                color: "white",
+                padding: "0.75rem 2rem",
+                fontSize: "1rem",
+                fontWeight: "500",
               }}
             >
-              Update profile information
+              Update Profile Information
             </Button>
           </div>
         </Form>
@@ -333,55 +467,85 @@ export default function ProfileUpdateForm() {
 
       {!(role === "donor" || role === "corporate") && (
         <CardBody className="p-4">
-          <div className="mb-3">
-            <h5 className="fw-bold mb-1">KYC</h5>
+          <div className="mb-4">
+            <h5 className="fw-bold mb-1">KYC Verification</h5>
             <p className="text-muted mb-0" style={{ fontSize: "14px" }}>
-              Update your KYC details to verify your account
+              Update your KYC details to verify and secure your account
             </p>
           </div>
 
           <div className="border-bottom py-3">
             <div className="d-flex justify-content-between align-items-center">
               <div>
-                <div className="fw-bold">Organization Documents</div>
+                <div className="fw-bold" style={{ color: "#1e1e1e" }}>
+                  Organization Documents
+                </div>
                 <div className="text-muted" style={{ fontSize: "14px" }}>
                   Provide your organization documents and credentials
                 </div>
               </div>
-              {/* <Button color="success" size="sm" outline>
+              <div
+                style={{
+                  color: "#02a95c",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                  transition: "color 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#026e46")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#02a95c")}
+              >
                 Update
-              </Button> */}
-              <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
+              </div>
             </div>
           </div>
 
           <div className="border-bottom py-3">
             <div className="d-flex justify-content-between align-items-center">
               <div>
-                <div className="fw-bold">Bank verification number (BVN)</div>
+                <div className="fw-bold" style={{ color: "#1e1e1e" }}>
+                  Bank Verification Number (BVN)
+                </div>
                 <div className="text-muted" style={{ fontSize: "14px" }}>
-                  Provide your organization documents and credentials
+                  Provide your bank details for verification
                 </div>
               </div>
-              {/* <Button color="success" size="sm" outline>
+              <div
+                style={{
+                  color: "#02a95c",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                  transition: "color 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#026e46")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#02a95c")}
+              >
                 Update
-              </Button> */}
-              <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
+              </div>
             </div>
           </div>
 
           <div className="py-3">
             <div className="d-flex justify-content-between align-items-center">
               <div>
-                <div className="fw-bold">National identity number (NIN)</div>
+                <div className="fw-bold" style={{ color: "#1e1e1e" }}>
+                  National Identity Number (NIN)
+                </div>
                 <div className="text-muted" style={{ fontSize: "14px" }}>
-                  Provide your organization documents and credentials
+                  Provide your national ID for identity verification
                 </div>
               </div>
-              {/* <Button color="success" size="sm" outline>
+              <div
+                style={{
+                  color: "#02a95c",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                  transition: "color 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#026e46")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#02a95c")}
+              >
                 Update
-              </Button> */}
-              <div style={{ color: "#128330", cursor: "pointer" }}>Update</div>
+              </div>
             </div>
           </div>
         </CardBody>
