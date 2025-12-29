@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useContent } from "../../services/useContext";
+import BankDetails from "./subs/bankDetails";
 import ProfileUpdateForm from "./subs/profile";
 
 function Profile() {
@@ -25,7 +26,7 @@ function Profile() {
         return <ProfileUpdateForm />;
 
       case "Bank Details":
-        return <div></div>;
+        return <BankDetails />;
       case "Security":
         return <div></div>;
       case "Notifications":
