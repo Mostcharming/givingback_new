@@ -38,7 +38,7 @@ export default function ProfileUpdateForm() {
   });
 
   const { mutate: updateProfile, isLoading: isUpdating } = useBackendService(
-    "",
+    "/auth",
     "PUT",
     {
       onSuccess: (response: any) => {
@@ -64,17 +64,12 @@ export default function ProfileUpdateForm() {
     }
   );
 
-  useEffect(() => {
-    getAreas({});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const [formData, setFormData] = useState({
     image: null,
     name: currentState?.user?.name || "",
     email: currentState?.user?.email || "",
     orgEmail: "",
-    phone: "",
+    phone: currentState?.user?.phoneNumber || "",
     country: currentState?.address?.[0]?.address || "Nigeria",
     state: currentState?.address?.[0]?.state || "",
     registrationNumber: "",
@@ -82,6 +77,33 @@ export default function ProfileUpdateForm() {
     areasOfInterest: [],
     imageUrl: currentState?.userimage?.filename || null,
   });
+
+  useEffect(() => {
+    getAreas({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Prefill areas of interest when areas data is loaded
+  useEffect(() => {
+    if (areas.length > 0 && currentState?.user?.interest_area) {
+      const interestAreas = currentState.user.interest_area
+        .split(",")
+        .map((area: string) => area.trim());
+
+      const selectedAreas = areas
+        .filter((area: any) => interestAreas.includes(area.name))
+        .map((area: any) => ({
+          value: area.name,
+          label: area.name,
+        }));
+
+      setFormData((prev) => ({
+        ...prev,
+        areasOfInterest: selectedAreas,
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [areas, currentState?.user?.interest_area]);
 
   const handleFileChange = (file) => {
     if (file) {
@@ -494,6 +516,7 @@ export default function ProfileUpdateForm() {
                     border: "1px solid #dee2e6",
                     padding: "0.75rem",
                   }}
+                  disabled
                 />
               </FormGroup>
             </Col>
