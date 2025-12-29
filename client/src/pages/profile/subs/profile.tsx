@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ShieldCheck, Trash2, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import Select from "react-select";
+import { toast } from "react-toastify";
 import {
   Alert,
   Button,
@@ -19,10 +21,12 @@ import {
 } from "reactstrap";
 import useBackendService from "../../../services/backend_service";
 import { useContent } from "../../../services/useContext";
+import { getCurrent } from "../../../store/reducers/userReducer";
 
 export default function ProfileUpdateForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { currentState, authState } = useContent();
+  const dispatch = useDispatch();
   const role = authState.user?.role;
 
   const [areas, setAreas] = useState([]);
@@ -32,6 +36,33 @@ export default function ProfileUpdateForm() {
     },
     onError: () => {},
   });
+
+  const { mutate: updateProfile, isLoading: isUpdating } = useBackendService(
+    "",
+    "PUT",
+    {
+      onSuccess: (response: any) => {
+        toast.success("Profile updated successfully!");
+        dispatch(
+          getCurrent({
+            activeProjectsCount: response.activeProjectsCount || 0,
+            allProjectsCount: response.allProjectsCount || 0,
+            donationsCount: response.donationsCount || 0,
+            address: response.address || [],
+            bank: response.bank || [],
+            user: response.user || null,
+            userImage: response.userImage || null,
+            wallet: response.wallet || null,
+          })
+        );
+      },
+      onError: (error: any) => {
+        const errorMessage =
+          error.response?.data?.message || "Failed to update profile";
+        toast.error(errorMessage);
+      },
+    }
+  );
 
   useEffect(() => {
     getAreas({});
@@ -82,14 +113,36 @@ export default function ProfileUpdateForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Add API call to submit form data
-    const submissionData = {
-      ...formData,
-      areasOfInterest: formData.areasOfInterest
-        .map((area) => area.value)
-        .join(","),
-    };
-    console.log("Form submitted:", submissionData);
+
+    const formDataToSend = new FormData();
+
+    // Add basic fields
+    formDataToSend.append("name", formData.name);
+    formDataToSend.append("phone", formData.phone);
+    formDataToSend.append("state", formData.state);
+    formDataToSend.append("address", formData.country);
+    formDataToSend.append(
+      "interest_area",
+      formData.areasOfInterest.map((area: any) => area.value).join(",")
+    );
+
+    // Add role-specific fields
+    if (role === "donor" || role === "corporate") {
+      formDataToSend.append("email", formData.personalEmail);
+      formDataToSend.append("orgemail", formData.orgEmail);
+      formDataToSend.append("orgphone", formData.phone);
+    } else {
+      // Organization fields
+      formDataToSend.append("cac", formData.registrationNumber);
+      formDataToSend.append("website", formData.registrationNumber);
+    }
+
+    // Add image if present
+    if (formData.image) {
+      formDataToSend.append("userimg", formData.image);
+    }
+
+    updateProfile(formDataToSend);
   };
 
   return (
@@ -450,6 +503,7 @@ export default function ProfileUpdateForm() {
           <div className="text-center mb-4">
             <Button
               type="submit"
+              disabled={isUpdating}
               style={{
                 backgroundColor: "#02a95c",
                 borderColor: "#02a95c",
@@ -457,9 +511,11 @@ export default function ProfileUpdateForm() {
                 padding: "0.75rem 2rem",
                 fontSize: "1rem",
                 fontWeight: "500",
+                opacity: isUpdating ? 0.6 : 1,
+                cursor: isUpdating ? "not-allowed" : "pointer",
               }}
             >
-              Update Profile Information
+              {isUpdating ? "Updating..." : "Update Profile Information"}
             </Button>
           </div>
         </Form>

@@ -130,7 +130,7 @@ export const newDonor = async (
 
     //email
     const token = 0;
-    const url = name;
+    const url = name ? name : "";
     const additionalData = { role: "Donor" };
     await new Email({ email: email, url, token, additionalData }).sendEmail(
       "donoronboard",
