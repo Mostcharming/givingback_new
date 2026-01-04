@@ -394,6 +394,7 @@ export const getOne = async (
       .first();
 
     const userImage = await getUserImage(id);
+    const bank = await getBank(id);
     const wallet = await getOrCreateWallet(id);
 
     if (!user) {
@@ -401,7 +402,7 @@ export const getOne = async (
       return;
     }
 
-    res.status(200).json({ user, userImage, wallet });
+    res.status(200).json({ user, userImage, wallet, bank });
     return;
   }
 

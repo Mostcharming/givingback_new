@@ -37,7 +37,8 @@ export default function BankDetails() {
   });
 
   const bankDetails = currentState?.bank || [];
-  console.log(bankDetails);
+  console.log("Current State:", currentState);
+  console.log("Bank Details:", bankDetails);
 
   const toggleLinkModal = () => {
     setIsLinkModalOpen(!isLinkModalOpen);
