@@ -3,6 +3,8 @@ import {
   Clipboard,
   FolderDot,
   FolderOpenDot,
+  FolderPlus,
+  FolderSearch2,
   HandCoins,
   House,
   Landmark,
@@ -12,6 +14,8 @@ import {
   ShieldUser,
   User,
   UsersRound,
+  Wallet,
+  WalletCards,
 } from "lucide-react";
 import FundWallets from "../pages";
 import Admin_projects from "../pages/admin_projects";
@@ -152,21 +156,28 @@ const routes = [
   {
     path: "/ngo_directory",
     name: "NGOs",
-    icon: <UsersRound />,
+    icon: <FolderSearch2 />,
     component: <Ngo />,
     layout: "/donor",
   },
   {
     path: "/projects",
     name: "Briefs/Projects",
-    icon: <FolderDot />,
+    icon: <FolderPlus />,
     component: <DN_Projects />,
     layout: "/donor",
   },
   {
     path: "/fund_management",
+    name: "My Contributions",
+    icon: <WalletCards />,
+    component: <FundsM />,
+    layout: "/donor",
+  },
+  {
+    path: "/fund_management",
     name: "Funds/Disbursement",
-    icon: <Landmark />,
+    icon: <Wallet />,
     component: <FundsM />,
     layout: "/donor",
   },

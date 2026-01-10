@@ -39,6 +39,7 @@ interface SidebarRoute {
 const Sidebar: React.FC<any> = (props) => {
   const { currentState } = useContent();
   const [collapseOpen, setCollapseOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const navigate = useNavigate();
   const dispatch: ThunkDispatch<RootState, unknown, any> = useDispatch();
@@ -66,6 +67,9 @@ const Sidebar: React.FC<any> = (props) => {
   const createLinks = (routes: SidebarRoute[]) => {
     return routes
       .filter((prop) => prop.layout === compare && prop.name)
+      .filter((prop) =>
+        prop.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
       .map((prop, key) => (
         <NavItem key={key} className="custom-nav-item m-2">
           <NavLink
@@ -219,6 +223,25 @@ const Sidebar: React.FC<any> = (props) => {
               </InputGroupAddon>
             </InputGroup>
           </Form>
+
+          {/* Search Filter */}
+          <div className="py-2">
+            <InputGroup className="input-group-rounded input-group-merge">
+              <InputGroupAddon addonType="prepend">
+                <InputGroupText style={{ backgroundColor: "transparent" }}>
+                  <i className="fa fa-search" />
+                </InputGroupText>
+              </InputGroupAddon>
+              <Input
+                aria-label="Filter menu"
+                className="form-control-rounded form-control-prepended"
+                placeholder="Search..."
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </InputGroup>
+          </div>
 
           {/* Navigation */}
           <Nav navbar>{createLinks(routes)}</Nav>
