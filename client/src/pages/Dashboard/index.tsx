@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ApexOptions } from "apexcharts";
 import {
   Book,
   Clock,
@@ -14,6 +15,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import Chart from "react-apexcharts";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
@@ -26,8 +28,6 @@ import {
   ModalHeader,
   Row,
 } from "reactstrap";
-import Chart from "react-apexcharts";
-import { ApexOptions } from "apexcharts";
 import DashBox from "../../components/dashbox";
 import { formatDate } from "../../components/formatTime";
 import Tables from "../../components/tables";
@@ -50,7 +50,9 @@ const Dashboard = () => {
   const [userBankDetails, setUserBankDetails] = useState(true);
   const [donorImpacts, setDonorImpacts] = useState(false);
   const [lastUpdated, setLastUpdated] = useState("");
-  const [chartData, setChartData] = useState<{ month: string; amount: number }[]>([]);
+  const [chartData, setChartData] = useState<
+    { month: string; amount: number }[]
+  >([]);
   const role = authState.user?.role;
   const isFirstTimeLogin = authState?.user?.first_time_login === 0;
   const hasActiveProject = currentState?.activeProjectsCount > 0;
@@ -106,7 +108,10 @@ const Dashboard = () => {
           const date = new Date(project.createdAt);
           // Only include data from the current year
           if (date.getFullYear() === currentYear) {
-            const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+            const monthYear = date.toLocaleString("default", {
+              month: "short",
+              year: "numeric",
+            });
             if (!monthlyData[monthYear]) {
               monthlyData[monthYear] = 0;
             }
@@ -530,82 +535,84 @@ const Dashboard = () => {
                   <hr style={{ borderColor: "#e5e5e5" }} />
                   {chartData.length > 0 ? (
                     <Chart
-                      options={{
-                        chart: {
-                          type: "line",
-                          toolbar: {
-                            show: false,
+                      options={
+                        {
+                          chart: {
+                            type: "line",
+                            toolbar: {
+                              show: false,
+                            },
+                            zoom: {
+                              enabled: false,
+                            },
                           },
-                          zoom: {
+                          stroke: {
+                            curve: "smooth",
+                            width: 3,
+                          },
+                          markers: {
+                            size: 6,
+                            colors: ["#128330"],
+                            strokeColors: "#fff",
+                            strokeWidth: 2,
+                            hover: {
+                              size: 9,
+                            },
+                          },
+                          xaxis: {
+                            categories: chartData.map((item) => item.month),
+                            title: {
+                              text: "Months",
+                              style: {
+                                fontSize: "14px",
+                                fontWeight: 600,
+                                color: "#333",
+                              },
+                            },
+                            labels: {
+                              style: {
+                                colors: "#666",
+                                fontSize: "12px",
+                              },
+                            },
+                          },
+                          yaxis: {
+                            title: {
+                              text: "Amount (₦)",
+                              style: {
+                                fontSize: "14px",
+                                fontWeight: 600,
+                                color: "#333",
+                              },
+                            },
+                            labels: {
+                              formatter: (value: number) =>
+                                `₦${value.toLocaleString()}`,
+                              style: {
+                                colors: "#666",
+                                fontSize: "12px",
+                              },
+                            },
+                          },
+                          tooltip: {
+                            y: {
+                              formatter: (value: number) =>
+                                `₦${value.toLocaleString()}`,
+                            },
+                          },
+                          colors: ["#128330"],
+                          grid: {
+                            borderColor: "#e7e7e7",
+                            row: {
+                              colors: ["#f3f3f3", "transparent"],
+                              opacity: 0.5,
+                            },
+                          },
+                          dataLabels: {
                             enabled: false,
                           },
-                        },
-                        stroke: {
-                          curve: "smooth",
-                          width: 3,
-                        },
-                        markers: {
-                          size: 6,
-                          colors: ["#128330"],
-                          strokeColors: "#fff",
-                          strokeWidth: 2,
-                          hover: {
-                            size: 9,
-                          },
-                        },
-                        xaxis: {
-                          categories: chartData.map((item) => item.month),
-                          title: {
-                            text: "Months",
-                            style: {
-                              fontSize: "14px",
-                              fontWeight: 600,
-                              color: "#333",
-                            },
-                          },
-                          labels: {
-                            style: {
-                              colors: "#666",
-                              fontSize: "12px",
-                            },
-                          },
-                        },
-                        yaxis: {
-                          title: {
-                            text: "Amount (₦)",
-                            style: {
-                              fontSize: "14px",
-                              fontWeight: 600,
-                              color: "#333",
-                            },
-                          },
-                          labels: {
-                            formatter: (value: number) =>
-                              `₦${value.toLocaleString()}`,
-                            style: {
-                              colors: "#666",
-                              fontSize: "12px",
-                            },
-                          },
-                        },
-                        tooltip: {
-                          y: {
-                            formatter: (value: number) =>
-                              `₦${value.toLocaleString()}`,
-                          },
-                        },
-                        colors: ["#128330"],
-                        grid: {
-                          borderColor: "#e7e7e7",
-                          row: {
-                            colors: ["#f3f3f3", "transparent"],
-                            opacity: 0.5,
-                          },
-                        },
-                        dataLabels: {
-                          enabled: false,
-                        },
-                      } as ApexOptions}
+                        } as ApexOptions
+                      }
                       series={[
                         {
                           name: "Donations",
