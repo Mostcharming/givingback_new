@@ -3,12 +3,12 @@ import {
   Book,
   Clock,
   FolderOpenDot,
-  Heart,
+  // Heart,  // Commented out - used in Quick Actions
   House,
   Map,
   Mic,
-  Plus,
-  Send,
+  // Plus,   // Commented out - used in Quick Actions
+  // Send,   // Commented out - used in Quick Actions
   Users,
   UsersRound,
   Wallet,
@@ -26,6 +26,8 @@ import {
   ModalHeader,
   Row,
 } from "reactstrap";
+import Chart from "react-apexcharts";
+import { ApexOptions } from "apexcharts";
 import DashBox from "../../components/dashbox";
 import { formatDate } from "../../components/formatTime";
 import Tables from "../../components/tables";
@@ -34,8 +36,8 @@ import { capitalizeFirstLetter } from "../../services/capitalize";
 import { useContent } from "../../services/useContext";
 import Highlights from "./Donor/highlights/highlight";
 import NoHighlights from "./Donor/highlights/nohighlight";
-import Content from "./Donor/recent/content";
-import NoContent from "./Donor/recent/noContent";
+// import Content from "./Donor/recent/content";     // Commented out - used in Recent Activities
+// import NoContent from "./Donor/recent/noContent"; // Commented out - used in Recent Activities
 import NGOChecks from "./NGO/checks";
 
 const Dashboard = () => {
@@ -48,6 +50,7 @@ const Dashboard = () => {
   const [userBankDetails, setUserBankDetails] = useState(true);
   const [donorImpacts, setDonorImpacts] = useState(false);
   const [lastUpdated, setLastUpdated] = useState("");
+  const [chartData, setChartData] = useState<{ month: string; amount: number }[]>([]);
   const role = authState.user?.role;
   const isFirstTimeLogin = authState?.user?.first_time_login === 0;
   const hasActiveProject = currentState?.activeProjectsCount > 0;
@@ -95,6 +98,32 @@ const Dashboard = () => {
 
         setTableData(filteredData);
         setupTableAttributes(role);
+
+        // Process data for chart - group by month (current year only)
+        const currentYear = new Date().getFullYear();
+        const monthlyData: { [key: string]: number } = {};
+        res.donations?.forEach((project: any) => {
+          const date = new Date(project.createdAt);
+          // Only include data from the current year
+          if (date.getFullYear() === currentYear) {
+            const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+            if (!monthlyData[monthYear]) {
+              monthlyData[monthYear] = 0;
+            }
+            monthlyData[monthYear] += parseFloat(project.amount) || 0;
+          }
+        });
+
+        // Convert to array and sort by date
+        const chartDataArray = Object.entries(monthlyData)
+          .map(([month, amount]) => ({ month, amount }))
+          .sort((a, b) => {
+            const dateA = new Date(a.month);
+            const dateB = new Date(b.month);
+            return dateA.getTime() - dateB.getTime();
+          });
+
+        setChartData(chartDataArray);
       },
       onError: () => {
         setupTableAttributes(role);
@@ -488,8 +517,118 @@ const Dashboard = () => {
               <NoHighlights />
             )}
 
-            {/* Bottom section */}
-            <Row>
+            {/* Donation Trend Chart */}
+            <Row className="mt-4">
+              <Col md={12} className="mb-4">
+                <Card className="border-0 shadow-sm p-4">
+                  <h5
+                    className="fw-normal pl-2 pt-2"
+                    style={{ fontSize: "1.5rem", color: "#333" }}
+                  >
+                    CSR Spend Trend ({new Date().getFullYear()})
+                  </h5>
+                  <hr style={{ borderColor: "#e5e5e5" }} />
+                  {chartData.length > 0 ? (
+                    <Chart
+                      options={{
+                        chart: {
+                          type: "line",
+                          toolbar: {
+                            show: false,
+                          },
+                          zoom: {
+                            enabled: false,
+                          },
+                        },
+                        stroke: {
+                          curve: "smooth",
+                          width: 3,
+                        },
+                        markers: {
+                          size: 6,
+                          colors: ["#128330"],
+                          strokeColors: "#fff",
+                          strokeWidth: 2,
+                          hover: {
+                            size: 9,
+                          },
+                        },
+                        xaxis: {
+                          categories: chartData.map((item) => item.month),
+                          title: {
+                            text: "Months",
+                            style: {
+                              fontSize: "14px",
+                              fontWeight: 600,
+                              color: "#333",
+                            },
+                          },
+                          labels: {
+                            style: {
+                              colors: "#666",
+                              fontSize: "12px",
+                            },
+                          },
+                        },
+                        yaxis: {
+                          title: {
+                            text: "Amount (₦)",
+                            style: {
+                              fontSize: "14px",
+                              fontWeight: 600,
+                              color: "#333",
+                            },
+                          },
+                          labels: {
+                            formatter: (value: number) =>
+                              `₦${value.toLocaleString()}`,
+                            style: {
+                              colors: "#666",
+                              fontSize: "12px",
+                            },
+                          },
+                        },
+                        tooltip: {
+                          y: {
+                            formatter: (value: number) =>
+                              `₦${value.toLocaleString()}`,
+                          },
+                        },
+                        colors: ["#128330"],
+                        grid: {
+                          borderColor: "#e7e7e7",
+                          row: {
+                            colors: ["#f3f3f3", "transparent"],
+                            opacity: 0.5,
+                          },
+                        },
+                        dataLabels: {
+                          enabled: false,
+                        },
+                      } as ApexOptions}
+                      series={[
+                        {
+                          name: "Donations",
+                          data: chartData.map((item) => item.amount),
+                        },
+                      ]}
+                      type="line"
+                      height={350}
+                    />
+                  ) : (
+                    <div
+                      className="d-flex align-items-center justify-content-center"
+                      style={{ height: "300px", color: "#999" }}
+                    >
+                      <p>No transaction data available for chart</p>
+                    </div>
+                  )}
+                </Card>
+              </Col>
+            </Row>
+
+            {/* Bottom section - Recent Activities and Quick Actions (commented out) */}
+            {/* <Row>
               <Col md={6} className="mb-4">
                 <Card className="border-0 shadow-sm">
                   <h5
@@ -518,7 +657,6 @@ const Dashboard = () => {
                     Quick Actions
                   </h5>
 
-                  {/* Divider */}
                   <hr style={{ borderColor: "#e5e5e5" }} />
 
                   <div className="">
@@ -585,7 +723,7 @@ const Dashboard = () => {
                   </div>
                 </Card>
               </Col>
-            </Row>
+            </Row> */}
           </Container>
         </div>
       )}
