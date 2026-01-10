@@ -154,14 +154,13 @@ export const onboard = async (req: Request, res: Response) => {
   } = req.body;
 
   const mail = email.trim();
-  const token = generateOtp(6); // generate token ONCE and reuse
+  const token = generateOtp(6);
 
   try {
     const filesToProcess = Array.isArray(req.files)
       ? req.files.filter((file) => file.fieldname === "userimg")
       : [];
 
-    // === Create user ===
     let newUser: Partial<FullUser>;
     if (selectedOption === "organization") {
       newUser = {
@@ -181,10 +180,9 @@ export const onboard = async (req: Request, res: Response) => {
       };
     }
 
-    // === Insert user ===
     const [userRow] = await db("users")
       .insert(newUser)
-      .returning(["id", "email", "role", "active", "token"]); // Return full row
+      .returning(["id", "email", "role", "active", "token"]);
 
     const userId = userRow;
     const user = await db("users").where({ id: userId }).first();
@@ -194,7 +192,6 @@ export const onboard = async (req: Request, res: Response) => {
       role: "User",
     };
 
-    // === Insert org or donor ===
     if (selectedOption === "organization") {
       const newOrg = {
         name: name?.trim(),
@@ -212,13 +209,6 @@ export const onboard = async (req: Request, res: Response) => {
       };
 
       await db("address").insert(address);
-
-      // await new Email({
-      //   email: mail,
-      //   url: "",
-      //   token,
-      //   additionalData,
-      // }).sendEmail("ngoonb", "Welcome to the GivingBack Family!");
 
       await new Email({
         email: mail,
@@ -241,13 +231,6 @@ export const onboard = async (req: Request, res: Response) => {
         user_id: userId,
         additional_information: JSON.stringify(additionalFields),
       });
-
-      // await new Email({
-      //   email: mail,
-      //   url: "",
-      //   token,
-      //   additionalData,
-      // }).sendEmail("donoronboard", "Welcome to the GivingBack Family!");
     }
     if (filesToProcess.length > 0) {
       await Promise.all(
@@ -277,7 +260,6 @@ export const onboard = async (req: Request, res: Response) => {
     createSendToken(user, 200, req, res);
   } catch (error) {
     console.error("Onboard Error:", error);
-    // res.status(500).json({ error: "An error occurred while signing up" });
   }
 };
 
@@ -304,12 +286,10 @@ export const resend = async (
   }
 };
 
-// Utility functions remain unchanged
-
 const getBank = async (userId: number) => {
   return await db("banks")
     .where({ user_id: userId })
-    .select("bankName", "accountName", "accountNumber", "bvn");
+    .select("id", "bankName", "accountName", "accountNumber", "bvn");
 };
 
 const getAddress = async (userId: number) => {
@@ -557,16 +537,13 @@ export const updateOne = async (
   } = req.body;
 
   try {
-    // Handle image upload
     const filesToProcess = Array.isArray(req.files)
       ? req.files.filter((file: any) => file.fieldname === "userimg")
       : [];
 
     if (filesToProcess.length > 0) {
-      // Delete old image(s) if they exist
       await db("userimg").where({ user_id: id }).del();
 
-      // Insert new image(s)
       await Promise.all(
         filesToProcess.map(async (file: any) => {
           const doc = {
@@ -578,11 +555,9 @@ export const updateOne = async (
       );
     }
 
-    // Check if user is an organization
     let orgUser = await db("organizations").where({ user_id: id }).first();
 
     if (orgUser) {
-      // Update organization details
       const updateData: any = {};
 
       if (name !== undefined) updateData.name = name?.trim();
@@ -596,7 +571,6 @@ export const updateOne = async (
         await db("organizations").where({ user_id: id }).update(updateData);
       }
 
-      // Update address
       const addressData: any = {};
       if (state !== undefined) addressData.state = state?.trim();
       if (city_lga !== undefined) addressData.city_lga = city_lga?.trim();
@@ -615,7 +589,6 @@ export const updateOne = async (
         }
       }
 
-      // Update bank details
       const bankData: any = {};
       if (bankName !== undefined) bankData.bankName = bankName?.trim();
       if (accountName !== undefined) bankData.accountName = accountName?.trim();
@@ -624,17 +597,10 @@ export const updateOne = async (
       if (bvn !== undefined) bankData.bvn = bvn?.trim();
 
       if (Object.keys(bankData).length > 0) {
-        const existingBank = await db("banks").where({ user_id: id }).first();
-
-        if (existingBank) {
-          await db("banks").where({ user_id: id }).update(bankData);
-        } else {
-          bankData.user_id = id;
-          await db("banks").insert(bankData);
-        }
+        bankData.user_id = id;
+        await db("banks").insert(bankData);
       }
 
-      // Fetch and return updated organization details
       const updatedOrg = await db("organizations")
         .where({ user_id: id })
         .select(
@@ -670,11 +636,9 @@ export const updateOne = async (
       return;
     }
 
-    // Check if user is a donor
     let donorUser = await db("donors").where({ user_id: id }).first();
 
     if (donorUser) {
-      // Update donor details
       const updateData: any = {};
 
       if (name !== undefined) updateData.name = name?.trim();
@@ -699,7 +663,6 @@ export const updateOne = async (
         await db("donors").where({ user_id: id }).update(updateData);
       }
 
-      // Update address
       const addressData: any = {};
       if (state !== undefined) addressData.state = state?.trim();
       if (city_lga !== undefined) addressData.city_lga = city_lga?.trim();
@@ -718,7 +681,6 @@ export const updateOne = async (
         }
       }
 
-      // Update bank details
       const bankData: any = {};
       if (bankName !== undefined) bankData.bankName = bankName?.trim();
       if (accountName !== undefined) bankData.accountName = accountName?.trim();
@@ -727,17 +689,10 @@ export const updateOne = async (
       if (bvn !== undefined) bankData.bvn = bvn?.trim();
 
       if (Object.keys(bankData).length > 0) {
-        const existingBank = await db("banks").where({ user_id: id }).first();
-
-        if (existingBank) {
-          await db("banks").where({ user_id: id }).update(bankData);
-        } else {
-          bankData.user_id = id;
-          await db("banks").insert(bankData);
-        }
+        bankData.user_id = id;
+        await db("banks").insert(bankData);
       }
 
-      // Fetch and return updated donor details
       const updatedDonor = await db("donors")
         .where({ user_id: id })
         .select(
@@ -772,12 +727,40 @@ export const updateOne = async (
       return;
     }
 
-    // User not associated with any account
     res.status(404).json({ error: "User not associated with any account" });
   } catch (error) {
     console.error("Update Error:", error);
     res
       .status(500)
       .json({ error: "An error occurred while updating user details" });
+  }
+};
+
+export const deleteBank = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  const userId = (req.user as User)?.id;
+  const { id } = req.params;
+
+  try {
+    const bank = await db("banks").where({ id, user_id: userId }).first();
+
+    if (!bank) {
+      res.status(404).json({ error: "Bank account not found" });
+      return;
+    }
+
+    await db("banks").where({ id, user_id: userId }).del();
+
+    res.status(200).json({
+      status: "success",
+      message: "Bank account deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete Bank Error:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while deleting bank account" });
   }
 };

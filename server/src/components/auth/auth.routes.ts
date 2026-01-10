@@ -4,6 +4,7 @@ import { secureLogin, verifyLogin, verifyNewUser } from "../../middleware/auth";
 import { uploadimg } from "../../middleware/general";
 import {
   changePassword,
+  deleteBank,
   forgotPassword,
   getOne,
   login,
@@ -18,30 +19,25 @@ import {
 
 const router = express.Router();
 
-// Route to sign up a new user
 router.post("/signup", verifyNewUser, signup);
 
-// Route to log in a user
 router.post("/login", verifyLogin, login);
 
-// Route to log out a user
 router.get("/logout", logout);
 
 router.post("/new/onboard", uploadimg, verifyNewUser, onboard as any);
 
-// Routes for verifying and resending
 router.route("/verify").post(verify).put(secureLogin, resend);
 
 router.post("/forgotpassword", forgotPassword);
 router.post("/resetpassword", resetPassword);
 
-// Route to get user details (requires secure login)
 router.get("/", secureLogin, getOne);
 
-// Route to update user details (requires secure login) - with optional image upload
 router.put("/", secureLogin, uploadimg, updateOne);
 
-// Route to change password (requires secure login)
 router.post("/changepassword", secureLogin, changePassword);
+
+router.delete("/bank/:id", secureLogin, deleteBank);
 
 export default router;

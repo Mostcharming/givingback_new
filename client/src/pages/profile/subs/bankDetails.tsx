@@ -21,13 +21,18 @@ import {
 import useBackendService from "../../../services/backend_service";
 import { Banks } from "../../../services/banks";
 import { useContent } from "../../../services/useContext";
-import { addBankAccount } from "../../../store/reducers/userReducer";
+import {
+  addBankAccount,
+  removeBankAccount,
+} from "../../../store/reducers/userReducer";
 
 export default function BankDetails() {
   const { currentState } = useContent();
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [selectedBank, setSelectedBank] = useState<any>(null);
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
@@ -37,8 +42,6 @@ export default function BankDetails() {
   });
 
   const bankDetails = currentState?.bank || [];
-  console.log("Current State:", currentState);
-  console.log("Bank Details:", bankDetails);
 
   const toggleLinkModal = () => {
     setIsLinkModalOpen(!isLinkModalOpen);
@@ -75,10 +78,26 @@ export default function BankDetails() {
     }
   );
 
+  const { mutate: deleteBankAccount, isLoading: isDeleting } =
+    useBackendService(`/auth/bank/${selectedBank?.id}`, "DELETE", {
+      onSuccess: () => {
+        dispatch(removeBankAccount(selectedBank.id));
+        toast.success("Bank account deleted successfully!");
+        setShowDeleteConfirmModal(false);
+        setSelectedBank(null);
+      },
+      onError: (error: any) => {
+        const errorMessage =
+          error.response?.data?.error || "Failed to delete bank account";
+        toast.error(errorMessage);
+      },
+    });
+
   const isFormComplete =
     formData.bank.trim() !== "" &&
     formData.accountNumber.trim() !== "" &&
-    formData.accountName.trim() !== "";
+    formData.accountName.trim() !== "" &&
+    formData.accountNumber.length >= 10;
 
   const handleLinkBankSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +108,17 @@ export default function BankDetails() {
       accountNumber: formData.accountNumber,
       accountName: formData.accountName,
     });
+  };
+
+  const handleDeleteClick = (bank: any) => {
+    setSelectedBank(bank);
+    console.log(bank);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleDeleteBank = () => {
+    if (!selectedBank?.id) return;
+    deleteBankAccount({});
   };
 
   return (
@@ -177,7 +207,7 @@ export default function BankDetails() {
                         </div>
                         <button
                           className="border-0 bg-transparent"
-                          onClick={() => {}}
+                          onClick={() => handleDeleteClick(account)}
                           style={{ cursor: "pointer" }}
                         >
                           <Trash2 size={20} color="white" />
@@ -294,12 +324,15 @@ export default function BankDetails() {
                 type="text"
                 placeholder="Account Number"
                 value={formData.accountNumber}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    accountNumber: e.target.value,
-                  }))
-                }
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "");
+                  if (value.length <= 20) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      accountNumber: value,
+                    }));
+                  }
+                }}
                 className="form-control-lg bg-light border-0 text-muted"
                 style={{
                   borderRadius: "12px",
@@ -307,6 +340,7 @@ export default function BankDetails() {
                   fontSize: "16px",
                   height: "auto",
                 }}
+                maxLength={20}
               />
             </FormGroup>
 
@@ -499,6 +533,67 @@ export default function BankDetails() {
               }}
             >
               Try Again
+            </Button>
+          </div>
+        </ModalBody>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteConfirmModal}
+        toggle={() => setShowDeleteConfirmModal(false)}
+        centered
+      >
+        <ModalBody
+          className="text-center"
+          style={{
+            backgroundColor: "white",
+            color: "black",
+            display: "flex",
+            justifyContent: "space-around",
+            flexDirection: "column",
+            padding: "2rem",
+          }}
+        >
+          <div className="p-3">
+            <Trash2 size={64} color="#CE0303" />
+          </div>
+          <h4 className="p-3">Delete Bank Account?</h4>
+          <p>
+            Are you sure you want to delete{" "}
+            <strong>{selectedBank?.bankName}</strong> account ending in{" "}
+            <strong>{selectedBank?.accountNumber?.slice(-4)}</strong>? This
+            action cannot be undone.
+          </p>
+          <div className="d-flex gap-3 mt-4">
+            <Button
+              className="p-3 flex-grow-1"
+              style={{
+                border: "1px solid #ccc",
+                background: "white",
+                color: "#333",
+              }}
+              type="button"
+              onClick={() => {
+                setShowDeleteConfirmModal(false);
+                setSelectedBank(null);
+              }}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="p-3 flex-grow-1"
+              style={{
+                border: "none",
+                background: "#CE0303",
+                color: "white",
+              }}
+              type="button"
+              onClick={handleDeleteBank}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </div>
         </ModalBody>

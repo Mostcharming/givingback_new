@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface User {
-  email: any;
+  email: string;
   id: number;
   name: string;
   cac: string;
@@ -25,6 +25,7 @@ export interface Wallet {
 }
 
 interface Bank {
+  id?: number;
   bankName: string;
   accountName: string;
   accountNumber: string;
@@ -128,11 +129,20 @@ const currentSlice = createSlice({
       }
       state.bank.push(action.payload);
     },
+    removeBankAccount: (state, action: PayloadAction<number>) => {
+      if (state.bank) {
+        state.bank = state.bank.filter((bank) => bank.id !== action.payload);
+      }
+    },
     clearCurrentState: () => initialState,
   },
 });
 
-export const { getCurrent, clearCurrentState, addBankAccount } =
-  currentSlice.actions;
+export const {
+  getCurrent,
+  clearCurrentState,
+  addBankAccount,
+  removeBankAccount,
+} = currentSlice.actions;
 export default currentSlice.reducer;
 export type { CurrentState };
