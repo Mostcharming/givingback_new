@@ -29,6 +29,7 @@ import {
   Row,
 } from "reactstrap";
 import DashBox from "../../components/dashbox";
+import DonorDashBox from "../../components/donorDashbox";
 import { formatDate } from "../../components/formatTime";
 import Tables from "../../components/tables";
 import useBackendService from "../../services/backend_service";
@@ -206,29 +207,35 @@ const Dashboard = () => {
             title: "Active Projects",
             amount: data.activeProjectsCount || 0,
             iconClass: <FolderOpenDot />,
-            bgColor: "#F3F4F6",
             color: "#3B82F6",
+            trendPercentage: data.activeProjectsTrend || 0,
+            trendDirection:
+              (data.activeProjectsTrend || 0) >= 0 ? "up" : "down",
           },
           {
             title: "Total Donated",
             amount: data.totalDonations || 0,
             iconClass: <Wallet />,
-            bgColor: "#F3F4F6",
             color: "#128330",
+            trendPercentage: data.totalDonationsTrend || 0,
+            trendDirection:
+              (data.totalDonationsTrend || 0) >= 0 ? "up" : "down",
           },
           {
-            title: "NGO's Patnered",
-            amount: data.activeProjectsCount,
+            title: "NGO's Partnered",
+            amount: data.ngoPartnered || data.activeProjectsCount,
             iconClass: <UsersRound />,
-            bgColor: "#F3F4F6",
             color: "#9C27B0",
+            trendPercentage: data.ngoPartnerTrend || 0,
+            trendDirection: (data.ngoPartnerTrend || 0) >= 0 ? "up" : "down",
           },
           {
             title: "States Covered",
-            amount: data.completedProjectsCount,
+            amount: data.statesCovered || data.completedProjectsCount,
             iconClass: <Map />,
-            bgColor: "#F3F4F6",
             color: "#3B82F6",
+            trendPercentage: data.statesCoveredTrend || 0,
+            trendDirection: (data.statesCoveredTrend || 0) >= 0 ? "up" : "down",
           },
         ];
       case "admin":
@@ -464,7 +471,11 @@ const Dashboard = () => {
       <Container>
         <Col className="p-4">{renderBreadcrumbs(role)} </Col>
       </Container>
-      <DashBox items={dashBoxItems} />
+      {role === "donor" || role === "corporate" ? (
+        <DonorDashBox items={dashBoxItems} />
+      ) : (
+        <DashBox items={dashBoxItems} />
+      )}
       {role === "NGO" && (
         <NGOChecks
           hasBankDetails={hasBankDetails}
