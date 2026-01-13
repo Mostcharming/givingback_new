@@ -67,8 +67,8 @@ const DonorDashBox: React.FC<DonorDashBoxProps> = ({ items }) => {
                       <div
                         style={{
                           display: "flex",
-                          alignItems: "flex-end",
-                          justifyContent: "space-between",
+                          flexDirection: "column",
+                          gap: "8px",
                         }}
                       >
                         <span
@@ -88,11 +88,12 @@ const DonorDashBox: React.FC<DonorDashBoxProps> = ({ items }) => {
                             alignItems: "center",
                             gap: "4px",
                             padding: "4px 8px",
-                            backgroundColor:
-                              item.trendDirection === "up"
-                                ? "#DCFCE7"
-                                : "#FEE2E2",
+                            // backgroundColor:
+                            //   item.trendDirection === "up"
+                            //     ? "#DCFCE7"
+                            //     : "#FEE2E2",
                             borderRadius: "6px",
+                            width: "fit-content",
                           }}
                         >
                           {item.trendDirection === "up" ? (
@@ -117,7 +118,17 @@ const DonorDashBox: React.FC<DonorDashBoxProps> = ({ items }) => {
                             }}
                           >
                             {item.trendDirection === "up" ? "+" : ""}
-                            {item.trendPercentage}% from last month
+                            {item.trendPercentage}%
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              fontWeight: "600",
+                              color: "#000000",
+                            }}
+                          >
+                            {" "}
+                            from last month
                           </span>
                         </div>
                       </div>
