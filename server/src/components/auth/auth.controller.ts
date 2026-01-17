@@ -830,17 +830,22 @@ export const getAllOrganizations = async (
   try {
     const { is_verified, donor_id } = req.query;
 
-    let query = db("organizations");
+    let query = db("organizations")
+      .leftJoin("users", "organizations.user_id", "users.id")
+      .select("organizations.*", "users.email");
 
     if (is_verified !== undefined) {
-      query = query.where({ is_verified: Number(is_verified) });
+      query = query.where({ "organizations.is_verified": Number(is_verified) });
     }
 
     if (donor_id !== undefined) {
-      query = query.where({ donor_id: Number(donor_id) });
+      query = query.where({ "organizations.donor_id": Number(donor_id) });
     }
 
-    const organizations = await query.orderBy("created_at", "asc");
+    const organizations = await query.orderBy(
+      "organizations.created_at",
+      "asc"
+    );
 
     res.status(200).json({
       status: "success",

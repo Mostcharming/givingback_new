@@ -1,0 +1,114 @@
+/* NGO Card Styling */
+.ngo-card {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.ngo-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #d0d0d0;
+}
+
+.ngo-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.ngo-name-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.ngo-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #333333;
+  line-height: 1.4;
+}
+
+.verification-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #b3e5b3;
+  border-radius: 20px;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+.verification-icon {
+  color: #1b5e20;
+  flex-shrink: 0;
+}
+
+.verification-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1b5e20;
+  margin: 0;
+}
+
+/* NGO Card Info Section - Second Line */
+.ngo-card-info {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.ngo-info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ngo-info-icon {
+  color: #666666;
+  flex-shrink: 0;
+}
+
+.ngo-info-text {
+  font-size: 14px;
+  color: #555555;
+  margin: 0;
+}
+
+/* NGO Card Footer - Contact Button */
+.ngo-card-footer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.contact-ngo-btn {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.contact-ngo-btn:hover {
+  background-color: #1d4ed8;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.contact-ngo-btn:active {
+  background-color: #1e40af;
+}

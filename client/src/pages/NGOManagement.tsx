@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button, Col, Container, Row } from "reactstrap";
 import EmptyNGO from "../assets/images/emptyngo.svg";
+import NGOCard from "../components/NGOCard";
 import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
 import "./ngo-management.css";
@@ -241,8 +242,22 @@ const NGOManagement = () => {
           <div className="tab-pane">
             {paperBasedNgos.length > 0 ? (
               <div>
-                <p>Paper-based NGOs: {paperBasedNgos.length}</p>
-                {/* TODO: Render table with paperBasedNgos data */}
+                <div style={{ marginBottom: "16px" }}>
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "#1a1a1a",
+                    }}
+                  >
+                    Paper-based NGOs: {paperBasedNgos.length}
+                  </p>
+                </div>
+                <div>
+                  {paperBasedNgos.map((ngo) => (
+                    <NGOCard key={ngo.id} ngo={ngo} />
+                  ))}
+                </div>
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 20px" }}>
@@ -262,8 +277,22 @@ const NGOManagement = () => {
           <div className="tab-pane">
             {yourNgos.length > 0 ? (
               <div>
-                <p>Your NGOs: {yourNgos.length}</p>
-                {/* TODO: Render table with yourNgos data */}
+                <div style={{ marginBottom: "16px" }}>
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "#1a1a1a",
+                    }}
+                  >
+                    Your NGOs: {yourNgos.length}
+                  </p>
+                </div>
+                <div>
+                  {yourNgos.map((ngo) => (
+                    <NGOCard key={ngo.id} ngo={ngo} />
+                  ))}
+                </div>
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 20px" }}>
@@ -283,8 +312,22 @@ const NGOManagement = () => {
           <div className="tab-pane">
             {verifiedNgos.length > 0 ? (
               <div>
-                <p>Verified NGOs: {verifiedNgos.length}</p>
-                {/* TODO: Render table with verifiedNgos data */}
+                <div style={{ marginBottom: "16px" }}>
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "#1a1a1a",
+                    }}
+                  >
+                    Verified NGOs: {verifiedNgos.length}
+                  </p>
+                </div>
+                <div>
+                  {verifiedNgos.map((ngo) => (
+                    <NGOCard key={ngo.id} ngo={ngo} />
+                  ))}
+                </div>
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "60px 20px" }}>
