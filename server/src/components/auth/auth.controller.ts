@@ -736,6 +736,64 @@ export const updateOne = async (
   }
 };
 
+export const getOrganizationCounts = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = (req.user as User)?.id;
+
+    if (!userId) {
+      res.status(400).json({ error: "User ID not found" });
+      return;
+    }
+
+    // Get actual donor_id from donor table where user_id matches
+    const donor = await db("donors").where({ user_id: userId }).first();
+
+    if (!donor) {
+      res.status(404).json({ error: "Donor not found" });
+      return;
+    }
+
+    const donorId = donor.id;
+
+    const totalOrganizationsResult: any = await db("organizations")
+      .count("id as totalCount")
+      .first();
+
+    const totalOrganizations = totalOrganizationsResult?.totalCount || 0;
+
+    const donorOrganizationsResult: any = await db("organizations")
+      .where({
+        donor_id: donorId,
+      })
+      .count("id as donorOrgCount")
+      .first();
+
+    const donorOrganizationCount = donorOrganizationsResult?.donorOrgCount || 0;
+
+    const verifiedOrganizationsResult: any = await db("organizations")
+      .where({ is_verified: 1 })
+      .count("id as verifiedCount")
+      .first();
+
+    const verifiedOrganizationsCount =
+      verifiedOrganizationsResult?.verifiedCount || 0;
+
+    res.status(200).json({
+      totalOrganizations,
+      donorOrganizationCount,
+      verifiedOrganizationsCount,
+    });
+  } catch (error) {
+    console.error("Get Organization Counts Error:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching organization counts" });
+  }
+};
+
 export const deleteBank = async (
   req: UserRequest,
   res: Response

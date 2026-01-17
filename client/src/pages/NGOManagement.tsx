@@ -3,7 +3,9 @@
 import { CheckCircle, FileText, Monitor } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { Button, Col, Container, Row } from "reactstrap";
+import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
 import "./ngo-management.css";
 
@@ -11,8 +13,35 @@ const NGOManagement = () => {
   const { authState } = useContent();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Paper-based NGOs");
+  const [counts, setCounts] = useState({
+    totalOrganizations: 0,
+    donorOrganizationCount: 0,
+    verifiedOrganizationsCount: 0,
+  });
 
   const tabs = ["Paper-based NGOs", "Your NGOs", "Verified NGOs"];
+
+  const { mutate: fetchOrganizationCounts, isLoading } = useBackendService(
+    "/auth/organization-counts",
+    "GET",
+    {
+      onSuccess: (res: any) => {
+        setCounts({
+          totalOrganizations: res.totalOrganizations || 0,
+          donorOrganizationCount: res.donorOrganizationCount || 0,
+          verifiedOrganizationsCount: res.verifiedOrganizationsCount || 0,
+        });
+      },
+      onError: (error) => {
+        toast.error("Failed to fetch organization counts.");
+        setCounts({
+          totalOrganizations: 0,
+          donorOrganizationCount: 0,
+          verifiedOrganizationsCount: 0,
+        });
+      },
+    }
+  );
 
   useEffect(() => {
     const role = authState.user?.role;
@@ -20,6 +49,10 @@ const NGOManagement = () => {
       navigate("/");
     }
   }, [authState.user?.role, navigate]);
+
+  useEffect(() => {
+    fetchOrganizationCounts({});
+  }, [fetchOrganizationCounts]);
 
   const handleAddNewNGO = () => {
     // Do nothing
@@ -121,6 +154,14 @@ const NGOManagement = () => {
               return null;
             };
 
+            const getCount = () => {
+              if (tab === "Paper-based NGOs") return counts.totalOrganizations;
+              if (tab === "Your NGOs") return counts.donorOrganizationCount;
+              if (tab === "Verified NGOs")
+                return counts.verifiedOrganizationsCount;
+              return 0;
+            };
+
             return (
               <button
                 key={tab}
@@ -128,9 +169,31 @@ const NGOManagement = () => {
                 className={`tab-button ${
                   activeTab === tab ? "tab-active" : ""
                 }`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
               >
                 {getIcon()}
                 {tab}
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#000000",
+                    color: "#ffffff",
+                    borderRadius: "50%",
+                    width: "24px",
+                    height: "24px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    marginLeft: "8px",
+                  }}
+                >
+                  {getCount()}
+                </span>
               </button>
             );
           })}

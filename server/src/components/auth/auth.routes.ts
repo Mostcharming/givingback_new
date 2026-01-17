@@ -7,6 +7,7 @@ import {
   deleteBank,
   forgotPassword,
   getOne,
+  getOrganizationCounts,
   login,
   logout,
   onboard,
@@ -33,6 +34,8 @@ router.post("/forgotpassword", forgotPassword);
 router.post("/resetpassword", resetPassword);
 
 router.get("/", secureLogin, getOne);
+
+router.get("/organization-counts", secureLogin, getOrganizationCounts);
 
 router.put("/", secureLogin, uploadimg, updateOne);
 
