@@ -1,13 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect } from "react";
+import { CheckCircle, FileText, Monitor } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Col, Container, Row } from "reactstrap";
 import { useContent } from "../services/useContext";
+import "./ngo-management.css";
 
 const NGOManagement = () => {
   const { authState } = useContent();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("Paper-based NGOs");
+
+  const tabs = ["Paper-based NGOs", "Your NGOs", "Verified NGOs"];
 
   useEffect(() => {
     const role = authState.user?.role;
@@ -17,7 +22,7 @@ const NGOManagement = () => {
   }, [authState.user?.role, navigate]);
 
   const handleAddNewNGO = () => {
-    navigate("/donor/add-ngo");
+    // Do nothing
   };
 
   return (
@@ -100,7 +105,56 @@ const NGOManagement = () => {
         </Col>
       </Row>
 
-      <div style={{ padding: "40px 60px" }}></div>
+      <div style={{ padding: "10px 0px" }}></div>
+
+      {/* Tab Navigation */}
+      <div className="tab-container">
+        <div className="tab-wrapper">
+          {tabs.map((tab) => {
+            const getIcon = () => {
+              if (tab === "Paper-based NGOs")
+                return <FileText size={18} style={{ marginRight: "8px" }} />;
+              if (tab === "Your NGOs")
+                return <Monitor size={18} style={{ marginRight: "8px" }} />;
+              if (tab === "Verified NGOs")
+                return <CheckCircle size={18} style={{ marginRight: "8px" }} />;
+              return null;
+            };
+
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`tab-button ${
+                  activeTab === tab ? "tab-active" : ""
+                }`}
+              >
+                {getIcon()}
+                {tab}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="ngo-tab-content">
+        {activeTab === "Paper-based NGOs" && (
+          <div className="tab-pane">
+            <p>Paper-based NGOs content goes here</p>
+          </div>
+        )}
+        {activeTab === "Your NGOs" && (
+          <div className="tab-pane">
+            <p>Your NGOs content goes here</p>
+          </div>
+        )}
+        {activeTab === "Verified NGOs" && (
+          <div className="tab-pane">
+            <p>Verified NGOs content goes here</p>
+          </div>
+        )}
+      </div>
     </Container>
   );
 };
