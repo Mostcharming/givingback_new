@@ -1,22 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BookOpen, FileText, Upload } from "lucide-react";
+import { FileText, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import {
-  Button,
-  Form,
-  FormGroup,
-  Input,
-  Label,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-} from "reactstrap";
+import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import useBackendService from "../services/backend_service";
 import "./add-ngo-modal.css";
-import FileUpload from "./file_upload";
+import ManualEntryForm from "./ManualEntry/ManualEntryForm";
+import UploadFileForm from "./UploadFile/UploadFileForm";
 
 interface AddNGOModalProps {
   isOpen: boolean;
@@ -198,245 +189,16 @@ export default function AddNGOModal({
       <ModalBody style={{ padding: "24px" }}>
         {/* Manual Entry Tab */}
         {activeTab === "manual" && (
-          <Form onSubmit={handleManualSubmit}>
-            <FormGroup>
-              <Label
-                for="name"
-                style={{ fontWeight: 600, marginBottom: "8px" }}
-              >
-                NGO Name *
-              </Label>
-              <Input
-                type="text"
-                name="name"
-                id="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Enter NGO name"
-                style={{
-                  borderRadius: "6px",
-                  borderColor: "#d1d5db",
-                  fontSize: "14px",
-                }}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label
-                for="email"
-                style={{ fontWeight: 600, marginBottom: "8px" }}
-              >
-                Email *
-              </Label>
-              <Input
-                type="email"
-                name="email"
-                id="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="Enter email address"
-                style={{
-                  borderRadius: "6px",
-                  borderColor: "#d1d5db",
-                  fontSize: "14px",
-                }}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label
-                for="phone"
-                style={{ fontWeight: 600, marginBottom: "8px" }}
-              >
-                Phone
-              </Label>
-              <Input
-                type="tel"
-                name="phone"
-                id="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                placeholder="Enter phone number"
-                style={{
-                  borderRadius: "6px",
-                  borderColor: "#d1d5db",
-                  fontSize: "14px",
-                }}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label
-                for="address"
-                style={{ fontWeight: 600, marginBottom: "8px" }}
-              >
-                Address
-              </Label>
-              <Input
-                type="text"
-                name="address"
-                id="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                placeholder="Enter address"
-                style={{
-                  borderRadius: "6px",
-                  borderColor: "#d1d5db",
-                  fontSize: "14px",
-                }}
-              />
-            </FormGroup>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "16px",
-              }}
-            >
-              <FormGroup>
-                <Label
-                  for="state"
-                  style={{ fontWeight: 600, marginBottom: "8px" }}
-                >
-                  State
-                </Label>
-                <Input
-                  type="text"
-                  name="state"
-                  id="state"
-                  value={formData.state}
-                  onChange={handleInputChange}
-                  placeholder="Enter state"
-                  style={{
-                    borderRadius: "6px",
-                    borderColor: "#d1d5db",
-                    fontSize: "14px",
-                  }}
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <Label
-                  for="country"
-                  style={{ fontWeight: 600, marginBottom: "8px" }}
-                >
-                  Country
-                </Label>
-                <Input
-                  type="text"
-                  name="country"
-                  id="country"
-                  value={formData.country}
-                  onChange={handleInputChange}
-                  placeholder="Enter country"
-                  style={{
-                    borderRadius: "6px",
-                    borderColor: "#d1d5db",
-                    fontSize: "14px",
-                  }}
-                />
-              </FormGroup>
-            </div>
-
-            <FormGroup>
-              <Label
-                for="description"
-                style={{ fontWeight: 600, marginBottom: "8px" }}
-              >
-                Description
-              </Label>
-              <Input
-                type="textarea"
-                name="description"
-                id="description"
-                value={formData.description}
-                onChange={handleInputChange as any}
-                placeholder="Enter NGO description"
-                style={{
-                  borderRadius: "6px",
-                  borderColor: "#d1d5db",
-                  fontSize: "14px",
-                }}
-                rows={4}
-              />
-            </FormGroup>
-          </Form>
+          <ManualEntryForm
+            formData={formData}
+            onChange={handleInputChange}
+            onSubmit={handleManualSubmit}
+          />
         )}
 
         {/* Upload Details Tab */}
         {activeTab === "upload" && (
-          <div>
-            <div style={{ marginBottom: "16px" }}>
-              <p
-                style={{
-                  fontSize: "14px",
-                  color: "#666666",
-                  marginBottom: "16px",
-                }}
-              >
-                Upload an Excel file with NGO details. Download the template to
-                see the required format.
-              </p>
-              <Button
-                color="link"
-                style={{
-                  padding: 0,
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#128330",
-                  textDecoration: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <BookOpen size={16} />
-                Download template
-              </Button>
-            </div>
-
-            <FileUpload
-              file={uploadFile}
-              width="100%"
-              height="200px"
-              onFile={handleFileSelect}
-              backgroundColor="#f9fafb"
-            >
-              {[
-                <div key="upload-container" style={{ textAlign: "center" }}>
-                  <svg
-                    width="48"
-                    height="48"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#666666"
-                    strokeWidth="2"
-                    style={{ marginBottom: "12px" }}
-                  >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                  </svg>
-                  <label
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      color: "#1a1a1a",
-                      display: "block",
-                      marginBottom: "4px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Click to upload or drag and drop
-                  </label>
-                  <p style={{ fontSize: "12px", color: "#666666", margin: 0 }}>
-                    {uploadFile ? uploadFile.name : "Excel (.xlsx, .xls)"}
-                  </p>
-                </div>,
-              ]}
-            </FileUpload>
-          </div>
+          <UploadFileForm uploadFile={uploadFile} onFile={handleFileSelect} />
         )}
       </ModalBody>
 
@@ -445,7 +207,7 @@ export default function AddNGOModal({
           borderTop: "1px solid #e5e7eb",
           padding: "16px 24px",
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
           gap: "12px",
         }}
       >
@@ -456,10 +218,11 @@ export default function AddNGOModal({
             borderRadius: "6px",
             fontSize: "14px",
             fontWeight: 600,
-            padding: "10px 24px",
+            padding: "14px 48px",
             backgroundColor: "#f3f4f6",
             color: "#1a1a1a",
             border: "none",
+            flex: 1,
           }}
         >
           Cancel
@@ -474,9 +237,10 @@ export default function AddNGOModal({
             borderRadius: "6px",
             fontSize: "14px",
             fontWeight: 600,
-            padding: "10px 24px",
+            padding: "14px 48px",
             backgroundColor: "#28a745",
             border: "none",
+            flex: 1,
           }}
         >
           {isLoading ? "Adding..." : "Add NGO"}
