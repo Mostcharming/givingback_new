@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button, Col, Container, Row } from "reactstrap";
 import EmptyNGO from "../assets/images/emptyngo.svg";
+import AddNGOModal from "../components/AddNGOModal";
 import NGOCard from "../components/NGOCard";
 import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
@@ -15,6 +16,7 @@ const NGOManagement = () => {
   const { authState, currentState } = useContent();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Paper-based NGOs");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [counts, setCounts] = useState({
     totalOrganizations: 0,
     donorOrganizationCount: 0,
@@ -88,10 +90,19 @@ const NGOManagement = () => {
     } else if (activeTab === "Verified NGOs") {
       fetchOrganizations({ is_verified: 1 });
     }
-  }, [activeTab, authState.user?.id, fetchOrganizations]);
+  }, [activeTab, currentState.user.id, fetchOrganizations]);
 
   const handleAddNewNGO = () => {
-    // Do nothing
+    setIsModalOpen(true);
+  };
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  const handleModalSuccess = () => {
+    // Refresh the data
+    fetchOrganizationCounts({});
   };
 
   return (
@@ -103,6 +114,11 @@ const NGOManagement = () => {
         padding: "0",
       }}
     >
+      <AddNGOModal
+        isOpen={isModalOpen}
+        toggle={toggleModal}
+        onSuccess={handleModalSuccess}
+      />
       <Row
         className="align-items-center"
         style={{
@@ -242,17 +258,6 @@ const NGOManagement = () => {
           <div className="tab-pane">
             {paperBasedNgos.length > 0 ? (
               <div>
-                <div style={{ marginBottom: "16px" }}>
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "#1a1a1a",
-                    }}
-                  >
-                    Paper-based NGOs: {paperBasedNgos.length}
-                  </p>
-                </div>
                 <div>
                   {paperBasedNgos.map((ngo) => (
                     <NGOCard key={ngo.id} ngo={ngo} />
