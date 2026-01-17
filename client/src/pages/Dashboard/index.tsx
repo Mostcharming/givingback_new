@@ -4,12 +4,8 @@ import {
   Book,
   Clock,
   FolderOpenDot,
-  // Heart,  // Commented out - used in Quick Actions
   House,
-  Map,
   Mic,
-  // Plus,   // Commented out - used in Quick Actions
-  // Send,   // Commented out - used in Quick Actions
   Users,
   UsersRound,
   Wallet,
@@ -37,8 +33,6 @@ import { capitalizeFirstLetter } from "../../services/capitalize";
 import { useContent } from "../../services/useContext";
 import Highlights from "./Donor/highlights/highlight";
 import NoHighlights from "./Donor/highlights/nohighlight";
-// import Content from "./Donor/recent/content";     // Commented out - used in Recent Activities
-// import NoContent from "./Donor/recent/noContent"; // Commented out - used in Recent Activities
 import NGOChecks from "./NGO/checks";
 
 const Dashboard = () => {
@@ -204,38 +198,36 @@ const Dashboard = () => {
       case "corporate":
         return [
           {
-            title: "Active Projects",
-            amount: data.activeProjectsCount || 0,
-            iconClass: <FolderOpenDot />,
-            color: "#3B82F6",
-            trendPercentage: data.activeProjectsTrend || 0,
-            trendDirection:
-              (data.activeProjectsTrend || 0) >= 0 ? "up" : "down",
-          },
-          {
-            title: "Total Donated",
-            amount: data.totalDonations || 0,
+            title: "Total Fund Disbursed",
+            amount: data.totalFundDisbursed?.value || "₦0.00",
             iconClass: <Wallet />,
             color: "#128330",
-            trendPercentage: data.totalDonationsTrend || 0,
-            trendDirection:
-              (data.totalDonationsTrend || 0) >= 0 ? "up" : "down",
+            trendPercentage: data.totalFundDisbursed?.trend || 0,
+            trendDirection: data.totalFundDisbursed?.isUp ? "up" : "down",
           },
           {
-            title: "NGO's Partnered",
-            amount: data.ngoPartnered || data.activeProjectsCount,
+            title: "NGOs Onboarded",
+            amount: data.ngosOnboarded?.value || 0,
             iconClass: <UsersRound />,
             color: "#9C27B0",
-            trendPercentage: data.ngoPartnerTrend || 0,
-            trendDirection: (data.ngoPartnerTrend || 0) >= 0 ? "up" : "down",
+            trendPercentage: data.ngosOnboarded?.trend || 0,
+            trendDirection: data.ngosOnboarded?.isUp ? "up" : "down",
           },
           {
-            title: "States Covered",
-            amount: data.statesCovered || data.completedProjectsCount,
-            iconClass: <Map />,
+            title: "Active Projects",
+            amount: data.activeProjects?.value || 0,
+            iconClass: <FolderOpenDot />,
             color: "#3B82F6",
-            trendPercentage: data.statesCoveredTrend || 0,
-            trendDirection: (data.statesCoveredTrend || 0) >= 0 ? "up" : "down",
+            trendPercentage: data.activeProjects?.trend || 0,
+            trendDirection: data.activeProjects?.isUp ? "up" : "down",
+          },
+          {
+            title: "Total Beneficiaries",
+            amount: data.totalBeneficiaries?.value || 0,
+            iconClass: <Users />,
+            color: "#FFC107",
+            trendPercentage: data.totalBeneficiaries?.trend || 0,
+            trendDirection: data.totalBeneficiaries?.isUp ? "up" : "down",
           },
         ];
       case "admin":
@@ -275,22 +267,12 @@ const Dashboard = () => {
     switch (role) {
       case "NGO":
         setHeaders(["Transaction-No", "Amount", "Type", "Status", "Date-Time"]);
-        setActions([
-          // {
-          //   label: 'View',
-          //   onClick: (row) => console.log('View details of', row)
-          // }
-        ]);
+        setActions([]);
         break;
       case "donor":
       case "corporate":
         setHeaders(["Transaction-No", "Amount", "Type", "Status", "Date-Time"]);
-        setActions([
-          // {
-          //   label: 'View',
-          //   onClick: (row) => console.log('View details of', row)
-          // }
-        ]);
+        setActions([]);
         break;
       case "admin":
         setHeaders([
@@ -644,104 +626,6 @@ const Dashboard = () => {
                 </Card>
               </Col>
             </Row>
-
-            {/* Bottom section - Recent Activities and Quick Actions (commented out) */}
-            {/* <Row>
-              <Col md={6} className="mb-4">
-                <Card className="border-0 shadow-sm">
-                  <h5
-                    className=" fw-normal pl-2 pt-2"
-                    style={{ fontSize: "1.5rem", color: "#333" }}
-                  >
-                    Recent activities
-                  </h5>
-
-                  <hr style={{ borderColor: "#e5e5e5" }} />
-
-                  {tableData && tableData.length > 0 ? (
-                    <Content data={tableData} />
-                  ) : (
-                    <NoContent />
-                  )}
-                </Card>
-              </Col>
-
-              <Col md={6} className="mb-4">
-                <Card className="border-0 shadow-sm">
-                  <h5
-                    className=" fw-normal pl-2 pt-2"
-                    style={{ fontSize: "1.5rem", color: "#333" }}
-                  >
-                    Quick Actions
-                  </h5>
-
-                  <hr style={{ borderColor: "#e5e5e5" }} />
-
-                  <div className="">
-                    <div className="d-flex flex-column align-items-center justify-content-center">
-                      <Button
-                        color="success"
-                        size="lg"
-                        className="d-flex align-items-center justify-content-center py-3 w-75"
-                        style={{
-                          margin: "15px",
-                          backgroundColor: "#4ade80",
-                          borderColor: "#4ade80",
-                        }}
-                        onClick={() => navigate("/donor/brief_initiate")}
-                      >
-                        <Plus className="mr-2" size={20} />
-                        Create a new project brief
-                      </Button>
-
-                      <Button
-                        color="primary"
-                        size="lg"
-                        className="d-flex align-items-center justify-content-center py-3 w-75"
-                        style={{
-                          margin: "15px",
-                          backgroundColor: "#3b82f6",
-                          borderColor: "#3b82f6",
-                        }}
-                        onClick={() => navigate("/donor/fund_management")}
-                      >
-                        <Heart className="mr-2" size={20} />
-                        Donate to projects
-                      </Button>
-
-                      <Button
-                        size="lg"
-                        className="d-flex align-items-center justify-content-center py-3 text-white w-75"
-                        style={{
-                          margin: "15px",
-                          backgroundColor: "#a855f7",
-                          borderColor: "#a855f7",
-                        }}
-                        onClick={() => navigate("/donor/ngo_directory")}
-                      >
-                        <Book className="mr-2" size={20} />
-                        View NGO directory
-                      </Button>
-
-                      <Button
-                        color="dark"
-                        size="lg"
-                        className="d-flex align-items-center justify-content-center py-3 rounded-3 w-75"
-                        style={{
-                          margin: "15px",
-                          backgroundColor: "#374151",
-                          borderColor: "#374151",
-                        }}
-                        onClick={() => navigate("/donor/messages")}
-                      >
-                        <Send className="mr-2" size={20} />
-                        Send message
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </Col>
-            </Row> */}
           </Container>
         </div>
       )}
