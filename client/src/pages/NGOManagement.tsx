@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button, Col, Container, Row } from "reactstrap";
+import EmptyNGO from "../assets/images/emptyngo.svg";
 import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
 import "./ngo-management.css";
 
 const NGOManagement = () => {
-  const { authState } = useContent();
+  const { authState, currentState } = useContent();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Paper-based NGOs");
   const [counts, setCounts] = useState({
@@ -18,6 +19,9 @@ const NGOManagement = () => {
     donorOrganizationCount: 0,
     verifiedOrganizationsCount: 0,
   });
+  const [paperBasedNgos, setPaperBasedNgos] = useState([]);
+  const [yourNgos, setYourNgos] = useState([]);
+  const [verifiedNgos, setVerifiedNgos] = useState([]);
 
   const tabs = ["Paper-based NGOs", "Your NGOs", "Verified NGOs"];
 
@@ -43,6 +47,26 @@ const NGOManagement = () => {
     }
   );
 
+  const { mutate: fetchOrganizations } = useBackendService(
+    "/auth/organizations",
+    "GET",
+    {
+      onSuccess: (res: any) => {
+        const organizations = res.data || [];
+        if (activeTab === "Paper-based NGOs") {
+          setPaperBasedNgos(organizations);
+        } else if (activeTab === "Your NGOs") {
+          setYourNgos(organizations);
+        } else if (activeTab === "Verified NGOs") {
+          setVerifiedNgos(organizations);
+        }
+      },
+      onError: (error) => {
+        toast.error("Failed to fetch organizations.");
+      },
+    }
+  );
+
   useEffect(() => {
     const role = authState.user?.role;
     if (role !== "donor" && role !== "corporate") {
@@ -53,6 +77,17 @@ const NGOManagement = () => {
   useEffect(() => {
     fetchOrganizationCounts({});
   }, [fetchOrganizationCounts]);
+
+  useEffect(() => {
+    const userId = currentState.user.id;
+    if (activeTab === "Paper-based NGOs") {
+      fetchOrganizations({});
+    } else if (activeTab === "Your NGOs" && userId) {
+      fetchOrganizations({ donor_id: userId });
+    } else if (activeTab === "Verified NGOs") {
+      fetchOrganizations({ is_verified: 1 });
+    }
+  }, [activeTab, authState.user?.id, fetchOrganizations]);
 
   const handleAddNewNGO = () => {
     // Do nothing
@@ -204,17 +239,65 @@ const NGOManagement = () => {
       <div className="ngo-tab-content">
         {activeTab === "Paper-based NGOs" && (
           <div className="tab-pane">
-            <p>Paper-based NGOs content goes here</p>
+            {paperBasedNgos.length > 0 ? (
+              <div>
+                <p>Paper-based NGOs: {paperBasedNgos.length}</p>
+                {/* TODO: Render table with paperBasedNgos data */}
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: "60px 20px" }}>
+                <img
+                  src={EmptyNGO}
+                  alt="No data"
+                  style={{ maxWidth: "200px", marginBottom: "20px" }}
+                />
+                <p style={{ fontSize: "16px", color: "#666666" }}>
+                  No data available at the moment
+                </p>
+              </div>
+            )}
           </div>
         )}
         {activeTab === "Your NGOs" && (
           <div className="tab-pane">
-            <p>Your NGOs content goes here</p>
+            {yourNgos.length > 0 ? (
+              <div>
+                <p>Your NGOs: {yourNgos.length}</p>
+                {/* TODO: Render table with yourNgos data */}
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: "60px 20px" }}>
+                <img
+                  src={EmptyNGO}
+                  alt="No data"
+                  style={{ maxWidth: "200px", marginBottom: "20px" }}
+                />
+                <p style={{ fontSize: "16px", color: "#666666" }}>
+                  No data available at the moment
+                </p>
+              </div>
+            )}
           </div>
         )}
         {activeTab === "Verified NGOs" && (
           <div className="tab-pane">
-            <p>Verified NGOs content goes here</p>
+            {verifiedNgos.length > 0 ? (
+              <div>
+                <p>Verified NGOs: {verifiedNgos.length}</p>
+                {/* TODO: Render table with verifiedNgos data */}
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: "60px 20px" }}>
+                <img
+                  src={EmptyNGO}
+                  alt="No data"
+                  style={{ maxWidth: "200px", marginBottom: "20px" }}
+                />
+                <p style={{ fontSize: "16px", color: "#666666" }}>
+                  No data available at the moment
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

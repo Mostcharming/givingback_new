@@ -6,6 +6,7 @@ import {
   changePassword,
   deleteBank,
   forgotPassword,
+  getAllOrganizations,
   getOne,
   getOrganizationCounts,
   login,
@@ -42,5 +43,7 @@ router.put("/", secureLogin, uploadimg, updateOne);
 router.post("/changepassword", secureLogin, changePassword);
 
 router.delete("/bank/:id", secureLogin, deleteBank);
+
+router.get("/organizations", secureLogin, getAllOrganizations);
 
 export default router;

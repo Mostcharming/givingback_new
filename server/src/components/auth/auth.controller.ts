@@ -822,3 +822,35 @@ export const deleteBank = async (
       .json({ error: "An error occurred while deleting bank account" });
   }
 };
+
+export const getAllOrganizations = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { is_verified, donor_id } = req.query;
+
+    let query = db("organizations");
+
+    if (is_verified !== undefined) {
+      query = query.where({ is_verified: Number(is_verified) });
+    }
+
+    if (donor_id !== undefined) {
+      query = query.where({ donor_id: Number(donor_id) });
+    }
+
+    const organizations = await query.orderBy("created_at", "asc");
+
+    res.status(200).json({
+      status: "success",
+      count: organizations.length,
+      data: organizations,
+    });
+  } catch (error) {
+    console.error("Get All Organizations Error:", error);
+    res.status(500).json({
+      error: "An error occurred while fetching organizations",
+    });
+  }
+};
