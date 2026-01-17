@@ -2,6 +2,8 @@
 import { ApexOptions } from "apexcharts";
 import {
   Book,
+  BriefcaseBusiness,
+  CircleAlert,
   Clock,
   FolderOpenDot,
   House,
@@ -216,7 +218,7 @@ const Dashboard = () => {
           {
             title: "Active Projects",
             amount: data.activeProjects?.value || 0,
-            iconClass: <FolderOpenDot />,
+            iconClass: <BriefcaseBusiness />,
             color: "#3B82F6",
             trendPercentage: data.activeProjects?.trend || 0,
             trendDirection: data.activeProjects?.isUp ? "up" : "down",
@@ -224,7 +226,7 @@ const Dashboard = () => {
           {
             title: "Total Beneficiaries",
             amount: data.totalBeneficiaries?.value || 0,
-            iconClass: <Users />,
+            iconClass: <CircleAlert />,
             color: "#FFC107",
             trendPercentage: data.totalBeneficiaries?.trend || 0,
             trendDirection: data.totalBeneficiaries?.isUp ? "up" : "down",
