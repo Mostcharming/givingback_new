@@ -71,13 +71,15 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .tab-container {
-    margin: 0 16px 32px 16px;
+    margin: 0 0 32px 0;
+    justify-content: center;
   }
 
   .tab-wrapper {
-    flex-direction: column;
+    flex-direction: row;
     width: 100%;
     max-width: 100%;
+    margin: 0 auto;
   }
 
   .tab-button {

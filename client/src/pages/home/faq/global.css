@@ -142,12 +142,13 @@
 
   .tab-container {
     margin-bottom: 32px;
+    justify-content: center;
   }
 
   .tab-wrapper {
-    flex-direction: column;
+    flex-direction: row;
     width: 100%;
-    max-width: 300px;
+    max-width: 100%;
     margin: 0 auto;
   }
 
