@@ -42,6 +42,13 @@ const NGOCard = ({ ngo }: NGOCardProps) => {
             </div>
           )}
         </div>
+        {!isVerified && (
+          <div className="awaiting-verification">
+            <span className="awaiting-verification-text">
+              Awaiting verification
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Second line: Location, Email, Phone */}

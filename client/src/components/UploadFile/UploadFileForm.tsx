@@ -5,41 +5,47 @@ import FileUpload from "../file_upload";
 interface UploadFileFormProps {
   uploadFile: File | undefined;
   onFile: (file: File) => void;
+  showHeader?: boolean;
+  showRequirements?: boolean;
 }
 
 export default function UploadFileForm({
   uploadFile,
   onFile,
+  showHeader = true,
+  showRequirements = true,
 }: UploadFileFormProps) {
   return (
     <div>
-      <div style={{ marginBottom: "16px" }}>
-        <p
-          style={{
-            fontSize: "14px",
-            color: "#666666",
-            marginBottom: "16px",
-          }}
-        >
-          Upload File
-        </p>
-        <Button
-          color="link"
-          style={{
-            padding: 0,
-            fontSize: "14px",
-            fontWeight: 600,
-            color: "#128330",
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
-          <BookOpen size={16} />
-          Download template
-        </Button>
-      </div>
+      {showHeader && (
+        <div style={{ marginBottom: "16px" }}>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "#666666",
+              marginBottom: "16px",
+            }}
+          >
+            Upload File
+          </p>
+          <Button
+            color="link"
+            style={{
+              padding: 0,
+              fontSize: "14px",
+              fontWeight: 600,
+              color: "#128330",
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <BookOpen size={16} />
+            Download template
+          </Button>
+        </div>
+      )}
 
       <FileUpload
         file={uploadFile}
@@ -83,63 +89,65 @@ export default function UploadFileForm({
         ]}
       </FileUpload>
 
-      <div
-        style={{
-          marginTop: "20px",
-          backgroundColor: "rgba(18, 131, 48, 0.21)",
-          border: "1px solid rgba(18, 131, 48, 0.62)",
-          borderRadius: "8px",
-          padding: "16px",
-        }}
-      >
+      {showRequirements && (
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            marginBottom: "12px",
+            marginTop: "20px",
+            backgroundColor: "rgba(18, 131, 48, 0.21)",
+            border: "1px solid rgba(18, 131, 48, 0.62)",
+            borderRadius: "8px",
+            padding: "16px",
           }}
         >
-          <AlertCircle size={20} color="#128330" strokeWidth={2.5} />
-          <h3
+          <div
             style={{
-              margin: 0,
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#128330",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginBottom: "12px",
             }}
           >
-            File Requirements
-          </h3>
+            <AlertCircle size={20} color="#128330" strokeWidth={2.5} />
+            <h3
+              style={{
+                margin: 0,
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "#128330",
+              }}
+            >
+              File Requirements
+            </h3>
+          </div>
+          <ul
+            style={{
+              margin: 0,
+              paddingLeft: "24px",
+              listStyle: "none",
+              fontSize: "13px",
+              color: "#128330",
+              lineHeight: "1.6",
+            }}
+          >
+            <li style={{ position: "relative", paddingLeft: "8px" }}>
+              <span style={{ position: "absolute", left: "-16px" }}>•</span>
+              Support formats: Excel (.xlsx, .xls) or CSV
+            </li>
+            <li style={{ position: "relative", paddingLeft: "8px" }}>
+              <span style={{ position: "absolute", left: "-16px" }}>•</span>
+              Maximum file size: 10MB
+            </li>
+            <li style={{ position: "relative", paddingLeft: "8px" }}>
+              <span style={{ position: "absolute", left: "-16px" }}>•</span>
+              Required columns: Name, Email, Phone Number
+            </li>
+            <li style={{ position: "relative", paddingLeft: "8px" }}>
+              <span style={{ position: "absolute", left: "-16px" }}>•</span>
+              Download Template for the corrcect format
+            </li>
+          </ul>
         </div>
-        <ul
-          style={{
-            margin: 0,
-            paddingLeft: "24px",
-            listStyle: "none",
-            fontSize: "13px",
-            color: "#128330",
-            lineHeight: "1.6",
-          }}
-        >
-          <li style={{ position: "relative", paddingLeft: "8px" }}>
-            <span style={{ position: "absolute", left: "-16px" }}>•</span>
-            Support formats: Excel (.xlsx, .xls) or CSV
-          </li>
-          <li style={{ position: "relative", paddingLeft: "8px" }}>
-            <span style={{ position: "absolute", left: "-16px" }}>•</span>
-            Maximum file size: 10MB
-          </li>
-          <li style={{ position: "relative", paddingLeft: "8px" }}>
-            <span style={{ position: "absolute", left: "-16px" }}>•</span>
-            Required columns: Name, Email, Phone Number
-          </li>
-          <li style={{ position: "relative", paddingLeft: "8px" }}>
-            <span style={{ position: "absolute", left: "-16px" }}>•</span>
-            Download Template for the corrcect format
-          </li>
-        </ul>
-      </div>
+      )}
     </div>
   );
 }

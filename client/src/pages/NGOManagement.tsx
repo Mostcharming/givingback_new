@@ -25,8 +25,20 @@ const NGOManagement = () => {
   const [paperBasedNgos, setPaperBasedNgos] = useState([]);
   const [yourNgos, setYourNgos] = useState([]);
   const [verifiedNgos, setVerifiedNgos] = useState([]);
+  const [areas, setAreas] = useState<Array<{ name: string }>>([]);
 
   const tabs = ["Paper-based NGOs", "Your NGOs", "Verified NGOs"];
+
+  const { mutate: getAreas } = useBackendService("/areas", "GET", {
+    onSuccess: (res2: any) => {
+      setAreas(res2 as any[]);
+    },
+    onError: () => {},
+  });
+
+  useEffect(() => {
+    getAreas({});
+  }, []);
 
   const { mutate: fetchOrganizationCounts, isLoading } = useBackendService(
     "/auth/organization-counts",
@@ -118,6 +130,7 @@ const NGOManagement = () => {
         isOpen={isModalOpen}
         toggle={toggleModal}
         onSuccess={handleModalSuccess}
+        areas={areas}
       />
       <Row
         className="align-items-center"

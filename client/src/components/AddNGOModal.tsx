@@ -13,15 +13,18 @@ interface AddNGOModalProps {
   isOpen: boolean;
   toggle: () => void;
   onSuccess?: () => void;
+  areas?: Array<{ name: string }>;
 }
 
 export default function AddNGOModal({
   isOpen,
   toggle,
   onSuccess,
+  areas = [],
 }: AddNGOModalProps) {
   const [activeTab, setActiveTab] = useState("manual");
   const [uploadFile, setUploadFile] = useState<File | undefined>(undefined);
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,6 +33,10 @@ export default function AddNGOModal({
     state: "",
     country: "Nigeria",
     description: "",
+    registrationNumber: "",
+    interestArea: [],
+    contactPerson: "",
+    contactTitle: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -74,8 +81,13 @@ export default function AddNGOModal({
       state: "",
       country: "Nigeria",
       description: "",
+      registrationNumber: "",
+      interestArea: [],
+      contactPerson: "",
+      contactTitle: "",
     });
     setUploadFile(undefined);
+    setCurrentStep(1);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,8 +98,60 @@ export default function AddNGOModal({
     }));
   };
 
+  const handleThematicAreaChange = (selectedOptions: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      interestArea: selectedOptions
+        ? selectedOptions.map((option: any) => option.value)
+        : [],
+    }));
+  };
+
   const handleFileSelect = (file: File) => {
     setUploadFile(file);
+  };
+
+  const validateStep1 = (): boolean => {
+    if (!formData.name || formData.name.trim() === "") {
+      toast.error("Please enter organization name");
+      return false;
+    }
+    if (
+      !formData.registrationNumber ||
+      formData.registrationNumber.trim() === ""
+    ) {
+      toast.error("Please enter registration number");
+      return false;
+    }
+    if (
+      !formData.interestArea ||
+      (Array.isArray(formData.interestArea) &&
+        formData.interestArea.length === 0)
+    ) {
+      toast.error("Please select at least one focus area");
+      return false;
+    }
+    return true;
+  };
+
+  const validateStep2 = (): boolean => {
+    if (!formData.contactPerson || formData.contactPerson.trim() === "") {
+      toast.error("Please enter contact person's name");
+      return false;
+    }
+    if (!formData.contactTitle || formData.contactTitle.trim() === "") {
+      toast.error("Please enter contact person's title/position");
+      return false;
+    }
+    if (!formData.email || formData.email.trim() === "") {
+      toast.error("Please enter email address");
+      return false;
+    }
+    if (!formData.phone || formData.phone.trim() === "") {
+      toast.error("Please enter phone number");
+      return false;
+    }
+    return true;
   };
 
   const handleManualSubmit = async (e: React.FormEvent) => {
@@ -137,22 +201,8 @@ export default function AddNGOModal({
         <h4 style={{ margin: 0, fontWeight: 700, color: "#1a1a1a" }}>
           Add New NGO
         </h4>
-        {/* <button
-          onClick={toggle}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: 0,
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <X size={20} color="#666666" />
-        </button> */}
       </ModalHeader>
 
-      {/* Tab Navigation */}
       <div className="tab-container" style={{ margin: "0", marginBottom: "0" }}>
         <div className="tab-wrapper">
           <button
@@ -187,16 +237,19 @@ export default function AddNGOModal({
       </div>
 
       <ModalBody style={{ padding: "24px" }}>
-        {/* Manual Entry Tab */}
         {activeTab === "manual" && (
           <ManualEntryForm
             formData={formData}
             onChange={handleInputChange}
             onSubmit={handleManualSubmit}
+            currentStep={currentStep}
+            uploadFile={uploadFile}
+            onFile={handleFileSelect}
+            areas={areas}
+            onThematicAreaChange={handleThematicAreaChange}
           />
         )}
 
-        {/* Upload Details Tab */}
         {activeTab === "upload" && (
           <UploadFileForm uploadFile={uploadFile} onFile={handleFileSelect} />
         )}
@@ -211,40 +264,95 @@ export default function AddNGOModal({
           gap: "12px",
         }}
       >
-        <Button
-          color="secondary"
-          onClick={toggle}
-          style={{
-            borderRadius: "6px",
-            fontSize: "14px",
-            fontWeight: 600,
-            padding: "14px 48px",
-            backgroundColor: "#f3f4f6",
-            color: "#1a1a1a",
-            border: "none",
-            flex: 1,
-          }}
-        >
-          Cancel
-        </Button>
-        <Button
-          color="success"
-          onClick={
-            activeTab === "manual" ? handleManualSubmit : handleFileUpload
-          }
-          disabled={isLoading}
-          style={{
-            borderRadius: "6px",
-            fontSize: "14px",
-            fontWeight: 600,
-            padding: "14px 48px",
-            backgroundColor: "#28a745",
-            border: "none",
-            flex: 1,
-          }}
-        >
-          {isLoading ? "Adding..." : "Add NGO"}
-        </Button>
+        {activeTab === "manual" ? (
+          <>
+            <Button
+              color="secondary"
+              onClick={() => setCurrentStep(currentStep - 1)}
+              disabled={currentStep === 1}
+              style={{
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: 600,
+                padding: "14px 48px",
+                backgroundColor: currentStep === 1 ? "#e5e7eb" : "#f3f4f6",
+                color: currentStep === 1 ? "#9ca3af" : "#1a1a1a",
+                border: "none",
+                flex: 1,
+                cursor: currentStep === 1 ? "not-allowed" : "pointer",
+              }}
+            >
+              Previous
+            </Button>
+
+            <Button
+              color="success"
+              onClick={() => {
+                if (currentStep === 1) {
+                  if (validateStep1()) {
+                    setCurrentStep(currentStep + 1);
+                  }
+                } else if (currentStep === 2) {
+                  if (validateStep2()) {
+                    setCurrentStep(currentStep + 1);
+                  }
+                } else if (currentStep === 4) {
+                  handleManualSubmit(new Event("submit") as any);
+                } else {
+                  setCurrentStep(currentStep + 1);
+                }
+              }}
+              disabled={isLoading}
+              style={{
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: 600,
+                padding: "14px 48px",
+                backgroundColor: isLoading ? "#9ca3af" : "#28a745",
+                border: "none",
+                flex: 1,
+                cursor: isLoading ? "not-allowed" : "pointer",
+              }}
+            >
+              {isLoading ? "Adding..." : currentStep === 4 ? "Submit" : "Next"}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              color="secondary"
+              onClick={toggle}
+              style={{
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: 600,
+                padding: "14px 48px",
+                backgroundColor: "#f3f4f6",
+                color: "#1a1a1a",
+                border: "none",
+                flex: 1,
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="success"
+              onClick={handleFileUpload}
+              disabled={isLoading}
+              style={{
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: 600,
+                padding: "14px 48px",
+                backgroundColor: "#28a745",
+                border: "none",
+                flex: 1,
+              }}
+            >
+              {isLoading ? "Adding..." : "Add NGO"}
+            </Button>
+          </>
+        )}
       </ModalFooter>
     </Modal>
   );
