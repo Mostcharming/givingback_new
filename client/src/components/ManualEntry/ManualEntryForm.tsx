@@ -16,6 +16,9 @@ interface ManualEntryFormProps {
     country?: string;
     contactPerson?: string;
     contactTitle?: string;
+    bankName?: string;
+    accountNumber?: string;
+    accountName?: string;
   };
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -26,6 +29,7 @@ interface ManualEntryFormProps {
   onFile?: (file: File) => void;
   areas?: Array<{ name: string }>;
   onThematicAreaChange?: (selected: any) => void;
+  onStateChange?: (selected: any) => void;
 }
 
 export default function ManualEntryForm({
@@ -37,6 +41,7 @@ export default function ManualEntryForm({
   onFile,
   areas = [],
   onThematicAreaChange,
+  onStateChange = () => {},
 }: ManualEntryFormProps) {
   return (
     <Form onSubmit={onSubmit}>
@@ -320,6 +325,224 @@ export default function ManualEntryForm({
 
       {currentStep === 3 && (
         <div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "20px",
+            }}
+          >
+            <h5
+              style={{
+                margin: 0,
+                fontWeight: 700,
+                color: "#1a1a1a",
+              }}
+            >
+              Location and Banking Information
+            </h5>
+            <div>3/4</div>
+          </div>
+
+          <FormGroup className="">
+            <label
+              style={{
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "#1a1a1a",
+                marginBottom: "8px",
+                display: "block",
+              }}
+            >
+              Address <span style={{ color: "red" }}>*</span>
+            </label>
+            <InputGroup className="input-group-alternative">
+              <Input
+                style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                className="p-3"
+                placeholder="Enter street address"
+                type="text"
+                name="address"
+                required
+                value={formData.address || ""}
+                onChange={onChange}
+              />
+            </InputGroup>
+          </FormGroup>
+
+          <FormGroup className="mt-4">
+            <label
+              style={{
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "#1a1a1a",
+                marginBottom: "8px",
+                display: "block",
+              }}
+            >
+              State <span style={{ color: "red" }}>*</span>
+            </label>
+            <InputGroup className="input-group-alternative">
+              <Select
+                styles={{
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "#F2F2F2",
+                    minHeight: "100%",
+                    height: "100%",
+                  }),
+                  valueContainer: (provided) => ({
+                    ...provided,
+                    height: "100%",
+                    padding: "0 6px",
+                  }),
+                  input: (provided) => ({
+                    ...provided,
+                    margin: "0px",
+                  }),
+                  indicatorsContainer: (provided) => ({
+                    ...provided,
+                    height: "55px",
+                  }),
+                }}
+                className="w-100"
+                placeholder="Select state"
+                required
+                onChange={onStateChange}
+                options={[
+                  { value: "Abia", label: "Abia" },
+                  { value: "Adamawa", label: "Adamawa" },
+                  { value: "Akwa Ibom", label: "Akwa Ibom" },
+                  { value: "Anambra", label: "Anambra" },
+                  { value: "Bauchi", label: "Bauchi" },
+                  { value: "Bayelsa", label: "Bayelsa" },
+                  { value: "Benue", label: "Benue" },
+                  { value: "Borno", label: "Borno" },
+                  { value: "Cross River", label: "Cross River" },
+                  { value: "Delta", label: "Delta" },
+                  { value: "Ebonyi", label: "Ebonyi" },
+                  { value: "Edo", label: "Edo" },
+                  { value: "Ekiti", label: "Ekiti" },
+                  { value: "Enugu", label: "Enugu" },
+                  {
+                    value: "Federal Capital Territory",
+                    label: "Federal Capital Territory",
+                  },
+                  { value: "Gombe", label: "Gombe" },
+                  { value: "Imo", label: "Imo" },
+                  { value: "Jigawa", label: "Jigawa" },
+                  { value: "Kaduna", label: "Kaduna" },
+                  { value: "Kano", label: "Kano" },
+                  { value: "Katsina", label: "Katsina" },
+                  { value: "Kebbi", label: "Kebbi" },
+                  { value: "Kogi", label: "Kogi" },
+                  { value: "Kwara", label: "Kwara" },
+                  { value: "Lagos", label: "Lagos" },
+                  { value: "Nasarawa", label: "Nasarawa" },
+                  { value: "Niger", label: "Niger" },
+                  { value: "Ogun", label: "Ogun" },
+                  { value: "Ondo", label: "Ondo" },
+                  { value: "Osun", label: "Osun" },
+                  { value: "Oyo", label: "Oyo" },
+                  { value: "Plateau", label: "Plateau" },
+                  { value: "Rivers", label: "Rivers" },
+                  { value: "Sokoto", label: "Sokoto" },
+                  { value: "Taraba", label: "Taraba" },
+                  { value: "Yobe", label: "Yobe" },
+                  { value: "Zamfara", label: "Zamfara" },
+                ]}
+                value={
+                  formData.state
+                    ? { value: formData.state, label: formData.state }
+                    : null
+                }
+              />
+            </InputGroup>
+          </FormGroup>
+
+          <FormGroup className="mt-4">
+            <label
+              style={{
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "#1a1a1a",
+                marginBottom: "8px",
+                display: "block",
+              }}
+            >
+              Bank Name <span style={{ color: "red" }}>*</span>
+            </label>
+            <InputGroup className="input-group-alternative">
+              <Input
+                style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                className="p-3"
+                placeholder="Enter bank name"
+                type="text"
+                name="bankName"
+                required
+                value={formData.bankName || ""}
+                onChange={onChange}
+              />
+            </InputGroup>
+          </FormGroup>
+
+          <FormGroup className="mt-4">
+            <label
+              style={{
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "#1a1a1a",
+                marginBottom: "8px",
+                display: "block",
+              }}
+            >
+              Account Number <span style={{ color: "red" }}>*</span>
+            </label>
+            <InputGroup className="input-group-alternative">
+              <Input
+                style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                className="p-3"
+                placeholder="Enter account number"
+                type="text"
+                name="accountNumber"
+                required
+                value={formData.accountNumber || ""}
+                onChange={onChange}
+              />
+            </InputGroup>
+          </FormGroup>
+
+          <FormGroup className="mt-4">
+            <label
+              style={{
+                fontSize: "14px",
+                fontWeight: 600,
+                color: "#1a1a1a",
+                marginBottom: "8px",
+                display: "block",
+              }}
+            >
+              Account Name <span style={{ color: "red" }}>*</span>
+            </label>
+            <InputGroup className="input-group-alternative">
+              <Input
+                style={{ backgroundColor: "#F2F2F2", height: "100%" }}
+                className="p-3"
+                placeholder="Enter account holder name"
+                type="text"
+                name="accountName"
+                required
+                value={formData.accountName || ""}
+                onChange={onChange}
+              />
+            </InputGroup>
+          </FormGroup>
+        </div>
+      )}
+
+      {currentStep === 4 && (
+        <div>
           <div className="mb-4">
             <h2 style={{ color: "black" }} className="h4 fw-bold mb-2">
               Review Information
@@ -520,11 +743,121 @@ export default function ManualEntryForm({
                 {formData.phone || "—"}
               </p>
             </div>
+
+            <div style={{ marginTop: "16px" }}>
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: "#6b7280",
+                  margin: "0 0 4px 0",
+                }}
+              >
+                Address
+              </p>
+              <p
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "#1a1a1a",
+                  margin: 0,
+                }}
+              >
+                {formData.address || "—"}
+              </p>
+            </div>
+
+            <div style={{ marginTop: "16px" }}>
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: "#6b7280",
+                  margin: "0 0 4px 0",
+                }}
+              >
+                State
+              </p>
+              <p
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "#1a1a1a",
+                  margin: 0,
+                }}
+              >
+                {formData.state || "—"}
+              </p>
+            </div>
+
+            <div style={{ marginTop: "16px" }}>
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: "#6b7280",
+                  margin: "0 0 4px 0",
+                }}
+              >
+                Bank Name
+              </p>
+              <p
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "#1a1a1a",
+                  margin: 0,
+                }}
+              >
+                {formData.bankName || "—"}
+              </p>
+            </div>
+
+            <div style={{ marginTop: "16px" }}>
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: "#6b7280",
+                  margin: "0 0 4px 0",
+                }}
+              >
+                Account Number
+              </p>
+              <p
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "#1a1a1a",
+                  margin: 0,
+                }}
+              >
+                {formData.accountNumber || "—"}
+              </p>
+            </div>
+
+            <div style={{ marginTop: "16px" }}>
+              <p
+                style={{
+                  fontSize: "12px",
+                  color: "#6b7280",
+                  margin: "0 0 4px 0",
+                }}
+              >
+                Account Name
+              </p>
+              <p
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "#1a1a1a",
+                  margin: 0,
+                }}
+              >
+                {formData.accountName || "—"}
+              </p>
+            </div>
           </div>
         </div>
       )}
 
-      {currentStep === 4 && onFile && (
+      {currentStep === 5 && onFile && (
         <div>
           <div className="mb-4">
             <h2 style={{ color: "black" }} className="h4 fw-bold mb-2">
