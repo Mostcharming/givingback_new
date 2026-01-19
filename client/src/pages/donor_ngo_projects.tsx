@@ -12,16 +12,17 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button, Card, CardBody, Col, Container, Row } from "reactstrap";
+import List from "../components/list";
 import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
 
 const DN_Projects = () => {
-  const { authState } = useContent();
+  const { authState, currentState } = useContent();
   const navigate = useNavigate();
   const [cardItems, setCardItems] = useState([]);
 
   const { mutate: getProjectStats } = useBackendService(
-    "/donor/project-stats",
+    "/auth/donor/project-stats",
     "GET",
     {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -97,7 +98,7 @@ const DN_Projects = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authState.user?.role, navigate]);
-
+  console.log("Current State:", currentState.user.id);
   return (
     <Container
       fluid
@@ -243,6 +244,8 @@ const DN_Projects = () => {
       )}
 
       <div style={{ padding: "10px 0px" }}></div>
+      {authState.user?.role !== "donor" &&
+        authState.user?.role !== "corporate" && <List type={"new"} />}
     </Container>
   );
 };

@@ -1249,3 +1249,70 @@ export const downloadSampleNGOFile = async (
     res.status(500).json({ error: "Unable to generate sample file" });
   }
 };
+
+export const getDonorProjectMetrics = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = (req.user as User)?.id;
+
+    if (!userId) {
+      res.status(400).json({ error: "User not found" });
+      return;
+    }
+
+    const donor = await db("donors").where({ user_id: userId }).first();
+
+    if (!donor) {
+      res.status(200).json({
+        completedProjects: 0,
+        activeBriefs: 0,
+        ongoingProjects: 0,
+        totalApplications: 0,
+      });
+      return;
+    }
+
+    const donorId = donor.id;
+
+    const completedResult: any = await db("project")
+      .where({ donor_id: donorId, status: "completed" })
+      .count("id as count")
+      .first();
+    const completedProjects = completedResult?.count || 0;
+
+    const briefResult: any = await db("project")
+      .where({ donor_id: donorId, status: "brief" })
+      .count("id as count")
+      .first();
+    const activeBriefs = briefResult?.count || 0;
+
+    const activeResult: any = await db("project")
+      .where({ donor_id: donorId, status: "active" })
+      .count("id as count")
+      .first();
+    const ongoingProjects = activeResult?.count || 0;
+
+    const applicationsResult: any = await db("donations")
+      .whereIn(
+        "project_id",
+        db("project").select("id").where({ donor_id: donorId })
+      )
+      .count("id as count")
+      .first();
+    const totalApplications = applicationsResult?.count || 0;
+
+    res.status(200).json({
+      completedProjects,
+      activeBriefs,
+      ongoingProjects,
+      totalApplications,
+    });
+  } catch (error) {
+    console.error("Get Donor Project Metrics Error:", error);
+    res.status(500).json({
+      error: "An error occurred while fetching project metrics",
+    });
+  }
+};

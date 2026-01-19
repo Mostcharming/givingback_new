@@ -10,6 +10,7 @@ import {
   downloadSampleNGOFile,
   forgotPassword,
   getAllOrganizations,
+  getDonorProjectMetrics,
   getOne,
   getOrganizationCounts,
   login,
@@ -40,6 +41,8 @@ router.post("/resetpassword", resetPassword);
 router.get("/", secureLogin, getOne);
 
 router.get("/organization-counts", secureLogin, getOrganizationCounts);
+
+router.get("/donor/project-stats", secureLogin, getDonorProjectMetrics);
 
 router.put("/", secureLogin, uploadimg, updateOne);
 
