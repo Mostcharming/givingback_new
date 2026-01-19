@@ -106,17 +106,6 @@ export const ProjectCard = ({ project }: { project: Project }) => {
                 <span>Budget: {formatCurrency(project.cost)}</span>
               </div>
 
-              {project.createdAt && (
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
-                >
-                  <Calendar size={16} />
-                  <span>
-                    Created: {new Date(project.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              )}
-
               {project.endDate && (
                 <div
                   style={{ display: "flex", alignItems: "center", gap: "6px" }}
@@ -149,10 +138,25 @@ export const ProjectCard = ({ project }: { project: Project }) => {
           <div
             style={{
               display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "center",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: "12px",
             }}
           >
+            {project.createdAt && (
+              <div
+                style={{
+                  fontSize: "13px",
+                  color: "#555",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span>
+                  Created: {new Date(project.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+            )}
             <button
               onMouseEnter={() => setShowMenu(true)}
               onMouseLeave={() => setShowMenu(false)}
