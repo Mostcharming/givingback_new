@@ -76,9 +76,11 @@ export const getStatsFromResponse = (res: any): StatCardItem[] => [
  */
 export const getStatusStyles = (status: string) => {
   const styles: Record<string, { backgroundColor: string; color: string }> = {
-    active: { backgroundColor: "#d4edda", color: "#155724" },
-    completed: { backgroundColor: "#d1ecf1", color: "#0c5460" },
-    pending: { backgroundColor: "#f8d7da", color: "#721c24" },
+    active: { backgroundColor: "#4CAF50", color: "#FFFFFF" },
+    completed: { backgroundColor: "#2196F3", color: "#FFFFFF" },
+    brief: { backgroundColor: "#FF9800", color: "#FFFFFF" },
+    draft: { backgroundColor: "#9C27B0", color: "#FFFFFF" },
+    pending: { backgroundColor: "#F44336", color: "#FFFFFF" },
   };
   return styles[status] || styles.pending;
 };

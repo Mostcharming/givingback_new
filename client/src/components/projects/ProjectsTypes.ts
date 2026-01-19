@@ -20,6 +20,10 @@ export interface Project {
   cost: number;
   status: "active" | "completed" | "pending";
   applications: number;
+  endDate?: string;
+  state?: string;
+  capital?: string;
+  createdAt?: string;
 }
 
 export interface StatCardItem {
