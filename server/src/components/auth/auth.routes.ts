@@ -11,6 +11,7 @@ import {
   forgotPassword,
   getAllOrganizations,
   getDonorProjectMetrics,
+  getDonorProjects,
   getOne,
   getOrganizationCounts,
   login,
@@ -43,6 +44,8 @@ router.get("/", secureLogin, getOne);
 router.get("/organization-counts", secureLogin, getOrganizationCounts);
 
 router.get("/donor/project-stats", secureLogin, getDonorProjectMetrics);
+
+router.get("/donor/projects", secureLogin, getDonorProjects);
 
 router.put("/", secureLogin, uploadimg, updateOne);
 

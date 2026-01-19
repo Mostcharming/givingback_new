@@ -1277,7 +1277,10 @@ export const getDonorProjectMetrics = async (
     const donorId = donor.id;
 
     const completedResult: any = await db("project")
-      .where({ donor_id: donorId, status: "completed" })
+      .where({
+        donor_id: donorId,
+        status: "completed",
+      })
       .count("id as count")
       .first();
     const completedProjects = completedResult?.count || 0;
@@ -1294,14 +1297,11 @@ export const getDonorProjectMetrics = async (
       .first();
     const ongoingProjects = activeResult?.count || 0;
 
-    const applicationsResult: any = await db("donations")
-      .whereIn(
-        "project_id",
-        db("project").select("id").where({ donor_id: donorId })
-      )
-      .count("id as count")
+    const applicationsResult: any = await db("project")
+      .where({ donor_id: donorId })
+      .sum("applications as totalApplications")
       .first();
-    const totalApplications = applicationsResult?.count || 0;
+    const totalApplications = applicationsResult?.totalApplications || 0;
 
     res.status(200).json({
       completedProjects,
@@ -1313,6 +1313,64 @@ export const getDonorProjectMetrics = async (
     console.error("Get Donor Project Metrics Error:", error);
     res.status(500).json({
       error: "An error occurred while fetching project metrics",
+    });
+  }
+};
+
+export const getDonorProjects = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = (req.user as User)?.id;
+
+    if (!userId) {
+      res.status(401).json({ error: "User not authenticated" });
+      return;
+    }
+
+    // Get donor_id from donors table
+    const donor = await db("donors").where({ user_id: userId }).first();
+
+    if (!donor) {
+      res.status(404).json({ error: "Donor not found" });
+      return;
+    }
+
+    const donorId = donor.id;
+
+    // Fetch all projects for this donor without pagination
+    const projects = await db("project")
+      .where({ donor_id: donorId })
+      .select(
+        "id",
+        "title",
+        db.raw('DATE_FORMAT(startDate, "%Y-%m-%d") AS startDate'),
+        db.raw('DATE_FORMAT(endDate, "%Y-%m-%d") AS endDate'),
+        "description",
+        "objectives",
+        "category",
+        "organization_id",
+        "cost",
+        "scope",
+        "allocated",
+        "beneficiary_overview",
+        "status",
+        "applications",
+        "createdAt",
+        "updatedAt"
+      )
+      .orderBy("createdAt", "desc");
+
+    res.status(200).json({
+      status: "success",
+      count: projects.length,
+      data: projects,
+    });
+  } catch (error) {
+    console.error("Get Donor Projects Error:", error);
+    res.status(500).json({
+      error: "An error occurred while fetching donor projects",
     });
   }
 };
