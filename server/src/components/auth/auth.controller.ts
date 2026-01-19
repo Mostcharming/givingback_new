@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
+import xlsx from "xlsx";
 import db from "../../config";
 import { FullUser, User, UserRequest } from "../../interfaces";
 import { hash } from "../../middleware/general";
@@ -857,5 +858,394 @@ export const getAllOrganizations = async (
     res.status(500).json({
       error: "An error occurred while fetching organizations",
     });
+  }
+};
+
+function generateRandomPassword(length: number = 12): string {
+  const charset =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+  let password = "";
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+  return password;
+}
+
+export const addSingleNGO = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  const transaction = await db.transaction();
+
+  try {
+    const {
+      name,
+      email,
+      phone,
+      address,
+      state,
+      city_lga,
+      interest_area,
+      cac,
+      website,
+      accountName,
+      accountNumber,
+      bankName,
+      bvn,
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !phone) {
+      res.status(400).json({
+        error: "Name, email, and phone are required fields",
+      });
+      return;
+    }
+
+    const mail = email.trim();
+
+    // Check if user already exists
+    const existingUser = await db("users").where({ email: mail }).first();
+    if (existingUser) {
+      res.status(409).json({ error: "User with this email already exists" });
+      return;
+    }
+
+    // Generate random password
+    const generatedPassword = generateRandomPassword(12);
+    const hashedPassword = hash(generatedPassword.trim());
+
+    // Create user
+    const [userId] = await transaction("users").insert({
+      email: mail,
+      password: hashedPassword,
+      active: 1,
+      role: "NGO",
+      status: 1,
+      token: 0,
+    });
+
+    // Create organization record
+    await transaction("organizations").insert({
+      name,
+      phone,
+      website: website || null,
+      interest_area: interest_area || null,
+      cac: cac || null,
+      user_id: userId,
+      active: 1,
+      is_verified: 0,
+    });
+
+    // Create address record
+    if (address || state || city_lga) {
+      await transaction("address").insert({
+        address: address || null,
+        state: state || null,
+        city_lga: city_lga || null,
+        user_id: userId,
+      });
+    }
+
+    // Create bank record
+    if (bankName || accountNumber || accountName) {
+      await transaction("banks").insert({
+        bankName: bankName || null,
+        accountName: accountName || null,
+        accountNumber: accountNumber || null,
+        bvn: bvn || null,
+        user_id: userId,
+      });
+    }
+
+    await transaction.commit();
+
+    // Send welcome email with credentials
+    try {
+      await new Email({
+        email: mail,
+        url: "",
+        token: 0,
+        additionalData: {
+          subject: "Welcome to GivingBack - Your NGO Account",
+          password: generatedPassword,
+          name,
+        },
+      }).sendEmail("ngowelcome", "Your NGO Account Has Been Created");
+    } catch (emailError) {
+      console.error("Error sending welcome email:", emailError);
+      // Don't fail the request if email fails
+    }
+
+    res.status(201).json({
+      status: "success",
+      message: "NGO added successfully",
+      data: {
+        userId,
+        email: mail,
+        name,
+        note: "A welcome email with login credentials has been sent to the organization",
+      },
+    });
+  } catch (error) {
+    await transaction.rollback();
+    console.error("Add Single NGO Error:", error);
+    res.status(500).json({
+      error: "An error occurred while adding the NGO",
+    });
+  }
+};
+
+const bulkUploadNGOs = async (fileBuffer: Buffer) => {
+  try {
+    const workbook = xlsx.read(fileBuffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rows: any[] = xlsx.utils.sheet_to_json(sheet);
+
+    // Filter rows that have at least name, email, and phone
+    const ngos = rows.filter((row) => row.Name && row.Email && row.Phone);
+
+    if (ngos.length === 0) {
+      return {
+        success: false,
+        error: "No valid rows found in the file",
+      };
+    }
+
+    const successCount: any[] = [];
+    const errorCount: any[] = [];
+
+    await db.transaction(async (trx: any) => {
+      for (const ngo of ngos) {
+        try {
+          const mail = ngo.Email.trim();
+
+          // Check if user already exists
+          const existingUser = await trx("users")
+            .where({ email: mail })
+            .first();
+          if (existingUser) {
+            errorCount.push({
+              name: ngo.Name,
+              email: mail,
+              error: "Email already exists",
+            });
+            continue;
+          }
+
+          const generatedPassword = generateRandomPassword(12);
+          const hashedPassword = hash(generatedPassword.trim());
+
+          // Create user
+          const [userId] = await trx("users").insert({
+            email: mail,
+            password: hashedPassword,
+            active: 1,
+            role: "NGO",
+            status: 1,
+            token: 0,
+          });
+
+          // Create organization
+          await trx("organizations").insert({
+            name: ngo.Name,
+            phone: ngo.Phone,
+            website: ngo.Website || null,
+            interest_area: ngo.Interest_Area || null,
+            cac: ngo.CAC || null,
+            user_id: userId,
+            active: 1,
+            is_verified: 0,
+          });
+
+          // Create address
+          if (ngo.Address || ngo.State || ngo.City_LGA) {
+            await trx("address").insert({
+              address: ngo.Address || null,
+              state: ngo.State || null,
+              city_lga: ngo.City_LGA || null,
+              user_id: userId,
+            });
+          }
+
+          // Create bank
+          if (ngo.BankName || ngo.AccountNumber || ngo.AccountName) {
+            await trx("banks").insert({
+              bankName: ngo.BankName || null,
+              accountName: ngo.AccountName || null,
+              accountNumber: ngo.AccountNumber || null,
+              bvn: ngo.BVN || null,
+              user_id: userId,
+            });
+          }
+
+          successCount.push({
+            name: ngo.Name,
+            email: mail,
+            userId,
+            password: generatedPassword,
+          });
+
+          // Send welcome email
+          try {
+            await new Email({
+              email: mail,
+              url: "",
+              token: 0,
+              additionalData: {
+                subject: "Welcome to GivingBack - Your NGO Account",
+                password: generatedPassword,
+                name: ngo.Name,
+              },
+            }).sendEmail("ngowelcome", "Your NGO Account Has Been Created");
+          } catch (emailError) {
+            console.error("Error sending email to " + mail + ":", emailError);
+          }
+        } catch (error) {
+          errorCount.push({
+            name: ngo.Name,
+            email: ngo.Email,
+            error:
+              error instanceof Error ? error.message : "Unknown error occurred",
+          });
+        }
+      }
+    });
+
+    return {
+      success: true,
+      message: "Bulk upload completed",
+      summary: {
+        total: ngos.length,
+        successful: successCount.length,
+        failed: errorCount.length,
+      },
+      successData: successCount,
+      errors: errorCount.length > 0 ? errorCount : undefined,
+    };
+  } catch (error) {
+    console.error("Error occurred during bulk upload:", error);
+    return {
+      success: false,
+      error: `Unable to perform bulk upload: ${error}`,
+    };
+  }
+};
+
+export const bulkUploadNGOsEndpoint = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.file || !req.file.buffer) {
+      res.status(400).json({ error: "File is required" });
+      return;
+    }
+
+    const fileBuffer = req.file.buffer;
+    const result = await bulkUploadNGOs(fileBuffer);
+
+    if (result.success) {
+      res.status(200).json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (error) {
+    console.error("Error in bulk upload route:", error);
+    res.status(500).json({ error: "Unable to upload data" });
+  }
+};
+
+export const downloadSampleNGOFile = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const workbook = xlsx.utils.book_new();
+    const sampleData = [
+      [
+        "Name",
+        "Email",
+        "Phone",
+        "Address",
+        "State",
+        "City_LGA",
+        "Interest_Area",
+        "CAC",
+        "Website",
+        "BankName",
+        "AccountName",
+        "AccountNumber",
+        "BVN",
+      ],
+      [
+        "Example NGO",
+        "contact@examplengo.org",
+        "+234812345678",
+        "123 Main Street",
+        "Lagos",
+        "Ikeja",
+        "Education,Healthcare",
+        "RC12345678",
+        "https://examplengo.org",
+        "First Bank",
+        "Example NGO",
+        "1234567890",
+        "11123456789",
+      ],
+      [
+        "Another NGO",
+        "info@anotherngo.org",
+        "+234807654321",
+        "456 Oak Avenue",
+        "Abuja",
+        "Central Business District",
+        "Environment,Community Development",
+        "RC87654321",
+        "https://anotherngo.org",
+        "GTBank",
+        "Another NGO Ltd",
+        "9876543210",
+        "22234567890",
+      ],
+    ];
+
+    const sheet = xlsx.utils.aoa_to_sheet(sampleData);
+
+    // Set column widths
+    sheet["!cols"] = [
+      { wch: 20 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 15 },
+    ];
+
+    xlsx.utils.book_append_sheet(workbook, sheet, "Sample NGOs");
+
+    const buffer = xlsx.write(workbook, { type: "buffer" });
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=sample_ngos_bulk.xlsx"
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.send(Buffer.from(buffer));
+  } catch (error) {
+    console.error("Error generating sample file:", error);
+    res.status(500).json({ error: "Unable to generate sample file" });
   }
 };

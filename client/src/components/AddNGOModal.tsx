@@ -31,12 +31,19 @@ export default function AddNGOModal({
     phone: "",
     address: "",
     state: "",
+    city_lga: "",
     country: "Nigeria",
     description: "",
     registrationNumber: "",
-    interestArea: [],
+    interest_area: "",
     contactPerson: "",
     contactTitle: "",
+    bankName: "",
+    accountNumber: "",
+    accountName: "",
+    bvn: "",
+    website: "",
+    cac: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -58,19 +65,23 @@ export default function AddNGOModal({
     }
   );
 
-  const { mutate: bulkUploadNGO } = useBackendService("/admin/bulk", "POST", {
-    onSuccess: (res: any) => {
-      setIsLoading(false);
-      toast.success("NGO uploaded successfully");
-      resetForm();
-      toggle();
-      onSuccess?.();
-    },
-    onError: (error: any) => {
-      setIsLoading(false);
-      toast.error(error.message || "Failed to upload NGO");
-    },
-  });
+  const { mutate: bulkUploadNGO } = useBackendService(
+    "/auth/bulk/upload",
+    "POST",
+    {
+      onSuccess: (res: any) => {
+        setIsLoading(false);
+        toast.success("NGO uploaded successfully");
+        resetForm();
+        toggle();
+        onSuccess?.();
+      },
+      onError: (error: any) => {
+        setIsLoading(false);
+        toast.error(error.message || "Failed to upload NGO");
+      },
+    }
+  );
 
   const resetForm = () => {
     setFormData({
@@ -79,12 +90,19 @@ export default function AddNGOModal({
       phone: "",
       address: "",
       state: "",
+      city_lga: "",
       country: "Nigeria",
       description: "",
       registrationNumber: "",
-      interestArea: [],
+      interest_area: "",
       contactPerson: "",
       contactTitle: "",
+      bankName: "",
+      accountNumber: "",
+      accountName: "",
+      bvn: "",
+      website: "",
+      cac: "",
     });
     setUploadFile(undefined);
     setCurrentStep(1);
@@ -98,17 +116,28 @@ export default function AddNGOModal({
     }));
   };
 
-  const handleThematicAreaChange = (selectedOptions: any) => {
+  const handleThematicAreaChange = (event: any) => {
+    const interest_area = event.map((item: any) => item.value).join(",");
+
     setFormData((prev) => ({
       ...prev,
-      interestArea: selectedOptions
-        ? selectedOptions.map((option: any) => option.value)
-        : [],
+      interest_area: interest_area,
+    }));
+  };
+
+  const handleStateChange = (selectedOption: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      state: selectedOption ? selectedOption.value : "",
     }));
   };
 
   const handleFileSelect = (file: File) => {
     setUploadFile(file);
+  };
+
+  const handleRemoveFile = () => {
+    setUploadFile(undefined);
   };
 
   const validateStep1 = (): boolean => {
@@ -123,11 +152,7 @@ export default function AddNGOModal({
       toast.error("Please enter registration number");
       return false;
     }
-    if (
-      !formData.interestArea ||
-      (Array.isArray(formData.interestArea) &&
-        formData.interestArea.length === 0)
-    ) {
+    if (!formData.interest_area || formData.interest_area.trim() === "") {
       toast.error("Please select at least one focus area");
       return false;
     }
@@ -154,16 +179,56 @@ export default function AddNGOModal({
     return true;
   };
 
+  const validateStep3 = (): boolean => {
+    if (!formData.address || formData.address.trim() === "") {
+      toast.error("Please enter address");
+      return false;
+    }
+    if (!formData.state || formData.state.trim() === "") {
+      toast.error("Please select a state");
+      return false;
+    }
+    if (!formData.bankName || formData.bankName.trim() === "") {
+      toast.error("Please enter bank name");
+      return false;
+    }
+    if (!formData.accountNumber || formData.accountNumber.trim() === "") {
+      toast.error("Please enter account number");
+      return false;
+    }
+    if (!formData.accountName || formData.accountName.trim() === "") {
+      toast.error("Please enter account name");
+      return false;
+    }
+    return true;
+  };
+
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.email) {
+    if (!formData.name || !formData.email || !formData.phone) {
       toast.error("Please fill in all required fields");
       return;
     }
 
     setIsLoading(true);
-    uploadNGO(formData);
+
+    // For manual submission, send as JSON
+    uploadNGO({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      address: formData.address || undefined,
+      state: formData.state || undefined,
+      city_lga: formData.city_lga || undefined,
+      interest_area: formData.interest_area || undefined,
+      cac: formData.registrationNumber || undefined,
+      website: formData.website || undefined,
+      bankName: formData.bankName || undefined,
+      accountName: formData.accountName || undefined,
+      accountNumber: formData.accountNumber || undefined,
+      bvn: formData.bvn || undefined,
+    });
   };
 
   const handleFileUpload = async () => {
@@ -245,13 +310,19 @@ export default function AddNGOModal({
             currentStep={currentStep}
             uploadFile={uploadFile}
             onFile={handleFileSelect}
+            onRemoveFile={handleRemoveFile}
             areas={areas}
             onThematicAreaChange={handleThematicAreaChange}
+            onStateChange={handleStateChange}
           />
         )}
 
         {activeTab === "upload" && (
-          <UploadFileForm uploadFile={uploadFile} onFile={handleFileSelect} />
+          <UploadFileForm
+            uploadFile={uploadFile}
+            onFile={handleFileSelect}
+            onRemoveFile={handleRemoveFile}
+          />
         )}
       </ModalBody>
 
@@ -294,6 +365,10 @@ export default function AddNGOModal({
                   }
                 } else if (currentStep === 2) {
                   if (validateStep2()) {
+                    setCurrentStep(currentStep + 1);
+                  }
+                } else if (currentStep === 3) {
+                  if (validateStep3()) {
                     setCurrentStep(currentStep + 1);
                   }
                 } else if (currentStep === 4) {

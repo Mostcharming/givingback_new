@@ -1,10 +1,13 @@
 import express from "express";
 import { secureLogin, verifyLogin, verifyNewUser } from "../../middleware/auth";
 
-import { uploadimg } from "../../middleware/general";
+import { uploadbulk, uploadimg } from "../../middleware/general";
 import {
+  addSingleNGO,
+  bulkUploadNGOsEndpoint,
   changePassword,
   deleteBank,
+  downloadSampleNGOFile,
   forgotPassword,
   getAllOrganizations,
   getOne,
@@ -45,5 +48,10 @@ router.post("/changepassword", secureLogin, changePassword);
 router.delete("/bank/:id", secureLogin, deleteBank);
 
 router.get("/organizations", secureLogin, getAllOrganizations);
+
+// NGO Management Routes
+router.post("/organizations", addSingleNGO as any);
+router.get("/bulk/sample", downloadSampleNGOFile);
+router.post("/bulk/upload", uploadbulk, bulkUploadNGOsEndpoint);
 
 export default router;

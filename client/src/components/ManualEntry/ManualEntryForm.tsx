@@ -27,6 +27,7 @@ interface ManualEntryFormProps {
   currentStep?: number;
   uploadFile?: File | undefined;
   onFile?: (file: File) => void;
+  onRemoveFile?: () => void;
   areas?: Array<{ name: string }>;
   onThematicAreaChange?: (selected: any) => void;
   onStateChange?: (selected: any) => void;
@@ -39,6 +40,7 @@ export default function ManualEntryForm({
   currentStep = 1,
   uploadFile,
   onFile,
+  onRemoveFile,
   areas = [],
   onThematicAreaChange,
   onStateChange = () => {},
@@ -541,335 +543,31 @@ export default function ManualEntryForm({
         </div>
       )}
 
-      {currentStep === 4 && (
+      {currentStep === 4 && onFile && (
         <div>
-          <div className="mb-4">
-            <h2 style={{ color: "black" }} className="h4 fw-bold mb-2">
-              Review Information
-            </h2>
-            <p className="text-muted mb-0">
-              Please verify your organization details
-            </p>
-          </div>
-
           <div
             style={{
-              backgroundColor: "#f9fafb",
-              padding: "16px",
-              borderRadius: "8px",
-              border: "1px solid #e5e7eb",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "20px",
             }}
           >
-            <div style={{ marginBottom: "16px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Organization Name
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.name || "—"}
-              </p>
-            </div>
-
-            <div style={{ marginBottom: "16px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Registration Number
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.registrationNumber || "—"}
-              </p>
-            </div>
-
-            <div style={{ marginBottom: "16px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Interest Areas
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {Array.isArray(formData.interestArea)
-                  ? formData.interestArea.join(", ") || "—"
-                  : formData.interestArea || "—"}
-              </p>
-            </div>
-
-            <div>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Description
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.description || "—"}
-              </p>
-            </div>
-
-            <div
+            <h5
               style={{
-                marginTop: "16px",
-                borderTop: "1px solid #e5e7eb",
-                paddingTop: "16px",
+                margin: 0,
+                fontWeight: 700,
+                color: "#1a1a1a",
               }}
             >
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Contact Person
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.contactPerson || "—"}
-              </p>
-            </div>
-
-            <div style={{ marginTop: "16px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Title/Position
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.contactTitle || "—"}
-              </p>
-            </div>
-
-            <div style={{ marginTop: "16px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Email Address
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.email || "—"}
-              </p>
-            </div>
-
-            <div style={{ marginTop: "16px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Phone Number
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.phone || "—"}
-              </p>
-            </div>
-
-            <div style={{ marginTop: "16px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Address
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.address || "—"}
-              </p>
-            </div>
-
-            <div style={{ marginTop: "16px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                State
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.state || "—"}
-              </p>
-            </div>
-
-            <div style={{ marginTop: "16px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Bank Name
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.bankName || "—"}
-              </p>
-            </div>
-
-            <div style={{ marginTop: "16px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Account Number
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.accountNumber || "—"}
-              </p>
-            </div>
-
-            <div style={{ marginTop: "16px" }}>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  margin: "0 0 4px 0",
-                }}
-              >
-                Account Name
-              </p>
-              <p
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1a1a1a",
-                  margin: 0,
-                }}
-              >
-                {formData.accountName || "—"}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {currentStep === 5 && onFile && (
-        <div>
-          <div className="mb-4">
-            <h2 style={{ color: "black" }} className="h4 fw-bold mb-2">
-              Supporting Documents
-            </h2>
-            <p className="text-muted mb-0">
-              Upload any supporting documents for your organization
-            </p>
+              Additional Documents
+            </h5>
+            <div>4/4</div>
           </div>
           <UploadFileForm
             uploadFile={uploadFile}
             onFile={onFile}
+            onRemoveFile={onRemoveFile}
             showHeader={false}
             showRequirements={false}
           />
