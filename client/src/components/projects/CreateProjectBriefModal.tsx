@@ -405,20 +405,20 @@ export const CreateProjectBriefModal: React.FC<
             style={{
               display: "flex",
               gap: "12px",
-              justifyContent: "flex-end",
               marginTop: "24px",
             }}
           >
             <Button
               style={{
-                backgroundColor: "#ffffff",
+                backgroundColor: "#f3f4f6",
                 color: "#1a1a1a",
-                border: "1px solid #d5d5d5",
+                border: "none",
                 borderRadius: "6px",
-                padding: "10px 24px",
+                padding: "14px 48px",
                 fontSize: "14px",
                 fontWeight: 600,
                 cursor: "pointer",
+                flex: 1,
               }}
               onClick={handleSaveAsDraft}
               disabled={isLoading}
@@ -431,18 +431,11 @@ export const CreateProjectBriefModal: React.FC<
                 color: "#fff",
                 border: "none",
                 borderRadius: "6px",
-                padding: "10px 24px",
+                padding: "14px 48px",
                 fontSize: "14px",
                 fontWeight: 600,
                 cursor: "pointer",
-                transition: "background-color 0.3s ease",
-                boxShadow: "0 2px 8px rgba(40, 167, 69, 0.2)",
-              }}
-              onMouseEnter={(e) => {
-                (e.target as HTMLElement).style.backgroundColor = "#218838";
-              }}
-              onMouseLeave={(e) => {
-                (e.target as HTMLElement).style.backgroundColor = "#28a745";
+                flex: 1,
               }}
               onClick={handlePublish}
               disabled={isLoading}
