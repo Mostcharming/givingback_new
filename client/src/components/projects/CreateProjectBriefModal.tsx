@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Select from "react-select";
+import { toast } from "react-toastify";
 import {
   Button,
   Form,
@@ -13,7 +14,6 @@ import {
   ModalHeader,
 } from "reactstrap";
 import useBackendService from "../../services/backend_service";
-import { useContent } from "../../services/useContext";
 import { States } from "../../services/utils";
 import "./datepicker-custom.css";
 
@@ -26,7 +26,7 @@ interface CreateProjectBriefModalProps {
 export const CreateProjectBriefModal: React.FC<
   CreateProjectBriefModalProps
 > = ({ isOpen, toggle, onSuccess }) => {
-  const { currentState } = useContent();
+  // const { currentState } = useContent();
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -50,6 +50,60 @@ export const CreateProjectBriefModal: React.FC<
     },
     onError: () => {},
   });
+
+  const { mutate: createProject } = useBackendService(
+    "/auth/donor/projects",
+    "POST",
+    {
+      onSuccess: () => {
+        toast.success("Project created successfully!");
+        resetForm();
+        toggle();
+        if (onSuccess) onSuccess();
+        // Reload the window after a short delay to refresh data
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      },
+      onError: (error: unknown) => {
+        let errorMessage = "Failed to create project";
+
+        if (error && typeof error === "object") {
+          const err = error as Record<string, unknown>;
+          if (err.response && typeof err.response === "object") {
+            const response = err.response as Record<string, unknown>;
+            if (response.data && typeof response.data === "object") {
+              const data = response.data as Record<string, unknown>;
+              if (data.error && typeof data.error === "string") {
+                errorMessage = data.error;
+              }
+            }
+          }
+          if (err.message && typeof err.message === "string") {
+            errorMessage = err.message;
+          }
+        }
+
+        toast.error(errorMessage);
+        setIsLoading(false);
+      },
+    }
+  );
+
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      category: "",
+      description: "",
+      budget: "",
+      deadline: "",
+      state: "",
+      lga: "",
+    });
+    setSelectedState(null);
+    setSelectedLGA(null);
+    setDeadlineDate(null);
+  };
 
   useEffect(() => {
     getAreas({});
@@ -112,104 +166,74 @@ export const CreateProjectBriefModal: React.FC<
 
   const validateForm = (): boolean => {
     if (!formData.title.trim()) {
-      alert("Please enter project title");
+      toast.error("Please enter project title");
       return false;
     }
     if (!formData.category) {
-      alert("Please select a category");
+      toast.error("Please select a category");
       return false;
     }
     if (!formData.description.trim()) {
-      alert("Please enter project description");
+      toast.error("Please enter project description");
       return false;
     }
     if (!formData.budget.trim()) {
-      alert("Please enter budget amount");
+      toast.error("Please enter budget amount");
       return false;
     }
     if (!formData.deadline) {
-      alert("Please select application deadline");
+      toast.error("Please select application deadline");
       return false;
     }
     if (!formData.state) {
-      alert("Please select state");
+      toast.error("Please select state");
       return false;
     }
     if (!formData.lga) {
-      alert("Please select LGA");
+      toast.error("Please select LGA");
       return false;
     }
     return true;
   };
 
-  const handleSaveAsDraft = async () => {
+  const handleSaveAsDraft = () => {
     if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
-    try {
-      const finalData = {
-        ...formData,
-        status: "draft",
-        donor_id: currentState.user.id,
-      };
-      console.log("Saving as draft:", finalData);
+    const projectData = {
+      title: formData.title.trim(),
+      category: formData.category,
+      description: formData.description.trim(),
+      budget: formData.budget,
+      deadline: formData.deadline,
+      state: formData.state,
+      lga: formData.lga,
+      status: "draft",
+    };
 
-      toggle();
-      setFormData({
-        title: "",
-        category: "",
-        description: "",
-        budget: "",
-        deadline: "",
-        state: "",
-        lga: "",
-      });
-      setSelectedState(null);
-      setSelectedLGA(null);
-      setDeadlineDate(null);
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      console.error("Error saving draft:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    createProject(projectData);
   };
 
-  const handlePublish = async () => {
+  const handlePublish = () => {
     if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
-    try {
-      const finalData = {
-        ...formData,
-        status: "brief",
-        donor_id: currentState.user.id,
-      };
-      console.log("Publishing brief:", finalData);
+    const projectData = {
+      title: formData.title.trim(),
+      category: formData.category,
+      description: formData.description.trim(),
+      budget: formData.budget,
+      deadline: formData.deadline,
+      state: formData.state,
+      lga: formData.lga,
+      status: "brief",
+    };
 
-      toggle();
-      setFormData({
-        title: "",
-        category: "",
-        description: "",
-        budget: "",
-        deadline: "",
-        state: "",
-        lga: "",
-      });
-      setSelectedState(null);
-      setSelectedLGA(null);
-      setDeadlineDate(null);
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      console.error("Error publishing:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    createProject(projectData);
   };
 
   const labelStyle = {
@@ -243,7 +267,6 @@ export const CreateProjectBriefModal: React.FC<
       </ModalHeader>
       <ModalBody style={{ padding: "24px" }}>
         <Form>
-          {/* Project Title */}
           <FormGroup className="mb-4">
             <label style={labelStyle}>
               Project Title <span style={{ color: "red" }}>*</span>
@@ -262,7 +285,6 @@ export const CreateProjectBriefModal: React.FC<
             </InputGroup>
           </FormGroup>
 
-          {/* Category */}
           <FormGroup className="mb-4">
             <label style={labelStyle}>
               Category <span style={{ color: "red" }}>*</span>
@@ -302,7 +324,6 @@ export const CreateProjectBriefModal: React.FC<
             </InputGroup>
           </FormGroup>
 
-          {/* Description */}
           <FormGroup className="mb-4">
             <label style={labelStyle}>
               Description <span style={{ color: "red" }}>*</span>
@@ -322,7 +343,6 @@ export const CreateProjectBriefModal: React.FC<
             </InputGroup>
           </FormGroup>
 
-          {/* Budget */}
           <FormGroup className="mb-4">
             <label style={labelStyle}>
               Budget <span style={{ color: "red" }}>*</span>
@@ -341,7 +361,6 @@ export const CreateProjectBriefModal: React.FC<
             </InputGroup>
           </FormGroup>
 
-          {/* Application Deadline */}
           <FormGroup className="mb-4">
             <label style={labelStyle}>
               Application Deadline <span style={{ color: "red" }}>*</span>
@@ -360,9 +379,7 @@ export const CreateProjectBriefModal: React.FC<
             </InputGroup>
           </FormGroup>
 
-          {/* Location - State and LGA */}
           <div style={{ display: "flex", gap: "16px" }}>
-            {/* State */}
             <FormGroup className="mb-4" style={{ flex: 1 }}>
               <label style={labelStyle}>
                 State <span style={{ color: "red" }}>*</span>
@@ -407,7 +424,6 @@ export const CreateProjectBriefModal: React.FC<
               </InputGroup>
             </FormGroup>
 
-            {/* LGA */}
             <FormGroup className="mb-4" style={{ flex: 1 }}>
               <label style={labelStyle}>
                 LGA <span style={{ color: "red" }}>*</span>
@@ -454,7 +470,6 @@ export const CreateProjectBriefModal: React.FC<
             </FormGroup>
           </div>
 
-          {/* Buttons */}
           <div
             style={{
               display: "flex",
@@ -477,7 +492,7 @@ export const CreateProjectBriefModal: React.FC<
               onClick={handleSaveAsDraft}
               disabled={isLoading}
             >
-              Save as Draft
+              {isLoading ? "Saving..." : "Save as Draft"}
             </Button>
             <Button
               style={{

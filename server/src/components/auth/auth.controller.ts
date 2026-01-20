@@ -749,7 +749,6 @@ export const getOrganizationCounts = async (
       return;
     }
 
-    // Get actual donor_id from donor table where user_id matches
     const donor = await db("donors").where({ user_id: userId }).first();
 
     if (!donor) {
@@ -895,7 +894,6 @@ export const addSingleNGO = async (
       bvn,
     } = req.body;
 
-    // Validate required fields
     if (!name || !email || !phone) {
       res.status(400).json({
         error: "Name, email, and phone are required fields",
@@ -905,18 +903,15 @@ export const addSingleNGO = async (
 
     const mail = email.trim();
 
-    // Check if user already exists
     const existingUser = await db("users").where({ email: mail }).first();
     if (existingUser) {
       res.status(409).json({ error: "User with this email already exists" });
       return;
     }
 
-    // Generate random password
     const generatedPassword = generateRandomPassword(12);
     const hashedPassword = hash(generatedPassword.trim());
 
-    // Create user
     const [userId] = await transaction("users").insert({
       email: mail,
       password: hashedPassword,
@@ -926,7 +921,6 @@ export const addSingleNGO = async (
       token: 0,
     });
 
-    // Create organization record
     await transaction("organizations").insert({
       name,
       phone,
@@ -938,7 +932,6 @@ export const addSingleNGO = async (
       is_verified: 0,
     });
 
-    // Create address record
     if (address || state || city_lga) {
       await transaction("address").insert({
         address: address || null,
@@ -948,7 +941,6 @@ export const addSingleNGO = async (
       });
     }
 
-    // Create bank record
     if (bankName || accountNumber || accountName) {
       await transaction("banks").insert({
         bankName: bankName || null,
@@ -961,7 +953,6 @@ export const addSingleNGO = async (
 
     await transaction.commit();
 
-    // Send welcome email with credentials
     try {
       await new Email({
         email: mail,
@@ -975,7 +966,6 @@ export const addSingleNGO = async (
       }).sendEmail("ngowelcome", "Your NGO Account Has Been Created");
     } catch (emailError) {
       console.error("Error sending welcome email:", emailError);
-      // Don't fail the request if email fails
     }
 
     res.status(201).json({
@@ -1004,7 +994,6 @@ const bulkUploadNGOs = async (fileBuffer: Buffer) => {
     const sheet = workbook.Sheets[sheetName];
     const rows: any[] = xlsx.utils.sheet_to_json(sheet);
 
-    // Filter rows that have at least name, email, and phone
     const ngos = rows.filter((row) => row.Name && row.Email && row.Phone);
 
     if (ngos.length === 0) {
@@ -1022,7 +1011,6 @@ const bulkUploadNGOs = async (fileBuffer: Buffer) => {
         try {
           const mail = ngo.Email.trim();
 
-          // Check if user already exists
           const existingUser = await trx("users")
             .where({ email: mail })
             .first();
@@ -1038,7 +1026,6 @@ const bulkUploadNGOs = async (fileBuffer: Buffer) => {
           const generatedPassword = generateRandomPassword(12);
           const hashedPassword = hash(generatedPassword.trim());
 
-          // Create user
           const [userId] = await trx("users").insert({
             email: mail,
             password: hashedPassword,
@@ -1048,7 +1035,6 @@ const bulkUploadNGOs = async (fileBuffer: Buffer) => {
             token: 0,
           });
 
-          // Create organization
           await trx("organizations").insert({
             name: ngo.Name,
             phone: ngo.Phone,
@@ -1060,7 +1046,6 @@ const bulkUploadNGOs = async (fileBuffer: Buffer) => {
             is_verified: 0,
           });
 
-          // Create address
           if (ngo.Address || ngo.State || ngo.City_LGA) {
             await trx("address").insert({
               address: ngo.Address || null,
@@ -1070,7 +1055,6 @@ const bulkUploadNGOs = async (fileBuffer: Buffer) => {
             });
           }
 
-          // Create bank
           if (ngo.BankName || ngo.AccountNumber || ngo.AccountName) {
             await trx("banks").insert({
               bankName: ngo.BankName || null,
@@ -1088,7 +1072,6 @@ const bulkUploadNGOs = async (fileBuffer: Buffer) => {
             password: generatedPassword,
           });
 
-          // Send welcome email
           try {
             await new Email({
               email: mail,
@@ -1214,7 +1197,6 @@ export const downloadSampleNGOFile = async (
 
     const sheet = xlsx.utils.aoa_to_sheet(sampleData);
 
-    // Set column widths
     sheet["!cols"] = [
       { wch: 20 },
       { wch: 25 },
@@ -1329,7 +1311,6 @@ export const getDonorProjects = async (
       return;
     }
 
-    // Get donor_id from donors table
     const donor = await db("donors").where({ user_id: userId }).first();
 
     if (!donor) {
@@ -1339,7 +1320,6 @@ export const getDonorProjects = async (
 
     const donorId = donor.id;
 
-    // Fetch all projects for this donor without pagination
     const projects = await db("project")
       .where({ donor_id: donorId })
       .select(
@@ -1392,7 +1372,6 @@ export const createProject = async (
       return;
     }
 
-    // Get donor_id from donors table using user_id
     const donor = await db("donors").where({ user_id: userId }).first();
 
     if (!donor) {
@@ -1405,7 +1384,6 @@ export const createProject = async (
 
     const donorId = donor.id;
 
-    // Destructure incoming data from frontend
     const {
       title,
       category,
@@ -1417,7 +1395,6 @@ export const createProject = async (
       status,
     } = req.body;
 
-    // Validate required fields
     const missingFields: string[] = [];
     if (!title) missingFields.push("title");
     if (!category) missingFields.push("category");
@@ -1436,7 +1413,6 @@ export const createProject = async (
       return;
     }
 
-    // Validate budget is a valid number
     const cost = parseFloat(String(budget));
     if (isNaN(cost) || cost <= 0) {
       res.status(400).json({
@@ -1446,7 +1422,6 @@ export const createProject = async (
       return;
     }
 
-    // Validate deadline is a valid date
     const deadlineDate = new Date(deadline);
     if (isNaN(deadlineDate.getTime())) {
       res.status(400).json({
@@ -1456,7 +1431,6 @@ export const createProject = async (
       return;
     }
 
-    // Validate status is one of the allowed values
     const validStatuses = ["draft", "brief", "active", "completed"];
     if (!validStatuses.includes(status)) {
       res.status(400).json({
@@ -1466,15 +1440,15 @@ export const createProject = async (
       return;
     }
 
-    // Create project record
     const [projectId] = await transaction("project").insert({
       title: title.trim(),
       category,
       description,
       cost,
       endDate: deadline,
+      startDate: new Date(),
       state,
-      // city: lga, // LGA maps to city field
+      city: lga,
       status,
       donor_id: donorId,
       organization_id: null,
@@ -1482,10 +1456,8 @@ export const createProject = async (
       updatedAt: new Date(),
     });
 
-    // Commit transaction
     await transaction.commit();
 
-    // Fetch the created project
     const createdProject = await db("project").where({ id: projectId }).first();
 
     res.status(201).json({
