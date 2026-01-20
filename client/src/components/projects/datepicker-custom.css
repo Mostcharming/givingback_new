@@ -1,0 +1,39 @@
+/* Custom DatePicker styling for Project Brief Modal */
+.custom-calendar {
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 10px;
+  font-family: "Segoe UI", sans-serif;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-input {
+  background-color: #f2f2f2 !important;
+  width: 100%;
+  border: none !important;
+  color: #767676 !important;
+  padding: 12px !important;
+  font-size: 14px !important;
+}
+
+.react-datepicker__day--selected {
+  background-color: #28a745;
+  color: white;
+  border-radius: 50%;
+}
+
+.react-datepicker__day:hover {
+  background-color: #218838;
+  color: white;
+}
+
+.react-datepicker__header {
+  background-color: #f2f2f2;
+  border-bottom: 1px solid #ccc;
+}
+
+.react-datepicker__current-month {
+  color: #1a1a1a;
+  font-weight: 600;
+}
