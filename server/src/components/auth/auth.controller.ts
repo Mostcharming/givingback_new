@@ -1460,6 +1460,67 @@ export const createProject = async (
 
     const createdProject = await db("project").where({ id: projectId }).first();
 
+    // Get donor email and details for notification
+    const donorUser = await db("users").where({ id: userId }).first();
+    const donorInfo = await db("donors").where({ id: donorId }).first();
+
+    // Send email based on project status
+    try {
+      if (status === "draft") {
+        // Send confirmation email for draft project
+        await new Email({
+          email: donorUser.email,
+          url: "",
+          token: 0,
+          additionalData: {
+            subject: "Project Brief Saved as Draft",
+            projectTitle: createdProject.title,
+            projectDescription: createdProject.description,
+            budget: createdProject.cost,
+            donorName: donorInfo?.name || "Donor",
+          },
+        }).sendEmail("donorbriefdraft", "Project Brief Saved as Draft");
+      } else if (status === "brief") {
+        // Send notification for project brief ready for review
+        await new Email({
+          email: donorUser.email,
+          url: "",
+          token: 0,
+          additionalData: {
+            subject: "Your Project Brief is Ready for Review",
+            projectTitle: createdProject.title,
+            projectDescription: createdProject.description,
+            budget: createdProject.cost,
+            donorName: donorInfo?.name || "Donor",
+            state: createdProject.state,
+            city: createdProject.city,
+          },
+        }).sendEmail(
+          "donorbriefready",
+          "Your Project Brief is Ready for Review"
+        );
+      } else if (status === "active") {
+        // Send notification for active project
+        await new Email({
+          email: donorUser.email,
+          url: "",
+          token: 0,
+          additionalData: {
+            subject: "Your Project is Now Active",
+            projectTitle: createdProject.title,
+            projectDescription: createdProject.description,
+            budget: createdProject.cost,
+            donorName: donorInfo?.name || "Donor",
+            state: createdProject.state,
+            city: createdProject.city,
+          },
+        }).sendEmail("donorbriefactive", "Your Project is Now Active");
+      }
+    } catch (emailError) {
+      console.error("Error sending project notification email:", emailError);
+      // Continue even if email fails
+    }
+
     res.status(201).json({
       status: "success",
       message: "Project brief created successfully",

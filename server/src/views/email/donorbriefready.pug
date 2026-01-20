@@ -1,0 +1,23 @@
+extends baseEmail
+
+block content
+  p Hello #{donorName},
+  p Congratulations! Your project brief is now ready for review and is live on our platform.
+  p
+    strong Project Details:
+  ul
+    li
+      strong Title: 
+      | #{projectTitle}
+    li
+      strong Description: 
+      | #{projectDescription}
+    li
+      strong Budget: 
+      | #{budget} NGN
+    li
+      strong Location: 
+      | #{state}, #{city}
+  p NGOs on our platform will now be able to view your project brief and submit their applications to execute the project.
+  p You can track applications and manage your project directly from your donor dashboard.
+  p Thank you for using GivingBack to make a positive impact!
