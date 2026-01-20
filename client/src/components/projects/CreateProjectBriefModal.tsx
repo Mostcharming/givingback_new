@@ -13,6 +13,7 @@ import {
   ModalHeader,
 } from "reactstrap";
 import useBackendService from "../../services/backend_service";
+import { useContent } from "../../services/useContext";
 import { States } from "../../services/utils";
 import "./datepicker-custom.css";
 
@@ -25,6 +26,7 @@ interface CreateProjectBriefModalProps {
 export const CreateProjectBriefModal: React.FC<
   CreateProjectBriefModalProps
 > = ({ isOpen, toggle, onSuccess }) => {
+  const { currentState } = useContent();
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -108,11 +110,52 @@ export const CreateProjectBriefModal: React.FC<
     }));
   };
 
+  const validateForm = (): boolean => {
+    if (!formData.title.trim()) {
+      alert("Please enter project title");
+      return false;
+    }
+    if (!formData.category) {
+      alert("Please select a category");
+      return false;
+    }
+    if (!formData.description.trim()) {
+      alert("Please enter project description");
+      return false;
+    }
+    if (!formData.budget.trim()) {
+      alert("Please enter budget amount");
+      return false;
+    }
+    if (!formData.deadline) {
+      alert("Please select application deadline");
+      return false;
+    }
+    if (!formData.state) {
+      alert("Please select state");
+      return false;
+    }
+    if (!formData.lga) {
+      alert("Please select LGA");
+      return false;
+    }
+    return true;
+  };
+
   const handleSaveAsDraft = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // TODO: Implement API call to save as draft
-      console.log("Saving as draft:", formData);
+      const finalData = {
+        ...formData,
+        status: "draft",
+        donor_id: currentState.user.id,
+      };
+      console.log("Saving as draft:", finalData);
+
       toggle();
       setFormData({
         title: "",
@@ -125,6 +168,7 @@ export const CreateProjectBriefModal: React.FC<
       });
       setSelectedState(null);
       setSelectedLGA(null);
+      setDeadlineDate(null);
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error saving draft:", error);
@@ -134,10 +178,19 @@ export const CreateProjectBriefModal: React.FC<
   };
 
   const handlePublish = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // TODO: Implement API call to publish
-      console.log("Publishing:", formData);
+      const finalData = {
+        ...formData,
+        status: "brief",
+        donor_id: currentState.user.id,
+      };
+      console.log("Publishing brief:", finalData);
+
       toggle();
       setFormData({
         title: "",
@@ -150,6 +203,7 @@ export const CreateProjectBriefModal: React.FC<
       });
       setSelectedState(null);
       setSelectedLGA(null);
+      setDeadlineDate(null);
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error publishing:", error);

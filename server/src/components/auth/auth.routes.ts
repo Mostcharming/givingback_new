@@ -6,6 +6,7 @@ import {
   addSingleNGO,
   bulkUploadNGOsEndpoint,
   changePassword,
+  createProject,
   deleteBank,
   downloadSampleNGOFile,
   forgotPassword,
@@ -46,6 +47,8 @@ router.get("/organization-counts", secureLogin, getOrganizationCounts);
 router.get("/donor/project-stats", secureLogin, getDonorProjectMetrics);
 
 router.get("/donor/projects", secureLogin, getDonorProjects);
+
+router.post("/donor/projects", secureLogin, createProject);
 
 router.put("/", secureLogin, uploadimg, updateOne);
 
