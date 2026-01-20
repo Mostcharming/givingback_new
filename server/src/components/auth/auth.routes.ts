@@ -18,6 +18,7 @@ import {
   login,
   logout,
   onboard,
+  publishProjectBrief,
   resend,
   resetPassword,
   signup,
@@ -49,6 +50,8 @@ router.get("/donor/project-stats", secureLogin, getDonorProjectMetrics);
 router.get("/donor/projects", secureLogin, getDonorProjects);
 
 router.post("/donor/projects", secureLogin, createProject);
+
+router.put("/donor/projects/:id/publish", secureLogin, publishProjectBrief);
 
 router.put("/", secureLogin, uploadimg, updateOne);
 

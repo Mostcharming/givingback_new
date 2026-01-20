@@ -18,7 +18,7 @@ export interface Project {
   description: string;
   category: string;
   cost: number;
-  status: "active" | "completed" | "pending";
+  status: "active" | "completed" | "pending" | "draft" | "brief";
   applications: number;
   endDate?: string;
   state?: string;

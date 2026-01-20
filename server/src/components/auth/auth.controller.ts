@@ -1549,3 +1549,132 @@ export const createProject = async (
     });
   }
 };
+
+export const publishProjectBrief = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = (req.user as User)?.id;
+    const { id } = req.params;
+
+    if (!userId) {
+      res.status(401).json({
+        status: "fail",
+        message: "Unauthorized: User not found",
+      });
+      return;
+    }
+
+    if (!id || isNaN(Number(id))) {
+      res.status(400).json({
+        status: "fail",
+        error: "Invalid project ID",
+      });
+      return;
+    }
+
+    // Get donor_id from donors table using user_id
+    const donor = await db("donors").where({ user_id: userId }).first();
+
+    if (!donor) {
+      res.status(400).json({
+        status: "fail",
+        message: "User is not registered as a donor",
+      });
+      return;
+    }
+
+    // Fetch the project
+    const project = await db("project").where({ id }).first();
+
+    if (!project) {
+      res.status(404).json({
+        status: "fail",
+        error: "Project not found",
+      });
+      return;
+    }
+
+    // Verify that the project belongs to the authenticated donor
+    if (project.donor_id !== donor.id) {
+      res.status(403).json({
+        status: "fail",
+        error: "You do not have permission to update this project",
+      });
+      return;
+    }
+
+    // Check if project is in draft status
+    if (project.status !== "draft") {
+      res.status(400).json({
+        status: "fail",
+        error: `Project is in ${project.status} status. Only draft projects can be published to brief status`,
+      });
+      return;
+    }
+
+    // Update project status to brief
+    await db("project").where({ id }).update({
+      status: "brief",
+      updatedAt: new Date(),
+    });
+
+    // Fetch updated project
+    const updatedProject = await db("project").where({ id }).first();
+
+    // Get donor email and details for notification
+    const donorUser = await db("users").where({ id: userId }).first();
+    const donorInfo = await db("donors").where({ id: donor.id }).first();
+
+    // Send email notification for project brief ready for review
+    try {
+      await new Email({
+        email: donorUser.email,
+        url: "",
+        token: 0,
+        additionalData: {
+          subject: "Your Project Brief is Ready for Review",
+          projectTitle: updatedProject.title,
+          projectDescription: updatedProject.description,
+          budget: updatedProject.cost,
+          donorName: donorInfo?.name || "Donor",
+          state: updatedProject.state,
+          city: updatedProject.city,
+        },
+      }).sendEmail("donorbriefready", "Your Project Brief is Ready for Review");
+    } catch (emailError) {
+      console.error(
+        "Error sending project publish notification email:",
+        emailError
+      );
+      // Continue even if email fails
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Project status updated to brief successfully",
+      data: {
+        id: updatedProject.id,
+        title: updatedProject.title,
+        category: updatedProject.category,
+        description: updatedProject.description,
+        budget: updatedProject.cost,
+        deadline: updatedProject.endDate,
+        state: updatedProject.state,
+        city: updatedProject.city,
+        status: updatedProject.status,
+        donor_id: updatedProject.donor_id,
+        updatedAt: updatedProject.updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Publish Project Brief Error:", error);
+
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while updating the project status",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
