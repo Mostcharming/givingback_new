@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Calendar,
+  CheckCircle,
   ChevronLeft,
   Clock,
   MapPin,
+  Clock as PendingIcon,
   Users,
   Wallet,
+  XCircle,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { formatCurrency } from "../../../../components/projects/ProjectsUtils";
 
 interface DonorCorporateViewProps {
@@ -21,6 +24,25 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
   onBack,
   onShare,
 }) => {
+  const [activeTab, setActiveTab] = useState("Pending");
+  const tabs = ["Pending", "Accepted", "Rejected"];
+
+  const counts = {
+    Pending: 0,
+    Accepted: 0,
+    Rejected: 0,
+  };
+
+  const getIcon = (tab: string) => {
+    if (tab === "Pending")
+      return <PendingIcon size={18} style={{ marginRight: "8px" }} />;
+    if (tab === "Accepted")
+      return <CheckCircle size={18} style={{ marginRight: "8px" }} />;
+    if (tab === "Rejected")
+      return <XCircle size={18} style={{ marginRight: "8px" }} />;
+    return null;
+  };
+
   console.log(onShare);
   console.log(project);
   return (
@@ -107,6 +129,46 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <Users size={16} color="orange" />
           <span>Applications: {project.applications ?? 0}</span>
+        </div>
+      </div>
+
+      <div style={{ padding: "10px 0px" }}></div>
+
+      {/* Tab Navigation */}
+      <div className="tab-container">
+        <div className="tab-wrapper">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`tab-button ${activeTab === tab ? "tab-active" : ""}`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              {getIcon(tab)}
+              {tab}
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#000000",
+                  color: "#ffffff",
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  marginLeft: "8px",
+                }}
+              >
+                {counts[activeTab as keyof typeof counts]}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
     </div>
