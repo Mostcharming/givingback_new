@@ -82,7 +82,6 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
               </div>
             </div>
 
-            {/* Right side buttons */}
             <div style={{ display: "flex", gap: "15px" }}>
               <button
                 type="button"
