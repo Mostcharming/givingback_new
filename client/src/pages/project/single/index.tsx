@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -11,6 +11,7 @@ import useBackendService from "../../../services/backend_service";
 import { useContent } from "../../../services/useContext";
 import Overview from "./render/Details/Overview";
 import Timeline from "./render/Details/TimeLine";
+import DonorCorporateView from "./render/DonorCorporateView";
 import Main from "./render/main";
 import MediaGallery from "./render/media";
 import Details from "./render/sidebar/Details";
@@ -121,40 +122,11 @@ const ProjectViewDetail: React.FC<any> = () => {
       ) : (
         <>
           {isDonorOrCorporate ? (
-            // Donor/Corporate View
-            <div className="container-fluid py-4">
-              <div>
-                <button
-                  onClick={handleBack}
-                  type="button"
-                  className="btn text-decoration-none p-0 mb-3"
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
-                >
-                  <ChevronLeft style={{ width: "1.2rem", height: "1.2rem" }} />
-                  Back to Briefs
-                </button>
-              </div>
-              <div className="mb-5">
-                <h1
-                  style={{
-                    fontSize: "2.5rem",
-                    fontWeight: "bold",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  {project.title}
-                </h1>
-                <p
-                  style={{
-                    fontSize: "1.1rem",
-                    color: "#666",
-                    lineHeight: "1.6",
-                  }}
-                >
-                  {project.description}
-                </p>
-              </div>
-            </div>
+            <DonorCorporateView
+              project={project}
+              onBack={handleBack}
+              onShare={() => setShareModalOpen(true)}
+            />
           ) : (
             // NGO/Admin View
             <div className="container-fluid py-4">
@@ -252,64 +224,6 @@ const ProjectViewDetail: React.FC<any> = () => {
                   )}
                 </div>
               </div>
-
-              {/* Support Card for Donors and Corporate */}
-              {(role === "donor" || role === "corporate") && (
-                <div className="row mt-5 mb-4">
-                  <div className="col">
-                    <div
-                      style={{
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "12px",
-                        padding: "40px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      {/* Left side text */}
-                      <div>
-                        <div
-                          style={{
-                            fontSize: "20px",
-                            fontWeight: "bold",
-                            lineHeight: "1.2",
-                            marginBottom: "5px",
-                          }}
-                        >
-                          Support this project
-                        </div>
-                        <div
-                          style={{
-                            color: "#666",
-                          }}
-                        >
-                          Help make a lasting impact
-                        </div>
-                      </div>
-
-                      {/* Right side buttons */}
-                      <div style={{ display: "flex", gap: "15px" }}>
-                        <button
-                          type="button"
-                          className="btn btn-outline-dark px-4 py-2"
-                          style={{ borderRadius: "6px" }}
-                          onClick={() => setShareModalOpen(true)}
-                        >
-                          Share
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-success px-4 py-2"
-                          style={{ borderRadius: "6px" }}
-                        >
-                          Donate Now
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </>
