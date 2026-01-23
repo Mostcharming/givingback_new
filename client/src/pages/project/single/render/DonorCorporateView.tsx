@@ -1,6 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ChevronLeft } from "lucide-react";
+import {
+  Calendar,
+  ChevronLeft,
+  Clock,
+  MapPin,
+  Users,
+  Wallet,
+} from "lucide-react";
 import React from "react";
+import { formatCurrency } from "../../../../components/projects/ProjectsUtils";
 
 interface DonorCorporateViewProps {
   project: any;
@@ -13,6 +21,8 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
   onBack,
   onShare,
 }) => {
+  console.log(onShare);
+  console.log(project);
   return (
     <div className="container-fluid py-4">
       <div>
@@ -26,7 +36,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
           Back to Briefs
         </button>
       </div>
-      <div className="mb-5">
+      <div className="mb-3">
         <h1
           style={{
             fontSize: "1.8rem",
@@ -47,59 +57,56 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
             project.description?.slice(1)}
         </p>
       </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          gap: "100px",
+          // marginTop: "12px",
+          fontSize: "13px",
+          color: "#555",
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <Clock size={16} color="green" />
+          <span>
+            Status:{" "}
+            {project.status?.charAt(0).toUpperCase() + project.status?.slice(1)}
+          </span>
+        </div>
 
-      {/* Support Card for Donors and Corporate */}
-      <div className="row mt-5 mb-4">
-        <div className="col">
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <Wallet size={16} color="blue" />
+          <span>Budget: {formatCurrency(project.cost)}</span>
+        </div>
+
+        {project.endDate && (
           <div
             style={{
-              border: "1px solid #e0e0e0",
-              borderRadius: "12px",
-              padding: "40px",
               display: "flex",
-              justifyContent: "space-between",
               alignItems: "center",
+              gap: "6px",
             }}
           >
-            {/* Left side text */}
-            <div>
-              <div
-                style={{
-                  fontSize: "20px",
-                  fontWeight: "bold",
-                  lineHeight: "1.2",
-                  marginBottom: "5px",
-                }}
-              >
-                Support this project
-              </div>
-              <div
-                style={{
-                  color: "#666",
-                }}
-              >
-                Help make a lasting impact
-              </div>
-            </div>
-
-            <div style={{ display: "flex", gap: "15px" }}>
-              <button
-                type="button"
-                className="btn btn-outline-dark px-4 py-2"
-                style={{ borderRadius: "6px" }}
-                onClick={onShare}
-              >
-                Share
-              </button>
-              <button
-                type="button"
-                className="btn btn-success px-4 py-2"
-                style={{ borderRadius: "6px" }}
-              >
-                Donate Now
-              </button>
-            </div>
+            <Calendar size={16} color="red" />
+            <span>
+              Deadline: {new Date(project.endDate).toLocaleDateString()}
+            </span>
           </div>
+        )}
+
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <MapPin size={16} color="pink" />
+          <span>
+            Location: {project.state || "Nigeria"}
+            {project.capital ? `, ${project.capital}` : ""}
+          </span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <Users size={16} color="orange" />
+          <span>Applications: {project.applications ?? 0}</span>
         </div>
       </div>
     </div>

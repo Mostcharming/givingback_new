@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
+import { FaTiktok } from "react-icons/fa";
 import {
   EmailIcon,
   EmailShareButton,
@@ -57,6 +59,17 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, toggle }) => {
         body: "Help make a lasting impact. Support projects on GiveBack",
       },
     },
+    {
+      name: "TikTok",
+      Component: "a",
+      Icon: FaTiktok,
+      props: {
+        href: `https://www.tiktok.com/`,
+        target: "_blank",
+        rel: "noopener noreferrer",
+      },
+      isCustom: true,
+    },
   ];
 
   return (
@@ -82,10 +95,45 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, toggle }) => {
           }}
         >
           {socialLinks.map((social) => {
-            const { Component, Icon, name, props } = social;
+            const { Component, Icon, name, props, isCustom } = social;
+            const ShareComponent = Component as any;
+
+            if (isCustom) {
+              return (
+                <div key={name} style={{ textAlign: "center" }}>
+                  <a
+                    {...props}
+                    style={{
+                      cursor: "pointer",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "8px",
+                      textDecoration: "none",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "48px",
+                        color: "#000",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Icon size={48} />
+                    </div>
+                    <span style={{ fontSize: "12px", color: "#666" }}>
+                      {name}
+                    </span>
+                  </a>
+                </div>
+              );
+            }
+
             return (
               <div key={name} style={{ textAlign: "center" }}>
-                <Component {...props}>
+                <ShareComponent {...props}>
                   <div
                     style={{
                       cursor: "pointer",
@@ -100,7 +148,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, toggle }) => {
                       {name}
                     </span>
                   </div>
-                </Component>
+                </ShareComponent>
               </div>
             );
           })}
