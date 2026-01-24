@@ -40,7 +40,7 @@ export default function NoHighlights() {
                 borderColor: "#28a745",
                 fontWeight: 500,
               }}
-              onClick={() => navigate("/donor/brief_initiate")}
+              onClick={() => navigate("/donor/projects")}
             >
               Create your first project
             </Button>
