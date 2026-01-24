@@ -96,7 +96,7 @@ const DN_Projects = () => {
       className="project-briefs-container"
       style={STYLES.container as any}
     >
-      <PageHeader />
+      {isDonorOrCorporate && <PageHeader />}
 
       <div style={STYLES.spacer} />
 
