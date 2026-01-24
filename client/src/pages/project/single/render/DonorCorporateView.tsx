@@ -10,8 +10,10 @@ import {
   Wallet,
   XCircle,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import EmptyNGO from "../../../../assets/images/emptyngo.svg";
 import { formatCurrency } from "../../../../components/projects/ProjectsUtils";
+import useBackendService from "../../../../services/backend_service";
 
 interface DonorCorporateViewProps {
   project: any;
@@ -22,15 +24,58 @@ interface DonorCorporateViewProps {
 const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
   project,
   onBack,
-  onShare,
 }) => {
   const [activeTab, setActiveTab] = useState("Pending");
   const tabs = ["Pending", "Accepted", "Rejected"];
+  const [metrics, setMetrics] = useState({
+    pending: 0,
+    accepted: 0,
+    rejected: 0,
+  });
+  const [applications, setApplications] = useState<any[]>([]);
+
+  const getStatusValue = (tab: string): string => {
+    const statusMap: Record<string, string> = {
+      Pending: "pending",
+      Accepted: "accepted",
+      Rejected: "rejected",
+    };
+    return statusMap[tab] || "pending";
+  };
+
+  const { mutate: fetchApplications } = useBackendService(
+    `/auth/donor/projects/${project.id}/applications`,
+    "GET",
+    {
+      onSuccess: (res: any) => {
+        if (res.metrics) {
+          setMetrics({
+            pending: res.metrics.pending || 0,
+            accepted: res.metrics.accepted || 0,
+            rejected: res.metrics.rejected || 0,
+          });
+        }
+        if (res.data) {
+          setApplications(res.data);
+        }
+      },
+      onError: () => {
+        // Handle error silently
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (project?.id) {
+      const status = getStatusValue(activeTab);
+      fetchApplications({ status });
+    }
+  }, [project?.id, activeTab, fetchApplications]);
 
   const counts = {
-    Pending: 0,
-    Accepted: 0,
-    Rejected: 0,
+    Pending: metrics.pending,
+    Accepted: metrics.accepted,
+    Rejected: metrics.rejected,
   };
 
   const getIcon = (tab: string) => {
@@ -43,8 +88,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
     return null;
   };
 
-  console.log(onShare);
-  console.log(project);
+  console.log(counts);
   return (
     <div className="container-fluid py-4">
       <div>
@@ -165,11 +209,151 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
                   marginLeft: "8px",
                 }}
               >
-                {counts[activeTab as keyof typeof counts]}
+                {counts[tab]}
               </span>
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Applications List or Empty State */}
+      <div style={{ marginTop: "24px" }}>
+        {applications.length > 0 ? (
+          <div>
+            {applications.map((app) => (
+              <div
+                key={app.id}
+                style={{
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  marginBottom: "12px",
+                  backgroundColor: "#fff",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "start",
+                    marginBottom: "12px",
+                  }}
+                >
+                  <div>
+                    <h5
+                      style={{
+                        margin: "0 0 4px 0",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      {app.ngo_name}
+                    </h5>
+                    <p style={{ margin: "0", fontSize: "13px", color: "#666" }}>
+                      Applied: {new Date(app.applied_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      backgroundColor:
+                        activeTab === "Pending"
+                          ? "#fff3cd"
+                          : activeTab === "Accepted"
+                          ? "#d4edda"
+                          : "#f8d7da",
+                      color:
+                        activeTab === "Pending"
+                          ? "#856404"
+                          : activeTab === "Accepted"
+                          ? "#155724"
+                          : "#721c24",
+                      padding: "4px 12px",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {activeTab}
+                  </div>
+                </div>
+
+                {app.proposed_budget && (
+                  <div style={{ marginBottom: "8px", fontSize: "13px" }}>
+                    <span style={{ color: "#666" }}>Budget: </span>
+                    <span style={{ fontWeight: "600" }}>
+                      {formatCurrency(app.proposed_budget)}
+                    </span>
+                  </div>
+                )}
+
+                {app.timeline && (
+                  <div style={{ marginBottom: "8px", fontSize: "13px" }}>
+                    <span style={{ color: "#666" }}>Timeline: </span>
+                    <span style={{ fontWeight: "600" }}>{app.timeline}</span>
+                  </div>
+                )}
+
+                {app.description && (
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#555",
+                      lineHeight: "1.5",
+                    }}
+                  >
+                    <p style={{ margin: "0" }}>{app.description}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "60px 20px",
+              backgroundColor: "#f9f9f9",
+              borderRadius: "8px",
+              border: "1px solid #e0e0e0",
+              minHeight: "300px",
+            }}
+          >
+            <img
+              src={EmptyNGO}
+              alt="No applications"
+              style={{
+                width: "120px",
+                height: "120px",
+                marginBottom: "16px",
+                opacity: 0.7,
+              }}
+            />
+            <p
+              style={{
+                fontSize: "16px",
+                color: "#666666",
+                textAlign: "center",
+                margin: "0",
+              }}
+            >
+              No {activeTab.toLowerCase()} applications yet
+            </p>
+            <p
+              style={{
+                fontSize: "13px",
+                color: "#999999",
+                textAlign: "center",
+                margin: "8px 0 0 0",
+              }}
+            >
+              Check back later for new applications
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

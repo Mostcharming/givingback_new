@@ -15,6 +15,7 @@ import {
   getDonorProjects,
   getOne,
   getOrganizationCounts,
+  getProjectApplications,
   login,
   logout,
   onboard,
@@ -52,6 +53,12 @@ router.get("/donor/projects", secureLogin, getDonorProjects);
 router.post("/donor/projects", secureLogin, createProject);
 
 router.put("/donor/projects/:id/publish", secureLogin, publishProjectBrief);
+
+router.get(
+  "/donor/projects/:projectId/applications",
+  secureLogin,
+  getProjectApplications
+);
 
 router.put("/", secureLogin, uploadimg, updateOne);
 

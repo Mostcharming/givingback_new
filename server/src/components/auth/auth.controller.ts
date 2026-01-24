@@ -1678,3 +1678,128 @@ export const publishProjectBrief = async (
     });
   }
 };
+
+export const getProjectApplications = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { projectId } = req.params;
+    const { status } = req.query;
+    const userId = (req.user as User)?.id;
+
+    if (!projectId) {
+      res.status(400).json({
+        status: "fail",
+        error: "Project ID is required",
+      });
+      return;
+    }
+
+    // Verify project exists and user has permission to view applications
+    const project = await db("project")
+      .where({ id: projectId })
+      .select("id", "donor_id", "title", "category")
+      .first();
+
+    if (!project) {
+      res.status(404).json({
+        status: "fail",
+        error: "Project not found",
+      });
+      return;
+    }
+
+    // Check if user is the donor who created this project
+    const donor = await db("donors")
+      .where({ user_id: userId })
+      .select("id")
+      .first();
+
+    if (!donor || donor.id !== project.donor_id) {
+      res.status(403).json({
+        status: "fail",
+        error:
+          "You do not have permission to view applications for this project",
+      });
+      return;
+    }
+
+    // Build query for project applications
+    let query = db("project_application")
+      .where({ project_id: projectId })
+      .leftJoin(
+        "organizations",
+        "project_application.ngo_id",
+        "organizations.id"
+      )
+      .select(
+        "project_application.id",
+        "project_application.project_id",
+        "project_application.ngo_id",
+        "project_application.applied_date",
+        "project_application.proposed_budget",
+        "project_application.timeline",
+        "project_application.description",
+        "project_application.deliverables",
+        "project_application.status",
+        "project_application.createdAt",
+        "project_application.updatedAt",
+        "organizations.name as ngo_name",
+        "organizations.phone",
+        "organizations.website",
+        "organizations.interest_area"
+      );
+
+    // Get metrics for all applications (before filtering by status)
+    const metricsResult: any = await db("project_application")
+      .where({ project_id: projectId })
+      .select("status")
+      .count("id as count")
+      .groupBy("status");
+
+    const metrics = {
+      total: 0,
+      pending: 0,
+      accepted: 0,
+      rejected: 0,
+    };
+
+    metricsResult.forEach((item: any) => {
+      metrics.total += item.count;
+      if (item.status === "pending") {
+        metrics.pending = item.count;
+      } else if (item.status === "accepted") {
+        metrics.accepted = item.count;
+      } else if (item.status === "rejected") {
+        metrics.rejected = item.count;
+      }
+    });
+
+    // Filter by status if provided
+    if (status) {
+      query = query.where("project_application.status", status);
+    }
+
+    const applications = await query.orderBy(
+      "project_application.createdAt",
+      "desc"
+    );
+
+    res.status(200).json({
+      status: "success",
+      count: applications.length,
+      projectId: projectId,
+      projectTitle: project.title,
+      metrics: metrics,
+      data: applications,
+    });
+  } catch (error) {
+    console.error("Get Project Applications Error:", error);
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while fetching project applications",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
