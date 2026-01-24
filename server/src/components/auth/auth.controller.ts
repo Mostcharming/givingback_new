@@ -895,6 +895,15 @@ export const addSingleNGO = async (
       bvn,
     } = req.body;
 
+    const donorId = (req.user as User)?.id;
+
+    if (!donorId) {
+      res.status(401).json({ error: "User not authenticated" });
+      return;
+    }
+
+    const donor = await db("donors").where({ user_id: donorId }).first();
+
     if (!name || !email || !phone) {
       res.status(400).json({
         error: "Name, email, and phone are required fields",
@@ -931,6 +940,7 @@ export const addSingleNGO = async (
       user_id: userId,
       active: 1,
       is_verified: 0,
+      donor_id: donor.id,
     });
 
     if (address || state || city_lga) {
