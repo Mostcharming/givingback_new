@@ -59,9 +59,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
           setApplications(res.data);
         }
       },
-      onError: () => {
-        // Handle error silently
-      },
+      onError: () => {},
     }
   );
 
@@ -128,7 +126,6 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
           display: "flex",
           flexDirection: "row",
           gap: "100px",
-          // marginTop: "12px",
           fontSize: "13px",
           color: "#555",
           flexWrap: "wrap",
@@ -178,7 +175,6 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
 
       <div style={{ padding: "10px 0px" }}></div>
 
-      {/* Tab Navigation */}
       <div className="tab-container">
         <div className="tab-wrapper">
           {tabs.map((tab) => (

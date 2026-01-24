@@ -136,6 +136,7 @@ export const logout = (req: Request, res: Response) => {
   });
   res.status(200).json({ status: "success" });
 };
+
 export const onboard = async (req: Request, res: Response) => {
   const {
     selectedOption,
@@ -1460,14 +1461,11 @@ export const createProject = async (
 
     const createdProject = await db("project").where({ id: projectId }).first();
 
-    // Get donor email and details for notification
     const donorUser = await db("users").where({ id: userId }).first();
     const donorInfo = await db("donors").where({ id: donorId }).first();
 
-    // Send email based on project status
     try {
       if (status === "draft") {
-        // Send confirmation email for draft project
         await new Email({
           email: donorUser.email,
           url: "",
@@ -1481,7 +1479,6 @@ export const createProject = async (
           },
         }).sendEmail("donorbriefdraft", "Project Brief Saved as Draft");
       } else if (status === "brief") {
-        // Send notification for project brief ready for review
         await new Email({
           email: donorUser.email,
           url: "",
@@ -1500,7 +1497,6 @@ export const createProject = async (
           "Your Project Brief is Ready for Review"
         );
       } else if (status === "active") {
-        // Send notification for active project
         await new Email({
           email: donorUser.email,
           url: "",
@@ -1518,7 +1514,6 @@ export const createProject = async (
       }
     } catch (emailError) {
       console.error("Error sending project notification email:", emailError);
-      // Continue even if email fails
     }
 
     res.status(201).json({
@@ -1574,7 +1569,6 @@ export const publishProjectBrief = async (
       return;
     }
 
-    // Get donor_id from donors table using user_id
     const donor = await db("donors").where({ user_id: userId }).first();
 
     if (!donor) {
@@ -1585,7 +1579,6 @@ export const publishProjectBrief = async (
       return;
     }
 
-    // Fetch the project
     const project = await db("project").where({ id }).first();
 
     if (!project) {
@@ -1596,7 +1589,6 @@ export const publishProjectBrief = async (
       return;
     }
 
-    // Verify that the project belongs to the authenticated donor
     if (project.donor_id !== donor.id) {
       res.status(403).json({
         status: "fail",
@@ -1605,7 +1597,6 @@ export const publishProjectBrief = async (
       return;
     }
 
-    // Check if project is in draft status
     if (project.status !== "draft") {
       res.status(400).json({
         status: "fail",
@@ -1614,20 +1605,16 @@ export const publishProjectBrief = async (
       return;
     }
 
-    // Update project status to brief
     await db("project").where({ id }).update({
       status: "brief",
       updatedAt: new Date(),
     });
 
-    // Fetch updated project
     const updatedProject = await db("project").where({ id }).first();
 
-    // Get donor email and details for notification
     const donorUser = await db("users").where({ id: userId }).first();
     const donorInfo = await db("donors").where({ id: donor.id }).first();
 
-    // Send email notification for project brief ready for review
     try {
       await new Email({
         email: donorUser.email,
@@ -1648,7 +1635,6 @@ export const publishProjectBrief = async (
         "Error sending project publish notification email:",
         emailError
       );
-      // Continue even if email fails
     }
 
     res.status(200).json({
@@ -1696,7 +1682,6 @@ export const getProjectApplications = async (
       return;
     }
 
-    // Verify project exists and user has permission to view applications
     const project = await db("project")
       .where({ id: projectId })
       .select("id", "donor_id", "title", "category")
@@ -1710,7 +1695,6 @@ export const getProjectApplications = async (
       return;
     }
 
-    // Check if user is the donor who created this project
     const donor = await db("donors")
       .where({ user_id: userId })
       .select("id")
@@ -1725,7 +1709,6 @@ export const getProjectApplications = async (
       return;
     }
 
-    // Build query for project applications
     let query = db("project_application")
       .where({ project_id: projectId })
       .leftJoin(
@@ -1733,6 +1716,8 @@ export const getProjectApplications = async (
         "project_application.ngo_id",
         "organizations.id"
       )
+      .leftJoin("userimg", "organizations.user_id", "userimg.user_id")
+      .leftJoin("address", "organizations.user_id", "address.user_id")
       .select(
         "project_application.id",
         "project_application.project_id",
@@ -1748,10 +1733,14 @@ export const getProjectApplications = async (
         "organizations.name as ngo_name",
         "organizations.phone",
         "organizations.website",
-        "organizations.interest_area"
+        "organizations.interest_area",
+        "organizations.user_id",
+        "userimg.image as ngo_image",
+        "address.state",
+        "address.city_lga",
+        "address.address"
       );
 
-    // Get metrics for all applications (before filtering by status)
     const metricsResult: any = await db("project_application")
       .where({ project_id: projectId })
       .select("status")
@@ -1776,7 +1765,6 @@ export const getProjectApplications = async (
       }
     });
 
-    // Filter by status if provided
     if (status) {
       query = query.where("project_application.status", status);
     }
@@ -1786,13 +1774,78 @@ export const getProjectApplications = async (
       "desc"
     );
 
+    const enrichedApplications = await Promise.all(
+      applications.map(async (app: any) => {
+        const totalProjects: any = await db("project")
+          .where({ organization_id: app.ngo_id })
+          .count("id as count")
+          .first();
+
+        const completedProjects: any = await db("project")
+          .where({ organization_id: app.ngo_id, status: "completed" })
+          .count("id as count")
+          .first();
+
+        const totalProjectsCount = Number(totalProjects?.count || 0);
+        const completedProjectsCount = Number(completedProjects?.count || 0);
+
+        const completionPercentage =
+          totalProjectsCount > 0
+            ? parseFloat(
+                ((completedProjectsCount / totalProjectsCount) * 100).toFixed(2)
+              )
+            : 0;
+
+        let beneficiariesCount = 0;
+
+        const ngoProjects: any[] = await db("project")
+          .where({ organization_id: app.ngo_id })
+          .select("id");
+
+        if (ngoProjects.length > 0) {
+          const projectIds = ngoProjects.map((p) => p.id);
+
+          const milestones: any[] = await db("milestone")
+            .whereIn("project_id", projectIds)
+            .select("id");
+
+          const milestoneIds = milestones.map((m) => m.id);
+
+          if (milestoneIds.length > 0) {
+            const beneficiariesResult: any = await db("milestone_update")
+              .whereIn("milestone_id", milestoneIds)
+              .count("id as count")
+              .first();
+
+            beneficiariesCount = Number(beneficiariesResult?.count || 0);
+          }
+        }
+
+        return {
+          ...app,
+          ngo_details: {
+            totalProjects: totalProjectsCount,
+            completedProjects: completedProjectsCount,
+            completionPercentage: completionPercentage,
+            beneficiaries: beneficiariesCount,
+            image: app.ngo_image,
+            location: {
+              state: app.state,
+              city_lga: app.city_lga,
+              address: app.address,
+            },
+          },
+        };
+      })
+    );
+
     res.status(200).json({
       status: "success",
-      count: applications.length,
+      count: enrichedApplications.length,
       projectId: projectId,
       projectTitle: project.title,
       metrics: metrics,
-      data: applications,
+      data: enrichedApplications,
     });
   } catch (error) {
     console.error("Get Project Applications Error:", error);
