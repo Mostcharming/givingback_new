@@ -95,7 +95,8 @@ export const getAllNames = async (
 ) => {
   try {
     const names = await db("areas").select("id", "name");
-    res.json(names);
+    const sortedNames = names.sort((a, b) => a.name.localeCompare(b.name));
+    res.json(sortedNames);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch areas" });
   }

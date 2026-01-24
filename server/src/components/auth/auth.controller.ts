@@ -1735,7 +1735,7 @@ export const getProjectApplications = async (
         "organizations.website",
         "organizations.interest_area",
         "organizations.user_id",
-        "userimg.image as ngo_image",
+        "userimg.filename as ngo_image",
         "address.state",
         "address.city_lga",
         "address.address"
