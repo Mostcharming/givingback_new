@@ -251,7 +251,7 @@ export default function FundWalletModal({
 
     const handler = (window as any).PaystackPop.setup({
       key: paystackPublicKey,
-      email: "mostcharming920@gmail.com",
+      email: currentState.user.email,
       amount: paymentData.amount,
       currency: paymentData.currency,
       ref: paymentData.reference,
