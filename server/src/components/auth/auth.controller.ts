@@ -1871,3 +1871,134 @@ export const getProjectApplications = async (
     });
   }
 };
+
+export const updateProjectApplicationStatus = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { projectId, applicationId } = req.params;
+    const { status } = req.body;
+    const userId = (req.user as User)?.id;
+
+    // Validate required fields
+    if (!projectId || !applicationId) {
+      res.status(400).json({
+        status: "fail",
+        error: "Project ID and Application ID are required",
+      });
+      return;
+    }
+
+    if (!status) {
+      res.status(400).json({
+        status: "fail",
+        error: "Status is required",
+      });
+      return;
+    }
+
+    // Validate status value
+    const validStatuses = ["pending", "accepted", "rejected"];
+    if (!validStatuses.includes(status)) {
+      res.status(400).json({
+        status: "fail",
+        error: `Invalid status. Status must be one of: ${validStatuses.join(
+          ", "
+        )}`,
+      });
+      return;
+    }
+
+    // Get project to verify ownership
+    const project = await db("project")
+      .where({ id: projectId })
+      .select("id", "donor_id", "title")
+      .first();
+
+    if (!project) {
+      res.status(404).json({
+        status: "fail",
+        error: "Project not found",
+      });
+      return;
+    }
+
+    // Verify user is the donor of this project
+    const donor = await db("donors")
+      .where({ user_id: userId })
+      .select("id")
+      .first();
+
+    if (!donor || donor.id !== project.donor_id) {
+      res.status(403).json({
+        status: "fail",
+        error:
+          "You do not have permission to update applications for this project",
+      });
+      return;
+    }
+
+    // Get the application
+    const application = await db("project_application")
+      .where({ id: applicationId, project_id: projectId })
+      .select("id", "project_id", "ngo_id", "status")
+      .first();
+
+    if (!application) {
+      res.status(404).json({
+        status: "fail",
+        error: "Application not found",
+      });
+      return;
+    }
+
+    // Update the application status
+    await db("project_application").where({ id: applicationId }).update({
+      status: status,
+      updatedAt: new Date(),
+    });
+
+    // Get the updated application with NGO details
+    const updatedApplication = await db("project_application")
+      .where({ id: applicationId })
+      .leftJoin(
+        "organizations",
+        "project_application.ngo_id",
+        "organizations.id"
+      )
+      .leftJoin("userimg", "organizations.user_id", "userimg.user_id")
+      .select(
+        "project_application.id",
+        "project_application.project_id",
+        "project_application.ngo_id",
+        "project_application.applied_date",
+        "project_application.proposed_budget",
+        "project_application.timeline",
+        "project_application.description",
+        "project_application.deliverables",
+        "project_application.status",
+        "project_application.createdAt",
+        "project_application.updatedAt",
+        "organizations.name as ngo_name",
+        "organizations.phone",
+        "organizations.website",
+        "organizations.user_id",
+        "userimg.filename as ngo_image"
+      )
+      .first();
+
+    res.status(200).json({
+      status: "success",
+      message: `Application status updated to ${status} successfully`,
+      data: updatedApplication,
+    });
+  } catch (error) {
+    console.error("Update Project Application Status Error:", error);
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while updating the application status",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};

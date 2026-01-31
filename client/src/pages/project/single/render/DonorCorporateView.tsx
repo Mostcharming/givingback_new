@@ -379,41 +379,207 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
                   style={{
                     borderTop: "1px solid #e0e0e0",
                     paddingTop: "12px",
-                    marginBottom: "12px",
+                    marginBottom: "16px",
                   }}
                 >
-                  <p style={{ margin: "0", fontSize: "12px", color: "#999" }}>
-                    Applied: {new Date(app.applied_date).toLocaleDateString()}
-                  </p>
-                </div>
-
-                {app.proposed_budget && (
-                  <div style={{ marginBottom: "8px", fontSize: "13px" }}>
-                    <span style={{ color: "#666" }}>Budget: </span>
-                    <span style={{ fontWeight: "600" }}>
-                      {formatCurrency(app.proposed_budget)}
-                    </span>
-                  </div>
-                )}
-
-                {app.timeline && (
-                  <div style={{ marginBottom: "8px", fontSize: "13px" }}>
-                    <span style={{ color: "#666" }}>Timeline: </span>
-                    <span style={{ fontWeight: "600" }}>{app.timeline}</span>
-                  </div>
-                )}
-
-                {app.description && (
+                  {/* Applied Date, Budget, and Timeline - Side by Side */}
                   <div
                     style={{
-                      fontSize: "13px",
-                      color: "#555",
-                      lineHeight: "1.5",
+                      display: "flex",
+                      gap: "40px",
+                      marginBottom: "20px",
+                      flexWrap: "wrap",
                     }}
                   >
-                    <p style={{ margin: "0" }}>{app.description}</p>
+                    {/* Applied Date */}
+                    <div>
+                      <p
+                        style={{
+                          margin: "0 0 6px 0",
+                          fontSize: "12px",
+                          color: "#999",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Applied Date
+                      </p>
+                      <p
+                        style={{
+                          margin: "0",
+                          fontSize: "13px",
+                          color: "#333",
+                          fontWeight: "500",
+                        }}
+                      >
+                        {new Date(app.applied_date).toLocaleDateString()}
+                      </p>
+                    </div>
+
+                    {/* Proposed Budget */}
+                    {app.proposed_budget && (
+                      <div>
+                        <p
+                          style={{
+                            margin: "0 0 6px 0",
+                            fontSize: "12px",
+                            color: "#999",
+                            fontWeight: "600",
+                          }}
+                        >
+                          Proposed Budget
+                        </p>
+                        <p
+                          style={{
+                            margin: "0",
+                            fontSize: "13px",
+                            color: "#333",
+                            fontWeight: "600",
+                          }}
+                        >
+                          {formatCurrency(app.proposed_budget)}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Timeline */}
+                    {app.timeline && (
+                      <div>
+                        <p
+                          style={{
+                            margin: "0 0 6px 0",
+                            fontSize: "12px",
+                            color: "#999",
+                            fontWeight: "600",
+                          }}
+                        >
+                          Timeline
+                        </p>
+                        <p
+                          style={{
+                            margin: "0",
+                            fontSize: "13px",
+                            color: "#333",
+                            fontWeight: "500",
+                          }}
+                        >
+                          {app.timeline}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                )}
+
+                  {/* Project Summary and Description */}
+                  {app.description && (
+                    <div style={{ marginBottom: "20px" }}>
+                      <p
+                        style={{
+                          margin: "0 0 8px 0",
+                          fontSize: "12px",
+                          color: "#999",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Proposal Summary
+                      </p>
+                      <p
+                        style={{
+                          margin: "0",
+                          fontSize: "13px",
+                          color: "#555",
+                          lineHeight: "1.6",
+                        }}
+                      >
+                        {app.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Key Deliverables and Action Buttons */}
+                  <div>
+                    {/* Key Deliverables */}
+                    {app.deliverables && app.deliverables.length > 0 && (
+                      <div style={{ marginBottom: "20px" }}>
+                        <p
+                          style={{
+                            margin: "0 0 12px 0",
+                            fontSize: "12px",
+                            color: "#999",
+                            fontWeight: "600",
+                          }}
+                        >
+                          Key Deliverables
+                        </p>
+                        <ul
+                          style={{
+                            margin: "0",
+                            paddingLeft: "20px",
+                            listStyleType: "disc",
+                          }}
+                        >
+                          {app.deliverables.map(
+                            (deliverable: string, idx: number) => (
+                              <li
+                                key={idx}
+                                style={{
+                                  margin: "6px 0",
+                                  fontSize: "13px",
+                                  color: "#555",
+                                  lineHeight: "1.5",
+                                }}
+                              >
+                                {deliverable}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "12px",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{
+                          backgroundColor: "#dc3545",
+                          color: "white",
+                          padding: "10px 20px",
+                          borderRadius: "4px",
+                          border: "none",
+                          fontSize: "13px",
+                          fontWeight: "500",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Reject
+                      </button>
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{
+                          backgroundColor: "#28a745",
+                          color: "white",
+                          padding: "10px 20px",
+                          borderRadius: "4px",
+                          border: "none",
+                          fontSize: "13px",
+                          fontWeight: "500",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Accept Application
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

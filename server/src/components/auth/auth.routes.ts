@@ -24,6 +24,7 @@ import {
   resetPassword,
   signup,
   updateOne,
+  updateProjectApplicationStatus,
   verify,
 } from "./auth.controller";
 
@@ -58,6 +59,12 @@ router.get(
   "/donor/projects/:projectId/applications",
   secureLogin,
   getProjectApplications
+);
+
+router.put(
+  "/donor/projects/:projectId/applications/:applicationId/status",
+  secureLogin,
+  updateProjectApplicationStatus
 );
 
 router.put("/", secureLogin, uploadimg, updateOne);
