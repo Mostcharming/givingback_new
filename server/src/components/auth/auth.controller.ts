@@ -1749,6 +1749,7 @@ export const getProjectApplications = async (
         "organizations.phone",
         "organizations.website",
         "organizations.interest_area",
+        "organizations.team_size",
         "organizations.user_id",
         "userimg.filename as ngo_image",
         "address.state",
@@ -1843,6 +1844,7 @@ export const getProjectApplications = async (
             completedProjects: completedProjectsCount,
             completionPercentage: completionPercentage,
             beneficiaries: beneficiariesCount,
+            teamSize: app.team_size,
             image: app.ngo_image,
             location: {
               state: app.state,

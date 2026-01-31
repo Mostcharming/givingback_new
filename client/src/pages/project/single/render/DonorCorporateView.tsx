@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import EmptyNGO from "../../../../assets/images/emptyngo.svg";
+import NGODetailsModal from "../../../../components/NGODetailsModal";
 import { formatCurrency } from "../../../../components/projects/ProjectsUtils";
 import useBackendService from "../../../../services/backend_service";
 
@@ -33,6 +34,8 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
     rejected: 0,
   });
   const [applications, setApplications] = useState<any[]>([]);
+  const [selectedNGO, setSelectedNGO] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getStatusValue = (tab: string): string => {
     const statusMap: Record<string, string> = {
@@ -69,6 +72,46 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
       fetchApplications({ status });
     }
   }, [project?.id, activeTab, fetchApplications]);
+
+  const handleViewProfile = (ngo: any) => {
+    setSelectedNGO(ngo);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedNGO(null);
+  };
+
+  const handleApplicationStatus = async (
+    applicationId: number,
+    newStatus: string
+  ) => {
+    try {
+      const endpoint = `/donor/projects/${project.id}/applications/${applicationId}/status`;
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}${endpoint}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+
+      if (response.ok) {
+        // Refresh applications list after status update
+        if (project?.id) {
+          const status = getStatusValue(activeTab);
+          fetchApplications({ status });
+        }
+      }
+    } catch (error) {
+      console.error("Error updating application status:", error);
+    }
+  };
 
   const counts = {
     Pending: metrics.pending,
@@ -358,6 +401,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
                     <button
                       type="button"
                       className="btn"
+                      onClick={() => handleViewProfile(app)}
                       style={{
                         backgroundColor: "#28a745",
                         color: "white",
@@ -546,6 +590,9 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
                       <button
                         type="button"
                         className="btn"
+                        onClick={() =>
+                          handleApplicationStatus(app.id, "rejected")
+                        }
                         style={{
                           backgroundColor: "#dc3545",
                           color: "white",
@@ -563,6 +610,9 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
                       <button
                         type="button"
                         className="btn"
+                        onClick={() =>
+                          handleApplicationStatus(app.id, "accepted")
+                        }
                         style={{
                           backgroundColor: "#28a745",
                           color: "white",
@@ -630,6 +680,13 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* NGO Details Modal */}
+      <NGODetailsModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        ngoData={selectedNGO}
+      />
     </div>
   );
 };
