@@ -272,46 +272,119 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    alignItems: "start",
-                    marginBottom: "12px",
+                    alignItems: "flex-start",
+                    marginBottom: "16px",
                   }}
                 >
-                  <div>
-                    <h5
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "12px",
+                      alignItems: "flex-start",
+                      flex: 1,
+                    }}
+                  >
+                    {/* NGO Image */}
+                    <img
+                      src={app.ngo_image || EmptyNGO}
+                      alt={app.ngo_name}
                       style={{
-                        margin: "0 0 4px 0",
-                        fontSize: "16px",
-                        fontWeight: "600",
+                        width: "64px",
+                        height: "64px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        backgroundColor: "#f0f0f0",
+                        flexShrink: 0,
                       }}
-                    >
-                      {app.ngo_name}
-                    </h5>
-                    <p style={{ margin: "0", fontSize: "13px", color: "#666" }}>
-                      Applied: {new Date(app.applied_date).toLocaleDateString()}
-                    </p>
+                    />
+                    {/* NGO Info */}
+                    <div style={{ flex: 1 }}>
+                      <h5
+                        style={{
+                          margin: "0 0 8px 0",
+                          fontSize: "16px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        {app.ngo_name}
+                      </h5>
+                      <p
+                        style={{
+                          margin: "0 0 12px 0",
+                          fontSize: "12px",
+                          color: "#666",
+                        }}
+                      >
+                        {app.city_lga || "N/A"}
+                        {app.state ? `, ${app.state}` : ""}
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "24px",
+                          fontSize: "12px",
+                          color: "#666",
+                        }}
+                      >
+                        <div>
+                          <span style={{ fontWeight: "600", color: "#000" }}>
+                            {app.ngo_details?.totalProjects || 0}
+                          </span>
+                          {" Projects"}
+                        </div>
+                        <div>
+                          <span style={{ fontWeight: "600", color: "#000" }}>
+                            {app.ngo_details?.completionPercentage || 0}%
+                          </span>
+                          {" Success rate"}
+                        </div>
+                        <div>
+                          <span style={{ fontWeight: "600", color: "#000" }}>
+                            {app.ngo_details?.beneficiaries || 0}
+                          </span>
+                          {" Beneficiaries"}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div
                     style={{
-                      backgroundColor:
-                        activeTab === "Pending"
-                          ? "#fff3cd"
-                          : activeTab === "Accepted"
-                          ? "#d4edda"
-                          : "#f8d7da",
-                      color:
-                        activeTab === "Pending"
-                          ? "#856404"
-                          : activeTab === "Accepted"
-                          ? "#155724"
-                          : "#721c24",
-                      padding: "4px 12px",
-                      borderRadius: "4px",
-                      fontSize: "12px",
-                      fontWeight: "600",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-end",
+                      gap: "12px",
                     }}
                   >
-                    {activeTab}
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{
+                        backgroundColor: "#28a745",
+                        color: "white",
+                        padding: "8px 16px",
+                        borderRadius: "4px",
+                        border: "none",
+                        fontSize: "13px",
+                        fontWeight: "500",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      View Profile
+                    </button>
                   </div>
+                </div>
+
+                <div
+                  style={{
+                    borderTop: "1px solid #e0e0e0",
+                    paddingTop: "12px",
+                    marginBottom: "12px",
+                  }}
+                >
+                  <p style={{ margin: "0", fontSize: "12px", color: "#999" }}>
+                    Applied: {new Date(app.applied_date).toLocaleDateString()}
+                  </p>
                 </div>
 
                 {app.proposed_budget && (
