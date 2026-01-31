@@ -54,14 +54,18 @@ export const CreateProjectBriefModal: React.FC<
     onError: () => {},
   });
 
-  const { mutate: fetchNgos } = useBackendService("/donor/users", "GET", {
-    onSuccess: (res: { users: Array<{ id: string; name: string }> }) => {
-      setNgos(res.users.map((ngo) => ({ value: ngo.id, label: ngo.name })));
-    },
-    onError: () => {
-      toast.error("Failed to fetch NGOs.");
-    },
-  });
+  const { mutate: fetchNgos } = useBackendService(
+    "/donor/users?all=true",
+    "GET",
+    {
+      onSuccess: (res: { users: Array<{ id: string; name: string }> }) => {
+        setNgos(res.users.map((ngo) => ({ value: ngo.id, label: ngo.name })));
+      },
+      onError: () => {
+        toast.error("Failed to fetch NGOs.");
+      },
+    }
+  );
 
   const { mutate: createProject } = useBackendService(
     "/auth/donor/projects",
@@ -261,6 +265,8 @@ export const CreateProjectBriefModal: React.FC<
     }
 
     setIsLoading(true);
+    const status =
+      !formData.isPublic && formData.selectedNgo ? "active" : "brief";
     const projectData = {
       title: formData.title.trim(),
       category: formData.category,
@@ -271,7 +277,7 @@ export const CreateProjectBriefModal: React.FC<
       lga: formData.lga,
       ispublic: formData.isPublic,
       organization_id: formData.isPublic ? null : formData.selectedNgo?.value,
-      status: "brief",
+      status: status,
     };
 
     createProject(projectData);
@@ -514,27 +520,64 @@ export const CreateProjectBriefModal: React.FC<
           <FormGroup className="mb-4">
             <label style={labelStyle}>Project Visibility</label>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <label
+              <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "8px",
-                  cursor: "pointer",
-                  marginBottom: 0,
+                  gap: "12px",
                 }}
               >
-                <input
-                  type="checkbox"
-                  checked={formData.isPublic}
-                  onChange={handleIsPublicChange}
-                  style={{ cursor: "pointer", width: "20px", height: "20px" }}
-                />
-                <span style={{ fontSize: "14px", fontWeight: 500 }}>
-                  {formData.isPublic
-                    ? "Public Project"
-                    : "Private Project (Specific NGO)"}
+                <span
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    minWidth: "60px",
+                  }}
+                >
+                  Private
                 </span>
-              </label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleIsPublicChange({
+                      target: { checked: !formData.isPublic },
+                    } as React.ChangeEvent<HTMLInputElement>)
+                  }
+                  style={{
+                    width: "56px",
+                    height: "32px",
+                    borderRadius: "16px",
+                    border: "none",
+                    backgroundColor: formData.isPublic ? "#28a745" : "#ccc",
+                    cursor: "pointer",
+                    position: "relative",
+                    padding: 0,
+                    transition: "background-color 0.3s ease",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      backgroundColor: "#fff",
+                      top: "2px",
+                      left: formData.isPublic ? "26px" : "2px",
+                      transition: "left 0.3s ease",
+                    }}
+                  />
+                </button>
+                <span
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    minWidth: "60px",
+                  }}
+                >
+                  Public
+                </span>
+              </div>
             </div>
           </FormGroup>
 

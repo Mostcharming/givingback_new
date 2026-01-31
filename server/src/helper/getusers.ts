@@ -41,6 +41,7 @@ export const fetchUsers = async (filters: {
   state?: string;
   user_id?: string; // Added user_id filter
   organization_id?: string; // Added organization_id filter
+  all?: boolean; // Fetch all users without pagination
 }): Promise<{
   users: any[];
   totalItems: number;
@@ -56,8 +57,10 @@ export const fetchUsers = async (filters: {
     state,
     user_id,
     organization_id,
+    all = false,
   } = filters;
-  const offset = (page - 1) * limit;
+  const offset = all ? 0 : (page - 1) * limit;
+  const pageLimit = all ? undefined : limit;
 
   // Build the query for users
   let query = db("users").select("id", "email", "role");
@@ -149,14 +152,16 @@ export const fetchUsers = async (filters: {
     }
   }
 
-  const paginatedUsers = allUsersDetails.slice(offset, offset + limit);
+  const paginatedUsers = all
+    ? allUsersDetails
+    : allUsersDetails.slice(offset, offset + limit);
   const totalItems = allUsersDetails.length;
-  const totalPages = Math.ceil(totalItems / limit);
+  const totalPages = all ? 1 : Math.ceil(totalItems / limit);
 
   return {
     users: paginatedUsers,
     totalItems,
     totalPages,
-    currentPage: page,
+    currentPage: all ? 1 : page,
   };
 };

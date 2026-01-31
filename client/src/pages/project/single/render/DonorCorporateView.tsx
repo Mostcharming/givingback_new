@@ -86,19 +86,59 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
     return null;
   };
 
-  console.log(counts);
   return (
     <div className="container-fluid py-4">
-      <div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1.5rem",
+        }}
+      >
         <button
           onClick={onBack}
           type="button"
-          className="btn text-decoration-none p-0 mb-3"
+          className="btn text-decoration-none p-0"
           style={{ display: "flex", alignItems: "center", gap: "8px" }}
         >
           <ChevronLeft style={{ width: "1.2rem", height: "1.2rem" }} />
           Back to Briefs
         </button>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button
+            type="button"
+            className="btn"
+            style={{
+              backgroundColor: "#28a745",
+              color: "white",
+              padding: "8px 16px",
+              borderRadius: "4px",
+              border: "none",
+              fontSize: "14px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            Edit Project Details and Milestones
+          </button>
+          <button
+            type="button"
+            className="btn"
+            style={{
+              backgroundColor: "#28a745",
+              color: "white",
+              padding: "8px 16px",
+              borderRadius: "4px",
+              border: "none",
+              fontSize: "14px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            View Milestone Updates
+          </button>
+        </div>
       </div>
       <div className="mb-3">
         <h1
