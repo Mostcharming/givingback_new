@@ -35,12 +35,15 @@ export const CreateProjectBriefModal: React.FC<
     deadline: "",
     state: "",
     lga: "",
+    isPublic: true,
+    selectedNgo: null,
   });
 
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [lgas, setLgas] = useState<string[]>([]);
   const [selectedLGA, setSelectedLGA] = useState<string | null>(null);
   const [areas, setAreas] = useState<Array<{ name: string }>>([]);
+  const [ngos, setNgos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [deadlineDate, setDeadlineDate] = useState<Date | null>(null);
 
@@ -49,6 +52,15 @@ export const CreateProjectBriefModal: React.FC<
       setAreas(res2 as Array<{ name: string }>);
     },
     onError: () => {},
+  });
+
+  const { mutate: fetchNgos } = useBackendService("/donor/users", "GET", {
+    onSuccess: (res: { users: Array<{ id: string; name: string }> }) => {
+      setNgos(res.users.map((ngo) => ({ value: ngo.id, label: ngo.name })));
+    },
+    onError: () => {
+      toast.error("Failed to fetch NGOs.");
+    },
   });
 
   const { mutate: createProject } = useBackendService(
@@ -99,6 +111,8 @@ export const CreateProjectBriefModal: React.FC<
       deadline: "",
       state: "",
       lga: "",
+      isPublic: true,
+      selectedNgo: null,
     });
     setSelectedState(null);
     setSelectedLGA(null);
@@ -107,6 +121,7 @@ export const CreateProjectBriefModal: React.FC<
 
   useEffect(() => {
     getAreas({});
+    fetchNgos({ limit: 10000 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -164,6 +179,24 @@ export const CreateProjectBriefModal: React.FC<
     }));
   };
 
+  const handleIsPublicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isPublic = e.target.checked;
+    setFormData((prev) => ({
+      ...prev,
+      isPublic,
+      selectedNgo: isPublic ? null : prev.selectedNgo,
+    }));
+  };
+
+  const handleNgoChange = (
+    selectedOption: { value: string; label: string } | null
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedNgo: selectedOption,
+    }));
+  };
+
   const validateForm = (): boolean => {
     if (!formData.title.trim()) {
       toast.error("Please enter project title");
@@ -193,6 +226,10 @@ export const CreateProjectBriefModal: React.FC<
       toast.error("Please select LGA");
       return false;
     }
+    if (!formData.isPublic && !formData.selectedNgo) {
+      toast.error("Please select an NGO for private project");
+      return false;
+    }
     return true;
   };
 
@@ -210,6 +247,8 @@ export const CreateProjectBriefModal: React.FC<
       deadline: formData.deadline,
       state: formData.state,
       lga: formData.lga,
+      ispublic: formData.isPublic,
+      organization_id: formData.isPublic ? null : formData.selectedNgo?.value,
       status: "draft",
     };
 
@@ -230,6 +269,8 @@ export const CreateProjectBriefModal: React.FC<
       deadline: formData.deadline,
       state: formData.state,
       lga: formData.lga,
+      ispublic: formData.isPublic,
+      organization_id: formData.isPublic ? null : formData.selectedNgo?.value,
       status: "brief",
     };
 
@@ -469,6 +510,74 @@ export const CreateProjectBriefModal: React.FC<
               </InputGroup>
             </FormGroup>
           </div>
+
+          <FormGroup className="mb-4">
+            <label style={labelStyle}>Project Visibility</label>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  cursor: "pointer",
+                  marginBottom: 0,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={formData.isPublic}
+                  onChange={handleIsPublicChange}
+                  style={{ cursor: "pointer", width: "20px", height: "20px" }}
+                />
+                <span style={{ fontSize: "14px", fontWeight: 500 }}>
+                  {formData.isPublic
+                    ? "Public Project"
+                    : "Private Project (Specific NGO)"}
+                </span>
+              </label>
+            </div>
+          </FormGroup>
+
+          {!formData.isPublic && (
+            <FormGroup className="mb-4">
+              <label style={labelStyle}>
+                Select NGO <span style={{ color: "red" }}>*</span>
+              </label>
+              <InputGroup className="input-group-alternative">
+                <Select
+                  styles={{
+                    control: (provided) => ({
+                      ...provided,
+                      backgroundColor: "#F2F2F2",
+                      minHeight: "55px",
+                      height: "100%",
+                    }),
+                    valueContainer: (provided) => ({
+                      ...provided,
+                      height: "100%",
+                      padding: "0 6px",
+                    }),
+                    input: (provided) => ({
+                      ...provided,
+                      margin: "0px",
+                    }),
+                    indicatorsContainer: (provided) => ({
+                      ...provided,
+                      height: "55px",
+                    }),
+                  }}
+                  className="w-100"
+                  placeholder="Select an NGO..."
+                  required
+                  onChange={handleNgoChange}
+                  options={ngos}
+                  value={formData.selectedNgo}
+                  isClearable
+                  isSearchable
+                />
+              </InputGroup>
+            </FormGroup>
+          )}
 
           <div
             style={{

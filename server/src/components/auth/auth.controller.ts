@@ -1404,6 +1404,8 @@ export const createProject = async (
       state,
       lga,
       status,
+      ispublic,
+      organization_id,
     } = req.body;
 
     const missingFields: string[] = [];
@@ -1462,7 +1464,8 @@ export const createProject = async (
       city: lga,
       status,
       donor_id: donorId,
-      organization_id: null,
+      organization_id: organization_id || null,
+      ispublic: ispublic ?? false,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -1535,11 +1538,13 @@ export const createProject = async (
         category: createdProject.category,
         description: createdProject.description,
         budget: createdProject.cost,
-        deadline: createdProject.deadline,
+        deadline: createdProject.endDate,
         state: createdProject.state,
         city: createdProject.city,
         status: createdProject.status,
         donor_id: createdProject.donor_id,
+        organization_id: createdProject.organization_id,
+        ispublic: createdProject.ispublic,
         createdAt: createdProject.createdAt,
       },
     });
