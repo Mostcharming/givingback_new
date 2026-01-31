@@ -53,6 +53,16 @@ jobs:
             cd /home/ubuntu/server
             npm run build
 
+      - name: Run Database Migrations
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.BACKEND_HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/server
+            npx knex migrate:latest --env production
+
       - name: Restart PM2 Backend Process
         uses: appleboy/ssh-action@v0.1.6
         with:
