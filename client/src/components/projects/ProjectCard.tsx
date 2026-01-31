@@ -128,7 +128,7 @@ export const ProjectCard = ({ project }: { project: Project }) => {
     ) {
       return [
         {
-          label: "View Applications",
+          label: "View Project Brief/Applications",
           onClick: handleViewApplications,
           variant: "primary",
         },

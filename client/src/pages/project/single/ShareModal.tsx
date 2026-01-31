@@ -21,7 +21,7 @@ interface ShareModalProps {
 }
 
 const ShareModal: React.FC<ShareModalProps> = ({ isOpen, toggle }) => {
-  const shareUrl = "https://givebackng.org";
+  const shareUrl = "https://givingback.org";
   const title = "Support this project on GiveBack";
 
   const socialLinks = [

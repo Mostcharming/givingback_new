@@ -112,7 +112,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
             style={{
               backgroundColor: "#28a745",
               color: "white",
-              padding: "8px 16px",
+              padding: "12px 16px",
               borderRadius: "4px",
               border: "none",
               fontSize: "14px",
@@ -128,7 +128,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
             style={{
               backgroundColor: "#28a745",
               color: "white",
-              padding: "8px 16px",
+              padding: "12px 16px",
               borderRadius: "4px",
               border: "none",
               fontSize: "14px",

@@ -3,7 +3,7 @@ import { MapPin } from "lucide-react";
 import { Image } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { Col } from "reactstrap";
-import place from "../assets/images/project.png";
+import place from "../assets/images/home/GivingBackNG-logo.svg";
 import { getStatusBadgeProps } from "../helper";
 import { useContent } from "../services/useContext";
 

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState } from "react";
+import place from "../../assets/images/home//GivingBackNG-logo.svg";
 import main8 from "../../assets/images/home/main_image/1.png";
 import p3 from "../../assets/images/home/main_image/3.png";
 import p4 from "../../assets/images/home/main_image/4.png";
@@ -10,7 +11,6 @@ import v4 from "../../assets/images/home/main_image/Vector.png";
 import v1 from "../../assets/images/home/main_image/Vector1.png";
 import v2 from "../../assets/images/home/main_image/Vector2.png";
 import v3 from "../../assets/images/home/main_image/Vector3.png";
-import place from "../../assets/images/project.png";
 
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-toastify";
