@@ -36,6 +36,9 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
   const [applications, setApplications] = useState<any[]>([]);
   const [selectedNGO, setSelectedNGO] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState<
+    number | null
+  >(null);
 
   const getStatusValue = (tab: string): string => {
     const statusMap: Record<string, string> = {
@@ -66,6 +69,23 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
     }
   );
 
+  const { mutate: updateApplicationStatus } = useBackendService(
+    `/auth/donor/projects/${project.id}/applications/${selectedApplicationId}/status`,
+    "PUT",
+    {
+      onSuccess: () => {
+        // Refresh applications list after status update
+        if (project?.id) {
+          const status = getStatusValue(activeTab);
+          fetchApplications({ status });
+        }
+      },
+      onError: (error: any) => {
+        console.error("Error updating application status:", error);
+      },
+    }
+  );
+
   useEffect(() => {
     if (project?.id) {
       const status = getStatusValue(activeTab);
@@ -83,34 +103,12 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
     setSelectedNGO(null);
   };
 
-  const handleApplicationStatus = async (
+  const handleApplicationStatus = (
     applicationId: number,
     newStatus: string
   ) => {
-    try {
-      const endpoint = `/donor/projects/${project.id}/applications/${applicationId}/status`;
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}${endpoint}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
-
-      if (response.ok) {
-        // Refresh applications list after status update
-        if (project?.id) {
-          const status = getStatusValue(activeTab);
-          fetchApplications({ status });
-        }
-      }
-    } catch (error) {
-      console.error("Error updating application status:", error);
-    }
+    setSelectedApplicationId(applicationId);
+    updateApplicationStatus({ status: newStatus });
   };
 
   const counts = {
@@ -579,55 +577,57 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
                       </div>
                     )}
 
-                    {/* Action Buttons */}
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "12px",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        className="btn"
-                        onClick={() =>
-                          handleApplicationStatus(app.id, "rejected")
-                        }
+                    {/* Action Buttons - Only show for pending applications */}
+                    {app.status === "pending" && (
+                      <div
                         style={{
-                          backgroundColor: "#dc3545",
-                          color: "white",
-                          padding: "10px 20px",
-                          borderRadius: "4px",
-                          border: "none",
-                          fontSize: "13px",
-                          fontWeight: "500",
-                          cursor: "pointer",
-                          whiteSpace: "nowrap",
+                          display: "flex",
+                          gap: "12px",
+                          justifyContent: "flex-end",
                         }}
                       >
-                        Reject
-                      </button>
-                      <button
-                        type="button"
-                        className="btn"
-                        onClick={() =>
-                          handleApplicationStatus(app.id, "accepted")
-                        }
-                        style={{
-                          backgroundColor: "#28a745",
-                          color: "white",
-                          padding: "10px 20px",
-                          borderRadius: "4px",
-                          border: "none",
-                          fontSize: "13px",
-                          fontWeight: "500",
-                          cursor: "pointer",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        Accept Application
-                      </button>
-                    </div>
+                        <button
+                          type="button"
+                          className="btn"
+                          onClick={() =>
+                            handleApplicationStatus(app.id, "rejected")
+                          }
+                          style={{
+                            backgroundColor: "#dc3545",
+                            color: "white",
+                            padding: "10px 20px",
+                            borderRadius: "4px",
+                            border: "none",
+                            fontSize: "13px",
+                            fontWeight: "500",
+                            cursor: "pointer",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          Reject
+                        </button>
+                        <button
+                          type="button"
+                          className="btn"
+                          onClick={() =>
+                            handleApplicationStatus(app.id, "accepted")
+                          }
+                          style={{
+                            backgroundColor: "#28a745",
+                            color: "white",
+                            padding: "10px 20px",
+                            borderRadius: "4px",
+                            border: "none",
+                            fontSize: "13px",
+                            fontWeight: "500",
+                            cursor: "pointer",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          Accept Application
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

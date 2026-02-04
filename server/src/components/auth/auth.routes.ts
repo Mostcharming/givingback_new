@@ -31,51 +31,31 @@ import {
 const router = express.Router();
 
 router.post("/signup", verifyNewUser, signup);
-
 router.post("/login", verifyLogin, login);
-
-router.get("/logout", logout);
-
 router.post("/new/onboard", uploadimg, verifyNewUser, onboard as any);
-
 router.route("/verify").post(verify).put(secureLogin, resend);
-
 router.post("/forgotpassword", forgotPassword);
 router.post("/resetpassword", resetPassword);
 
-router.get("/", secureLogin, getOne);
+router.use(secureLogin);
 
-router.get("/organization-counts", secureLogin, getOrganizationCounts);
-
-router.get("/donor/project-stats", secureLogin, getDonorProjectMetrics);
-
-router.get("/donor/projects", secureLogin, getDonorProjects);
-
-router.post("/donor/projects", secureLogin, createProject);
-
-router.put("/donor/projects/:id/publish", secureLogin, publishProjectBrief);
-
-router.get(
-  "/donor/projects/:projectId/applications",
-  secureLogin,
-  getProjectApplications
-);
-
+router.get("/logout", logout);
+router.get("/", getOne);
+router.get("/organization-counts", getOrganizationCounts);
+router.get("/donor/project-stats", getDonorProjectMetrics);
+router.get("/donor/projects", getDonorProjects);
+router.post("/donor/projects", createProject);
+router.put("/donor/projects/:id/publish", publishProjectBrief);
+router.get("/donor/projects/:projectId/applications", getProjectApplications);
 router.put(
   "/donor/projects/:projectId/applications/:applicationId/status",
-  secureLogin,
   updateProjectApplicationStatus
 );
+router.put("/", uploadimg, updateOne);
+router.post("/changepassword", changePassword);
+router.delete("/bank/:id", deleteBank);
+router.get("/organizations", getAllOrganizations);
 
-router.put("/", secureLogin, uploadimg, updateOne);
-
-router.post("/changepassword", secureLogin, changePassword);
-
-router.delete("/bank/:id", secureLogin, deleteBank);
-
-router.get("/organizations", secureLogin, getAllOrganizations);
-
-// NGO Management Routes
 router.post("/organizations", addSingleNGO as any);
 router.get("/bulk/sample", downloadSampleNGOFile);
 router.post("/bulk/upload", uploadbulk, bulkUploadNGOsEndpoint);

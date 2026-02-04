@@ -1963,7 +1963,7 @@ export const updateProjectApplicationStatus = async (
 
     // Get the updated application with NGO details
     const updatedApplication = await db("project_application")
-      .where({ id: applicationId })
+      .where("project_application.id", applicationId)
       .leftJoin(
         "organizations",
         "project_application.ngo_id",
