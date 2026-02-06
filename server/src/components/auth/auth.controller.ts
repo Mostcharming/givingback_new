@@ -1552,17 +1552,14 @@ export const createProject = async (
           },
         }).sendEmail("donorbriefactive", "Your Project is Now Active");
 
-        // Send emails to NGOs if multi_ngo or single organization
         if (orgIds.length > 0) {
           try {
             for (const orgId of orgIds) {
-              // Get organization details
               const organization = await db("organizations")
                 .where({ id: orgId })
                 .first();
 
               if (organization && organization.user_id) {
-                // Get user email
                 const ngoUser = await db("users")
                   .where({ id: organization.user_id })
                   .first();
@@ -2038,6 +2035,32 @@ export const updateProjectApplicationStatus = async (
       status: status,
       updatedAt: new Date(),
     });
+
+    // If status is accepted, add to project_organization table and update project to multi_ngo
+    if (status === "accepted") {
+      const ngoId = application.ngo_id;
+
+      // Check if this record already exists in project_organization
+      const existingRecord = await db("project_organization")
+        .where({ project_id: projectId, organization_id: ngoId })
+        .first();
+
+      if (!existingRecord) {
+        // Add to project_organization table
+        await db("project_organization").insert({
+          project_id: projectId,
+          organization_id: ngoId,
+          created_at: new Date(),
+          updated_at: new Date(),
+        });
+      }
+
+      // Update project to set multi_ngo to true
+      await db("project").where({ id: projectId }).update({
+        multi_ngo: true,
+        updatedAt: new Date(),
+      });
+    }
 
     // Get the updated application with NGO details
     const updatedApplication = await db("project_application")
