@@ -36,7 +36,7 @@ export const CreateProjectBriefModal: React.FC<
     state: "",
     lga: "",
     isPublic: true,
-    selectedNgo: null,
+    selectedNgos: [],
   });
 
   const [selectedState, setSelectedState] = useState<string | null>(null);
@@ -116,7 +116,7 @@ export const CreateProjectBriefModal: React.FC<
       state: "",
       lga: "",
       isPublic: true,
-      selectedNgo: null,
+      selectedNgos: [],
     });
     setSelectedState(null);
     setSelectedLGA(null);
@@ -188,16 +188,16 @@ export const CreateProjectBriefModal: React.FC<
     setFormData((prev) => ({
       ...prev,
       isPublic,
-      selectedNgo: isPublic ? null : prev.selectedNgo,
+      selectedNgos: isPublic ? [] : prev.selectedNgos,
     }));
   };
 
   const handleNgoChange = (
-    selectedOption: { value: string; label: string } | null
+    selectedOptions: Array<{ value: string; label: string }> | null
   ) => {
     setFormData((prev) => ({
       ...prev,
-      selectedNgo: selectedOption,
+      selectedNgos: selectedOptions || [],
     }));
   };
 
@@ -230,8 +230,8 @@ export const CreateProjectBriefModal: React.FC<
       toast.error("Please select LGA");
       return false;
     }
-    if (!formData.isPublic && !formData.selectedNgo) {
-      toast.error("Please select an NGO for private project");
+    if (!formData.isPublic && formData.selectedNgos.length === 0) {
+      toast.error("Please select at least one NGO for private project");
       return false;
     }
     return true;
@@ -252,10 +252,13 @@ export const CreateProjectBriefModal: React.FC<
       state: formData.state,
       lga: formData.lga,
       ispublic: formData.isPublic,
-      organization_id: formData.isPublic ? null : formData.selectedNgo?.value,
+      organization_ids: formData.isPublic
+        ? []
+        : formData.selectedNgos.map((ngo) => ngo.value),
       status: "draft",
     };
 
+    console.log("📤 Saving as Draft - Project Data:", projectData);
     createProject(projectData);
   };
 
@@ -266,7 +269,9 @@ export const CreateProjectBriefModal: React.FC<
 
     setIsLoading(true);
     const status =
-      !formData.isPublic && formData.selectedNgo ? "active" : "brief";
+      !formData.isPublic && formData.selectedNgos.length > 0
+        ? "active"
+        : "brief";
     const projectData = {
       title: formData.title.trim(),
       category: formData.category,
@@ -276,10 +281,13 @@ export const CreateProjectBriefModal: React.FC<
       state: formData.state,
       lga: formData.lga,
       ispublic: formData.isPublic,
-      organization_id: formData.isPublic ? null : formData.selectedNgo?.value,
+      organization_ids: formData.isPublic
+        ? []
+        : formData.selectedNgos.map((ngo) => ngo.value),
       status: status,
     };
 
+    console.log("📤 Publishing Project - Project Data:", projectData);
     createProject(projectData);
   };
 
@@ -584,10 +592,11 @@ export const CreateProjectBriefModal: React.FC<
           {!formData.isPublic && (
             <FormGroup className="mb-4">
               <label style={labelStyle}>
-                Select NGO <span style={{ color: "red" }}>*</span>
+                Select NGOs <span style={{ color: "red" }}>*</span>
               </label>
               <InputGroup className="input-group-alternative">
                 <Select
+                  isMulti
                   styles={{
                     control: (provided) => ({
                       ...provided,
@@ -610,11 +619,11 @@ export const CreateProjectBriefModal: React.FC<
                     }),
                   }}
                   className="w-100"
-                  placeholder="Select an NGO..."
+                  placeholder="Select one or more NGOs..."
                   required
                   onChange={handleNgoChange}
                   options={ngos}
-                  value={formData.selectedNgo}
+                  value={formData.selectedNgos}
                   isClearable
                   isSearchable
                 />
