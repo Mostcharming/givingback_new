@@ -1,0 +1,35 @@
+extends baseEmail
+
+block content
+  p Hello #{ngoName},
+  p Congratulations! You have been assigned a new project by donor #{donorName}.
+  p
+    strong Project Details:
+  ul
+    li
+      strong Title: 
+      | #{projectTitle}
+    li
+      strong Description: 
+      | #{projectDescription}
+    li
+      strong Budget: 
+      | #{budget} NGN
+    li
+      strong Location: 
+      | #{state}, #{city}
+    li
+      strong Donor: 
+      | #{donorName}
+  p This is an exciting opportunity to make a real impact in your community. Your expertise and dedication have been recognized by the donor, and we trust you'll deliver excellent results.
+  p
+    strong Next Steps:
+  ol
+    li Log in to your GivingBack dashboard
+    li Review the project details and requirements
+    li Submit your project implementation plan if required
+    li Begin project execution according to the agreed timeline
+  p You'll be able to track milestones, update progress, and communicate directly with the donor through your dashboard.
+  p If you have any questions about the project or need support, please don't hesitate to reach out to our support team at support@givingback.org.
+  p We believe in your ability to make a meaningful difference. Let's create positive change together!
+  p Thank you for your commitment to our mission.

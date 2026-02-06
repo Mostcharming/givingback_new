@@ -14,7 +14,7 @@ import { fetchRateFromGoogle } from "../utils/rateUtils";
 const app = express();
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
-app.enable("trust proxy");
+// app.enable("trust proxy");
 
 const whitelist: string[] = [
   "http://192.168.1.191:5173",

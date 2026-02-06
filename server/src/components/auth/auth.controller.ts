@@ -1405,7 +1405,7 @@ export const createProject = async (
       lga,
       status,
       ispublic,
-      organization_id,
+      organization_ids = [],
     } = req.body;
 
     const missingFields: string[] = [];
@@ -1453,6 +1453,21 @@ export const createProject = async (
       return;
     }
 
+    let organization_id: number | null = null;
+    let multiNgo = false;
+
+    const orgIds = Array.isArray(organization_ids)
+      ? organization_ids.map((id) => Number(id)).filter((id) => !isNaN(id))
+      : [];
+
+    if (orgIds.length === 1) {
+      organization_id = orgIds[0];
+      multiNgo = false;
+    } else if (orgIds.length > 1) {
+      organization_id = null;
+      multiNgo = true;
+    }
+
     const [projectId] = await transaction("project").insert({
       title: title.trim(),
       category,
@@ -1465,10 +1480,21 @@ export const createProject = async (
       status,
       donor_id: donorId,
       organization_id: organization_id || null,
+      multi_ngo: multiNgo,
       ispublic: ispublic ?? false,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+
+    if (multiNgo && orgIds.length > 0) {
+      const projectOrgRecords = orgIds.map((orgId) => ({
+        project_id: projectId,
+        organization_id: orgId,
+        created_at: new Date(),
+        updated_at: new Date(),
+      }));
+      await transaction("project_organization").insert(projectOrgRecords);
+    }
 
     await transaction.commit();
 
@@ -1510,6 +1536,7 @@ export const createProject = async (
           "Your Project Brief is Ready for Review"
         );
       } else if (status === "active") {
+        // Send email to donor
         await new Email({
           email: donorUser.email,
           url: "",
@@ -1524,6 +1551,55 @@ export const createProject = async (
             city: createdProject.city,
           },
         }).sendEmail("donorbriefactive", "Your Project is Now Active");
+
+        // Send emails to NGOs if multi_ngo or single organization
+        if (orgIds.length > 0) {
+          try {
+            for (const orgId of orgIds) {
+              // Get organization details
+              const organization = await db("organizations")
+                .where({ id: orgId })
+                .first();
+
+              if (organization && organization.user_id) {
+                // Get user email
+                const ngoUser = await db("users")
+                  .where({ id: organization.user_id })
+                  .first();
+
+                if (ngoUser && ngoUser.email) {
+                  await new Email({
+                    email: ngoUser.email,
+                    url: "",
+                    token: 0,
+                    additionalData: {
+                      subject: "New Project Assignment",
+                      projectTitle: createdProject.title,
+                      projectDescription: createdProject.description,
+                      budget: createdProject.cost,
+                      ngoName: organization.name || "NGO",
+                      state: createdProject.state,
+                      city: createdProject.city,
+                      donorName: donorInfo?.name || "Donor",
+                    },
+                  }).sendEmail(
+                    "ngoprojectassignment",
+                    "New Project Assignment"
+                  );
+
+                  console.log(
+                    `Email sent to NGO: ${organization.name} (${ngoUser.email})`
+                  );
+                }
+              }
+            }
+          } catch (ngoEmailError) {
+            console.error(
+              "Error sending project assignment emails to NGOs:",
+              ngoEmailError
+            );
+          }
+        }
       }
     } catch (emailError) {
       console.error("Error sending project notification email:", emailError);
@@ -1544,6 +1620,8 @@ export const createProject = async (
         status: createdProject.status,
         donor_id: createdProject.donor_id,
         organization_id: createdProject.organization_id,
+        multi_ngo: createdProject.multi_ngo,
+        organization_ids: multiNgo ? orgIds : [],
         ispublic: createdProject.ispublic,
         createdAt: createdProject.createdAt,
       },

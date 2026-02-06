@@ -31,7 +31,7 @@ export const CreateProjectBriefModal: React.FC<
     title: "",
     category: "",
     description: "",
-    budget: "",
+    budget: 0,
     deadline: "",
     state: "",
     lga: "",
@@ -99,8 +99,8 @@ export const CreateProjectBriefModal: React.FC<
             errorMessage = err.message;
           }
         }
-
-        toast.error(errorMessage);
+        console.log("❌ Create Project Error:", errorMessage);
+        toast.error("Failed to create project");
         setIsLoading(false);
       },
     }
@@ -111,7 +111,7 @@ export const CreateProjectBriefModal: React.FC<
       title: "",
       category: "",
       description: "",
-      budget: "",
+      budget: 0,
       deadline: "",
       state: "",
       lga: "",
@@ -214,7 +214,7 @@ export const CreateProjectBriefModal: React.FC<
       toast.error("Please enter project description");
       return false;
     }
-    if (!formData.budget.trim()) {
+    if (!formData.budget || formData.budget <= 0) {
       toast.error("Please enter budget amount");
       return false;
     }
@@ -287,7 +287,6 @@ export const CreateProjectBriefModal: React.FC<
       status: status,
     };
 
-    console.log("📤 Publishing Project - Project Data:", projectData);
     createProject(projectData);
   };
 
@@ -407,7 +406,7 @@ export const CreateProjectBriefModal: React.FC<
                 style={inputStyle}
                 className="p-3"
                 placeholder="Enter budget amount"
-                type="text"
+                type="number"
                 name="budget"
                 required
                 value={formData.budget}
