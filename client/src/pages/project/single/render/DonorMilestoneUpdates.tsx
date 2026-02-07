@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Calendar, ChevronLeft, Clock, MapPin, Wallet } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import EmptyNGO from "../../../../assets/images/emptyngo.svg";
+import CreateMilestoneModal from "../../../../components/projects/CreateMilestoneModal";
 import { formatCurrency } from "../../../../components/projects/ProjectsUtils";
 
 interface DonorMilestoneUpdatesProps {
@@ -13,6 +14,8 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
   project,
   onBack,
 }) => {
+  const [isCreateMilestoneModalOpen, setIsCreateMilestoneModalOpen] =
+    useState(false);
   return (
     <div className="container-fluid py-4">
       <div
@@ -448,6 +451,7 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
                 gap: "8px",
                 transition: "background-color 0.3s ease",
               }}
+              onClick={() => setIsCreateMilestoneModalOpen(true)}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.backgroundColor = "#218838")
               }
@@ -681,6 +685,14 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Create Milestone Modal */}
+      <CreateMilestoneModal
+        isOpen={isCreateMilestoneModalOpen}
+        toggle={() => setIsCreateMilestoneModalOpen(false)}
+        projectId={project?.id}
+        onSuccess={() => setIsCreateMilestoneModalOpen(false)}
+      />
     </div>
   );
 };
