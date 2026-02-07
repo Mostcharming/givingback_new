@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Libraries and Utilities
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
@@ -19,7 +18,6 @@ import ProjectDetails from "./pages/home/project-details";
 import Services from "./pages/home/services";
 import Terms from "./pages/home/terms";
 
-// Services and Context
 import Signup from "./layouts/auth/signup";
 import Error from "./pages/error";
 import PreviousIndex from "./pages/home/previous";
@@ -27,7 +25,6 @@ import useBackendService from "./services/backend_service";
 import { useContent } from "./services/useContext";
 import { getCurrent } from "./store/reducers/userReducer";
 
-// ProtectedRoute Component
 function ProtectedRoute({ element, roles, authState }) {
   const { isAuthenticated, user } = authState || {};
   const userRole = user?.role?.toLowerCase();
@@ -48,7 +45,6 @@ function ProtectedRoute({ element, roles, authState }) {
   return <Navigate to="/" replace />;
 }
 
-// DashboardRoute Component
 function DashboardRoute({ authState }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -107,7 +103,6 @@ function DashboardRoute({ authState }) {
   return null;
 }
 
-// App Component
 function App() {
   const { authState } = useContent();
 
@@ -176,7 +171,6 @@ function App() {
 
 export default App;
 
-// HomeRoutes Component (in ./pages/home/HomeRoutes.js)
 export function HomeRoutes() {
   return (
     <Routes>

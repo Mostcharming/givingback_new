@@ -11,6 +11,7 @@ import {
   XCircle,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import EmptyNGO from "../../../../assets/images/emptyngo.svg";
 import NGODetailsModal from "../../../../components/NGODetailsModal";
@@ -28,6 +29,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
   project,
   onBack,
 }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Pending");
   const tabs = ["Pending", "Accepted", "Rejected"];
   const [metrics, setMetrics] = useState({
@@ -105,6 +107,10 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedNGO(null);
+  };
+
+  const handleMilestoneUpdates = () => {
+    navigate(`/donor/projects/${project.id}/milestones`);
   };
 
   const handleEditProjectDetails = () => {
@@ -194,6 +200,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
           <button
             type="button"
             className="btn"
+            onClick={handleMilestoneUpdates}
             style={{
               backgroundColor: "#28a745",
               color: "white",

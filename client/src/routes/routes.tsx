@@ -36,6 +36,7 @@ import Ngo from "../pages/ngodirectory";
 import Profile from "../pages/profile";
 import CreateProject from "../pages/project/create-project-options";
 import ProjectViewDetail from "../pages/project/single";
+import MilestoneUpdatesPage from "../pages/project/single/MilestoneUpdatesPage";
 import AdminDashboard from "../pages/report/dashboard";
 import SendMoney from "../pages/send";
 
@@ -202,6 +203,36 @@ const routes = [
     component: <Profile />,
     layout: "/donor",
   },
+  {
+    path: "/projects/:id/milestones",
+    icon: "ni ni-circle-08",
+    component: <MilestoneUpdatesPage />,
+    layout: "/donor",
+  },
+  {
+    path: "/ngo/:id",
+    icon: "ni ni-circle-08",
+    component: <NGODetails />,
+    layout: "/donor",
+  },
+  {
+    path: "/projects/:id",
+    icon: "ni ni-circle-08",
+    component: <ProjectViewDetail />,
+    layout: "/donor",
+  },
+  {
+    path: "/fund_wallet",
+    icon: "ni ni-settings-gear-65",
+    component: <FundWallets />,
+    layout: "/donor",
+  },
+  {
+    path: "/send_money",
+    icon: "ni ni-settings-gear-65",
+    component: <SendMoney />,
+    layout: "/donor",
+  },
 
   //NGOs
   {
@@ -244,6 +275,37 @@ const routes = [
     name: "Profile",
     icon: <User />,
     component: <Profile />,
+    layout: "/ngo",
+  },
+  {
+    path: "/projects/add_past",
+    icon: "ni ni-settings-gear-65",
+    component: <AddPastProject />,
+    layout: "/ngo",
+  },
+
+  {
+    path: "/fund_wallet",
+    icon: "ni ni-settings-gear-65",
+    component: <FundWallets />,
+    layout: "/ngo",
+  },
+  {
+    path: "/send_money",
+    icon: "ni ni-settings-gear-65",
+    component: <SendMoney />,
+    layout: "/ngo",
+  },
+  {
+    path: "/projects/:id",
+    icon: "ni ni-circle-08",
+    component: <ProjectViewDetail />,
+    layout: "/ngo",
+  },
+  {
+    path: "/projects/brief_initiate",
+    icon: "ni ni-chart-bar-32",
+    component: <CreateProject />,
     layout: "/ngo",
   },
 
@@ -312,14 +374,6 @@ const routes = [
     component: <Admin_projects />,
     layout: "/admin",
   },
-
-  //viewing one ngo
-  {
-    path: "/ngo/:id",
-    icon: "ni ni-circle-08",
-    component: <NGODetails />,
-    layout: "/donor",
-  },
   {
     path: "/ngo/:id",
     icon: "ni ni-circle-08",
@@ -327,70 +381,23 @@ const routes = [
     layout: "/admin",
   },
 
-  ///projectdetails
-  {
-    path: "/projects/:id",
-    icon: "ni ni-circle-08",
-    component: <ProjectViewDetail />,
-    layout: "/donor",
-  },
-  {
-    path: "/projects/:id",
-    icon: "ni ni-circle-08",
-    component: <ProjectViewDetail />,
-    layout: "/ngo",
-  },
   {
     path: "/projects/:id",
     icon: "ni ni-circle-08",
     component: <ProjectViewDetail />,
     layout: "/admin",
   },
-
-  ///upload prev project
   {
-    path: "/projects/add_past",
-    icon: "ni ni-settings-gear-65",
-    component: <AddPastProject />,
-    layout: "/ngo",
-  },
-
-  {
-    path: "/fund_wallet",
-    icon: "ni ni-settings-gear-65",
-    component: <FundWallets />,
-    layout: "/ngo",
-  },
-  {
-    path: "/send_money",
-    icon: "ni ni-settings-gear-65",
-    component: <SendMoney />,
-    layout: "/ngo",
-  },
-  {
-    path: "/fund_wallet",
-    icon: "ni ni-settings-gear-65",
-    component: <FundWallets />,
-    layout: "/donor",
-  },
-  {
-    path: "/send_money",
-    icon: "ni ni-settings-gear-65",
-    component: <SendMoney />,
-    layout: "/donor",
-  },
-
-  {
-    path: "/projects/brief_initiate",
-    icon: "ni ni-chart-bar-32",
-    component: <CreateProject />,
+    path: "/projects/:id/milestones",
+    icon: "ni ni-circle-08",
+    component: <MilestoneUpdatesPage />,
     layout: "/admin",
   },
   {
     path: "/projects/brief_initiate",
     icon: "ni ni-chart-bar-32",
     component: <CreateProject />,
-    layout: "/ngo",
+    layout: "/admin",
   },
 ];
 
