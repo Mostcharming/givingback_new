@@ -16,6 +16,12 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
 }) => {
   const [isCreateMilestoneModalOpen, setIsCreateMilestoneModalOpen] =
     useState(false);
+  const [milestones, setMilestones] = useState(project?.milestones || []);
+
+  const handleMilestoneCreated = (newMilestone: any) => {
+    setMilestones((prev) => [...prev, newMilestone]);
+  };
+
   return (
     <div className="container-fluid py-4">
       <div
@@ -116,9 +122,9 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
       </h2>
       {/* Milestone Updates List or Empty State */}
       <div style={{ marginTop: "24px" }}>
-        {project.milestones && project.milestones.length > 0 ? (
+        {milestones && milestones.length > 0 ? (
           <div>
-            {project?.milestones.map((milestone: any) => (
+            {milestones?.map((milestone: any) => (
               <div
                 key={milestone.id}
                 style={{
@@ -283,6 +289,59 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
                       </div>
                     )}
                   </div>
+
+                  {/* Progress Bar */}
+                  {milestone.target !== undefined && (
+                    <div style={{ marginBottom: "20px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: "8px",
+                        }}
+                      >
+                        <p
+                          style={{
+                            margin: "0",
+                            fontSize: "12px",
+                            color: "#999",
+                            fontWeight: "600",
+                          }}
+                        >
+                          Progress
+                        </p>
+                        <p
+                          style={{
+                            margin: "0",
+                            fontSize: "12px",
+                            color: "#333",
+                            fontWeight: "600",
+                          }}
+                        >
+                          {milestone.percentage_complete || 0}%
+                        </p>
+                      </div>
+                      <div
+                        style={{
+                          width: "100%",
+                          height: "8px",
+                          backgroundColor: "#e0e0e0",
+                          borderRadius: "4px",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${milestone.percentage_complete || 0}%`,
+                            backgroundColor: "#28a745",
+                            transition: "width 0.3s ease",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Milestone Description */}
                   {milestone.description && (
@@ -539,7 +598,7 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
             >
               Project Updates
             </p>
-            {project.milestones && project.milestones.length > 0 ? (
+            {milestones && milestones.length > 0 ? (
               <div
                 style={{
                   display: "flex",
@@ -567,7 +626,7 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
                       fontWeight: "700",
                     }}
                   >
-                    {project.milestones?.length || 0}
+                    {milestones?.length || 0}
                   </p>
                 </div>
 
@@ -591,9 +650,8 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
                       fontWeight: "700",
                     }}
                   >
-                    {project.milestones?.filter(
-                      (m: any) => m.status === "completed"
-                    ).length || 0}
+                    {milestones?.filter((m: any) => m.status === "completed")
+                      .length || 0}
                   </p>
                 </div>
 
@@ -617,9 +675,8 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
                       fontWeight: "700",
                     }}
                   >
-                    {project.milestones?.filter(
-                      (m: any) => m.status === "in_progress"
-                    ).length || 0}
+                    {milestones?.filter((m: any) => m.status === "in_progress")
+                      .length || 0}
                   </p>
                 </div>
 
@@ -643,9 +700,8 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
                       fontWeight: "700",
                     }}
                   >
-                    {project.milestones?.filter(
-                      (m: any) => m.status === "pending"
-                    ).length || 0}
+                    {milestones?.filter((m: any) => m.status === "pending")
+                      .length || 0}
                   </p>
                 </div>
               </div>
@@ -691,7 +747,10 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
         isOpen={isCreateMilestoneModalOpen}
         toggle={() => setIsCreateMilestoneModalOpen(false)}
         projectId={project?.id}
-        onSuccess={() => setIsCreateMilestoneModalOpen(false)}
+        onSuccess={(newMilestone) => {
+          handleMilestoneCreated(newMilestone);
+          setIsCreateMilestoneModalOpen(false);
+        }}
       />
     </div>
   );

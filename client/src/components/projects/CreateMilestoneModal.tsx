@@ -15,11 +15,12 @@ import {
 import useBackendService from "../../services/backend_service";
 import "./datepicker-custom.css";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 interface CreateMilestoneModalProps {
   isOpen: boolean;
   toggle: () => void;
   projectId: string | number;
-  onSuccess?: () => void;
+  onSuccess?: (milestone: any) => void;
 }
 
 export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
@@ -30,7 +31,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     title: "",
-    target: 0,
+    target: "",
     dueDate: "",
     description: "",
   });
@@ -39,18 +40,14 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
   const [deadlineDate, setDeadlineDate] = useState<Date | null>(null);
 
   const { mutate: createMilestone } = useBackendService(
-    `/auth/donor/projects/${projectId}/milestones`,
+    `/auth/milestones`,
     "POST",
     {
-      onSuccess: () => {
+      onSuccess: (data: any) => {
         toast.success("Milestone created successfully!");
         resetForm();
         toggle();
-        if (onSuccess) onSuccess();
-        // Reload the window after a short delay to refresh data
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
+        if (onSuccess) onSuccess(data);
       },
       onError: (error: unknown) => {
         let errorMessage = "Failed to create milestone";
@@ -80,7 +77,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
   const resetForm = () => {
     setFormData({
       title: "",
-      target: 0,
+      target: "",
       dueDate: "",
       description: "",
     });
@@ -95,7 +92,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "target" ? (value ? parseInt(value, 10) : 0) : value,
+      [name]: name === "target" ? (value ? parseInt(value, 10) : "") : value,
     }));
   };
 
@@ -112,7 +109,10 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
       toast.error("Please enter milestone title");
       return false;
     }
-    if (!formData.target || formData.target <= 0) {
+    if (
+      !formData.target ||
+      parseInt(formData.target as unknown as string, 10) <= 0
+    ) {
       toast.error("Please enter a valid target");
       return false;
     }
@@ -135,12 +135,12 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
     setIsLoading(true);
     const milestoneData = {
       title: formData.title.trim(),
-      target: formData.target,
+      target: parseInt(formData.target as unknown as string, 10),
       due_date: formData.dueDate,
       description: formData.description.trim(),
+      project_id: projectId,
     };
 
-    console.log("📤 Creating Milestone - Milestone Data:", milestoneData);
     createMilestone(milestoneData);
   };
 

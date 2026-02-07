@@ -2345,3 +2345,150 @@ export const updateProjectApplicationStatus = async (
     });
   }
 };
+
+export const createMilestone = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const {
+      title,
+      description,
+      status = "active",
+      target,
+      project_id,
+      due_date,
+    } = req.body;
+    // const userId = (req.user as User)?.id;
+
+    // Validate required fields
+    if (!title || !description || !target || !project_id) {
+      res.status(400).json({
+        status: "fail",
+        message: "Please provide title, description, target, and project_id",
+      });
+      return;
+    }
+
+    // Verify that the user owns the organization that owns this project
+    const project = await db("project").where({ id: project_id }).first();
+
+    if (!project) {
+      res.status(404).json({
+        status: "fail",
+        message: "Project not found",
+      });
+      return;
+    }
+
+    // Create the milestone
+    const milestoneData = {
+      milestone: title,
+      description: description,
+      status: status,
+      target: target,
+      project_id: project_id,
+      due_date: due_date || null,
+      createdAt: new Date(),
+    };
+
+    const [milestoneId] = await db("milestone").insert(milestoneData);
+
+    const createdMilestone = await db("milestone")
+      .where({ id: milestoneId })
+      .first();
+
+    res.status(201).json({
+      status: "success",
+      message: "Milestone created successfully",
+      data: createdMilestone,
+    });
+  } catch (error: any) {
+    console.error("Create milestone error:", error);
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while creating the milestone",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+export const getProjectOrganizations = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { projectId } = req.params;
+
+    if (!projectId || isNaN(Number(projectId))) {
+      res.status(400).json({
+        status: "fail",
+        error: "Invalid or missing project ID",
+      });
+      return;
+    }
+
+    // Get the project details
+    const project = await db("project")
+      .where({ id: projectId })
+      .select("id", "title", "organization_id", "multi_ngo")
+      .first();
+
+    if (!project) {
+      res.status(404).json({
+        status: "fail",
+        error: "Project not found",
+      });
+      return;
+    }
+
+    let organizationIds: number[] = [];
+
+    // If multi_ngo is true, get organizations from project_organization table
+    if (project.multi_ngo) {
+      const projectOrganizations = await db("project_organization")
+        .where({ project_id: projectId })
+        .select("organization_id");
+
+      organizationIds = projectOrganizations.map((po) => po.organization_id);
+    } else if (project.organization_id) {
+      // If single organization, use the organization_id from projects table
+      organizationIds = [project.organization_id];
+    }
+
+    // Get organization details
+    let organizations: any[] = [];
+
+    if (organizationIds.length > 0) {
+      organizations = await db("organizations")
+        .whereIn("id", organizationIds)
+        .select(
+          "id",
+          "name",
+          "phone",
+          "website",
+          "interest_area",
+          "cac",
+          "active",
+          "is_verified",
+          "user_id"
+        );
+    }
+
+    res.status(200).json({
+      status: "success",
+      projectId: projectId,
+      projectTitle: project.title,
+      multiNgo: project.multi_ngo,
+      organizationCount: organizations.length,
+      data: organizations,
+    });
+  } catch (error: any) {
+    console.error("Get project organizations error:", error);
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while fetching project organizations",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};

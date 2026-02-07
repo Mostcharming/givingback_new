@@ -6,6 +6,7 @@ import {
   addSingleNGO,
   bulkUploadNGOsEndpoint,
   changePassword,
+  createMilestone,
   createProject,
   deleteBank,
   downloadSampleNGOFile,
@@ -17,6 +18,7 @@ import {
   getOne,
   getOrganizationCounts,
   getProjectApplications,
+  getProjectOrganizations,
   login,
   logout,
   onboard,
@@ -61,5 +63,7 @@ router.get("/organizations", getAllOrganizations);
 router.post("/organizations", addSingleNGO as any);
 router.get("/bulk/sample", downloadSampleNGOFile);
 router.post("/bulk/upload", uploadbulk, bulkUploadNGOsEndpoint);
+router.post("/milestones", createMilestone);
+router.get("/projects/:projectId/organizations", getProjectOrganizations);
 
 export default router;
