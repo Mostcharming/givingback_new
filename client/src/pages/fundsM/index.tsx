@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   BanknoteArrowUp,
+  CheckCircle,
   Copy,
   HandCoins,
   Landmark,
@@ -7,7 +9,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { Button, Modal, ModalBody } from "reactstrap";
+import { Button, Modal, ModalBody, Spinner } from "reactstrap";
 import DashBox from "../../components/dashbox";
 import { formatDate } from "../../components/formatTime";
 import Tables from "../../components/tables";
@@ -194,25 +196,25 @@ const FundsM = () => {
           {
             title: "Wallet Balance",
             amount: data.walletBalance,
-            iconClass: "fas fa-wallet",
+            iconClass: <Wallet />,
             bgColor: "bg-primary",
           },
           {
             title: "Ongoing Projects",
             amount: data.activeProjectsCount,
-            iconClass: "fas fa-spinner",
+            iconClass: <Spinner />,
             bgColor: "bg-info",
           },
           {
             title: "Donations Made",
             amount: data.totalDonations,
-            iconClass: "fas fa-donate",
+            iconClass: <HandCoins />,
             bgColor: "bg-warning",
           },
           {
             title: "Current Funding",
             amount: "₦0.00",
-            iconClass: "fas fa-check-circle",
+            iconClass: <CheckCircle />,
             bgColor: "bg-success",
           },
         ];
