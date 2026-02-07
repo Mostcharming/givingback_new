@@ -188,6 +188,7 @@ export const getProjects = async (
           "target",
           "description",
           "status",
+          "due_date",
           "createdAt"
         );
 
@@ -208,7 +209,21 @@ export const getProjects = async (
               "narration",
               "createdAt"
             );
-          return { ...milestone, updates };
+
+          // Calculate percentage completion
+          const totalAchievement = updates.reduce(
+            (sum, update) => sum + (update.achievement || 0),
+            0
+          );
+          const target = milestone.target || 0;
+          const percentageComplete =
+            target > 0 ? Math.round((totalAchievement / target) * 100) : 0;
+
+          return {
+            ...milestone,
+            updates,
+            percentage_complete: percentageComplete,
+          };
         })
       );
 

@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Calendar, ChevronLeft, Clock, MapPin, Wallet } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import EmptyNGO from "../../../../assets/images/emptyngo.svg";
 import CreateMilestoneModal from "../../../../components/projects/CreateMilestoneModal";
 import { formatCurrency } from "../../../../components/projects/ProjectsUtils";
+import useBackendService from "../../../../services/backend_service";
 
 interface DonorMilestoneUpdatesProps {
   project: any;
@@ -17,6 +19,29 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
   const [isCreateMilestoneModalOpen, setIsCreateMilestoneModalOpen] =
     useState(false);
   const [milestones, setMilestones] = useState(project?.milestones || []);
+  const [organizations, setOrganizations] = useState<any[]>([]);
+  const [activeOrganization, setActiveOrganization] = useState<number | null>(
+    null
+  );
+
+  const { mutate: fetchOrganizations } = useBackendService(
+    `/auth/projects/${project?.id}/organizations`,
+    "GET",
+    {
+      onSuccess: (res: any) => {
+        setOrganizations(res.data || []);
+      },
+      onError: () => {
+        toast.error("Error fetching organizations");
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (project?.id) {
+      fetchOrganizations({});
+    }
+  }, [project?.id, fetchOrganizations]);
 
   const handleMilestoneCreated = (newMilestone: any) => {
     setMilestones((prev) => [...prev, newMilestone]);
@@ -141,7 +166,6 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "flex-start",
-                    marginBottom: "16px",
                   }}
                 >
                   <div style={{ flex: 1 }}>
@@ -152,179 +176,39 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
                         fontWeight: "600",
                       }}
                     >
-                      {milestone.title}
+                      {milestone.milestone?.charAt(0).toUpperCase() +
+                        milestone.milestone?.slice(1)}
                     </h4>
-                    <p
-                      style={{
-                        margin: "0",
-                        fontSize: "12px",
-                        color: "#666",
-                      }}
-                    >
-                      {milestone.ngo_name}
-                    </p>
                   </div>
-                  <div
+                  <p
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-end",
-                      gap: "8px",
+                      margin: "0",
+                      fontSize: "12px",
+                      color: "#333",
+                      fontWeight: "600",
+                      minWidth: "40px",
+                      textAlign: "right",
                     }}
                   >
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor:
-                          milestone.status === "completed"
-                            ? "#28a745"
-                            : milestone.status === "in_progress"
-                            ? "#ffc107"
-                            : "#6c757d",
-                        color: "white",
-                        borderRadius: "20px",
-                        padding: "6px 12px",
-                        fontSize: "12px",
-                        fontWeight: "500",
-                      }}
-                    >
-                      {milestone.status?.charAt(0).toUpperCase() +
-                        milestone.status?.slice(1).replace("_", " ")}
+                    Due date:{" "}
+                    {milestone.due_date && (
+                      <span style={{ marginRight: "12px", color: "#666" }}>
+                        {new Date(milestone.due_date).toLocaleDateString()}
+                      </span>
+                    )}
+                    <span style={{ marginLeft: "12px" }}>
+                      {milestone.percentage_complete || 0}%
                     </span>
-                  </div>
+                  </p>
                 </div>
 
-                <div
-                  style={{
-                    borderTop: "1px solid #e0e0e0",
-                    paddingTop: "16px",
-                    marginBottom: "16px",
-                  }}
-                >
-                  {/* Milestone Info */}
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "40px",
-                      marginBottom: "20px",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    {milestone.deadline && (
-                      <div>
-                        <p
-                          style={{
-                            margin: "0 0 6px 0",
-                            fontSize: "12px",
-                            color: "#999",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Deadline
-                        </p>
-                        <p
-                          style={{
-                            margin: "0",
-                            fontSize: "13px",
-                            color: "#333",
-                            fontWeight: "500",
-                          }}
-                        >
-                          {new Date(milestone.deadline).toLocaleDateString()}
-                        </p>
-                      </div>
-                    )}
-
-                    {milestone.percentage_complete !== undefined && (
-                      <div>
-                        <p
-                          style={{
-                            margin: "0 0 6px 0",
-                            fontSize: "12px",
-                            color: "#999",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Completion
-                        </p>
-                        <p
-                          style={{
-                            margin: "0",
-                            fontSize: "13px",
-                            color: "#333",
-                            fontWeight: "600",
-                          }}
-                        >
-                          {milestone.percentage_complete}%
-                        </p>
-                      </div>
-                    )}
-
-                    {milestone.date_submitted && (
-                      <div>
-                        <p
-                          style={{
-                            margin: "0 0 6px 0",
-                            fontSize: "12px",
-                            color: "#999",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Submitted On
-                        </p>
-                        <p
-                          style={{
-                            margin: "0",
-                            fontSize: "13px",
-                            color: "#333",
-                            fontWeight: "500",
-                          }}
-                        >
-                          {new Date(
-                            milestone.date_submitted
-                          ).toLocaleDateString()}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
+                <div style={{}}>
                   {/* Progress Bar */}
                   {milestone.target !== undefined && (
                     <div style={{ marginBottom: "20px" }}>
                       <div
                         style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        <p
-                          style={{
-                            margin: "0",
-                            fontSize: "12px",
-                            color: "#999",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Progress
-                        </p>
-                        <p
-                          style={{
-                            margin: "0",
-                            fontSize: "12px",
-                            color: "#333",
-                            fontWeight: "600",
-                          }}
-                        >
-                          {milestone.percentage_complete || 0}%
-                        </p>
-                      </div>
-                      <div
-                        style={{
-                          width: "100%",
+                          flex: 1,
                           height: "8px",
                           backgroundColor: "#e0e0e0",
                           borderRadius: "4px",
@@ -342,121 +226,6 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
                       </div>
                     </div>
                   )}
-
-                  {/* Milestone Description */}
-                  {milestone.description && (
-                    <div style={{ marginBottom: "20px" }}>
-                      <p
-                        style={{
-                          margin: "0 0 8px 0",
-                          fontSize: "12px",
-                          color: "#999",
-                          fontWeight: "600",
-                        }}
-                      >
-                        Description
-                      </p>
-                      <p
-                        style={{
-                          margin: "0",
-                          fontSize: "13px",
-                          color: "#555",
-                          lineHeight: "1.6",
-                        }}
-                      >
-                        {milestone.description}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Deliverables */}
-                  {milestone.deliverables &&
-                    milestone.deliverables.length > 0 && (
-                      <div style={{ marginBottom: "20px" }}>
-                        <p
-                          style={{
-                            margin: "0 0 12px 0",
-                            fontSize: "12px",
-                            color: "#999",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Deliverables
-                        </p>
-                        <ul
-                          style={{
-                            margin: "0",
-                            paddingLeft: "20px",
-                            listStyleType: "disc",
-                          }}
-                        >
-                          {milestone.deliverables.map(
-                            (deliverable: string, idx: number) => (
-                              <li
-                                key={idx}
-                                style={{
-                                  margin: "6px 0",
-                                  fontSize: "13px",
-                                  color: "#555",
-                                  lineHeight: "1.5",
-                                }}
-                              >
-                                {deliverable}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-
-                  {/* Media/Attachments */}
-                  {milestone.attachments &&
-                    milestone.attachments.length > 0 && (
-                      <div>
-                        <p
-                          style={{
-                            margin: "0 0 12px 0",
-                            fontSize: "12px",
-                            color: "#999",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Attachments
-                        </p>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "12px",
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          {milestone.attachments.map(
-                            (attachment: any, idx: number) => (
-                              <a
-                                key={idx}
-                                href={attachment.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: "8px",
-                                  padding: "8px 12px",
-                                  backgroundColor: "#f0f0f0",
-                                  borderRadius: "4px",
-                                  textDecoration: "none",
-                                  color: "#28a745",
-                                  fontSize: "12px",
-                                  fontWeight: "500",
-                                }}
-                              >
-                                📎 {attachment.name || "Download"}
-                              </a>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
                 </div>
               </div>
             ))}
@@ -547,7 +316,7 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
           >
             <p
               style={{
-                margin: "0 0 12px 0",
+                margin: "0 0 16px 0",
                 fontSize: "12px",
                 color: "#999",
                 fontWeight: "600",
@@ -556,23 +325,102 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
             >
               Organizations
             </p>
-            <div style={{ minHeight: "100px" }}>
+            {organizations && organizations.length > 0 ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
+                {organizations.map((org: any) => (
+                  <div
+                    key={org.id}
+                    onClick={() =>
+                      setActiveOrganization(
+                        activeOrganization === org.id ? null : org.id
+                      )
+                    }
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      padding: "12px",
+                      border: `2px solid ${
+                        activeOrganization === org.id ? "#28a745" : "#e0e0e0"
+                      }`,
+                      borderRadius: "8px",
+                      backgroundColor:
+                        activeOrganization === org.id ? "#f0f8f5" : "#fff",
+                      cursor: "pointer",
+                      transition:
+                        "all 0.3s ease, border-color 0.3s ease, background-color 0.3s ease",
+                      gap: "12px",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (activeOrganization !== org.id) {
+                        (e.currentTarget as HTMLDivElement).style.borderColor =
+                          "#d0d0d0";
+                        (e.currentTarget as HTMLDivElement).style.boxShadow =
+                          "0 2px 8px rgba(0,0,0,0.1)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (activeOrganization !== org.id) {
+                        (e.currentTarget as HTMLDivElement).style.borderColor =
+                          "#e0e0e0";
+                        (e.currentTarget as HTMLDivElement).style.boxShadow =
+                          "none";
+                      }
+                    }}
+                  >
+                    {org.image && (
+                      <img
+                        src={org.image}
+                        alt={org.name}
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          flexShrink: 0,
+                          border: `3px solid ${
+                            activeOrganization === org.id
+                              ? "#28a745"
+                              : "#e0e0e0"
+                          }`,
+                        }}
+                      />
+                    )}
+                    <p
+                      style={{
+                        margin: "0",
+                        fontSize: "12px",
+                        color: "#333",
+                        fontWeight: "600",
+                        lineHeight: "1.4",
+                        flex: 1,
+                      }}
+                    >
+                      {org.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
               <p
                 style={{
                   margin: "0",
                   fontSize: "14px",
                   color: "#666",
                   fontWeight: "500",
+                  textAlign: "center",
                   lineHeight: "1.6",
                 }}
               >
-                {project.organization_ids && project.organization_ids.length > 0
-                  ? `${project.organization_ids.length} Organization${
-                      project.organization_ids.length > 1 ? "s" : ""
-                    } assigned`
-                  : "No organizations assigned"}
+                No organizations assigned
               </p>
-            </div>
+            )}
           </div>
 
           {/* Larger Card - Right */}
@@ -598,151 +446,42 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
             >
               Project Updates
             </p>
-            {milestones && milestones.length > 0 ? (
-              <div
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "40px 20px",
+                minHeight: "200px",
+              }}
+            >
+              <img
+                src={EmptyNGO}
+                alt="No updates"
                 style={{
-                  display: "flex",
-                  gap: "30px",
-                  flexWrap: "wrap",
+                  width: "100px",
+                  height: "100px",
+                  marginBottom: "10px",
+                  opacity: 0.8,
+                }}
+              />
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#666666",
+                  textAlign: "center",
+                  margin: "0",
                 }}
               >
-                <div>
-                  <p
-                    style={{
-                      margin: "0 0 6px 0",
-                      fontSize: "11px",
-                      color: "#999",
-                      fontWeight: "600",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Total Milestones
-                  </p>
-                  <p
-                    style={{
-                      margin: "0",
-                      fontSize: "18px",
-                      color: "#333",
-                      fontWeight: "700",
-                    }}
-                  >
-                    {milestones?.length || 0}
-                  </p>
-                </div>
-
-                <div>
-                  <p
-                    style={{
-                      margin: "0 0 6px 0",
-                      fontSize: "11px",
-                      color: "#999",
-                      fontWeight: "600",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Completed
-                  </p>
-                  <p
-                    style={{
-                      margin: "0",
-                      fontSize: "18px",
-                      color: "#28a745",
-                      fontWeight: "700",
-                    }}
-                  >
-                    {milestones?.filter((m: any) => m.status === "completed")
-                      .length || 0}
-                  </p>
-                </div>
-
-                <div>
-                  <p
-                    style={{
-                      margin: "0 0 6px 0",
-                      fontSize: "11px",
-                      color: "#999",
-                      fontWeight: "600",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    In Progress
-                  </p>
-                  <p
-                    style={{
-                      margin: "0",
-                      fontSize: "18px",
-                      color: "#ffc107",
-                      fontWeight: "700",
-                    }}
-                  >
-                    {milestones?.filter((m: any) => m.status === "in_progress")
-                      .length || 0}
-                  </p>
-                </div>
-
-                <div>
-                  <p
-                    style={{
-                      margin: "0 0 6px 0",
-                      fontSize: "11px",
-                      color: "#999",
-                      fontWeight: "600",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Pending
-                  </p>
-                  <p
-                    style={{
-                      margin: "0",
-                      fontSize: "18px",
-                      color: "#6c757d",
-                      fontWeight: "700",
-                    }}
-                  >
-                    {milestones?.filter((m: any) => m.status === "pending")
-                      .length || 0}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "40px 20px",
-                  minHeight: "200px",
-                }}
-              >
-                <img
-                  src={EmptyNGO}
-                  alt="No updates"
-                  style={{
-                    width: "100px",
-                    height: "100px",
-                    marginBottom: "10px",
-                    opacity: 0.8,
-                  }}
-                />
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "#666666",
-                    textAlign: "center",
-                    margin: "0",
-                  }}
-                >
-                  No updates available
-                </p>
-              </div>
-            )}
+                No updates available
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Create Milestone Modal */}
       <CreateMilestoneModal
         isOpen={isCreateMilestoneModalOpen}
         toggle={() => setIsCreateMilestoneModalOpen(false)}

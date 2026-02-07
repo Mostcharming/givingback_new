@@ -2473,6 +2473,17 @@ export const getProjectOrganizations = async (
           "is_verified",
           "user_id"
         );
+
+      // Fetch images for each organization
+      organizations = await Promise.all(
+        organizations.map(async (org) => {
+          const image = await getUserImage(org.user_id);
+          return {
+            ...org,
+            image: image?.filename || null,
+          };
+        })
+      );
     }
 
     res.status(200).json({
