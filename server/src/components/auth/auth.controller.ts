@@ -2503,3 +2503,96 @@ export const getProjectOrganizations = async (
     });
   }
 };
+
+export const deleteMilestoneUpdate = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const { milestoneUpdateId } = req.params;
+    const userId = (req.user as User)?.id;
+
+    if (!milestoneUpdateId) {
+      res.status(400).json({
+        status: "fail",
+        message: "Milestone update ID is required",
+      });
+      return;
+    }
+
+    if (!userId) {
+      res.status(401).json({
+        status: "fail",
+        message: "User not authenticated",
+      });
+      return;
+    }
+
+    // Get the milestone update
+    const milestoneUpdate = await db("milestone_updates")
+      .where({ id: milestoneUpdateId })
+      .first();
+
+    if (!milestoneUpdate) {
+      res.status(404).json({
+        status: "fail",
+        message: "Milestone update not found",
+      });
+      return;
+    }
+
+    // Get the milestone to verify project ownership
+    const milestone = await db("milestone")
+      .where({ id: milestoneUpdate.milestone_id })
+      .first();
+
+    if (!milestone) {
+      res.status(404).json({
+        status: "fail",
+        message: "Milestone not found",
+      });
+      return;
+    }
+
+    // Get the project to verify user ownership
+    const project = await db("project")
+      .where({ id: milestone.project_id })
+      .first();
+
+    if (!project) {
+      res.status(404).json({
+        status: "fail",
+        message: "Project not found",
+      });
+      return;
+    }
+
+    // Get the organization to verify user is the owner
+    const organization = await db("organizations")
+      .where({ id: project.organization_id })
+      .first();
+
+    if (!organization || organization.user_id !== userId) {
+      res.status(403).json({
+        status: "fail",
+        message: "You do not have permission to delete this milestone update",
+      });
+      return;
+    }
+
+    // Delete the milestone update
+    await db("milestone_updates").where({ id: milestoneUpdateId }).del();
+
+    res.status(200).json({
+      status: "success",
+      message: "Milestone update deleted successfully",
+    });
+  } catch (error: any) {
+    console.error("Delete milestone update error:", error);
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while deleting the milestone update",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};

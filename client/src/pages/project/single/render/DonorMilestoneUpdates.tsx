@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Calendar, ChevronLeft, Clock, MapPin, Wallet } from "lucide-react";
+import {
+  Calendar,
+  ChevronLeft,
+  Clock,
+  MapPin,
+  Plus,
+  Wallet,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import EmptyNGO from "../../../../assets/images/emptyngo.svg";
@@ -148,88 +155,160 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
       {/* Milestone Updates List or Empty State */}
       <div style={{ marginTop: "24px" }}>
         {milestones && milestones.length > 0 ? (
-          <div>
-            {milestones?.map((milestone: any) => (
-              <div
-                key={milestone.id}
-                style={{
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "8px",
-                  padding: "20px",
-                  marginBottom: "16px",
-                  backgroundColor: "#fff",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                }}
-              >
+          <>
+            <div>
+              {milestones?.map((milestone: any) => (
                 <div
+                  key={milestone.id}
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "8px",
+                    padding: "20px",
+                    marginBottom: "16px",
+                    backgroundColor: "#fff",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
                   }}
                 >
-                  <div style={{ flex: 1 }}>
-                    <h4
-                      style={{
-                        margin: "0 0 8px 0",
-                        fontSize: "16px",
-                        fontWeight: "600",
-                      }}
-                    >
-                      {milestone.milestone?.charAt(0).toUpperCase() +
-                        milestone.milestone?.slice(1)}
-                    </h4>
-                  </div>
-                  <p
+                  <div
                     style={{
-                      margin: "0",
-                      fontSize: "12px",
-                      color: "#333",
-                      fontWeight: "600",
-                      minWidth: "40px",
-                      textAlign: "right",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
                     }}
                   >
-                    Due date:{" "}
-                    {milestone.due_date && (
-                      <span style={{ marginRight: "12px", color: "#666" }}>
-                        {new Date(milestone.due_date).toLocaleDateString()}
-                      </span>
-                    )}
-                    <span style={{ marginLeft: "12px" }}>
-                      {milestone.percentage_complete || 0}%
-                    </span>
-                  </p>
-                </div>
-
-                <div style={{}}>
-                  {/* Progress Bar */}
-                  {milestone.target !== undefined && (
-                    <div style={{ marginBottom: "20px" }}>
-                      <div
+                    <div style={{ flex: 1 }}>
+                      <h4
                         style={{
-                          flex: 1,
-                          height: "8px",
-                          backgroundColor: "#e0e0e0",
-                          borderRadius: "4px",
-                          overflow: "hidden",
+                          margin: "0 0 8px 0",
+                          fontSize: "16px",
+                          fontWeight: "600",
                         }}
                       >
+                        {milestone.milestone?.charAt(0).toUpperCase() +
+                          milestone.milestone?.slice(1)}
+                      </h4>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "12px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: "0",
+                          fontSize: "12px",
+                          color: "#333",
+                          fontWeight: "600",
+                          minWidth: "40px",
+                          textAlign: "right",
+                        }}
+                      >
+                        Due date:{" "}
+                        {milestone.due_date && (
+                          <span style={{ marginRight: "12px", color: "#666" }}>
+                            {new Date(milestone.due_date).toLocaleDateString()}
+                          </span>
+                        )}
+                        <span style={{ marginLeft: "12px" }}>
+                          {milestone.percentage_complete || 0}%
+                        </span>
+                      </p>
+                      {/* <button
+                        onClick={() => handleDeleteMilestone(milestone.id)}
+                        type="button"
+                        style={{
+                          background: "#ff4444",
+                          border: "none",
+                          color: "white",
+                          borderRadius: "4px",
+                          padding: "4px 8px",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          transition: "background-color 0.3s ease",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.backgroundColor = "#cc0000")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor = "#ff4444")
+                        }
+                      >
+                        <Trash2 size={14} />
+                        Delete
+                      </button> */}
+                    </div>
+                  </div>
+
+                  <div style={{}}>
+                    {/* Progress Bar */}
+                    {milestone.target !== undefined && (
+                      <div style={{ marginBottom: "20px" }}>
                         <div
                           style={{
-                            height: "100%",
-                            width: `${milestone.percentage_complete || 0}%`,
-                            backgroundColor: "#28a745",
-                            transition: "width 0.3s ease",
+                            flex: 1,
+                            height: "8px",
+                            backgroundColor: "#e0e0e0",
+                            borderRadius: "4px",
+                            overflow: "hidden",
                           }}
-                        />
+                        >
+                          <div
+                            style={{
+                              height: "100%",
+                              width: `${milestone.percentage_complete || 0}%`,
+                              backgroundColor: "#28a745",
+                              transition: "width 0.3s ease",
+                            }}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            <div
+              style={{
+                marginTop: "24px",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <button
+                type="button"
+                style={{
+                  backgroundColor: "#28a745",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 50px",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  transition: "background-color 0.3s ease",
+                }}
+                onClick={() => setIsCreateMilestoneModalOpen(true)}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#218838")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#28a745")
+                }
+              >
+                <Plus size={18} />
+                Add Project Milestone
+              </button>
+            </div>
+          </>
         ) : (
           <div
             style={{

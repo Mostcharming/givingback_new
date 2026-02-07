@@ -205,6 +205,7 @@ export const getProjects = async (
               "achievement",
               "position",
               "image",
+              "organization_id",
               "status",
               "narration",
               "createdAt"

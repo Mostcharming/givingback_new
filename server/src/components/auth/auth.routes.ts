@@ -9,6 +9,7 @@ import {
   createMilestone,
   createProject,
   deleteBank,
+  deleteMilestoneUpdate,
   downloadSampleNGOFile,
   editProject,
   forgotPassword,
@@ -64,6 +65,7 @@ router.post("/organizations", addSingleNGO as any);
 router.get("/bulk/sample", downloadSampleNGOFile);
 router.post("/bulk/upload", uploadbulk, bulkUploadNGOsEndpoint);
 router.post("/milestones", createMilestone);
+router.delete("/milestones/:milestoneUpdateId", deleteMilestoneUpdate);
 router.get("/projects/:projectId/organizations", getProjectOrganizations);
 
 export default router;

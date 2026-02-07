@@ -47,7 +47,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
         toast.success("Milestone created successfully!");
         resetForm();
         toggle();
-        if (onSuccess) onSuccess(data);
+        if (onSuccess) onSuccess(data.data);
       },
       onError: (error: unknown) => {
         let errorMessage = "Failed to create milestone";
