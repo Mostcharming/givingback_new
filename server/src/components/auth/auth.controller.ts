@@ -1536,7 +1536,6 @@ export const createProject = async (
           "Your Project Brief is Ready for Review"
         );
       } else if (status === "active") {
-        // Send email to donor
         await new Email({
           email: donorUser.email,
           url: "",
@@ -1755,6 +1754,211 @@ export const publishProjectBrief = async (
   }
 };
 
+export const editProject = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = (req.user as User)?.id;
+    const { id } = req.params;
+
+    if (!userId) {
+      res.status(401).json({
+        status: "fail",
+        message: "Unauthorized: User not found",
+      });
+      return;
+    }
+
+    if (!id || isNaN(Number(id))) {
+      res.status(400).json({
+        status: "fail",
+        error: "Invalid project ID",
+      });
+      return;
+    }
+
+    const donor = await db("donors").where({ user_id: userId }).first();
+
+    if (!donor) {
+      res.status(400).json({
+        status: "fail",
+        message: "User is not registered as a donor",
+      });
+      return;
+    }
+
+    const project = await db("project").where({ id }).first();
+
+    if (!project) {
+      res.status(404).json({
+        status: "fail",
+        error: "Project not found",
+      });
+      return;
+    }
+
+    if (project.donor_id !== donor.id) {
+      res.status(403).json({
+        status: "fail",
+        error: "You do not have permission to edit this project",
+      });
+      return;
+    }
+
+    if (project.status !== "brief") {
+      res.status(400).json({
+        status: "fail",
+        error: `Project is in ${project.status} status. Only projects with brief status can be edited`,
+      });
+      return;
+    }
+
+    const {
+      title,
+      category,
+      description,
+      budget,
+      deadline,
+      state,
+      lga,
+      ispublic,
+      organization_ids,
+    } = req.body;
+
+    // Prepare update object with only provided fields
+    const updateData: any = {};
+    if (title !== undefined) updateData.title = title.trim();
+    if (category !== undefined) updateData.category = category;
+    if (description !== undefined) updateData.description = description;
+    if (budget !== undefined) {
+      const cost = parseFloat(String(budget));
+      if (isNaN(cost) || cost <= 0) {
+        res.status(400).json({
+          status: "fail",
+          error: "Budget must be a valid positive number",
+        });
+        return;
+      }
+      updateData.cost = cost;
+    }
+    if (deadline !== undefined) {
+      const deadlineDate = new Date(deadline);
+      if (isNaN(deadlineDate.getTime())) {
+        res.status(400).json({
+          status: "fail",
+          error: "Deadline must be a valid date (YYYY-MM-DD)",
+        });
+        return;
+      }
+      updateData.endDate = deadline;
+    }
+    if (state !== undefined) updateData.state = state;
+    if (lga !== undefined) updateData.city = lga;
+    if (ispublic !== undefined) updateData.ispublic = ispublic;
+
+    updateData.updatedAt = new Date();
+
+    // Handle organization_ids update if provided
+    let organization_id = project.organization_id;
+    let multiNgo = project.multi_ngo;
+
+    if (organization_ids !== undefined) {
+      const orgIds = Array.isArray(organization_ids)
+        ? organization_ids.map((id) => Number(id)).filter((id) => !isNaN(id))
+        : [];
+
+      if (orgIds.length === 1) {
+        organization_id = orgIds[0];
+        multiNgo = false;
+      } else if (orgIds.length > 1) {
+        organization_id = null;
+        multiNgo = true;
+      } else {
+        organization_id = null;
+        multiNgo = false;
+      }
+
+      updateData.organization_id = organization_id;
+      updateData.multi_ngo = multiNgo;
+
+      // Update project_organization relationships
+      await db("project_organization").where({ project_id: id }).del();
+
+      if (multiNgo && orgIds.length > 0) {
+        const projectOrgRecords = orgIds.map((orgId) => ({
+          project_id: id,
+          organization_id: orgId,
+          created_at: new Date(),
+          updated_at: new Date(),
+        }));
+        await db("project_organization").insert(projectOrgRecords);
+      }
+    }
+
+    // Update the project
+    await db("project").where({ id }).update(updateData);
+
+    const updatedProject = await db("project").where({ id }).first();
+
+    const donorUser = await db("users").where({ id: userId }).first();
+    const donorInfo = await db("donors").where({ id: donor.id }).first();
+
+    // Send notification email
+    try {
+      await new Email({
+        email: donorUser.email,
+        url: "",
+        token: 0,
+        additionalData: {
+          subject: "Project Brief Updated",
+          projectTitle: updatedProject.title,
+          projectDescription: updatedProject.description,
+          budget: updatedProject.cost,
+          donorName: donorInfo?.name || "Donor",
+          state: updatedProject.state,
+          city: updatedProject.city,
+        },
+      }).sendEmail("donorbriefupdate", "Project Brief Updated");
+    } catch (emailError) {
+      console.error(
+        "Error sending project update notification email:",
+        emailError
+      );
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Project details updated successfully",
+      data: {
+        id: updatedProject.id,
+        title: updatedProject.title,
+        category: updatedProject.category,
+        description: updatedProject.description,
+        budget: updatedProject.cost,
+        deadline: updatedProject.endDate,
+        state: updatedProject.state,
+        city: updatedProject.city,
+        status: updatedProject.status,
+        donor_id: updatedProject.donor_id,
+        organization_id: updatedProject.organization_id,
+        multi_ngo: updatedProject.multi_ngo,
+        organization_ids: multiNgo ? organization_ids || [] : [],
+        ispublic: updatedProject.ispublic,
+        updatedAt: updatedProject.updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Edit Project Error:", error);
+
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while editing the project",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
 export const getProjectApplications = async (
   req: UserRequest,
   res: Response
@@ -1921,6 +2125,7 @@ export const getProjectApplications = async (
             beneficiaries: beneficiariesCount,
             teamSize: app.team_size,
             image: app.ngo_image,
+            interestArea: app.interest_area,
             location: {
               state: app.state,
               city_lga: app.city_lga,
@@ -1958,7 +2163,6 @@ export const updateProjectApplicationStatus = async (
     const { status } = req.body;
     const userId = (req.user as User)?.id;
 
-    // Validate required fields
     if (!projectId || !applicationId) {
       res.status(400).json({
         status: "fail",
@@ -1975,7 +2179,6 @@ export const updateProjectApplicationStatus = async (
       return;
     }
 
-    // Validate status value
     const validStatuses = ["pending", "accepted", "rejected"];
     if (!validStatuses.includes(status)) {
       res.status(400).json({
@@ -1987,7 +2190,6 @@ export const updateProjectApplicationStatus = async (
       return;
     }
 
-    // Get project to verify ownership
     const project = await db("project")
       .where({ id: projectId })
       .select("id", "donor_id", "title")
@@ -2001,7 +2203,6 @@ export const updateProjectApplicationStatus = async (
       return;
     }
 
-    // Verify user is the donor of this project
     const donor = await db("donors")
       .where({ user_id: userId })
       .select("id")
@@ -2016,7 +2217,6 @@ export const updateProjectApplicationStatus = async (
       return;
     }
 
-    // Get the application
     const application = await db("project_application")
       .where({ id: applicationId, project_id: projectId })
       .select("id", "project_id", "ngo_id", "status")
@@ -2030,23 +2230,19 @@ export const updateProjectApplicationStatus = async (
       return;
     }
 
-    // Update the application status
     await db("project_application").where({ id: applicationId }).update({
       status: status,
       updatedAt: new Date(),
     });
 
-    // If status is accepted, add to project_organization table and update project to multi_ngo
     if (status === "accepted") {
       const ngoId = application.ngo_id;
 
-      // Check if this record already exists in project_organization
       const existingRecord = await db("project_organization")
         .where({ project_id: projectId, organization_id: ngoId })
         .first();
 
       if (!existingRecord) {
-        // Add to project_organization table
         await db("project_organization").insert({
           project_id: projectId,
           organization_id: ngoId,
@@ -2055,14 +2251,58 @@ export const updateProjectApplicationStatus = async (
         });
       }
 
-      // Update project to set multi_ngo to true
       await db("project").where({ id: projectId }).update({
         multi_ngo: true,
+        status: "active",
         updatedAt: new Date(),
       });
+
+      try {
+        const organization = await db("organizations")
+          .where({ id: ngoId })
+          .first();
+
+        if (organization && organization.user_id) {
+          const ngoUser = await db("users")
+            .where({ id: organization.user_id })
+            .first();
+
+          const projectDetails = await db("project")
+            .where({ id: projectId })
+            .first();
+
+          if (ngoUser && ngoUser.email) {
+            await new Email({
+              email: ngoUser.email,
+              url: "",
+              token: 0,
+              additionalData: {
+                subject: "Your Application Has Been Accepted",
+                projectTitle: projectDetails.title,
+                projectDescription: projectDetails.description,
+                budget: projectDetails.cost,
+                ngoName: organization.name || "NGO",
+                state: projectDetails.state,
+                city: projectDetails.city,
+              },
+            }).sendEmail(
+              "ngoapplicationaccepted",
+              "Your Application Has Been Accepted"
+            );
+
+            console.log(
+              `Acceptance email sent to NGO: ${organization.name} (${ngoUser.email})`
+            );
+          }
+        }
+      } catch (ngoEmailError) {
+        console.error(
+          "Error sending application acceptance email to NGO:",
+          ngoEmailError
+        );
+      }
     }
 
-    // Get the updated application with NGO details
     const updatedApplication = await db("project_application")
       .where("project_application.id", applicationId)
       .leftJoin(

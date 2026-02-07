@@ -1,0 +1,23 @@
+extends baseEmail
+
+block content
+  p Hello #{donorName},
+  p Your project brief has been successfully updated! The changes have been saved to your account.
+  p
+    strong Updated Project Details:
+  ul
+    li
+      strong Title: 
+      | #{projectTitle}
+    li
+      strong Description: 
+      | #{projectDescription}
+    li
+      strong Budget: 
+      | #{budget} NGN
+    li
+      strong Location: 
+      | #{state}, #{city}
+  p Your updated project brief is now live on our platform. NGOs will be able to see the latest information when viewing your project.
+  p If you have any other changes you'd like to make, you can continue editing your brief or contact our support team for assistance.
+  p We appreciate your commitment to making a meaningful difference!

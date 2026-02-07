@@ -1,0 +1,33 @@
+extends baseEmail
+
+block content
+  p Hello #{ngoName},
+  p Congratulations! Your application has been accepted for the project.
+  p
+    strong Project Details:
+  ul
+    li
+      strong Title: 
+      | #{projectTitle}
+    li
+      strong Description: 
+      | #{projectDescription}
+    li
+      strong Budget: 
+      | #{budget} NGN
+    li
+      strong Location: 
+      | #{state}, #{city}
+  p Your organization has been selected to implement this project. This is a great opportunity to showcase your expertise and make a meaningful impact in the community.
+  p
+    strong Next Steps:
+  ol
+    li Log in to your GivingBack dashboard
+    li Review the full project requirements and specifications
+    li Prepare your project implementation plan
+    li Coordinate with the donor regarding project kickoff
+    li Begin project execution according to the agreed timeline
+  p You'll be able to track milestones, update progress, and communicate directly with the donor through your dashboard. Make sure to keep the donor informed of any updates or challenges.
+  p If you have any questions about the project or need support, please don't hesitate to reach out to our support team at support@givingback.org.
+  p We are excited to support you in delivering excellent results on this project. Let's create positive change together!
+  p Thank you for your commitment to our mission and for being a trusted implementation partner.

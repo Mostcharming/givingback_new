@@ -9,6 +9,7 @@ import {
   createProject,
   deleteBank,
   downloadSampleNGOFile,
+  editProject,
   forgotPassword,
   getAllOrganizations,
   getDonorProjectMetrics,
@@ -45,6 +46,7 @@ router.get("/organization-counts", getOrganizationCounts);
 router.get("/donor/project-stats", getDonorProjectMetrics);
 router.get("/donor/projects", getDonorProjects);
 router.post("/donor/projects", createProject);
+router.put("/donor/projects/:id", editProject);
 router.put("/donor/projects/:id/publish", publishProjectBrief);
 router.get("/donor/projects/:projectId/applications", getProjectApplications);
 router.put(

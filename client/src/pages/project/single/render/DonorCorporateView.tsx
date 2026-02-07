@@ -11,8 +11,10 @@ import {
   XCircle,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import EmptyNGO from "../../../../assets/images/emptyngo.svg";
 import NGODetailsModal from "../../../../components/NGODetailsModal";
+import EditProjectBriefModal from "../../../../components/projects/EditProjectBriefModal";
 import { formatCurrency } from "../../../../components/projects/ProjectsUtils";
 import useBackendService from "../../../../services/backend_service";
 
@@ -36,6 +38,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
   const [applications, setApplications] = useState<any[]>([]);
   const [selectedNGO, setSelectedNGO] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState<
     number | null
   >(null);
@@ -69,22 +72,23 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
     }
   );
 
-  const { mutate: updateApplicationStatus } = useBackendService(
-    `/auth/donor/projects/${project.id}/applications/${selectedApplicationId}/status`,
-    "PUT",
-    {
-      onSuccess: () => {
-        // Refresh applications list after status update
-        if (project?.id) {
-          const status = getStatusValue(activeTab);
-          fetchApplications({ status });
-        }
-      },
-      onError: (error: any) => {
-        console.error("Error updating application status:", error);
-      },
-    }
-  );
+  const { mutate: updateApplicationStatus, isLoading: isUpdatingStatus } =
+    useBackendService(
+      `/auth/donor/projects/${project.id}/applications/${selectedApplicationId}/status`,
+      "PUT",
+      {
+        onSuccess: () => {
+          // Refresh applications list after status update
+          if (project?.id) {
+            const status = getStatusValue(activeTab);
+            fetchApplications({ status });
+          }
+        },
+        onError: (error: any) => {
+          console.error("Error updating application status:", error);
+        },
+      }
+    );
 
   useEffect(() => {
     if (project?.id) {
@@ -101,6 +105,29 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedNGO(null);
+  };
+
+  const handleEditProjectDetails = () => {
+    const status = project?.status?.toLowerCase();
+    console.log("Current project status:", status);
+
+    if (status === "active") {
+      toast.error("Cannot edit project details. Project is currently active.");
+      return;
+    }
+
+    if (status === "completed") {
+      toast.error("Cannot edit project details. Project is already completed.");
+      return;
+    }
+
+    if (status !== "brief") {
+      toast.error("Project details can only be edited when status is 'Brief'.");
+      return;
+    }
+
+    // Open the edit modal
+    setIsEditModalOpen(true);
   };
 
   const handleApplicationStatus = (
@@ -150,6 +177,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
           <button
             type="button"
             className="btn"
+            onClick={handleEditProjectDetails}
             style={{
               backgroundColor: "#28a745",
               color: "white",
@@ -161,7 +189,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
               cursor: "pointer",
             }}
           >
-            Edit Project Details and Milestones
+            Edit Project Details
           </button>
           <button
             type="button"
@@ -177,7 +205,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
               cursor: "pointer",
             }}
           >
-            View Milestone Updates
+            Milestone Updates
           </button>
         </div>
       </div>
@@ -612,6 +640,7 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
                           onClick={() =>
                             handleApplicationStatus(app.id, "accepted")
                           }
+                          disabled={isUpdatingStatus}
                           style={{
                             backgroundColor: "#28a745",
                             color: "white",
@@ -620,11 +649,18 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
                             border: "none",
                             fontSize: "13px",
                             fontWeight: "500",
-                            cursor: "pointer",
+                            cursor: isUpdatingStatus
+                              ? "not-allowed"
+                              : "pointer",
                             whiteSpace: "nowrap",
+                            opacity: isUpdatingStatus ? 0.6 : 1,
+                            filter: isUpdatingStatus ? "blur(2px)" : "none",
+                            pointerEvents: isUpdatingStatus ? "none" : "auto",
                           }}
                         >
-                          Accept Application
+                          {isUpdatingStatus
+                            ? "Accepting..."
+                            : "Accept Application"}
                         </button>
                       </div>
                     )}
@@ -686,6 +722,14 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
         open={isModalOpen}
         onClose={handleCloseModal}
         ngoData={selectedNGO}
+      />
+
+      {/* Edit Project Brief Modal */}
+      <EditProjectBriefModal
+        isOpen={isEditModalOpen}
+        toggle={() => setIsEditModalOpen(false)}
+        project={project}
+        onSuccess={() => setIsEditModalOpen(false)}
       />
     </div>
   );
