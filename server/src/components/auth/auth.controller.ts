@@ -2354,7 +2354,7 @@ export const createMilestone = async (
     const {
       title,
       description,
-      status = "active",
+      status = "in-progress",
       target,
       project_id,
       due_date,

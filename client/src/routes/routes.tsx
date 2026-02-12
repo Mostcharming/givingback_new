@@ -28,6 +28,7 @@ import ResetPassword from "../pages/auth/ResetPassword";
 import Briefs from "../pages/briefs";
 import Dashboard from "../pages/Dashboard";
 import DN_Projects from "../pages/donor_ngo_projects";
+import FundsDisbursement from "../pages/FundsDisbursement";
 import FundsM from "../pages/fundsM";
 import MessageDonor from "../pages/messages";
 import AddPastProject from "../pages/ngo/pastproject/past-projects";
@@ -168,17 +169,18 @@ const routes = [
     component: <DN_Projects />,
     layout: "/donor",
   },
-  {
-    path: "/fund_management",
-    name: "My Contributions",
-    icon: <WalletCards />,
-    component: <FundsM />,
-    layout: "/donor",
-  },
+
   {
     path: "/fund_management",
     name: "Funds/Disbursement",
     icon: <Wallet />,
+    component: <FundsDisbursement />,
+    layout: "/donor",
+  },
+  {
+    path: "/fund_management_new",
+    name: "My Contributions",
+    icon: <WalletCards />,
     component: <FundsM />,
     layout: "/donor",
   },
