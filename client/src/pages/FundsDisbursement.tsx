@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, CardBody, Col, Container, Row } from "reactstrap";
+import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
 import "./funds-disbursement.css";
 
@@ -18,7 +19,7 @@ const FundsDisbursement = () => {
   const navigate = useNavigate();
   const [disbursements, setDisbursements] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [dashBoxItems] = useState([
+  const [dashBoxItems, setDashBoxItems] = useState([
     {
       title: "Total Allocated",
       amount: "₦0.00",
@@ -44,6 +45,46 @@ const FundsDisbursement = () => {
       color: "#9C27B0",
     },
   ]);
+
+  const { mutate: fetchDashboard } = useBackendService(
+    "/donor/dashboard",
+    "GET",
+    {
+      onSuccess: (res: any) => {
+        setDashBoxItems([
+          {
+            title: "Total Allocated",
+            amount: res.totalAllocated || "₦0.00",
+            iconClass: <Wallet />,
+            color: "#128330",
+          },
+          {
+            title: "Total Disbursed",
+            amount: res.totalFundDisbursed?.value || "₦0.00",
+            iconClass: <BanknoteArrowDown />,
+            color: "#3B82F6",
+          },
+          {
+            title: "Pending Disbursement",
+            amount: "₦0.00",
+            iconClass: <Clock />,
+            color: "#FFC107",
+          },
+          {
+            title: "Available Funds",
+            amount: res.walletBalance || "₦0.00",
+            iconClass: <CircleDollarSign />,
+            color: "#9C27B0",
+          },
+        ]);
+      },
+      onError: () => {},
+    }
+  );
+
+  useEffect(() => {
+    fetchDashboard({});
+  }, []);
 
   // Redirect if user is not authorized
   useEffect(() => {

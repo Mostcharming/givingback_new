@@ -11,6 +11,8 @@ interface DonorCounts {
   ngosOnboarded: MetricTrend;
   activeProjects: MetricTrend;
   totalBeneficiaries: MetricTrend;
+  walletBalance: string;
+  totalAllocated: string;
 }
 
 interface OrgCounts {
@@ -171,6 +173,24 @@ export const getCounts = async (
       lastMonthBeneficiaries
     );
 
+    const donorWalletBalance = await db("wallet")
+      .where("user_id", userId)
+      .select("balance")
+      .first();
+
+    const formattedDonorWalletBalance = formatCurrency(
+      donorWalletBalance?.balance || 0
+    );
+
+    const totalAllocatedResult = await db("project")
+      .where("donor_id", donorId)
+      .sum("cost as total")
+      .first();
+
+    const formattedTotalAllocated = formatCurrency(
+      Number(totalAllocatedResult?.total || 0)
+    );
+
     return {
       totalFundDisbursed: {
         value: formatCurrency(currentDisbursedAmount),
@@ -192,6 +212,8 @@ export const getCounts = async (
         trend: parseFloat(beneficiariesTrend.toFixed(2)),
         isUp: beneficiariesTrend >= 0,
       },
+      walletBalance: formattedDonorWalletBalance,
+      totalAllocated: formattedTotalAllocated,
     } as DonorCounts;
   } else {
     const completedProjectsCount = await db("project")

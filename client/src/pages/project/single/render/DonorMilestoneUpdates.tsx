@@ -10,6 +10,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import EmptyNGO from "../../../../assets/images/emptyngo.svg";
+import placeholder from "../../../../assets/images/home/GivingBackNG-logo.svg";
 import CreateMilestoneModal from "../../../../components/projects/CreateMilestoneModal";
 import { formatCurrency } from "../../../../components/projects/ProjectsUtils";
 import useBackendService from "../../../../services/backend_service";
@@ -453,24 +454,20 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
                       }
                     }}
                   >
-                    {org.image && (
-                      <img
-                        src={org.image}
-                        alt={org.name}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          flexShrink: 0,
-                          border: `3px solid ${
-                            activeOrganization === org.id
-                              ? "#28a745"
-                              : "#e0e0e0"
-                          }`,
-                        }}
-                      />
-                    )}
+                    <img
+                      src={org.image || placeholder}
+                      alt={org.name}
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        flexShrink: 0,
+                        border: `3px solid ${
+                          activeOrganization === org.id ? "#28a745" : "#e0e0e0"
+                        }`,
+                      }}
+                    />
                     <p
                       style={{
                         margin: "0",
