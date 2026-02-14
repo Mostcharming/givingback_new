@@ -28,6 +28,7 @@ import ResetPassword from "../pages/auth/ResetPassword";
 import Briefs from "../pages/briefs";
 import Dashboard from "../pages/Dashboard";
 import DN_Projects from "../pages/donor_ngo_projects";
+import FundingDetail from "../pages/funding";
 import FundsDisbursement from "../pages/FundsDisbursement";
 import FundsM from "../pages/fundsM";
 import MessageDonor from "../pages/messages";
@@ -169,7 +170,6 @@ const routes = [
     component: <DN_Projects />,
     layout: "/donor",
   },
-
   {
     path: "/fund_management",
     name: "Funds/Disbursement",
@@ -233,6 +233,12 @@ const routes = [
     path: "/send_money",
     icon: "ni ni-settings-gear-65",
     component: <SendMoney />,
+    layout: "/donor",
+  },
+  {
+    path: "/funding/:id",
+    name: "Funding Detail",
+    component: <FundingDetail />,
     layout: "/donor",
   },
 

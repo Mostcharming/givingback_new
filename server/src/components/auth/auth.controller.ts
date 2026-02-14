@@ -1330,9 +1330,15 @@ export const getDonorProjects = async (
     }
 
     const donorId = donor.id;
+    const { status } = req.query;
 
-    const projects = await db("project")
-      .where({ donor_id: donorId })
+    let query = db("project").where({ donor_id: donorId });
+
+    if (status && typeof status === "string") {
+      query = query.andWhere("status", status);
+    }
+
+    const projects = await query
       .select(
         "id",
         "title",
@@ -1342,6 +1348,7 @@ export const getDonorProjects = async (
         "objectives",
         "category",
         "organization_id",
+        "multi_ngo",
         "cost",
         "scope",
         "allocated",
@@ -1353,10 +1360,63 @@ export const getDonorProjects = async (
       )
       .orderBy("createdAt", "desc");
 
+    // Enrich each project with organization details
+    const enrichedProjects = await Promise.all(
+      projects.map(async (project: any) => {
+        let organizationIds: number[] = [];
+
+        if (project.multi_ngo) {
+          const projectOrganizations = await db("project_organization")
+            .where({ project_id: project.id })
+            .select("organization_id");
+          organizationIds = projectOrganizations.map(
+            (po: any) => po.organization_id
+          );
+        } else if (project.organization_id) {
+          organizationIds = [project.organization_id];
+        }
+
+        let organizations: any[] = [];
+
+        if (organizationIds.length > 0) {
+          organizations = await db("organizations")
+            .whereIn("id", organizationIds)
+            .select(
+              "id",
+              "name",
+              "phone",
+              "website",
+              "interest_area",
+              "cac",
+              "active",
+              "is_verified",
+              "user_id"
+            );
+
+          organizations = await Promise.all(
+            organizations.map(async (org: any) => {
+              const image = await getUserImage(org.user_id);
+              return {
+                ...org,
+                image: image?.filename || null,
+              };
+            })
+          );
+        }
+
+        return {
+          ...project,
+          organization: project.multi_ngo
+            ? organizations
+            : organizations[0] || null,
+        };
+      })
+    );
+
     res.status(200).json({
       status: "success",
-      count: projects.length,
-      data: projects,
+      count: enrichedProjects.length,
+      data: enrichedProjects,
     });
   } catch (error) {
     console.error("Get Donor Projects Error:", error);

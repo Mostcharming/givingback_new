@@ -7,10 +7,14 @@ import {
   Upload,
   Wallet,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { Button, Card, CardBody, Col, Container, Row } from "reactstrap";
+import EmptyNGO from "../assets/images/emptyngo.svg";
+import Tables from "../components/tables";
 import useBackendService from "../services/backend_service";
+import { capitalizeFirstLetter } from "../services/capitalize";
 import { useContent } from "../services/useContext";
 import "./funds-disbursement.css";
 
@@ -18,7 +22,9 @@ const FundsDisbursement = () => {
   const { authState } = useContent();
   const navigate = useNavigate();
   const [disbursements, setDisbursements] = useState([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [dashBoxItems, setDashBoxItems] = useState([
     {
       title: "Total Allocated",
@@ -82,8 +88,24 @@ const FundsDisbursement = () => {
     }
   );
 
+  const { mutate: fetchDonorProjects } = useBackendService(
+    "/auth/donor/projects",
+    "GET",
+    {
+      onSuccess: (res: any) => {
+        const projectsData = res.data || [];
+        setProjects(projectsData);
+      },
+      onError: () => {
+        toast.error("Failed to fetch donor projects.");
+        setProjects([]);
+      },
+    }
+  );
+
   useEffect(() => {
     fetchDashboard({});
+    fetchDonorProjects({ status: "active" });
   }, []);
 
   // Redirect if user is not authorized
@@ -93,6 +115,46 @@ const FundsDisbursement = () => {
       navigate("/");
     }
   }, [authState.user?.role, navigate]);
+
+  const tableHeaders = ["Project", "Budget", "Organization", "Status"];
+
+  const getOrganizationName = (project: any) => {
+    if (!project.organization) return "—";
+    if (Array.isArray(project.organization)) {
+      return project.organization.map((o: any) => o.name).join(", ") || "—";
+    }
+    return project.organization.name || "—";
+  };
+
+  const tableData = useMemo(() => {
+    const mapped = projects.map((project: any) => ({
+      id: project.id,
+      project: project.title,
+      budget: `₦${Number(project.cost || 0).toLocaleString()}`,
+      organization: project.organization?.length || 0,
+      tstatus: capitalizeFirstLetter(project.status) || "Active",
+    }));
+
+    if (!searchQuery.trim()) return mapped;
+
+    const query = searchQuery.toLowerCase();
+    return mapped.filter(
+      (row) =>
+        row.project?.toLowerCase().includes(query) ||
+        row.budget?.toLowerCase().includes(query) ||
+        row.organization?.toLowerCase().includes(query) ||
+        row.tstatus?.toLowerCase().includes(query)
+    );
+  }, [projects, searchQuery]);
+
+  const tableActions = [
+    {
+      label: "View",
+      onClick: (row: any) => {
+        navigate(`/donor/funding/${row.id}`);
+      },
+    },
+  ];
 
   return (
     <Container
@@ -258,16 +320,66 @@ const FundsDisbursement = () => {
 
       <div style={{ padding: "10px 0px" }}></div>
 
-      {/* Main Content Area */}
+      {/* Search Field */}
       <div
-        className="funds-content"
-        style={{ paddingLeft: "60px", paddingRight: "60px" }}
+        style={{
+          padding: "0 15px 16px 15px",
+        }}
       >
-        <div style={{ textAlign: "center", padding: "60px 20px" }}>
-          <p style={{ fontSize: "16px", color: "#666666" }}>
-            No disbursement data available at the moment
-          </p>
-        </div>
+        <input
+          type="text"
+          placeholder="Search projects..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            width: "100%",
+            maxWidth: "400px",
+            padding: "10px 16px",
+            fontSize: "14px",
+            border: "1px solid #d0d0d0",
+            borderRadius: "8px",
+            outline: "none",
+            backgroundColor: "#fff",
+            color: "#1a1a1a",
+            transition: "border-color 0.2s ease",
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = "#28a745";
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = "#d0d0d0";
+          }}
+        />
+      </div>
+
+      {/* Main Content Area */}
+      <div className="funds-content">
+        {projects.length > 0 ? (
+          <Tables
+            tableName="All Projects"
+            headers={tableHeaders}
+            data={tableData}
+            isPagination={false}
+            actions={tableActions}
+            emptyStateContent="No projects found"
+            emptyStateButtonLabel="Add Project"
+            onEmptyStateButtonClick={() => {}}
+            currentPage={1}
+            totalPages={1}
+            onPageChange={() => {}}
+          />
+        ) : (
+          <div style={{ textAlign: "center", padding: "60px 20px" }}>
+            <img
+              src={EmptyNGO}
+              alt="No projects"
+              style={{ maxWidth: "200px", marginBottom: "20px" }}
+            />
+            <p style={{ fontSize: "16px", color: "#666666" }}>
+              No disbursement data available at the moment
+            </p>
+          </div>
+        )}
       </div>
     </Container>
   );
