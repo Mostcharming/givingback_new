@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -73,80 +74,179 @@ const FundingDetail = () => {
       : 0;
 
   return (
-    <Container style={{ maxWidth: 900, marginTop: 40 }}>
-      <h2 style={{ fontWeight: 700, marginBottom: 32 }}>{project.title}</h2>
-      <Row style={{ marginBottom: 32 }}>
-        <Col md={3} sm={6} xs={12} style={{ marginBottom: 16 }}>
-          <Card>
-            <CardBody style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 13, color: "#888" }}>Budget</div>
-              <div style={{ fontWeight: 700, fontSize: 22 }}>
-                ₦{budget.toLocaleString()}
-              </div>
-            </CardBody>
-          </Card>
+    <Container fluid style={{ minHeight: "100vh", padding: 0 }}>
+      {/* Header Section - full width */}
+      <Row className="align-items-center" style={{ padding: "24px 0" }}>
+        <Col
+          lg="6"
+          md="12"
+          className="left-content"
+          style={{ paddingLeft: "60px", paddingRight: "30px" }}
+        >
+          <h1
+            style={{
+              fontSize: "28px",
+              fontWeight: "700",
+              marginBottom: "4px",
+              color: "#1a1a1a",
+              lineHeight: "1.2",
+            }}
+          >
+            Funds & Disbursement
+          </h1>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "#666666",
+              lineHeight: "1.4",
+              marginBottom: "0",
+            }}
+          >
+            Monitor fund allocation and disbursement tracking
+          </p>
+          <Button
+            style={{
+              marginTop: "50px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontWeight: 400,
+              textDecoration: "none",
+              boxShadow: "none",
+              background: "none",
+              border: "none",
+              padding: 0,
+              color: "black",
+            }}
+            onClick={() => navigate(-1)}
+          >
+            <ChevronLeft size={18} style={{ color: "#1a1a1a" }} /> Go Back
+          </Button>
         </Col>
-        <Col md={3} sm={6} xs={12} style={{ marginBottom: 16 }}>
-          <Card>
-            <CardBody style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 13, color: "#888" }}>Total Disbursed</div>
-              <div style={{ fontWeight: 700, fontSize: 22 }}>
-                ₦{totalDisbursed.toLocaleString()}
-              </div>
-            </CardBody>
-          </Card>
-        </Col>
-        <Col md={3} sm={6} xs={12} style={{ marginBottom: 16 }}>
-          <Card>
-            <CardBody style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 13, color: "#888" }}>NGO</div>
-              <div style={{ fontWeight: 700, fontSize: 22 }}>{ngoCount}</div>
-            </CardBody>
-          </Card>
-        </Col>
-        <Col md={3} sm={6} xs={12} style={{ marginBottom: 16 }}>
-          <Card>
-            <CardBody style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 13, color: "#888" }}>Locations</div>
-              <div style={{ fontWeight: 700, fontSize: 22 }}>{locations}</div>
-            </CardBody>
-          </Card>
+        <Col
+          lg="6"
+          md="12"
+          className="right-content"
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            paddingRight: "60px",
+          }}
+        >
+          {/* Empty for now, matches FundsDisbursement layout */}
         </Col>
       </Row>
-      <Card>
-        <CardBody>
-          <p style={{ color: "#666", marginBottom: 8 }}>
-            {project.description}
-          </p>
-          <Row style={{ marginBottom: 16 }}>
-            <Col md={6}>
-              <strong>Status:</strong> {project.status}
-            </Col>
-            <Col md={6}>
-              <strong>Budget:</strong> ₦{budget.toLocaleString()}
-            </Col>
-          </Row>
-          <Row style={{ marginBottom: 16 }}>
-            <Col md={6}>
-              <strong>Start Date:</strong> {project.startDate}
-            </Col>
-            <Col md={6}>
-              <strong>End Date:</strong> {project.endDate}
-            </Col>
-          </Row>
-          <Row style={{ marginBottom: 16 }}>
-            <Col md={12}>
-              <strong>Organizations:</strong>{" "}
-              {Array.isArray(project.organization)
-                ? project.organization.map((o: any) => o.name).join(", ")
-                : project.organization?.name || "—"}
-            </Col>
-          </Row>
-          <Button color="secondary" onClick={() => navigate(-1)}>
-            Back
-          </Button>
-        </CardBody>
-      </Card>
+      {/* Main Content Area - full width */}
+      <div style={{ padding: "0 30px" }}>
+        <h2 style={{ fontWeight: 700, marginBottom: 32 }}>{project.title}</h2>
+        <Row style={{ marginBottom: 32 }}>
+          <Col md={3} sm={6} xs={12} style={{ marginBottom: 32 }}>
+            <Card
+              style={{
+                borderRadius: "16px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              }}
+            >
+              <CardBody
+                style={{ textAlign: "left", color: "#1a1a1a", padding: "24px" }}
+              >
+                <div style={{ fontSize: 13, color: "#888", marginBottom: 18 }}>
+                  Budget
+                </div>
+                <div
+                  style={{
+                    fontWeight: 700,
+                    fontSize: 22,
+                    color: "#1a1a1a",
+                    textAlign: "left",
+                  }}
+                >
+                  ₦{budget.toLocaleString()}
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+          <Col md={3} sm={6} xs={12} style={{ marginBottom: 32 }}>
+            <Card
+              style={{
+                borderRadius: "16px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              }}
+            >
+              <CardBody
+                style={{ textAlign: "left", color: "#1a1a1a", padding: "24px" }}
+              >
+                <div style={{ fontSize: 13, color: "#888", marginBottom: 18 }}>
+                  Total Disbursed
+                </div>
+                <div
+                  style={{
+                    fontWeight: 700,
+                    fontSize: 22,
+                    color: "#1a1a1a",
+                    textAlign: "left",
+                  }}
+                >
+                  ₦{totalDisbursed.toLocaleString()}
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+          <Col md={3} sm={6} xs={12} style={{ marginBottom: 32 }}>
+            <Card
+              style={{
+                borderRadius: "16px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              }}
+            >
+              <CardBody
+                style={{ textAlign: "left", color: "#1a1a1a", padding: "24px" }}
+              >
+                <div style={{ fontSize: 13, color: "#888", marginBottom: 18 }}>
+                  NGO
+                </div>
+                <div
+                  style={{
+                    fontWeight: 700,
+                    fontSize: 22,
+                    color: "#1a1a1a",
+                    textAlign: "left",
+                  }}
+                >
+                  {ngoCount}
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+          <Col md={3} sm={6} xs={12} style={{ marginBottom: 32 }}>
+            <Card
+              style={{
+                borderRadius: "16px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              }}
+            >
+              <CardBody
+                style={{ textAlign: "left", color: "#1a1a1a", padding: "24px" }}
+              >
+                <div style={{ fontSize: 13, color: "#888", marginBottom: 18 }}>
+                  Locations
+                </div>
+                <div
+                  style={{
+                    fontWeight: 700,
+                    fontSize: 22,
+                    color: "#1a1a1a",
+                    textAlign: "left",
+                  }}
+                >
+                  {locations}
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+        <Card></Card>
+      </div>
     </Container>
   );
 };

@@ -2491,7 +2491,7 @@ export const getProjectOrganizations = async (
     // Get the project details
     const project = await db("project")
       .where({ id: projectId })
-      .select("id", "title", "organization_id", "multi_ngo")
+      .select("id", "title", "organization_id", "multi_ngo", "allocated")
       .first();
 
     if (!project) {
@@ -2534,13 +2534,31 @@ export const getProjectOrganizations = async (
           "user_id"
         );
 
-      // Fetch images for each organization
+      // Fetch images and allocated/budget for each organization
       organizations = await Promise.all(
         organizations.map(async (org) => {
           const image = await getUserImage(org.user_id);
+          let allocated = null;
+          let budget = null;
+
+          if (project.multi_ngo) {
+            // Fetch allocated and budget from project_organization
+            const po = await db("project_organization")
+              .where({ project_id: projectId, organization_id: org.id })
+              .select("allocated", "budget")
+              .first();
+            allocated = po?.allocated ?? null;
+            budget = po?.budget ?? null;
+          } else {
+            // Use allocated from project table
+            allocated = project.allocated ?? null;
+          }
+
           return {
             ...org,
             image: image?.filename || null,
+            allocated,
+            ...(project.multi_ngo ? { budget } : {}),
           };
         })
       );
