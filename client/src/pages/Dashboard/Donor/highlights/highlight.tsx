@@ -99,7 +99,7 @@ export default function Highlights({ currentState }: any, ...args: any) {
         />
         <CarouselCaption
           captionText={item.caption}
-          captionHeader={item.caption}
+          captionHeader={item.altText}
         />
       </CarouselItem>
     );

@@ -61,7 +61,7 @@ const Dashboard = () => {
     onSuccess: (res: any) => {
       const items = getDashBoxItems(role, res);
       setDashBoxItems(items);
-      setDonorImpacts(res?.activeProjectsCount > 0);
+      setDonorImpacts(res?.activeProjects.value > 0);
     },
     onError: () => {
       toast.error("Error getting Dashboard details");
@@ -99,21 +99,21 @@ const Dashboard = () => {
         setupTableAttributes(role);
 
         // Process data for chart - group by month (current year only)
-        const currentYear = new Date().getFullYear();
+        // const currentYear = new Date().getFullYear();
         const monthlyData: { [key: string]: number } = {};
         res.donations?.forEach((project: any) => {
           const date = new Date(project.createdAt);
           // Only include data from the current year
-          if (date.getFullYear() === currentYear) {
-            const monthYear = date.toLocaleString("default", {
-              month: "short",
-              year: "numeric",
-            });
-            if (!monthlyData[monthYear]) {
-              monthlyData[monthYear] = 0;
-            }
-            monthlyData[monthYear] += parseFloat(project.amount) || 0;
+          // if (date.getFullYear() === currentYear) {
+          const monthYear = date.toLocaleString("default", {
+            month: "short",
+            year: "numeric",
+          });
+          if (!monthlyData[monthYear]) {
+            monthlyData[monthYear] = 0;
           }
+          monthlyData[monthYear] += parseFloat(project.amount) || 0;
+          // }
         });
 
         // Convert to array and sort by date

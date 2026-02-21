@@ -4,13 +4,12 @@ import {
   BanknoteArrowDown,
   CircleDollarSign,
   Clock,
-  Upload,
   Wallet,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Button, Card, CardBody, Col, Container, Row } from "reactstrap";
+import { Card, CardBody, Col, Container, Row } from "reactstrap";
 import EmptyNGO from "../assets/images/emptyngo.svg";
 import Tables from "../components/tables";
 import useBackendService from "../services/backend_service";
@@ -211,7 +210,7 @@ const FundsDisbursement = () => {
             paddingRight: "60px",
           }}
         >
-          <Button
+          {/* <Button
             style={{
               backgroundColor: "#ffffff",
               color: "#1a1a1a",
@@ -254,7 +253,7 @@ const FundsDisbursement = () => {
             }}
           >
             Allocate Funds
-          </Button>
+          </Button> */}
         </Col>
       </Row>
 

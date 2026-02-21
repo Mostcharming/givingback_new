@@ -237,7 +237,6 @@ const routes = [
   },
   {
     path: "/funding/:id",
-    // name: "Funding Detail",
     component: <FundingDetail />,
     layout: "/donor",
   },
