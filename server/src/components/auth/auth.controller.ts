@@ -2473,14 +2473,64 @@ export const createMilestone = async (
   }
 };
 
+// Helper to fetch organization details
+async function fetchOrganizationsWithDetails(
+  organizationIds: number[],
+  project: any,
+  projectId: number
+) {
+  if (!organizationIds.length) return [];
+
+  const organizations = await db("organizations")
+    .whereIn("id", organizationIds)
+    .select(
+      "id",
+      "name",
+      "phone",
+      "website",
+      "interest_area",
+      "cac",
+      "active",
+      "is_verified",
+      "user_id"
+    );
+
+  return Promise.all(
+    organizations.map(async (org) => {
+      const image = await getUserImage(org.user_id);
+      let allocated = null;
+      let budget = null;
+
+      if (project.multi_ngo) {
+        const po = await db("project_organization")
+          .where({ project_id: projectId, organization_id: org.id })
+          .select("budget")
+          .first();
+        allocated = po?.allocated ?? null;
+        budget = po?.budget ?? null;
+      } else {
+        allocated = project.allocated ?? null;
+      }
+
+      return {
+        ...org,
+        image: image?.filename || null,
+        allocated,
+        ...(project.multi_ngo ? { budget } : {}),
+      };
+    })
+  );
+}
+
 export const getProjectOrganizations = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
     const { projectId } = req.params;
+    const idNum = Number(projectId);
 
-    if (!projectId || isNaN(Number(projectId))) {
+    if (!projectId || isNaN(idNum)) {
       res.status(400).json({
         status: "fail",
         error: "Invalid or missing project ID",
@@ -2488,9 +2538,8 @@ export const getProjectOrganizations = async (
       return;
     }
 
-    // Get the project details
     const project = await db("project")
-      .where({ id: projectId })
+      .where({ id: idNum })
       .select("id", "title", "organization_id", "multi_ngo", "allocated")
       .first();
 
@@ -2503,75 +2552,30 @@ export const getProjectOrganizations = async (
     }
 
     let organizationIds: number[] = [];
-
-    // If multi_ngo is true, get organizations from project_organization table
     if (project.multi_ngo) {
       const projectOrganizations = await db("project_organization")
-        .where({ project_id: projectId })
+        .where({ project_id: idNum })
         .select("organization_id");
-
       organizationIds = projectOrganizations.map((po) => po.organization_id);
     } else if (project.organization_id) {
-      // If single organization, use the organization_id from projects table
       organizationIds = [project.organization_id];
     }
 
-    // Get organization details
-    let organizations: any[] = [];
-
-    if (organizationIds.length > 0) {
-      organizations = await db("organizations")
-        .whereIn("id", organizationIds)
-        .select(
-          "id",
-          "name",
-          "phone",
-          "website",
-          "interest_area",
-          "cac",
-          "active",
-          "is_verified",
-          "user_id"
-        );
-
-      // Fetch images and allocated/budget for each organization
-      organizations = await Promise.all(
-        organizations.map(async (org) => {
-          const image = await getUserImage(org.user_id);
-          let allocated = null;
-          let budget = null;
-
-          if (project.multi_ngo) {
-            // Fetch allocated and budget from project_organization
-            const po = await db("project_organization")
-              .where({ project_id: projectId, organization_id: org.id })
-              .select("allocated", "budget")
-              .first();
-            allocated = po?.allocated ?? null;
-            budget = po?.budget ?? null;
-          } else {
-            // Use allocated from project table
-            allocated = project.allocated ?? null;
-          }
-
-          return {
-            ...org,
-            image: image?.filename || null,
-            allocated,
-            ...(project.multi_ngo ? { budget } : {}),
-          };
-        })
-      );
-    }
+    const organizations = await fetchOrganizationsWithDetails(
+      organizationIds,
+      project,
+      idNum
+    );
 
     res.status(200).json({
       status: "success",
-      projectId: projectId,
+      projectId: project.id,
       projectTitle: project.title,
       multiNgo: project.multi_ngo,
       organizationCount: organizations.length,
       data: organizations,
     });
+    return;
   } catch (error: any) {
     console.error("Get project organizations error:", error);
     res.status(500).json({
@@ -2579,6 +2583,7 @@ export const getProjectOrganizations = async (
       error: "An error occurred while fetching project organizations",
       details: error instanceof Error ? error.message : "Unknown error",
     });
+    return;
   }
 };
 
