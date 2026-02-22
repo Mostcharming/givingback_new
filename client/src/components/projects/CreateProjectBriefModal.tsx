@@ -31,7 +31,7 @@ export const CreateProjectBriefModal: React.FC<
     title: "",
     category: "",
     description: "",
-    budget: 0,
+    budget: "",
     deadline: "",
     state: "",
     lga: "",
@@ -111,7 +111,7 @@ export const CreateProjectBriefModal: React.FC<
       title: "",
       category: "",
       description: "",
-      budget: 0,
+      budget: "",
       deadline: "",
       state: "",
       lga: "",
@@ -137,7 +137,7 @@ export const CreateProjectBriefModal: React.FC<
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "budget" ? value.replace(/\D/g, "") : value,
     }));
   };
 
@@ -214,7 +214,7 @@ export const CreateProjectBriefModal: React.FC<
       toast.error("Please enter project description");
       return false;
     }
-    if (!formData.budget || formData.budget <= 0) {
+    if (!formData.budget || Number(formData.budget) <= 0) {
       toast.error("Please enter budget amount");
       return false;
     }
@@ -247,7 +247,7 @@ export const CreateProjectBriefModal: React.FC<
       title: formData.title.trim(),
       category: formData.category,
       description: formData.description.trim(),
-      budget: formData.budget,
+      budget: Number(formData.budget),
       deadline: formData.deadline,
       state: formData.state,
       lga: formData.lga,
@@ -276,7 +276,7 @@ export const CreateProjectBriefModal: React.FC<
       title: formData.title.trim(),
       category: formData.category,
       description: formData.description.trim(),
-      budget: formData.budget,
+      budget: Number(formData.budget),
       deadline: formData.deadline,
       state: formData.state,
       lga: formData.lga,

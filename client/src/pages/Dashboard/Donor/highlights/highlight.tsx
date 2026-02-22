@@ -8,6 +8,7 @@ import {
   CarouselIndicators,
   CarouselItem,
 } from "reactstrap";
+import placeholder from "../../../../assets/images/home/GivingBackNG-logo.svg";
 import Loading from "../../../../components/home/loading";
 import useBackendService from "../../../../services/backend_service";
 
@@ -20,7 +21,7 @@ export default function Highlights({ currentState }: any, ...args: any) {
     src:
       project?.projectImages && project.projectImages.length > 0
         ? project.projectImages[0].image
-        : "https://picsum.photos/1200/400",
+        : placeholder,
     altText: project?.title || "Project image",
     caption: project?.description || "",
     key: project?.id || Math.random(),

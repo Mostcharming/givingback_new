@@ -1495,11 +1495,36 @@ export const createProject = async (
       return;
     }
 
+    // Ensure deadline is at least one month ahead
     const deadlineDate = new Date(deadline);
+    const now = new Date();
+    const oneMonthLater = new Date(now);
+    oneMonthLater.setMonth(now.getMonth() + 1);
     if (isNaN(deadlineDate.getTime())) {
       res.status(400).json({
         status: "fail",
         error: "Deadline must be a valid date (YYYY-MM-DD)",
+      });
+      return;
+    }
+    if (deadlineDate < oneMonthLater) {
+      res.status(400).json({
+        status: "fail",
+        error: "Deadline must be at least one month from today.",
+      });
+      return;
+    }
+
+    // Ensure user has enough balance
+    const wallet = await getOrCreateWallet(userId);
+    if (
+      !wallet ||
+      typeof wallet.balance !== "number" ||
+      wallet.balance < cost
+    ) {
+      res.status(400).json({
+        status: "fail",
+        error: "Insufficient wallet balance to create this project.",
       });
       return;
     }

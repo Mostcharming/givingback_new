@@ -525,7 +525,8 @@ const Dashboard = () => {
                     className="fw-normal pl-2 pt-2"
                     style={{ fontSize: "1.5rem", color: "#333" }}
                   >
-                    CSR Spend Trend ({new Date().getFullYear()})
+                    CSR Spend Trend
+                    {/* ({new Date().getFullYear()}) */}
                   </h5>
                   <hr style={{ borderColor: "#e5e5e5" }} />
                   {chartData.length > 0 ? (
