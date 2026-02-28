@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaCheckCircle, FaEye, FaEyeSlash } from "react-icons/fa";
+import { toast } from "react-toastify";
 import {
   Button,
   CardBody,
@@ -10,7 +11,6 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupText,
-  Label,
 } from "reactstrap";
 
 export default function Security() {
@@ -24,13 +24,26 @@ export default function Security() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  // Password criteria checks
+  const hasUppercase = /[A-Z]/.test(form.newPassword);
+  const hasLowercase = /[a-z]/.test(form.newPassword);
+  const hasNumber = /[0-9]/.test(form.newPassword);
+  const hasSpecial = /[^A-Za-z0-9]/.test(form.newPassword);
+  const allCriteriaMet =
+    hasUppercase && hasLowercase && hasNumber && hasSpecial;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (form.newPassword !== form.confirmNewPassword) {
+      toast.error("New password and confirm password do not match.");
+      return;
+    }
     // Add password change logic here
+    toast.success("Password changed successfully!");
   };
 
   return (
@@ -42,7 +55,6 @@ export default function Security() {
           <div className="row">
             <div className="col-md-6">
               <FormGroup className="mb-3">
-                <Label for="currentPassword">Current Password</Label>
                 <InputGroup className="input-group-alternative">
                   <Input
                     style={{ backgroundColor: "#F2F2F2", height: "100%" }}
@@ -70,6 +82,11 @@ export default function Security() {
               </FormGroup>
             </div>
             <div className="col-md-3"></div>
+            <div className="col-md-3"></div>
+          </div>
+          <div className="row">
+            <div className="col-md-6">
+              <FormGroup className="mb-3 mt-3">
                 <InputGroup className="input-group-alternative">
                   <Input
                     style={{ backgroundColor: "#F2F2F2", height: "100%" }}
@@ -97,8 +114,7 @@ export default function Security() {
               </FormGroup>
             </div>
             <div className="col-md-6">
-              <FormGroup className="mb-4">
-                <Label for="confirmNewPassword">Confirm New Password</Label>
+              <FormGroup className="mb-4 mt-3">
                 <InputGroup className="input-group-alternative">
                   <Input
                     style={{ backgroundColor: "#F2F2F2", height: "100%" }}
@@ -126,15 +142,94 @@ export default function Security() {
               </FormGroup>
             </div>
           </div>
+          <div className="row mb-4">
+            <div className="col-md-6 d-flex flex-column align-items-start">
+              <span style={{ fontSize: "15px", fontWeight: 500 }}>
+                Password Criteria
+              </span>
+              <div className="mt-2">
+                <div
+                  className="d-flex align-items-center mb-1"
+                  style={{
+                    fontSize: "14px",
+                    color: hasUppercase ? "#02a95c" : "#6c757d",
+                    fontWeight: hasUppercase ? 600 : 400,
+                  }}
+                >
+                  <FaCheckCircle
+                    style={{
+                      marginRight: 8,
+                      color: hasUppercase ? "#02a95c" : "#ccc",
+                    }}
+                  />
+                  Must contain uppercase
+                </div>
+                <div
+                  className="d-flex align-items-center"
+                  style={{
+                    fontSize: "14px",
+                    color: hasLowercase ? "#02a95c" : "#6c757d",
+                    fontWeight: hasLowercase ? 600 : 400,
+                  }}
+                >
+                  <FaCheckCircle
+                    style={{
+                      marginRight: 8,
+                      color: hasLowercase ? "#02a95c" : "#ccc",
+                    }}
+                  />
+                  Must contain lowercase
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 d-flex flex-column align-items-start mt-md-4 mt-2">
+              <div
+                className="d-flex align-items-center mb-1"
+                style={{
+                  fontSize: "14px",
+                  color: hasNumber ? "#02a95c" : "#6c757d",
+                  fontWeight: hasNumber ? 600 : 400,
+                }}
+              >
+                <FaCheckCircle
+                  style={{
+                    marginRight: 8,
+                    color: hasNumber ? "#02a95c" : "#ccc",
+                  }}
+                />
+                Must contain number
+              </div>
+              <div
+                className="d-flex align-items-center"
+                style={{
+                  fontSize: "14px",
+                  color: hasSpecial ? "#02a95c" : "#6c757d",
+                  fontWeight: hasSpecial ? 600 : 400,
+                }}
+              >
+                <FaCheckCircle
+                  style={{
+                    marginRight: 8,
+                    color: hasSpecial ? "#02a95c" : "#ccc",
+                  }}
+                />
+                Must contain special character (including punctuation)
+              </div>
+            </div>
+          </div>
           <Button
             type="submit"
             color="success"
             style={{
-              backgroundColor: "#02a95c",
-              borderColor: "#02a95c",
+              backgroundColor: allCriteriaMet ? "#02a95c" : "#EEEEEE",
+              borderColor: allCriteriaMet ? "#02a95c" : "#EEEEEE",
+              color: allCriteriaMet ? "white" : "#333",
               padding: "0.75rem 2rem",
               fontWeight: "500",
+              cursor: allCriteriaMet ? "pointer" : "not-allowed",
+              opacity: allCriteriaMet ? 1 : 0.7,
             }}
+            disabled={!allCriteriaMet}
           >
             Change Password
           </Button>
