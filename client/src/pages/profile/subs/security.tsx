@@ -11,7 +11,10 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupText,
+  Modal,
+  ModalBody,
 } from "reactstrap";
+import useBackendService from "../../../services/backend_service";
 
 export default function Security() {
   const [form, setForm] = useState({
@@ -23,6 +26,29 @@ export default function Security() {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const { mutate: changePassword } = useBackendService(
+    "/auth/changepassword", // adjust endpoint if needed
+    "POST",
+    {
+      onSuccess: () => {
+        setShowSuccessModal(true);
+        toast.success("Password changed successfully!");
+        setForm({
+          currentPassword: "",
+          newPassword: "",
+          confirmNewPassword: "",
+        });
+      },
+      onError: (error) => {
+        const err = error as { response?: { data?: { message?: string } } };
+        const errorMessage =
+          err?.response?.data?.message || "Failed to change password";
+        toast.error(errorMessage);
+      },
+    }
+  );
 
   // Password criteria checks
   const hasUppercase = /[A-Z]/.test(form.newPassword);
@@ -42,8 +68,10 @@ export default function Security() {
       toast.error("New password and confirm password do not match.");
       return;
     }
-    // Add password change logic here
-    toast.success("Password changed successfully!");
+    changePassword({
+      oldPassword: form.currentPassword,
+      newPassword: form.newPassword,
+    });
   };
 
   return (
@@ -235,6 +263,77 @@ export default function Security() {
           </Button>
         </Form>
       </CardBody>
+      {/* Success Modal */}
+      <Modal
+        isOpen={showSuccessModal}
+        toggle={() => setShowSuccessModal(false)}
+        centered
+      >
+        <ModalBody
+          className="text-center"
+          style={{
+            backgroundColor: "white",
+            color: "black",
+            display: "flex",
+            justifyContent: "space-around",
+            flexDirection: "column",
+          }}
+        >
+          <div className="p-3">
+            <svg
+              width="112"
+              height="112"
+              viewBox="0 0 112 112"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g clipPath="url(#clip0_45_18996)">
+                <path
+                  d="M56 112C86.9279 112 112 86.9279 112 56C112 25.0721 86.9279 0 56 0C25.0721 0 0 25.0721 0 56C0 86.9279 25.0721 112 56 112Z"
+                  fill="#4CAF50"
+                />
+                <path
+                  d="M41.6904 81.2616L70.4854 110.057C94.334 103.697 112 81.9682 112 55.9998C112 55.4698 112 54.9398 112 54.4099L89.3876 33.5645L41.6904 81.2616Z"
+                  fill="#128330"
+                />
+                <path
+                  d="M57.4128 68.543C59.886 71.0162 59.886 75.256 57.4128 77.7292L52.2898 82.8522C49.8166 85.3254 45.5769 85.3254 43.1037 82.8522L20.6684 60.2402C18.1952 57.767 18.1952 53.5273 20.6684 51.0541L25.7914 45.9311C28.2646 43.4579 32.5043 43.4579 34.9775 45.9311L57.4128 68.543Z"
+                  fill="white"
+                />
+                <path
+                  d="M77.022 29.5014C79.4952 27.0282 83.7349 27.0282 86.2081 29.5014L91.3311 34.6244C93.8043 37.0976 93.8043 41.3373 91.3311 43.8105L52.4668 82.4982C49.9936 84.9714 45.7538 84.9714 43.2807 82.4982L38.1576 77.3752C35.6844 74.902 35.6844 70.6623 38.1576 68.1891L77.022 29.5014Z"
+                  fill="white"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_45_18996">
+                  <rect width="112" height="112" fill="white" />
+                </clipPath>
+              </defs>
+            </svg>
+          </div>
+          <h4 className="p-3">Password Updated Successfully</h4>
+          <p>
+            Your password has been changed. You can now log in securely with
+            your new credentials
+          </p>
+          <div className="text-center">
+            <Button
+              className="p-3 mt-5 mb-3"
+              style={{
+                border: "none",
+                width: "-webkit-fill-available",
+                background: "#128330",
+                color: "white",
+              }}
+              type="button"
+              onClick={() => setShowSuccessModal(false)}
+            >
+              Continue
+            </Button>
+          </div>
+        </ModalBody>
+      </Modal>
     </Container>
   );
 }

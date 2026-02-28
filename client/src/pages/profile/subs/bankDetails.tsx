@@ -438,8 +438,11 @@ export default function BankDetails() {
               </defs>
             </svg>
           </div>
-          <h4 className="p-3">Bank Account Linked Successfully</h4>
-          <p>Your bank account has been linked and is ready to use.</p>
+          <h4 className="p-3">Account Linked Successfully</h4>
+          <p>
+            Your bank account has been linked securely. You're now set to
+            receive and manage funds seamlessly.
+          </p>
           <div className="text-center">
             <Button
               className="p-3 mt-5 mb-3"
