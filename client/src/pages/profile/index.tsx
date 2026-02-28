@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useContent } from "../../services/useContext";
 import BankDetails from "./subs/bankDetails";
 import ProfileUpdateForm from "./subs/profile";
+import Security from "./subs/security";
 
 function Profile() {
   const { authState } = useContent();
@@ -28,7 +29,7 @@ function Profile() {
       case "Bank Details":
         return <BankDetails />;
       case "Security":
-        return <div></div>;
+        return <Security />;
       case "Notifications":
         return <div></div>;
       case "Support":
