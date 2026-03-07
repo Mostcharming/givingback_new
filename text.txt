@@ -1,3 +1,4 @@
+check if the wallet is funded,
 make sure the error message when creating a project is shown,
 save draft not checking money
 check money on publish
@@ -5,3 +6,10 @@ check money on publish
 if no money,
 save as draft,
 navigate user to wallet page
+
+remove from the wallet, add to reserved balance
+
+if no money show error modal to save as draft
+navigate to funding page, 
+
+move the 
