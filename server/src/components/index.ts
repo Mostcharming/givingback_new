@@ -2,6 +2,7 @@ import express from "express";
 import { secureLogin } from "../middleware/auth";
 import adminRoute from "./admin/admin.routes";
 import authRoute from "./auth/auth.routes";
+import chatRoute from "./chat/chat.routes";
 import communityRoute from "./community/community.routes";
 import contactRoute from "./contact_us/contact.routes";
 import donorRoute from "./donor/donor.routes";
@@ -17,6 +18,7 @@ router.use("/", supportRoute);
 router.use("/", landingRoute);
 router.use("/community", communityRoute);
 
+router.use("/chats", secureLogin, chatRoute);
 router.use("/donor", secureLogin, donorRoute);
 router.use("/ngo", secureLogin, ngoRoute);
 router.use("/admin", secureLogin, adminRoute);
