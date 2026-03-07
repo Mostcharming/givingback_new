@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MessageCircle, Search, Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Image } from "react-bootstrap";
@@ -141,7 +142,10 @@ function MessageDonor() {
 
   return (
     <>
-      <div className="d-flex vh-100" style={{ backgroundColor: "#f5f7fa" }}>
+      <div
+        className="d-flex"
+        style={{ backgroundColor: "#f5f7fa", height: "90vh" }}
+      >
         {/* Left Sidebar */}
         <div
           className="bg-white p-3 border-end d-flex flex-column"
@@ -306,9 +310,15 @@ function MessageDonor() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-grow-1 d-flex flex-column">
+        <div
+          className="flex-grow-1 d-flex flex-column"
+          style={{ minHeight: 0 }}
+        >
           {!selectedChat ? (
-            <div className="flex-grow-1 d-flex align-items-center justify-content-center">
+            <div
+              className="flex-grow-1 d-flex align-items-center justify-content-center"
+              style={{ minHeight: 0 }}
+            >
               <div className="text-center">
                 <div
                   className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"

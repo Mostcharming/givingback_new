@@ -218,7 +218,6 @@ export const getChatMessages = async (
   try {
     const userId = (req.user as User)?.id;
     const { chatId } = req.params;
-    const { page = 1, limit = 50 } = req.query;
 
     if (!userId || !chatId) {
       res.status(400).json({ error: "Missing required parameters" });
@@ -242,22 +241,9 @@ export const getChatMessages = async (
       return;
     }
 
-    const pageNum = Number(page) || 1;
-    const limitNum = Number(limit) || 50;
-    const offset = (pageNum - 1) * limitNum;
-
-    const [totalCount] = await db("chat_message")
-      .where("chat_id", chatId)
-      .count("id as total");
-
-    const total = Number(totalCount?.total) || 0;
-    const totalPages = Math.ceil(total / limitNum);
-
     const messages = await db("chat_message")
       .where("chat_id", chatId)
       .orderBy("created_at", "asc")
-      .limit(limitNum)
-      .offset(offset)
       .select(
         "id",
         "sender_user_id",
@@ -273,12 +259,6 @@ export const getChatMessages = async (
     res.status(200).json({
       message: "Messages fetched successfully",
       messages,
-      pagination: {
-        currentPage: pageNum,
-        totalPages,
-        totalMessages: total,
-        limit: limitNum,
-      },
     });
   } catch (error) {
     console.error(error);
