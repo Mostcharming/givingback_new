@@ -1,0 +1,7 @@
+make sure the error message when creating a project is shown,
+save draft not checking money
+check money on publish
+
+if no money,
+save as draft,
+navigate user to wallet page
