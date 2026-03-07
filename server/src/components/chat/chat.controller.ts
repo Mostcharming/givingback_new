@@ -2,10 +2,6 @@ import { NextFunction, Response } from "express";
 import db from "../../config";
 import { User, UserRequest } from "../../interfaces";
 
-/**
- * Get all chats for the logged-in user
- * Updates unread message counts based on actual messages in the database
- */
 export const getChats = async (
   req: UserRequest,
   res: Response,
@@ -20,17 +16,14 @@ export const getChats = async (
       return;
     }
 
-    // Get all chats where user is either participant1 or participant2
     const chats = await db("chat")
       .where("participant1_user_id", userId)
       .orWhere("participant2_user_id", userId);
 
-    // Enrich chats with message data and update unread counts
     const enrichedChats = await Promise.all(
       chats.map(async (chat) => {
         const isParticipant1 = chat.participant1_user_id === userId;
 
-        // Get unread messages for this user in this chat
         const senderUserId = isParticipant1
           ? chat.participant2_user_id
           : chat.participant1_user_id;
@@ -39,14 +32,13 @@ export const getChats = async (
           .where({
             chat_id: chat.id,
             sender_user_id: senderUserId,
-            status: "sent", // Messages not read yet
+            status: "sent",
           })
           .count("id as count")
           .first();
 
         const unreadCount = unreadMessages?.count || 0;
 
-        // Update the unread count in the database
         const updateField = isParticipant1
           ? "participant1_unread_count"
           : "participant2_unread_count";
@@ -55,7 +47,6 @@ export const getChats = async (
           .where("id", chat.id)
           .update({ [updateField]: unreadCount });
 
-        // Get the other participant's details
         const otherParticipantId = isParticipant1
           ? chat.participant2_user_id
           : chat.participant1_user_id;
@@ -64,12 +55,14 @@ export const getChats = async (
           ? chat.participant2_user_type
           : chat.participant1_user_type;
 
-        const otherParticipant = await db("users")
-          .where("id", otherParticipantId)
-          .select("id", "email")
-          .first();
+        // Only fetch user if otherParticipantId is not null (admin can have null ID)
+        const otherParticipant = otherParticipantId
+          ? await db("users")
+              .where("id", otherParticipantId)
+              .select("id", "email")
+              .first()
+          : null;
 
-        // Get last message
         const lastMessage = await db("chat_message")
           .where("chat_id", chat.id)
           .orderBy("created_at", "desc")
@@ -99,7 +92,6 @@ export const getChats = async (
       })
     );
 
-    // Sort by most recent message
     enrichedChats.sort(
       (a, b) =>
         new Date(b.lastMessage?.timestamp || b.updatedAt).getTime() -
@@ -119,9 +111,6 @@ export const getChats = async (
   }
 };
 
-/**
- * Get or create a chat between two users
- */
 export const getOrCreateChat = async (
   req: UserRequest,
   res: Response,
@@ -132,21 +121,47 @@ export const getOrCreateChat = async (
     const userRole = (req.user as User)?.role;
     const { otherUserId, otherUserType } = req.body;
 
-    if (!userId || !userRole || !otherUserId || !otherUserType) {
+    if (!userId || !userRole || !otherUserType) {
       res.status(400).json({
         error:
-          "Missing required fields: otherUserId and otherUserType required",
+          "Missing required fields: otherUserType is required, otherUserId is optional for admin",
       });
       return;
     }
 
-    // Ensure consistent ordering (smaller ID first)
-    const [participant1Id, participant1Type, participant2Id, participant2Type] =
-      userId < otherUserId
-        ? [userId, userRole, otherUserId, otherUserType]
-        : [otherUserId, otherUserType, userId, userRole];
+    // For admin chats, otherUserId can be null
+    if (otherUserType !== "admin" && !otherUserId) {
+      res.status(400).json({
+        error: "otherUserId is required for non-admin chats",
+      });
+      return;
+    }
 
-    // Check if chat already exists
+    // Determine participant order - admin is always participant2 with potentially null ID
+    let participant1Id, participant1Type, participant2Id, participant2Type;
+
+    if (otherUserType === "admin") {
+      // Admin is always participant2 with potentially null ID
+      participant1Id = userId;
+      participant1Type = userRole;
+      participant2Id = otherUserId || null;
+      participant2Type = otherUserType;
+    } else {
+      // Regular ordering for non-admin participants
+      const shouldSwap = userId < otherUserId;
+      if (shouldSwap) {
+        participant1Id = userId;
+        participant1Type = userRole;
+        participant2Id = otherUserId;
+        participant2Type = otherUserType;
+      } else {
+        participant1Id = otherUserId;
+        participant1Type = otherUserType;
+        participant2Id = userId;
+        participant2Type = userRole;
+      }
+    }
+
     let chat = await db("chat")
       .where({
         participant1_user_id: participant1Id,
@@ -155,7 +170,6 @@ export const getOrCreateChat = async (
       .first();
 
     if (!chat) {
-      // Create new chat
       const [chatId] = await db("chat").insert({
         participant1_user_id: participant1Id,
         participant1_user_type: participant1Type,
@@ -196,9 +210,6 @@ export const getOrCreateChat = async (
   }
 };
 
-/**
- * Get messages for a specific chat
- */
 export const getChatMessages = async (
   req: UserRequest,
   res: Response,
@@ -235,7 +246,6 @@ export const getChatMessages = async (
     const limitNum = Number(limit) || 50;
     const offset = (pageNum - 1) * limitNum;
 
-    // Get total message count
     const [totalCount] = await db("chat_message")
       .where("chat_id", chatId)
       .count("id as total");
@@ -243,7 +253,6 @@ export const getChatMessages = async (
     const total = Number(totalCount?.total) || 0;
     const totalPages = Math.ceil(total / limitNum);
 
-    // Get messages (paginated, ordered by creation date ascending)
     const messages = await db("chat_message")
       .where("chat_id", chatId)
       .orderBy("created_at", "asc")
@@ -280,9 +289,6 @@ export const getChatMessages = async (
   }
 };
 
-/**
- * Send a message in a chat
- */
 export const sendMessage = async (
   req: UserRequest,
   res: Response,
@@ -319,7 +325,6 @@ export const sendMessage = async (
       return;
     }
 
-    // Insert the message
     const [messageId] = await db("chat_message").insert({
       chat_id: chatId,
       sender_user_id: userId,
@@ -329,7 +334,6 @@ export const sendMessage = async (
       status: "sent",
     });
 
-    // Increment unread count for other participant
     const otherParticipantField = isParticipant1
       ? "participant2_unread_count"
       : "participant1_unread_count";
@@ -363,9 +367,6 @@ export const sendMessage = async (
   }
 };
 
-/**
- * Mark message as read
- */
 export const markMessageAsRead = async (
   req: UserRequest,
   res: Response,
@@ -388,7 +389,6 @@ export const markMessageAsRead = async (
       return;
     }
 
-    // Verify user is a participant in the chat
     const chat = await db("chat").where("id", chatMessage.chat_id).first();
 
     if (!chat) {
@@ -405,19 +405,16 @@ export const markMessageAsRead = async (
       return;
     }
 
-    // Only mark as read if the current user is not the sender
     if (chatMessage.sender_user_id === userId) {
       res.status(400).json({ error: "Cannot mark own message as read" });
       return;
     }
 
-    // Update message status and read timestamp
     await db("chat_message").where("id", messageId).update({
       status: "read",
       read_at: new Date(),
     });
 
-    // Decrease unread count for the reading user
     const isParticipant1 = chat.participant1_user_id === userId;
     const unreadField = isParticipant1
       ? "participant1_unread_count"
@@ -437,9 +434,6 @@ export const markMessageAsRead = async (
   }
 };
 
-/**
- * Mark all messages in a chat as read
- */
 export const markChatAsRead = async (
   req: UserRequest,
   res: Response,
@@ -471,13 +465,11 @@ export const markChatAsRead = async (
       return;
     }
 
-    // Get the other participant ID
     const otherParticipantId =
       chat.participant1_user_id === userId
         ? chat.participant2_user_id
         : chat.participant1_user_id;
 
-    // Get count of unread messages from other participant
     const [unreadCount] = await db("chat_message")
       .where({
         chat_id: chatId,
@@ -486,7 +478,6 @@ export const markChatAsRead = async (
       })
       .count("id as total");
 
-    // Update all unread messages to read
     await db("chat_message")
       .where({
         chat_id: chatId,
@@ -498,7 +489,6 @@ export const markChatAsRead = async (
         read_at: new Date(),
       });
 
-    // Reset unread count for this participant
     const unreadField =
       chat.participant1_user_id === userId
         ? "participant1_unread_count"
@@ -521,9 +511,6 @@ export const markChatAsRead = async (
   }
 };
 
-/**
- * Delete a message
- */
 export const deleteMessage = async (
   req: UserRequest,
   res: Response,
@@ -538,7 +525,6 @@ export const deleteMessage = async (
       return;
     }
 
-    // Get the message
     const chatMessage = await db("chat_message").where("id", messageId).first();
 
     if (!chatMessage) {
@@ -546,13 +532,11 @@ export const deleteMessage = async (
       return;
     }
 
-    // Only the sender can delete their message
     if (chatMessage.sender_user_id !== userId) {
       res.status(403).json({ error: "You can only delete your own messages" });
       return;
     }
 
-    // Delete the message
     await db("chat_message").where("id", messageId).delete();
 
     res.status(200).json({
@@ -567,9 +551,6 @@ export const deleteMessage = async (
   }
 };
 
-/**
- * Delete a chat
- */
 export const deleteChat = async (
   req: UserRequest,
   res: Response,
@@ -601,10 +582,8 @@ export const deleteChat = async (
       return;
     }
 
-    // Delete all messages in the chat
     await db("chat_message").where("chat_id", chatId).delete();
 
-    // Delete the chat
     await db("chat").where("id", chatId).delete();
 
     res.status(200).json({
