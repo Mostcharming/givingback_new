@@ -3,6 +3,7 @@ import { useContent } from "../../services/useContext";
 import BankDetails from "./subs/bankDetails";
 import ProfileUpdateForm from "./subs/profile";
 import Security from "./subs/security";
+import Support from "./subs/support";
 
 function Profile() {
   const { authState } = useContent();
@@ -10,13 +11,7 @@ function Profile() {
 
   const TABS =
     role === "donor" || role === "corporate"
-      ? [
-          "Profile Information",
-          "Bank Details",
-          "Security",
-          "Notifications",
-          "Support",
-        ]
+      ? ["Profile Information", "Bank Details", "Security", "Support"]
       : ["Profile Information"];
 
   const [activeTab, setActiveTab] = useState("Profile Information");
@@ -30,10 +25,9 @@ function Profile() {
         return <BankDetails />;
       case "Security":
         return <Security />;
-      case "Notifications":
-        return <div></div>;
+
       case "Support":
-        return <div></div>;
+        return <Support />;
       default:
         return null;
     }
