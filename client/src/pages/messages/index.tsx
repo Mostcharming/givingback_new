@@ -61,7 +61,6 @@ function MessageDonor() {
     selectedChat?.id ? `/chats/${selectedChat.id}/messages` : "/chats",
     "POST"
   );
-  // Load chats on mount
   useEffect(() => {
     const loadChats = async () => {
       try {
@@ -129,7 +128,6 @@ function MessageDonor() {
     }
   };
 
-  // Filter chats based on search (exclude admin chats since they're shown separately)
   const filteredChats = chats.filter((chat) => {
     const displayName =
       chat.otherParticipant?.userId || chat.otherParticipant?.userType;
@@ -144,7 +142,7 @@ function MessageDonor() {
     <>
       <div
         className="d-flex"
-        style={{ backgroundColor: "#f5f7fa", height: "90vh" }}
+        style={{ backgroundColor: "#f5f7fa", height: "95vh" }}
       >
         {/* Left Sidebar */}
         <div
@@ -427,10 +425,16 @@ function MessageDonor() {
                 className="p-4 border-top"
                 style={{
                   borderColor: "#e8ebf2",
-                  backgroundColor: "white",
+                  backgroundColor: "#f5f7fa",
                 }}
               >
-                <div className="d-flex gap-2">
+                <div
+                  style={{
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "flex-end",
+                  }}
+                >
                   <Input
                     type="textarea"
                     placeholder="Type your message..."
@@ -445,23 +449,31 @@ function MessageDonor() {
                     style={{
                       borderColor: "#e8ebf2",
                       borderRadius: "8px",
-                      padding: "10px 12px",
+                      padding: "10px 48px 10px 12px",
                       minHeight: "40px",
                       maxHeight: "100px",
                       resize: "none",
+                      backgroundColor: "white",
+                      paddingRight: "48px",
                     }}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!messageText.trim()}
                     style={{
+                      position: "absolute",
+                      right: "8px",
+                      bottom: "8px",
                       backgroundColor: "#128330",
                       color: "white",
                       border: "none",
-                      borderRadius: "8px",
-                      padding: "10px 16px",
+                      borderRadius: "6px",
+                      padding: "8px 12px",
                       cursor: messageText.trim() ? "pointer" : "not-allowed",
                       opacity: messageText.trim() ? 1 : 0.5,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
                     <Send size={16} />

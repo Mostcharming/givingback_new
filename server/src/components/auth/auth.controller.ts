@@ -312,6 +312,11 @@ const getOrCreateWallet = async (userId: number) => {
     wallet = await db("wallet").where({ user_id: userId }).first();
   }
 
+  // Ensure balance is a number
+  if (wallet && typeof wallet.balance === "string") {
+    wallet.balance = parseFloat(wallet.balance);
+  }
+
   return wallet;
 };
 
@@ -1517,6 +1522,7 @@ export const createProject = async (
 
     // Ensure user has enough balance
     const wallet = await getOrCreateWallet(userId);
+    console.log(wallet);
     if (
       !wallet ||
       typeof wallet.balance !== "number" ||
