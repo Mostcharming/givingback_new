@@ -7,11 +7,13 @@ import contactRoute from "./contact_us/contact.routes";
 import donorRoute from "./donor/donor.routes";
 import landingRoute from "./landing/landing.routes";
 import ngoRoute from "./ngo/ngo.routes";
+import supportRoute from "./support/support.routes";
 
 const router = express.Router();
 
 router.use("/auth", authRoute);
 router.use("/", contactRoute);
+router.use("/", supportRoute);
 router.use("/", landingRoute);
 router.use("/community", communityRoute);
 

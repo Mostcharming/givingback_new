@@ -2,12 +2,14 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { Button, Form, FormGroup, Input } from "reactstrap";
 import useBackendService from "../../../services/backend_service";
+import { useContent } from "../../../services/useContext";
 
 export default function Support() {
+  const { authState } = useContent();
   const [form, setForm] = useState({ title: "", content: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const sendSupportForm = useBackendService("/send_email", "POST", {
+  const sendSupportForm = useBackendService("/send_support", "POST", {
     onSuccess: () => {
       toast.success("Message sent successfully!");
       setIsSubmitting(false);
@@ -29,8 +31,11 @@ export default function Support() {
     e.preventDefault();
     setIsSubmitting(true);
     sendSupportForm({
+      name: authState.user?.name || "",
+      email: authState.user?.email || "",
       subject: form.title,
       message: form.content,
+      phoneNumber: authState.user?.phoneNumber || "",
     });
   };
 
