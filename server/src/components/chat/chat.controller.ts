@@ -144,7 +144,7 @@ export const getOrCreateChat = async (
       // Admin is always participant2 with potentially null ID
       participant1Id = userId;
       participant1Type = userRole;
-      participant2Id = otherUserId || null;
+      participant2Id = null;
       participant2Type = otherUserType;
     } else {
       // Regular ordering for non-admin participants

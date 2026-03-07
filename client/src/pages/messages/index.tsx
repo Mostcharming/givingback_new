@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MessageCircle, Search, Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Image } from "react-bootstrap";
@@ -15,10 +14,11 @@ import { useContent } from "../../services/useContext";
 
 interface Chat {
   id: string;
-  participant1: { userId: string; userType: string };
-  participant2: { userId: string; userType: string };
-  unreadCounts: { participant1: number; participant2: number };
+  otherParticipant: { userId: string | null; userType: string };
+  unreadCount: number;
+  lastMessage: string | null;
   createdAt: string;
+  updatedAt: string;
 }
 
 interface Message {
@@ -32,8 +32,11 @@ interface Message {
   createdAt: string;
 }
 
-const ADMIN_USER_ID = "1"; // You may need to adjust this based on your backend
 const ADMIN_USER_TYPE = "admin";
+
+const isAdminChat = (chat: Chat | null) => {
+  return chat?.otherParticipant?.userType === ADMIN_USER_TYPE;
+};
 
 function MessageDonor() {
   const { authState } = useContent();
@@ -43,15 +46,9 @@ function MessageDonor() {
   const [messageText, setMessageText] = useState("");
   const [searchText, setSearchText] = useState("");
 
-  // API Calls
   const fetchChatsAPI = useBackendService<{ chats: Chat[] }, any>(
     "/chats",
     "GET"
-  );
-
-  const getOrCreateChatAPI = useBackendService<{ chat: Chat }, any>(
-    "/chats",
-    "POST"
   );
 
   const fetchMessagesAPI = useBackendService<{ messages: Message[] }, any>(
@@ -63,7 +60,6 @@ function MessageDonor() {
     selectedChat?.id ? `/chats/${selectedChat.id}/messages` : "/chats",
     "POST"
   );
-
   // Load chats on mount
   useEffect(() => {
     const loadChats = async () => {
@@ -81,7 +77,6 @@ function MessageDonor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch messages when chat is selected
   useEffect(() => {
     if (selectedChat?.id) {
       const loadMessages = async () => {
@@ -98,29 +93,25 @@ function MessageDonor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedChat?.id]);
 
-  // Handle admin chat click
   const handleAdminChatClick = async () => {
     try {
-      const result = await getOrCreateChatAPI.mutateAsync({
-        otherUserId: ADMIN_USER_ID,
-        otherUserType: ADMIN_USER_TYPE,
-      });
-      setSelectedChat(result.chat);
-
-      // Fetch messages for the admin chat
-      const messagesResult = await fetchMessagesAPI.mutateAsync({});
-      setMessages(messagesResult.messages || []);
+      const adminChat = chats.find(
+        (chat) => chat.otherParticipant?.userType === ADMIN_USER_TYPE
+      );
+      if (adminChat) {
+        setSelectedChat(adminChat);
+        const messagesResult = await fetchMessagesAPI.mutateAsync({});
+        setMessages(messagesResult.messages || []);
+      }
     } catch (error) {
       console.error("Failed to get/create admin chat:", error);
     }
   };
 
-  // Handle regular chat click
   const handleChatClick = async (chat: Chat) => {
     setSelectedChat(chat);
   };
 
-  // Handle send message
   const handleSendMessage = async () => {
     if (!messageText.trim() || !selectedChat) return;
 
@@ -137,13 +128,15 @@ function MessageDonor() {
     }
   };
 
-  // Filter chats based on search
+  // Filter chats based on search (exclude admin chats since they're shown separately)
   const filteredChats = chats.filter((chat) => {
-    const otherParticipantId =
-      chat.participant1.userId === String(authState.user?.id)
-        ? chat.participant2.userId
-        : chat.participant1.userId;
-    return otherParticipantId.toLowerCase().includes(searchText.toLowerCase());
+    const displayName =
+      chat.otherParticipant?.userId || chat.otherParticipant?.userType;
+    const matchesSearch = (displayName || "")
+      .toString()
+      .toLowerCase()
+      .includes(searchText.toLowerCase());
+    return matchesSearch && chat.otherParticipant?.userType !== ADMIN_USER_TYPE;
   });
 
   return (
@@ -193,20 +186,15 @@ function MessageDonor() {
                 className="d-flex align-items-center p-3 rounded-2 cursor-pointer"
                 style={{
                   cursor: "pointer",
-                  backgroundColor:
-                    selectedChat?.participant2?.userId === ADMIN_USER_ID ||
-                    selectedChat?.participant1?.userId === ADMIN_USER_ID
-                      ? "#f1f2f7"
-                      : "transparent",
+                  backgroundColor: isAdminChat(selectedChat)
+                    ? "#f1f2f7"
+                    : "transparent",
                 }}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.backgroundColor = "#f1f2f7")
                 }
                 onMouseLeave={(e) => {
-                  if (
-                    selectedChat?.participant2?.userId !== ADMIN_USER_ID &&
-                    selectedChat?.participant1?.userId !== ADMIN_USER_ID
-                  ) {
+                  if (!isAdminChat(selectedChat)) {
                     e.currentTarget.style.backgroundColor = "transparent";
                   }
                 }}
@@ -300,14 +288,15 @@ function MessageDonor() {
                         className="fw-medium mb-0 small"
                         style={{ color: "#000000" }}
                       >
-                        User{" "}
-                        {chat.participant1.userId === String(authState.user?.id)
-                          ? chat.participant2.userId
-                          : chat.participant1.userId}
+                        {chat.otherParticipant?.userType === "admin"
+                          ? "GivingBack Admin"
+                          : `User ${
+                              chat.otherParticipant?.userId || "Unknown"
+                            }`}
                       </span>
                     </div>
                     <p className="mb-0 small" style={{ color: "#888888" }}>
-                      {chat.participant1.userType}
+                      {chat.otherParticipant?.userType}
                     </p>
                   </div>
                 </div>
@@ -353,14 +342,10 @@ function MessageDonor() {
                 style={{ borderColor: "#e8ebf2", backgroundColor: "white" }}
               >
                 <h2 className="h5 fw-medium mb-0" style={{ color: "#000000" }}>
-                  {selectedChat.participant1.userId === ADMIN_USER_ID ||
-                  selectedChat.participant2.userId === ADMIN_USER_ID
+                  {isAdminChat(selectedChat)
                     ? "GivingBack Admin"
                     : `User ${
-                        selectedChat.participant1.userId ===
-                        String(authState.user?.id)
-                          ? selectedChat.participant2.userId
-                          : selectedChat.participant1.userId
+                        selectedChat.otherParticipant?.userId || "Unknown"
                       }`}
                 </h2>
               </div>
