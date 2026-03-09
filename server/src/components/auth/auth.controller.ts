@@ -1470,7 +1470,9 @@ export const createProject = async (
       lga,
       status,
       ispublic,
+      visibilityType,
       organization_ids = [],
+      selectedAreas = [],
     } = req.body;
 
     const missingFields: string[] = [];
@@ -1520,19 +1522,21 @@ export const createProject = async (
       return;
     }
 
-    // Ensure user has enough balance
-    const wallet = await getOrCreateWallet(userId);
-    console.log(wallet);
-    if (
-      !wallet ||
-      typeof wallet.balance !== "number" ||
-      wallet.balance < cost
-    ) {
-      res.status(400).json({
-        status: "fail",
-        error: "Insufficient wallet balance to create this project.",
-      });
-      return;
+    // Only check wallet balance if status is NOT "draft"
+    if (status !== "draft") {
+      const wallet = await getOrCreateWallet(userId);
+      console.log(wallet);
+      if (
+        !wallet ||
+        typeof wallet.balance !== "number" ||
+        wallet.balance < cost
+      ) {
+        res.status(400).json({
+          status: "fail",
+          error: "Insufficient wallet balance to create this project.",
+        });
+        return;
+      }
     }
 
     const validStatuses = ["draft", "brief", "active", "completed"];
@@ -1547,9 +1551,47 @@ export const createProject = async (
     let organization_id: number | null = null;
     let multiNgo = false;
 
-    const orgIds = Array.isArray(organization_ids)
-      ? organization_ids.map((id) => Number(id)).filter((id) => !isNaN(id))
-      : [];
+    // Handle organization_ids based on visibilityType
+    let orgIds: number[] = [];
+
+    if (visibilityType === "private") {
+      // Private: use provided organization_ids (array of numbers)
+      orgIds = Array.isArray(organization_ids)
+        ? organization_ids.map((id) => Number(id)).filter((id) => !isNaN(id))
+        : [];
+    } else if (visibilityType === "select-area") {
+      // Select Area: fetch organizations matching the selected areas
+      // selectedAreas is an array of area names like ["Education", "Healthcare"]
+      const areas = Array.isArray(selectedAreas)
+        ? selectedAreas.map((area: any) =>
+            typeof area === "string" ? area : area.value || area.label
+          )
+        : [];
+
+      if (areas.length > 0) {
+        // Query organizations where interest_area contains any of the selected areas
+        // interest_area can be "area1,area2,area3" (comma-separated)
+        const organizations = await db("organizations")
+          .select("id")
+          .where(function (builder) {
+            areas.forEach((area: string, index: number) => {
+              if (index === 0) {
+                builder.whereRaw("FIND_IN_SET(?, interest_area)", [area]);
+              } else {
+                builder.orWhereRaw("FIND_IN_SET(?, interest_area)", [area]);
+              }
+            });
+          });
+
+        orgIds = organizations.map((org: any) => org.id);
+        console.log(
+          `Selected areas: ${areas.join(
+            ", "
+          )} => Found organizations: ${orgIds.join(", ")}`
+        );
+      }
+    }
+    // If visibilityType === "public", orgIds remains empty
 
     if (orgIds.length === 1) {
       organization_id = orgIds[0];

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 import { toast } from "react-toastify";
 import {
@@ -27,6 +28,8 @@ export const CreateProjectBriefModal: React.FC<
   CreateProjectBriefModalProps
 > = ({ isOpen, toggle, onSuccess }) => {
   // const { currentState } = useContent();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -48,6 +51,8 @@ export const CreateProjectBriefModal: React.FC<
   const [isLoading, setIsLoading] = useState(false);
   const [deadlineDate, setDeadlineDate] = useState<Date | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showInsufficientBalanceModal, setShowInsufficientBalanceModal] =
+    useState(false);
 
   const { mutate: getAreas } = useBackendService("/areas", "GET", {
     onSuccess: (res2: unknown) => {
@@ -85,24 +90,23 @@ export const CreateProjectBriefModal: React.FC<
       },
       onError: (error: unknown) => {
         let errorMessage = "Failed to create project";
-
-        if (error && typeof error === "object") {
-          const err = error as Record<string, unknown>;
-          if (err.response && typeof err.response === "object") {
-            const response = err.response as Record<string, unknown>;
-            if (response.data && typeof response.data === "object") {
-              const data = response.data as Record<string, unknown>;
-              if (data.error && typeof data.error === "string") {
-                errorMessage = data.error;
-              }
+        if (error && typeof error === "object" && "response" in error) {
+          const response = (error as Record<string, unknown>).response;
+          if (response && typeof response === "object" && "data" in response) {
+            const data = (response as Record<string, unknown>).data;
+            if (data && typeof data === "object" && "error" in data) {
+              errorMessage = String((data as Record<string, unknown>).error);
             }
-          }
-          if (err.message && typeof err.message === "string") {
-            errorMessage = err.message;
           }
         }
         console.log("❌ Create Project Error:", errorMessage);
-        toast.error("Failed to create project");
+
+        // Check if the error is about insufficient wallet balance
+        if (errorMessage.includes("Insufficient wallet balance")) {
+          setShowInsufficientBalanceModal(true);
+        } else {
+          toast.error(errorMessage);
+        }
         setIsLoading(false);
       },
     }
@@ -351,6 +355,46 @@ export const CreateProjectBriefModal: React.FC<
     createProject(projectData);
   };
 
+  const handleSaveAsDraftFromInsufficientBalance = () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    const projectData = {
+      title: formData.title.trim(),
+      category: formData.category,
+      description: formData.description.trim(),
+      budget: Number(formData.budget),
+      deadline: formData.deadline,
+      state: formData.state,
+      lga: formData.lga,
+      ispublic: formData.visibilityType === "public",
+      organization_ids:
+        formData.visibilityType === "private"
+          ? formData.selectedNgos.map((ngo) => ngo.value)
+          : [],
+      area_ids:
+        formData.visibilityType === "select-area"
+          ? formData.selectedAreas.map((area) => area.value)
+          : [],
+      status: "draft",
+    };
+
+    console.log(
+      "📤 Saving as Draft (from insufficient balance) - Project Data:",
+      projectData
+    );
+    setShowInsufficientBalanceModal(false);
+    createProject(projectData);
+  };
+
+  const handleGoToFunding = () => {
+    setShowInsufficientBalanceModal(false);
+    toggle();
+    navigate("donor/fund_management_new");
+  };
+
   const labelStyle = {
     fontSize: "14px",
     fontWeight: 600,
@@ -365,389 +409,520 @@ export const CreateProjectBriefModal: React.FC<
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      toggle={toggle}
-      centered
-      size="lg"
-      className="create-brief-modal"
-    >
-      <ModalHeader
+    <>
+      <Modal
+        isOpen={isOpen}
         toggle={toggle}
-        style={{ borderBottom: "1px solid #e5e5e5" }}
+        centered
+        size="lg"
+        className="create-brief-modal"
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-          }}
+        <ModalHeader
+          toggle={toggle}
+          style={{ borderBottom: "1px solid #e5e5e5" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <h5 style={{ margin: 0, fontWeight: 700, color: "#1a1a1a" }}>
+              {currentStep === 1
+                ? "Create New Project Brief"
+                : "Project Details"}
+            </h5>
+            <span style={{ fontSize: "12px", color: "#666", fontWeight: 600 }}>
+              Step {currentStep} of 2
+            </span>
+          </div>
+        </ModalHeader>
+        <ModalBody style={{ padding: "24px" }}>
+          <Form>
+            {/* STEP 1: Basic Information */}
+            {currentStep === 1 && (
+              <>
+                <FormGroup className="mb-4">
+                  <label style={labelStyle}>
+                    Project Title <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <InputGroup className="input-group-alternative">
+                    <Input
+                      style={inputStyle}
+                      className="p-3"
+                      placeholder="Enter project title"
+                      type="text"
+                      name="title"
+                      required
+                      value={formData.title}
+                      onChange={handleInputChange}
+                    />
+                  </InputGroup>
+                </FormGroup>
+
+                <FormGroup className="mb-4">
+                  <label style={labelStyle}>
+                    Category <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <InputGroup className="input-group-alternative">
+                    <Select
+                      styles={{
+                        control: (provided) => ({
+                          ...provided,
+                          backgroundColor: "#F2F2F2",
+                          minHeight: "55px",
+                          height: "100%",
+                        }),
+                        valueContainer: (provided) => ({
+                          ...provided,
+                          height: "100%",
+                          padding: "0 6px",
+                        }),
+                        input: (provided) => ({
+                          ...provided,
+                          margin: "0px",
+                        }),
+                        indicatorsContainer: (provided) => ({
+                          ...provided,
+                          height: "55px",
+                        }),
+                      }}
+                      className="w-100"
+                      placeholder="Select category"
+                      required
+                      onChange={handleCategoryChange}
+                      options={areas.map((category) => ({
+                        value: category.name,
+                        label: category.name,
+                      }))}
+                    />
+                  </InputGroup>
+                </FormGroup>
+
+                <FormGroup className="mb-4">
+                  <label style={labelStyle}>
+                    Description <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <InputGroup className="input-group-alternative">
+                    <Input
+                      style={inputStyle}
+                      className="p-3"
+                      placeholder="Enter project brief description"
+                      type="textarea"
+                      name="description"
+                      rows={4}
+                      required
+                      value={formData.description}
+                      onChange={handleInputChange}
+                    />
+                  </InputGroup>
+                </FormGroup>
+              </>
+            )}
+
+            {/* STEP 2: Detailed Information */}
+            {currentStep === 2 && (
+              <>
+                <FormGroup className="mb-4">
+                  <label style={labelStyle}>
+                    Budget <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <InputGroup className="input-group-alternative">
+                    <Input
+                      style={inputStyle}
+                      className="p-3"
+                      placeholder="Enter budget amount"
+                      type="number"
+                      name="budget"
+                      required
+                      value={formData.budget}
+                      onChange={handleInputChange}
+                    />
+                  </InputGroup>
+                </FormGroup>
+
+                <FormGroup className="mb-4">
+                  <label style={labelStyle}>
+                    Application Deadline <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <InputGroup
+                    style={{ backgroundColor: "#F2F2F2", paddingBottom: "8px" }}
+                    className="input-group-alternative"
+                  >
+                    <DatePicker
+                      selected={deadlineDate}
+                      onChange={handleDeadlineChange}
+                      placeholderText="Select deadline"
+                      className="calendar-input p-2"
+                      calendarClassName="custom-calendar"
+                    />
+                  </InputGroup>
+                </FormGroup>
+
+                <div style={{ display: "flex", gap: "16px" }}>
+                  <FormGroup className="mb-4" style={{ flex: 1 }}>
+                    <label style={labelStyle}>
+                      State <span style={{ color: "red" }}>*</span>
+                    </label>
+                    <InputGroup className="input-group-alternative">
+                      <Select
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            backgroundColor: "#F2F2F2",
+                            minHeight: "55px",
+                            height: "100%",
+                          }),
+                          valueContainer: (provided) => ({
+                            ...provided,
+                            height: "100%",
+                            padding: "0 6px",
+                          }),
+                          input: (provided) => ({
+                            ...provided,
+                            margin: "0px",
+                          }),
+                          indicatorsContainer: (provided) => ({
+                            ...provided,
+                            height: "55px",
+                          }),
+                        }}
+                        className="w-100"
+                        placeholder="Select state"
+                        required
+                        onChange={handleStateChange}
+                        options={Array.from(States.keys()).map((state) => ({
+                          value: state,
+                          label: state,
+                        }))}
+                        value={
+                          selectedState
+                            ? { value: selectedState, label: selectedState }
+                            : null
+                        }
+                      />
+                    </InputGroup>
+                  </FormGroup>
+
+                  <FormGroup className="mb-4" style={{ flex: 1 }}>
+                    <label style={labelStyle}>
+                      LGA <span style={{ color: "red" }}>*</span>
+                    </label>
+                    <InputGroup className="input-group-alternative">
+                      <Select
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            backgroundColor: "#F2F2F2",
+                            minHeight: "55px",
+                            height: "100%",
+                          }),
+                          valueContainer: (provided) => ({
+                            ...provided,
+                            height: "100%",
+                            padding: "0 6px",
+                          }),
+                          input: (provided) => ({
+                            ...provided,
+                            margin: "0px",
+                          }),
+                          indicatorsContainer: (provided) => ({
+                            ...provided,
+                            height: "55px",
+                          }),
+                        }}
+                        className="w-100"
+                        placeholder="Select LGA"
+                        required
+                        onChange={handleLGAChange}
+                        options={lgas.map((lga) => ({
+                          value: lga,
+                          label: lga,
+                        }))}
+                        value={
+                          selectedLGA
+                            ? { value: selectedLGA, label: selectedLGA }
+                            : null
+                        }
+                        isDisabled={!selectedState}
+                      />
+                    </InputGroup>
+                  </FormGroup>
+                </div>
+
+                <FormGroup className="mb-4">
+                  <label style={labelStyle}>
+                    Project Visibility <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <InputGroup className="input-group-alternative">
+                    <Select
+                      styles={{
+                        control: (provided) => ({
+                          ...provided,
+                          backgroundColor: "#F2F2F2",
+                          minHeight: "55px",
+                          height: "100%",
+                        }),
+                        valueContainer: (provided) => ({
+                          ...provided,
+                          height: "100%",
+                          padding: "0 6px",
+                        }),
+                        input: (provided) => ({
+                          ...provided,
+                          margin: "0px",
+                        }),
+                        indicatorsContainer: (provided) => ({
+                          ...provided,
+                          height: "55px",
+                        }),
+                      }}
+                      className="w-100"
+                      placeholder="Select visibility type"
+                      required
+                      onChange={handleVisibilityChange}
+                      options={[
+                        { value: "public", label: "Public" },
+                        { value: "private", label: "Private" },
+                        { value: "select-area", label: "Select Area" },
+                      ]}
+                      value={
+                        formData.visibilityType
+                          ? {
+                              value: formData.visibilityType,
+                              label:
+                                formData.visibilityType === "public"
+                                  ? "Public"
+                                  : formData.visibilityType === "private"
+                                  ? "Private"
+                                  : "Select Area",
+                            }
+                          : null
+                      }
+                    />
+                  </InputGroup>
+                </FormGroup>
+
+                {formData.visibilityType === "private" && (
+                  <FormGroup className="mb-4">
+                    <label style={labelStyle}>
+                      Select NGOs <span style={{ color: "red" }}>*</span>
+                    </label>
+                    <InputGroup className="input-group-alternative">
+                      <Select
+                        isMulti
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            backgroundColor: "#F2F2F2",
+                            minHeight: "55px",
+                            height: "100%",
+                          }),
+                          valueContainer: (provided) => ({
+                            ...provided,
+                            height: "100%",
+                            padding: "0 6px",
+                          }),
+                          input: (provided) => ({
+                            ...provided,
+                            margin: "0px",
+                          }),
+                          indicatorsContainer: (provided) => ({
+                            ...provided,
+                            height: "55px",
+                          }),
+                        }}
+                        className="w-100"
+                        placeholder="Select one or more NGOs..."
+                        required
+                        onChange={handleNgoChange}
+                        options={ngos}
+                        value={formData.selectedNgos}
+                        isClearable
+                        isSearchable
+                      />
+                    </InputGroup>
+                  </FormGroup>
+                )}
+
+                {formData.visibilityType === "select-area" && (
+                  <FormGroup className="mb-4">
+                    <label style={labelStyle}>
+                      Select Areas <span style={{ color: "red" }}>*</span>
+                    </label>
+                    <InputGroup className="input-group-alternative">
+                      <Select
+                        isMulti
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            backgroundColor: "#F2F2F2",
+                            minHeight: "55px",
+                            height: "100%",
+                          }),
+                          valueContainer: (provided) => ({
+                            ...provided,
+                            height: "100%",
+                            padding: "0 6px",
+                          }),
+                          input: (provided) => ({
+                            ...provided,
+                            margin: "0px",
+                          }),
+                          indicatorsContainer: (provided) => ({
+                            ...provided,
+                            height: "55px",
+                          }),
+                        }}
+                        className="w-100"
+                        placeholder="Select one or more areas..."
+                        required
+                        onChange={handleAreasChange}
+                        options={areas.map((area) => ({
+                          value: area.name,
+                          label: area.name,
+                        }))}
+                        value={formData.selectedAreas}
+                        isClearable
+                        isSearchable
+                      />
+                    </InputGroup>
+                  </FormGroup>
+                )}
+              </>
+            )}
+
+            {/* Navigation and Action Buttons */}
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                marginTop: "24px",
+              }}
+            >
+              {currentStep === 2 && (
+                <Button
+                  style={{
+                    backgroundColor: "#f3f4f6",
+                    color: "#1a1a1a",
+                    border: "none",
+                    borderRadius: "6px",
+                    padding: "14px 48px",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    flex: 1,
+                  }}
+                  onClick={handlePreviousStep}
+                  disabled={isLoading}
+                >
+                  Back
+                </Button>
+              )}
+
+              {currentStep === 1 ? (
+                <>
+                  <Button
+                    style={{
+                      backgroundColor: "#f3f4f6",
+                      color: "#1a1a1a",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "14px 48px",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      flex: 1,
+                    }}
+                    onClick={toggle}
+                    disabled={isLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    style={{
+                      backgroundColor: "#28a745",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "14px 48px",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      flex: 1,
+                    }}
+                    onClick={handleNextStep}
+                    disabled={isLoading}
+                  >
+                    Next
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    style={{
+                      backgroundColor: "#f3f4f6",
+                      color: "#1a1a1a",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "14px 48px",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      flex: 1,
+                    }}
+                    onClick={handleSaveAsDraft}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Saving..." : "Save as Draft"}
+                  </Button>
+                  <Button
+                    style={{
+                      backgroundColor: "#28a745",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "14px 48px",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      flex: 1,
+                    }}
+                    onClick={handlePublish}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Publishing..." : "Publish Brief"}
+                  </Button>
+                </>
+              )}
+            </div>
+          </Form>
+        </ModalBody>
+      </Modal>
+
+      {/* Insufficient Wallet Balance Modal */}
+      <Modal
+        isOpen={showInsufficientBalanceModal}
+        centered
+        size="md"
+        className="insufficient-balance-modal"
+      >
+        <ModalHeader
+          toggle={() => setShowInsufficientBalanceModal(false)}
+          style={{ borderBottom: "1px solid #e5e5e5" }}
         >
           <h5 style={{ margin: 0, fontWeight: 700, color: "#1a1a1a" }}>
-            {currentStep === 1 ? "Create New Project Brief" : "Project Details"}
+            Insufficient Wallet Balance
           </h5>
-          <span style={{ fontSize: "12px", color: "#666", fontWeight: 600 }}>
-            Step {currentStep} of 2
-          </span>
-        </div>
-      </ModalHeader>
-      <ModalBody style={{ padding: "24px" }}>
-        <Form>
-          {/* STEP 1: Basic Information */}
-          {currentStep === 1 && (
-            <>
-              <FormGroup className="mb-4">
-                <label style={labelStyle}>
-                  Project Title <span style={{ color: "red" }}>*</span>
-                </label>
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    style={inputStyle}
-                    className="p-3"
-                    placeholder="Enter project title"
-                    type="text"
-                    name="title"
-                    required
-                    value={formData.title}
-                    onChange={handleInputChange}
-                  />
-                </InputGroup>
-              </FormGroup>
-
-              <FormGroup className="mb-4">
-                <label style={labelStyle}>
-                  Category <span style={{ color: "red" }}>*</span>
-                </label>
-                <InputGroup className="input-group-alternative">
-                  <Select
-                    styles={{
-                      control: (provided) => ({
-                        ...provided,
-                        backgroundColor: "#F2F2F2",
-                        minHeight: "55px",
-                        height: "100%",
-                      }),
-                      valueContainer: (provided) => ({
-                        ...provided,
-                        height: "100%",
-                        padding: "0 6px",
-                      }),
-                      input: (provided) => ({
-                        ...provided,
-                        margin: "0px",
-                      }),
-                      indicatorsContainer: (provided) => ({
-                        ...provided,
-                        height: "55px",
-                      }),
-                    }}
-                    className="w-100"
-                    placeholder="Select category"
-                    required
-                    onChange={handleCategoryChange}
-                    options={areas.map((category) => ({
-                      value: category.name,
-                      label: category.name,
-                    }))}
-                  />
-                </InputGroup>
-              </FormGroup>
-
-              <FormGroup className="mb-4">
-                <label style={labelStyle}>
-                  Description <span style={{ color: "red" }}>*</span>
-                </label>
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    style={inputStyle}
-                    className="p-3"
-                    placeholder="Enter project brief description"
-                    type="textarea"
-                    name="description"
-                    rows={4}
-                    required
-                    value={formData.description}
-                    onChange={handleInputChange}
-                  />
-                </InputGroup>
-              </FormGroup>
-            </>
-          )}
-
-          {/* STEP 2: Detailed Information */}
-          {currentStep === 2 && (
-            <>
-              <FormGroup className="mb-4">
-                <label style={labelStyle}>
-                  Budget <span style={{ color: "red" }}>*</span>
-                </label>
-                <InputGroup className="input-group-alternative">
-                  <Input
-                    style={inputStyle}
-                    className="p-3"
-                    placeholder="Enter budget amount"
-                    type="number"
-                    name="budget"
-                    required
-                    value={formData.budget}
-                    onChange={handleInputChange}
-                  />
-                </InputGroup>
-              </FormGroup>
-
-              <FormGroup className="mb-4">
-                <label style={labelStyle}>
-                  Application Deadline <span style={{ color: "red" }}>*</span>
-                </label>
-                <InputGroup
-                  style={{ backgroundColor: "#F2F2F2", paddingBottom: "8px" }}
-                  className="input-group-alternative"
-                >
-                  <DatePicker
-                    selected={deadlineDate}
-                    onChange={handleDeadlineChange}
-                    placeholderText="Select deadline"
-                    className="calendar-input p-2"
-                    calendarClassName="custom-calendar"
-                  />
-                </InputGroup>
-              </FormGroup>
-
-              <div style={{ display: "flex", gap: "16px" }}>
-                <FormGroup className="mb-4" style={{ flex: 1 }}>
-                  <label style={labelStyle}>
-                    State <span style={{ color: "red" }}>*</span>
-                  </label>
-                  <InputGroup className="input-group-alternative">
-                    <Select
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          backgroundColor: "#F2F2F2",
-                          minHeight: "55px",
-                          height: "100%",
-                        }),
-                        valueContainer: (provided) => ({
-                          ...provided,
-                          height: "100%",
-                          padding: "0 6px",
-                        }),
-                        input: (provided) => ({
-                          ...provided,
-                          margin: "0px",
-                        }),
-                        indicatorsContainer: (provided) => ({
-                          ...provided,
-                          height: "55px",
-                        }),
-                      }}
-                      className="w-100"
-                      placeholder="Select state"
-                      required
-                      onChange={handleStateChange}
-                      options={Array.from(States.keys()).map((state) => ({
-                        value: state,
-                        label: state,
-                      }))}
-                      value={
-                        selectedState
-                          ? { value: selectedState, label: selectedState }
-                          : null
-                      }
-                    />
-                  </InputGroup>
-                </FormGroup>
-
-                <FormGroup className="mb-4" style={{ flex: 1 }}>
-                  <label style={labelStyle}>
-                    LGA <span style={{ color: "red" }}>*</span>
-                  </label>
-                  <InputGroup className="input-group-alternative">
-                    <Select
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          backgroundColor: "#F2F2F2",
-                          minHeight: "55px",
-                          height: "100%",
-                        }),
-                        valueContainer: (provided) => ({
-                          ...provided,
-                          height: "100%",
-                          padding: "0 6px",
-                        }),
-                        input: (provided) => ({
-                          ...provided,
-                          margin: "0px",
-                        }),
-                        indicatorsContainer: (provided) => ({
-                          ...provided,
-                          height: "55px",
-                        }),
-                      }}
-                      className="w-100"
-                      placeholder="Select LGA"
-                      required
-                      onChange={handleLGAChange}
-                      options={lgas.map((lga) => ({
-                        value: lga,
-                        label: lga,
-                      }))}
-                      value={
-                        selectedLGA
-                          ? { value: selectedLGA, label: selectedLGA }
-                          : null
-                      }
-                      isDisabled={!selectedState}
-                    />
-                  </InputGroup>
-                </FormGroup>
-              </div>
-
-              <FormGroup className="mb-4">
-                <label style={labelStyle}>
-                  Project Visibility <span style={{ color: "red" }}>*</span>
-                </label>
-                <InputGroup className="input-group-alternative">
-                  <Select
-                    styles={{
-                      control: (provided) => ({
-                        ...provided,
-                        backgroundColor: "#F2F2F2",
-                        minHeight: "55px",
-                        height: "100%",
-                      }),
-                      valueContainer: (provided) => ({
-                        ...provided,
-                        height: "100%",
-                        padding: "0 6px",
-                      }),
-                      input: (provided) => ({
-                        ...provided,
-                        margin: "0px",
-                      }),
-                      indicatorsContainer: (provided) => ({
-                        ...provided,
-                        height: "55px",
-                      }),
-                    }}
-                    className="w-100"
-                    placeholder="Select visibility type"
-                    required
-                    onChange={handleVisibilityChange}
-                    options={[
-                      { value: "public", label: "Public" },
-                      { value: "private", label: "Private" },
-                      { value: "select-area", label: "Select Area" },
-                    ]}
-                    value={
-                      formData.visibilityType
-                        ? {
-                            value: formData.visibilityType,
-                            label:
-                              formData.visibilityType === "public"
-                                ? "Public"
-                                : formData.visibilityType === "private"
-                                ? "Private"
-                                : "Select Area",
-                          }
-                        : null
-                    }
-                  />
-                </InputGroup>
-              </FormGroup>
-
-              {formData.visibilityType === "private" && (
-                <FormGroup className="mb-4">
-                  <label style={labelStyle}>
-                    Select NGOs <span style={{ color: "red" }}>*</span>
-                  </label>
-                  <InputGroup className="input-group-alternative">
-                    <Select
-                      isMulti
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          backgroundColor: "#F2F2F2",
-                          minHeight: "55px",
-                          height: "100%",
-                        }),
-                        valueContainer: (provided) => ({
-                          ...provided,
-                          height: "100%",
-                          padding: "0 6px",
-                        }),
-                        input: (provided) => ({
-                          ...provided,
-                          margin: "0px",
-                        }),
-                        indicatorsContainer: (provided) => ({
-                          ...provided,
-                          height: "55px",
-                        }),
-                      }}
-                      className="w-100"
-                      placeholder="Select one or more NGOs..."
-                      required
-                      onChange={handleNgoChange}
-                      options={ngos}
-                      value={formData.selectedNgos}
-                      isClearable
-                      isSearchable
-                    />
-                  </InputGroup>
-                </FormGroup>
-              )}
-
-              {formData.visibilityType === "select-area" && (
-                <FormGroup className="mb-4">
-                  <label style={labelStyle}>
-                    Select Areas <span style={{ color: "red" }}>*</span>
-                  </label>
-                  <InputGroup className="input-group-alternative">
-                    <Select
-                      isMulti
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          backgroundColor: "#F2F2F2",
-                          minHeight: "55px",
-                          height: "100%",
-                        }),
-                        valueContainer: (provided) => ({
-                          ...provided,
-                          height: "100%",
-                          padding: "0 6px",
-                        }),
-                        input: (provided) => ({
-                          ...provided,
-                          margin: "0px",
-                        }),
-                        indicatorsContainer: (provided) => ({
-                          ...provided,
-                          height: "55px",
-                        }),
-                      }}
-                      className="w-100"
-                      placeholder="Select one or more areas..."
-                      required
-                      onChange={handleAreasChange}
-                      options={areas.map((area) => ({
-                        value: area.name,
-                        label: area.name,
-                      }))}
-                      value={formData.selectedAreas}
-                      isClearable
-                      isSearchable
-                    />
-                  </InputGroup>
-                </FormGroup>
-              )}
-            </>
-          )}
-
-          {/* Navigation and Action Buttons */}
+        </ModalHeader>
+        <ModalBody style={{ padding: "24px" }}>
+          <p style={{ fontSize: "14px", color: "#666", marginBottom: "24px" }}>
+            You have insufficient wallet balance to create this project. You can
+            save it as a draft and fund your wallet later, or go to funding now
+            to add funds to your wallet.
+          </p>
           <div
             style={{
               display: "flex",
@@ -755,105 +930,44 @@ export const CreateProjectBriefModal: React.FC<
               marginTop: "24px",
             }}
           >
-            {currentStep === 2 && (
-              <Button
-                style={{
-                  backgroundColor: "#f3f4f6",
-                  color: "#1a1a1a",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "14px 48px",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  flex: 1,
-                }}
-                onClick={handlePreviousStep}
-                disabled={isLoading}
-              >
-                Back
-              </Button>
-            )}
-
-            {currentStep === 1 ? (
-              <>
-                <Button
-                  style={{
-                    backgroundColor: "#f3f4f6",
-                    color: "#1a1a1a",
-                    border: "none",
-                    borderRadius: "6px",
-                    padding: "14px 48px",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    flex: 1,
-                  }}
-                  onClick={toggle}
-                  disabled={isLoading}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  style={{
-                    backgroundColor: "#28a745",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "6px",
-                    padding: "14px 48px",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    flex: 1,
-                  }}
-                  onClick={handleNextStep}
-                  disabled={isLoading}
-                >
-                  Next
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  style={{
-                    backgroundColor: "#f3f4f6",
-                    color: "#1a1a1a",
-                    border: "none",
-                    borderRadius: "6px",
-                    padding: "14px 48px",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    flex: 1,
-                  }}
-                  onClick={handleSaveAsDraft}
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Saving..." : "Save as Draft"}
-                </Button>
-                <Button
-                  style={{
-                    backgroundColor: "#28a745",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "6px",
-                    padding: "14px 48px",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    flex: 1,
-                  }}
-                  onClick={handlePublish}
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Publishing..." : "Publish Brief"}
-                </Button>
-              </>
-            )}
+            <Button
+              style={{
+                backgroundColor: "#f3f4f6",
+                color: "#1a1a1a",
+                border: "none",
+                borderRadius: "6px",
+                padding: "14px 48px",
+                fontSize: "14px",
+                fontWeight: 600,
+                cursor: "pointer",
+                flex: 1,
+              }}
+              onClick={handleSaveAsDraftFromInsufficientBalance}
+              disabled={isLoading}
+            >
+              {isLoading ? "Saving..." : "Save as Draft"}
+            </Button>
+            <Button
+              style={{
+                backgroundColor: "#28a745",
+                color: "#fff",
+                border: "none",
+                borderRadius: "6px",
+                padding: "14px 48px",
+                fontSize: "14px",
+                fontWeight: 600,
+                cursor: "pointer",
+                flex: 1,
+              }}
+              onClick={handleGoToFunding}
+              disabled={isLoading}
+            >
+              Go to Funding
+            </Button>
           </div>
-        </Form>
-      </ModalBody>
-    </Modal>
+        </ModalBody>
+      </Modal>
+    </>
   );
 };
 
