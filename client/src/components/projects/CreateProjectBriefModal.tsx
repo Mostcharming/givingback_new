@@ -429,12 +429,20 @@ export const CreateProjectBriefModal: React.FC<
               width: "100%",
             }}
           >
-            <h5 style={{ margin: 0, fontWeight: 700, color: "#1a1a1a" }}>
+            <h5
+              style={{
+                margin: 0,
+                fontWeight: 700,
+                color: "#1a1a1a",
+                paddingRight: "12px",
+              }}
+            >
               {currentStep === 1
                 ? "Create New Project Brief"
-                : "Project Details"}
+                : "Project Details "}
             </h5>
             <span style={{ fontSize: "12px", color: "#666", fontWeight: 600 }}>
+              {" "}
               Step {currentStep} of 2
             </span>
           </div>
