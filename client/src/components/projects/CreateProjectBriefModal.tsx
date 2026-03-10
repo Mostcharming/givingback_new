@@ -392,7 +392,7 @@ export const CreateProjectBriefModal: React.FC<
   const handleGoToFunding = () => {
     setShowInsufficientBalanceModal(false);
     toggle();
-    navigate("donor/fund_management_new");
+    navigate("/donor/fund_management_new");
   };
 
   const labelStyle = {
