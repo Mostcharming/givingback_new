@@ -105,6 +105,15 @@ const FundsM = () => {
     }
   };
   useEffect(() => {
+    // Check if we should auto-open the fund modal
+    const shouldOpenFundModal = sessionStorage.getItem("openFundModal");
+    if (shouldOpenFundModal === "true") {
+      setFundModalOpen(true);
+      sessionStorage.removeItem("openFundModal");
+    }
+  }, []);
+
+  useEffect(() => {
     if (authState.user?.role === "admin") {
       getDashAdmin({});
       getTableData({});

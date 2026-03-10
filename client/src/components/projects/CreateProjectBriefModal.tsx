@@ -392,6 +392,8 @@ export const CreateProjectBriefModal: React.FC<
   const handleGoToFunding = () => {
     setShowInsufficientBalanceModal(false);
     toggle();
+    // Set a flag in sessionStorage to auto-open the fund modal on the funding page
+    sessionStorage.setItem("openFundModal", "true");
     navigate("/donor/fund_management_new");
   };
 
