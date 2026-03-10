@@ -9,10 +9,17 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Card, CardBody } from "reactstrap";
+import {
+  Button,
+  Card,
+  CardBody,
+  Modal,
+  ModalBody,
+  ModalHeader,
+} from "reactstrap";
 import EmptyNGO from "../../assets/images/emptyngo.svg";
 import ShareModal from "../../pages/project/single/ShareModal";
 import useBackendService from "../../services/backend_service";
@@ -65,6 +72,8 @@ export const ProjectCard = ({ project }: { project: Project }) => {
   const [showMenu, setShowMenu] = React.useState(false);
   const [isPublishing, setIsPublishing] = React.useState(false);
   const [shareModalOpen, setShareModalOpen] = React.useState(false);
+  const [showInsufficientBalanceModal, setShowInsufficientBalanceModal] =
+    useState(false);
 
   const { mutate: publishProject } = useBackendService(
     `/auth/donor/projects/${project.id}/publish`,
@@ -78,23 +87,25 @@ export const ProjectCard = ({ project }: { project: Project }) => {
         }, 500);
       },
       onError: (error: unknown) => {
-        let errorMessage = "Failed to publish project";
-        if (error && typeof error === "object") {
-          const err = error as Record<string, unknown>;
-          if (err.response && typeof err.response === "object") {
-            const response = err.response as Record<string, unknown>;
-            if (response.data && typeof response.data === "object") {
-              const data = response.data as Record<string, unknown>;
-              if (data.error && typeof data.error === "string") {
-                errorMessage = data.error;
-              }
+        let errorMessage = "Failed to create project";
+        if (error && typeof error === "object" && "response" in error) {
+          const response = (error as Record<string, unknown>).response;
+          if (response && typeof response === "object" && "data" in response) {
+            const data = (response as Record<string, unknown>).data;
+            if (data && typeof data === "object" && "error" in data) {
+              errorMessage = String((data as Record<string, unknown>).error);
             }
           }
-          if (err.message && typeof err.message === "string") {
-            errorMessage = err.message;
-          }
         }
-        toast.error(errorMessage);
+        console.log("❌ Create Project Error:", errorMessage);
+
+        // Check if the error is about insufficient wallet balance
+        if (errorMessage.includes("Insufficient wallet balance")) {
+          setShowInsufficientBalanceModal(true);
+        } else {
+          toast.error(errorMessage);
+        }
+        // toast.error(errorMessage);
         setIsPublishing(false);
       },
     }
@@ -118,7 +129,7 @@ export const ProjectCard = ({ project }: { project: Project }) => {
   };
 
   const handleEdit = () => {
-    navigate(`/donor/projects/${project.id}/edit`);
+    navigate(`/donor/projects/${project.id}`);
   };
 
   const getActionButtons = () => {
@@ -146,6 +157,17 @@ export const ProjectCard = ({ project }: { project: Project }) => {
       ];
     }
     return [];
+  };
+
+  const handleSaveAsDraftFromInsufficientBalance = () => {
+    setShowInsufficientBalanceModal(false);
+  };
+  const handleGoToFunding = () => {
+    setShowInsufficientBalanceModal(false);
+    // toggle();
+    // Set a flag in sessionStorage to auto-open the fund modal on the funding page
+    sessionStorage.setItem("openFundModal", "true");
+    navigate("/donor/fund_management_new");
   };
 
   return (
@@ -344,6 +366,70 @@ export const ProjectCard = ({ project }: { project: Project }) => {
         isOpen={shareModalOpen}
         toggle={() => setShareModalOpen(!shareModalOpen)}
       />
+      <Modal
+        isOpen={showInsufficientBalanceModal}
+        centered
+        size="md"
+        className="insufficient-balance-modal"
+      >
+        <ModalHeader
+          toggle={() => setShowInsufficientBalanceModal(false)}
+          style={{ borderBottom: "1px solid #e5e5e5" }}
+        >
+          <h5 style={{ margin: 0, fontWeight: 700, color: "#1a1a1a" }}>
+            Insufficient Wallet Balance
+          </h5>
+        </ModalHeader>
+        <ModalBody style={{ padding: "24px" }}>
+          <p style={{ fontSize: "14px", color: "#666", marginBottom: "24px" }}>
+            You have insufficient wallet balance to create this project. You can
+            leave it as a draft and fund your wallet later, or go to funding now
+            to add funds to your wallet.
+          </p>
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              marginTop: "24px",
+            }}
+          >
+            <Button
+              style={{
+                backgroundColor: "#f3f4f6",
+                color: "#1a1a1a",
+                border: "none",
+                borderRadius: "6px",
+                padding: "14px 48px",
+                fontSize: "14px",
+                fontWeight: 600,
+                cursor: "pointer",
+                flex: 1,
+              }}
+              onClick={handleSaveAsDraftFromInsufficientBalance}
+              // disabled={isLoading}
+            >
+              {"Leave as Draft"}
+            </Button>
+            <Button
+              style={{
+                backgroundColor: "#28a745",
+                color: "#fff",
+                border: "none",
+                borderRadius: "6px",
+                padding: "14px 48px",
+                fontSize: "14px",
+                fontWeight: 600,
+                cursor: "pointer",
+                flex: 1,
+              }}
+              onClick={handleGoToFunding}
+              // disabled={isLoading}
+            >
+              Go to Funding
+            </Button>
+          </div>
+        </ModalBody>
+      </Modal>
     </>
   );
 };

@@ -1827,6 +1827,21 @@ export const publishProjectBrief = async (
       return;
     }
 
+    // Check wallet balance before publishing
+    const wallet = await getOrCreateWallet(userId);
+    if (
+      !wallet ||
+      typeof wallet.balance !== "number" ||
+      wallet.balance < project.cost
+    ) {
+      res.status(400).json({
+        status: "fail",
+        error:
+          "Insufficient wallet balance to publish this project. Please fund your wallet.",
+      });
+      return;
+    }
+
     await db("project").where({ id }).update({
       status: "brief",
       updatedAt: new Date(),

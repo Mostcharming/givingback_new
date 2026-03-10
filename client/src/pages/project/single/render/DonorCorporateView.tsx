@@ -127,8 +127,10 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
       return;
     }
 
-    if (status !== "brief") {
-      toast.error("Project details can only be edited when status is 'Brief'.");
+    if (status !== "brief" && status !== "draft") {
+      toast.error(
+        "Project details can only be edited when status is 'Draft' or 'Brief'."
+      );
       return;
     }
 

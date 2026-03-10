@@ -306,6 +306,7 @@ export const CreateProjectBriefModal: React.FC<
       deadline: formData.deadline,
       state: formData.state,
       lga: formData.lga,
+      visibilityType: formData.visibilityType,
       ispublic: formData.visibilityType === "public",
       organization_ids:
         formData.visibilityType === "private"
@@ -328,10 +329,7 @@ export const CreateProjectBriefModal: React.FC<
     }
 
     setIsLoading(true);
-    const status =
-      formData.visibilityType === "private" && formData.selectedNgos.length > 0
-        ? "active"
-        : "brief";
+    const status = formData.visibilityType === "public" ? "brief" : "active";
     const projectData = {
       title: formData.title.trim(),
       category: formData.category,
@@ -369,6 +367,7 @@ export const CreateProjectBriefModal: React.FC<
       deadline: formData.deadline,
       state: formData.state,
       lga: formData.lga,
+      visibilityType: formData.visibilityType,
       ispublic: formData.visibilityType === "public",
       organization_ids:
         formData.visibilityType === "private"
