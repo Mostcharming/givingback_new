@@ -329,7 +329,7 @@ export const CreateProjectBriefModal: React.FC<
     }
 
     setIsLoading(true);
-    const status = formData.visibilityType === "public" ? "brief" : "active";
+    const status = formData.visibilityType === "private" ? "active" : "brief";
     const projectData = {
       title: formData.title.trim(),
       category: formData.category,

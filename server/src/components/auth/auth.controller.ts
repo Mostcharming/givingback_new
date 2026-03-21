@@ -1559,6 +1559,15 @@ export const createProject = async (
       orgIds = Array.isArray(organization_ids)
         ? organization_ids.map((id) => Number(id)).filter((id) => !isNaN(id))
         : [];
+
+      // For private visibility, add organizations to project profile
+      if (orgIds.length === 1) {
+        organization_id = orgIds[0];
+        multiNgo = false;
+      } else if (orgIds.length > 1) {
+        organization_id = null;
+        multiNgo = true;
+      }
     } else if (visibilityType === "select-area") {
       // Select Area: fetch organizations matching the selected areas
       // selectedAreas is an array of area names like ["Education", "Healthcare"]
@@ -1590,15 +1599,22 @@ export const createProject = async (
           )} => Found organizations: ${orgIds.join(", ")}`
         );
       }
-    }
-    // If visibilityType === "public", orgIds remains empty
+      // For select-area, do NOT add to organization profile
+    } else if (visibilityType === "public") {
+      // Public: find organizations where category matches interest_area
+      const organizations = await db("organizations")
+        .select("id")
+        .where(function (builder) {
+          builder.whereRaw("FIND_IN_SET(?, interest_area)", [category]);
+        });
 
-    if (orgIds.length === 1) {
-      organization_id = orgIds[0];
-      multiNgo = false;
-    } else if (orgIds.length > 1) {
-      organization_id = null;
-      multiNgo = true;
+      orgIds = organizations.map((org: any) => org.id);
+      console.log(
+        `Public visibility with category: ${category} => Found organizations: ${orgIds.join(
+          ", "
+        )}`
+      );
+      // For public, do NOT add to organization profile
     }
 
     const [projectId] = await transaction("project").insert({
@@ -1619,7 +1635,8 @@ export const createProject = async (
       updatedAt: new Date(),
     });
 
-    if (multiNgo && orgIds.length > 0) {
+    // Only create project_organization records for private visibility
+    if (visibilityType === "private" && multiNgo && orgIds.length > 0) {
       const projectOrgRecords = orgIds.map((orgId) => ({
         project_id: projectId,
         organization_id: orgId,
@@ -1684,7 +1701,8 @@ export const createProject = async (
           },
         }).sendEmail("donorbriefactive", "Your Project is Now Active");
 
-        if (orgIds.length > 0) {
+        // Send notification emails for private visibility
+        if (visibilityType === "private" && orgIds.length > 0) {
           try {
             for (const orgId of orgIds) {
               const organization = await db("organizations")
@@ -1729,6 +1747,56 @@ export const createProject = async (
             );
           }
         }
+        // Send notification emails for select-area and public visibility
+        else if (
+          (visibilityType === "select-area" || visibilityType === "public") &&
+          orgIds.length > 0
+        ) {
+          try {
+            for (const orgId of orgIds) {
+              const organization = await db("organizations")
+                .where({ id: orgId })
+                .first();
+
+              if (organization && organization.user_id) {
+                const ngoUser = await db("users")
+                  .where({ id: organization.user_id })
+                  .first();
+
+                if (ngoUser && ngoUser.email) {
+                  await new Email({
+                    email: ngoUser.email,
+                    url: "",
+                    token: 0,
+                    additionalData: {
+                      subject: "New Project Brief Available",
+                      projectTitle: createdProject.title,
+                      projectDescription: createdProject.description,
+                      budget: createdProject.cost,
+                      ngoName: organization.name || "NGO",
+                      state: createdProject.state,
+                      city: createdProject.city,
+                      donorName: donorInfo?.name || "Donor",
+                      projectCategory: createdProject.category,
+                    },
+                  }).sendEmail(
+                    "ngoprojectnotification",
+                    "New Project Brief Available"
+                  );
+
+                  console.log(
+                    `Notification email sent to NGO: ${organization.name} (${ngoUser.email})`
+                  );
+                }
+              }
+            }
+          } catch (ngoEmailError) {
+            console.error(
+              "Error sending project notification emails to NGOs:",
+              ngoEmailError
+            );
+          }
+        }
       }
     } catch (emailError) {
       console.error("Error sending project notification email:", emailError);
@@ -1750,7 +1818,8 @@ export const createProject = async (
         donor_id: createdProject.donor_id,
         organization_id: createdProject.organization_id,
         multi_ngo: createdProject.multi_ngo,
-        organization_ids: multiNgo ? orgIds : [],
+        organization_ids:
+          visibilityType === "private" && multiNgo ? orgIds : [],
         ispublic: createdProject.ispublic,
         createdAt: createdProject.createdAt,
       },

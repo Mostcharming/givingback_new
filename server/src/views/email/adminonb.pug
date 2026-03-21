@@ -3,7 +3,8 @@ extends baseEmail
 block content
   p Admin Notification:
   p A new user has joined GivingBack!
-  p Name: #{url}
-  p Email: #{email}
-  p Role: #{role} 
+  ul(style="text-align: left; margin: 10px 0; padding-left: 20px;")
+    li Name: #{url}
+    li Email: #{email}
+    li Role: #{role} 
   p Please review their account and verify if required.

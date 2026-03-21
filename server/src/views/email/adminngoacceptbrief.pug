@@ -3,8 +3,10 @@ extends baseEmail
 block content
   p Admin Notification:
   p The NGO "#{ngoName}" has accepted a project funded by #{donorName}.
-  p Project Details:
-  p - Title: #{projectTitle}
-  p - Description: #{projectDescription}
-  p - Funding Amount: #{fundingAmount} #{currency}
+  p
+    strong Project Details:
+  ul(style="text-align: left; margin: 10px 0; padding-left: 20px;")
+    li Title: #{projectTitle}
+    li Description: #{projectDescription}
+    li Funding Amount: #{fundingAmount} #{currency}
   p Please review and monitor the progress of this project to ensure compliance with platform policies.

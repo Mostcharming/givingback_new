@@ -3,9 +3,10 @@ extends baseEmail
 block content
   p Admin Notification:
   p A new donation has been made to a project.
-  p Donor Name: #{donorName}
-  p Project Title: #{projectTitle}
-  p Amount: #{amount} #{currency}
-  p Transaction ID: #{transactionId}
-  p NGO Managing Project: #{ngoName}
+  ul(style="text-align: left; margin: 10px 0; padding-left: 20px;")
+    li Donor Name: #{donorName}
+    li Project Title: #{projectTitle}
+    li Amount: #{amount} #{currency}
+    li Transaction ID: #{transactionId}
+    li NGO Managing Project: #{ngoName}
   p Please review the transaction details for verification.

@@ -1,0 +1,29 @@
+extends baseEmail
+
+block content
+  p Hello #{ngoName},
+  p A new project brief matching your interest area has been published and is available for your review!
+  p
+    strong Project Details:
+  ul(style="text-align: left; margin: 10px 0; padding-left: 20px;")
+    li
+      strong Title: 
+      | #{projectTitle}
+    li
+      strong Description: 
+      | #{projectDescription}
+    li
+      strong Category: 
+      | #{projectCategory}
+    li
+      strong Budget: 
+      | #{budget} NGN
+    li
+      strong Location: 
+      | #{state}, #{city}
+    li
+      strong Posted by: 
+      | #{donorName}
+  p You can view the full project details and submit your application from your dashboard.
+  p If you are interested in this project and meet the requirements, please submit your proposal as soon as possible.
+  p If you have any questions, feel free to contact us.
