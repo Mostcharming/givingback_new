@@ -61,7 +61,9 @@ const Dashboard = () => {
     onSuccess: (res: any) => {
       const items = getDashBoxItems(role, res);
       setDashBoxItems(items);
-      setDonorImpacts(res?.activeProjects.value > 0);
+      if (role !== "NGO") {
+        setDonorImpacts(res?.activeProjects.value > 0);
+      }
     },
     onError: () => {
       toast.error("Error getting Dashboard details");
@@ -98,13 +100,9 @@ const Dashboard = () => {
         setTableData(filteredData);
         setupTableAttributes(role);
 
-        // Process data for chart - group by month (current year only)
-        // const currentYear = new Date().getFullYear();
         const monthlyData: { [key: string]: number } = {};
         res.donations?.forEach((project: any) => {
           const date = new Date(project.createdAt);
-          // Only include data from the current year
-          // if (date.getFullYear() === currentYear) {
           const monthYear = date.toLocaleString("default", {
             month: "short",
             year: "numeric",
@@ -113,7 +111,6 @@ const Dashboard = () => {
             monthlyData[monthYear] = 0;
           }
           monthlyData[monthYear] += parseFloat(project.amount) || 0;
-          // }
         });
 
         // Convert to array and sort by date
@@ -300,14 +297,14 @@ const Dashboard = () => {
   const handleEmptyStateClick = () => {
     switch (role) {
       case "admin":
-        navigate("/admin/projects"); // Redirect to admin briefs
+        navigate("/admin/projects");
         break;
       case "donor":
       case "corporate":
-        navigate("/donor/projects"); // Redirect to donor briefs
+        navigate("/donor/projects");
         break;
       case "NGO":
-        navigate("/ngo/projects"); // Redirect to NGO briefs
+        navigate("/ngo/projects");
         break;
       default:
         console.log("Invalid role or no role found");
@@ -475,7 +472,7 @@ const Dashboard = () => {
           data={tableData}
           isPagination={false}
           actions={actions}
-          emptyStateContent="No Transactions found found"
+          emptyStateContent="No Transactions found"
           emptyStateButtonLabel="Create New Project"
           onEmptyStateButtonClick={handleEmptyStateClick}
           currentPage={""}
@@ -517,7 +514,6 @@ const Dashboard = () => {
               <NoHighlights />
             )}
 
-            {/* Donation Trend Chart */}
             <Row className="mt-4">
               <Col md={12} className="mb-4">
                 <Card className="border-0 shadow-sm p-4">
@@ -526,7 +522,6 @@ const Dashboard = () => {
                     style={{ fontSize: "1.5rem", color: "#333" }}
                   >
                     CSR Spend Trend
-                    {/* ({new Date().getFullYear()}) */}
                   </h5>
                   <hr style={{ borderColor: "#e5e5e5" }} />
                   {chartData.length > 0 ? (
