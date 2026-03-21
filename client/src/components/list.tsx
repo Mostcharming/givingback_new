@@ -61,11 +61,11 @@ const List = ({ type }) => {
       if (role === "NGO") {
         fetchUsers({
           page: currentPage,
-          projectType: "present",
-          status: "active",
+          // projectType: "present",
+          // status: "active",
           organization_id: currentState.user.id,
         });
-      } else {
+      } else if (role === "donor" || role === "corporate") {
         fetchUsers({
           page: currentPage,
           projectType: "present",
@@ -74,7 +74,7 @@ const List = ({ type }) => {
         });
       }
     }
-  }, []);
+  }, [role]);
   useEffect(() => {
     const isDefault =
       statusFilter === "All Projects" &&
@@ -82,15 +82,19 @@ const List = ({ type }) => {
       dateFilter === "Any time" &&
       locationFilter === "All locations";
 
-    const baseQuery = {
-      page: 1,
-      projectType: "present",
-      status: "active",
-      // organization_id: currentState.user.id,
-    };
-
     if (isDefault) {
-      fetchUsers(baseQuery);
+      if (role === "NGO") {
+        fetchUsers({
+          page: 1,
+          organization_id: currentState.user.id,
+        });
+      } else if (role === "donor" || role === "corporate") {
+        fetchUsers({
+          page: 1,
+          projectType: "present",
+          status: "active",
+        });
+      }
       return;
     }
     if (role === "NGO") {
@@ -98,27 +102,29 @@ const List = ({ type }) => {
         page: currentPage,
         category:
           categoryFilter !== "All Categories" ? categoryFilter : undefined,
-        projectType: "present",
         status: statusFilter !== "All Projects" ? statusFilter : undefined,
-
         startDate: dateFilter !== "Any time" ? dateFilter : undefined,
         organization_id: currentState.user.id,
       });
-      // eslint-disable-next-line no-constant-condition
-    } else if (role === "donor" || "corporate") {
+    } else if (role === "donor" || role === "corporate") {
       fetchUsers({
         page: currentPage,
         category:
           categoryFilter !== "All Categories" ? categoryFilter : undefined,
         status: statusFilter !== "All Projects" ? statusFilter : undefined,
-
         projectType: "present",
         startDate: dateFilter !== "Any time" ? dateFilter : undefined,
         state: locationFilter !== "All locations" ? locationFilter : undefined,
-        // donor_id: currentState.user.id,
       });
     }
-  }, [currentPage, statusFilter, categoryFilter, dateFilter, locationFilter]);
+  }, [
+    currentPage,
+    statusFilter,
+    categoryFilter,
+    dateFilter,
+    locationFilter,
+    role,
+  ]);
 
   useEffect(() => {
     if (activeTab === "Contributed to" || activeTab === "Sponsoring") {
@@ -132,11 +138,11 @@ const List = ({ type }) => {
       if (role === "NGO") {
         fetchUsers({
           page: currentPage,
-          projectType: "present",
-          status: "active",
+          // projectType: "present",
+          // status: "active",
           organization_id: currentState.user.id,
         });
-      } else {
+      } else if (role === "donor" || role === "corporate") {
         fetchUsers({
           page: currentPage,
           projectType: "present",
@@ -208,39 +214,43 @@ const List = ({ type }) => {
               onLocationChange={setLocationFilter}
             />
             {/* Tab Navigation */}
-            <div style={{ marginLeft: "-1.5rem", marginRight: "-1.5rem" }}>
-              <ul
-                className="nav nav-tabs mt-4 border-bottom border-2"
-                style={{
-                  paddingLeft: "1.5rem",
-                  paddingRight: "1.5rem",
-                  marginBottom: "-2px",
-                }}
-              >
-                {["All Projects", "Contributed to", "Sponsoring"].map((tab) => (
-                  <li className="nav-item" key={tab}>
-                    <button
-                      onClick={() => setActiveTab(tab)}
-                      className={`nav-link border-0 ${
-                        activeTab === tab ? "text-success " : "text-muted"
-                      }`}
-                    >
-                      <span
-                        style={{
-                          background: "transparent",
-                          borderBottom:
-                            activeTab === tab ? "2px solid #198754" : "",
-                          paddingBottom: "8px",
-                          display: "inline-block",
-                        }}
-                      >
-                        {tab}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {role !== "NGO" && (
+              <div style={{ marginLeft: "-1.5rem", marginRight: "-1.5rem" }}>
+                <ul
+                  className="nav nav-tabs mt-4 border-bottom border-2"
+                  style={{
+                    paddingLeft: "1.5rem",
+                    paddingRight: "1.5rem",
+                    marginBottom: "-2px",
+                  }}
+                >
+                  {["All Projects", "Contributed to", "Sponsoring"].map(
+                    (tab) => (
+                      <li className="nav-item" key={tab}>
+                        <button
+                          onClick={() => setActiveTab(tab)}
+                          className={`nav-link border-0 ${
+                            activeTab === tab ? "text-success " : "text-muted"
+                          }`}
+                        >
+                          <span
+                            style={{
+                              background: "transparent",
+                              borderBottom:
+                                activeTab === tab ? "2px solid #198754" : "",
+                              paddingBottom: "8px",
+                              display: "inline-block",
+                            }}
+                          >
+                            {tab}
+                          </span>
+                        </button>
+                      </li>
+                    )
+                  )}
+                </ul>
+              </div>
+            )}
 
             {responseData.length === 0 ? (
               <div

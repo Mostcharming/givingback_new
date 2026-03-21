@@ -67,10 +67,16 @@ const DN_Projects = () => {
   );
 
   useEffect(() => {
+    const isDonorOrCorporate =
+      authState.user?.role === "donor" || authState.user?.role === "corporate";
+
     getProjectStats({});
     getAreas({});
-    fetchDonorProjects({});
-  }, [getProjectStats, getAreas, fetchDonorProjects]);
+
+    if (isDonorOrCorporate) {
+      fetchDonorProjects({});
+    }
+  }, [getProjectStats, getAreas, fetchDonorProjects, authState.user?.role]);
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project: any) => {
