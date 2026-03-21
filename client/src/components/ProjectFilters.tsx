@@ -1,3 +1,5 @@
+import { capitalizeFirstLetter } from "../services/capitalize";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface ProjectFiltersProps {
   statusFilter: string;
@@ -100,7 +102,7 @@ export const ProjectFilters = ({
                 }}
                 onMouseOver={(e) => (e.currentTarget.style.color = "#212529")}
               >
-                <span>{statusFilter}</span>
+                <span>{capitalizeFirstLetter(statusFilter)}</span>
               </button>
               <ul className="dropdown-menu w-100">
                 <li>

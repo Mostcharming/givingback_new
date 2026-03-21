@@ -271,6 +271,13 @@ const routes = [
     layout: "/ngo",
   },
   {
+    path: "/briefs/:id",
+    name: "Briefs",
+    icon: <Clipboard />,
+    component: <Briefs />,
+    layout: "/ngo",
+  },
+  {
     path: "/messages",
     name: "Messages",
     icon: <Mails />,
