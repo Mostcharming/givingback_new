@@ -143,8 +143,8 @@
 
 /* CTA Card */
 .cta-card {
-  border: 1px solid #128330;
-  background-color: #12833051;
+  border: 1px solid #128330 !important;
+  background-color: #1283300f !important;
   border-radius: 0.75rem;
 }
 
@@ -245,7 +245,7 @@
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  background-color: #007bff;
+  background-color: #128330;
   flex-shrink: 0;
   margin-top: 0.25rem;
 }
@@ -279,8 +279,8 @@
 
 /* Sponsor Card */
 .sponsor-card {
-  border: 1px solid rgba(0, 123, 255, 0.25);
-  background-color: #f0f7ff;
+  border: 1px solid #128330 !important;
+  background-color: #1283300f !important;
   border-radius: 0.75rem;
 }
 

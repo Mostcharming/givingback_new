@@ -308,7 +308,7 @@ export default function SingleBriefs() {
         {/* Final CTA Button */}
         <Row>
           <Col>
-            <Button color="primary" size="lg" block className="cta-button">
+            <Button color="success" size="lg" block className="cta-button">
               Apply for this opportunity
             </Button>
           </Col>
