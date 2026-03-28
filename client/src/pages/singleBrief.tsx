@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { capitalize } from "@mui/material";
 import {
   Bookmark,
   Briefcase,
@@ -15,6 +14,7 @@ import { Badge, Button, Card, CardBody, Col, Container, Row } from "reactstrap";
 import place from "../assets/images/home/GivingBackNG-logo.svg";
 import Loading from "../components/home/loading";
 import useBackendService from "../services/backend_service";
+import { capitalizeFirstLetter } from "../services/capitalize";
 import "./singleBrief.css";
 
 const SingleBriefs: React.FC<any> = () => {
@@ -86,7 +86,9 @@ const SingleBriefs: React.FC<any> = () => {
                     strokeLinejoin="round"
                   />
                 </svg>
-                <span className="">{capitalize(brief.title) || "Brief"}</span>
+                <span className="">
+                  {capitalizeFirstLetter(brief.title) || "Brief"}
+                </span>
               </div>
             </Col>
           </Row>
@@ -105,7 +107,9 @@ const SingleBriefs: React.FC<any> = () => {
               />
             </Col>
             <Col xs="12" sm="auto" className="flex-grow-1">
-              <h1 className="banner-title">{capitalize(brief.title)}</h1>
+              <h1 className="banner-title">
+                {capitalizeFirstLetter(brief.title)}
+              </h1>
               <p className="banner-subtitle">
                 Sponsored by {brief.donor?.name || "Sponsor"}
               </p>
@@ -221,7 +225,8 @@ const SingleBriefs: React.FC<any> = () => {
           <Col>
             <h2 className="section-title">About this project</h2>
             <p className="section-text">
-              {brief.description || "No description available."}
+              {capitalizeFirstLetter(brief.description) ||
+                "No description available."}
             </p>
           </Col>
         </Row>
@@ -231,16 +236,37 @@ const SingleBriefs: React.FC<any> = () => {
           <Col>
             <h2 className="section-title">Requirements</h2>
             <div className="requirements-list">
-              {brief.requirements && brief.requirements.length > 0 ? (
-                brief.requirements.map((req: string, index: number) => (
-                  <div key={index} className="requirement-item">
-                    <CheckCircle2 className="requirement-icon" />
-                    <p className="requirement-text">{req}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="section-text">No specific requirements listed.</p>
-              )}
+              <div className="requirement-item">
+                <CheckCircle2 className="requirement-icon" />
+                <p className="requirement-text">
+                  Minimum of 3 years operating experience in healthcare services
+                </p>
+              </div>
+              <div className="requirement-item">
+                <CheckCircle2 className="requirement-icon" />
+                <p className="requirement-text">
+                  Licensed medical professionals on staff or as committed
+                  partners
+                </p>
+              </div>
+              <div className="requirement-item">
+                <CheckCircle2 className="requirement-icon" />
+                <p className="requirement-text">
+                  Demonstrated ability to manage grants of similar size
+                </p>
+              </div>
+              <div className="requirement-item">
+                <CheckCircle2 className="requirement-icon" />
+                <p className="requirement-text">
+                  Experience working in rural or under-served communities
+                </p>
+              </div>
+              <div className="requirement-item">
+                <CheckCircle2 className="requirement-icon" />
+                <p className="requirement-text">
+                  Ability to commence work within 60 days of funding
+                </p>
+              </div>
             </div>
           </Col>
         </Row>
@@ -250,7 +276,11 @@ const SingleBriefs: React.FC<any> = () => {
           <Col>
             <h2 className="section-title">Eligibility</h2>
             <p className="section-text">
-              {brief.eligibility || "No eligibility criteria specified."}
+              This opportunity is open to registered non-profit organizations
+              with 501(c)(3) status or equivalent. Public health departments,
+              community health centers, and other healthcare-focused
+              organizations are encouraged to apply. Collaborative proposals
+              involving multiple organizations are welcome.
             </p>
           </Col>
         </Row>
@@ -280,11 +310,13 @@ const SingleBriefs: React.FC<any> = () => {
                     )}
                     <div className="timeline-content">
                       <p className="timeline-date">
-                        {milestone.dueDate
-                          ? formatDate(milestone.dueDate)
+                        {milestone.due_date
+                          ? formatDate(milestone.due_date)
                           : "TBD"}
                       </p>
-                      <p className="timeline-event">{milestone.title}</p>
+                      <p className="timeline-event">
+                        {capitalizeFirstLetter(milestone.milestone)}
+                      </p>
                     </div>
                   </div>
                 ))
