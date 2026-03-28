@@ -602,10 +602,13 @@ export const CreateProjectBriefModal: React.FC<
                         placeholder="Select state"
                         required
                         onChange={handleStateChange}
-                        options={Array.from(States.keys()).map((state) => ({
-                          value: state,
-                          label: state,
-                        }))}
+                        options={[
+                          { value: "Nationwide", label: "Nationwide" },
+                          ...Array.from(States.keys()).map((state) => ({
+                            value: state,
+                            label: state,
+                          })),
+                        ]}
                         value={
                           selectedState
                             ? { value: selectedState, label: selectedState }
@@ -646,10 +649,17 @@ export const CreateProjectBriefModal: React.FC<
                         placeholder="Select LGA"
                         required
                         onChange={handleLGAChange}
-                        options={lgas.map((lga) => ({
-                          value: lga,
-                          label: lga,
-                        }))}
+                        options={
+                          selectedState === "Nationwide"
+                            ? [{ value: "All LGAs", label: "All LGAs" }]
+                            : [
+                                { value: "All LGAs", label: "All LGAs" },
+                                ...lgas.map((lga) => ({
+                                  value: lga,
+                                  label: lga,
+                                })),
+                              ]
+                        }
                         value={
                           selectedLGA
                             ? { value: selectedLGA, label: selectedLGA }

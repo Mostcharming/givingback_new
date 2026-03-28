@@ -22,6 +22,7 @@ export interface Project {
   applications: number;
   endDate?: string;
   state?: string;
+  ispublic?: number;
   capital?: string;
   createdAt?: string;
 }

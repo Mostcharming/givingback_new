@@ -125,7 +125,8 @@ export const ProjectCard = ({ project }: { project: Project }) => {
 
   const handlePublish = () => {
     setIsPublishing(true);
-    publishProject({ status: "brief" });
+    const statusToPublish = project.ispublic === 1 ? "brief" : "active";
+    publishProject({ status: statusToPublish });
   };
 
   const handleEdit = () => {

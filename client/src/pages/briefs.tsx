@@ -137,8 +137,17 @@ const Briefs = () => {
                   <Button
                     className="btn mb-3 px-5 py-3 col-12 col-md-6 col-lg-8"
                     style={{ border: "none", background: "#02a95c" }}
+                    onClick={() => {
+                      setCurrentPage(1);
+                      setCategoryFilter("All Categories");
+                      setDateFilter("Any time");
+                      fetchBriefs({
+                        page: 1,
+                        status: "brief",
+                      });
+                    }}
                   >
-                    Check again later
+                    Check again
                   </Button>
 
                   {/* Notification Text */}
@@ -156,6 +165,7 @@ const Briefs = () => {
                       onStatusChange={() => {}}
                       onCategoryChange={setCategoryFilter}
                       onDateChange={setDateFilter}
+                      showStatusFilter={false}
                     />
 
                     <div className="mt-4">

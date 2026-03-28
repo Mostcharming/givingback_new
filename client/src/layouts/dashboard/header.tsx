@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate } from "react-router-dom";
 // reactstrap components
 import { FaChevronDown } from "react-icons/fa";
@@ -20,7 +21,7 @@ import { useContent } from "../../services/useContext";
 import { logout_auth } from "../../store/reducers/authReducer";
 import { RootState } from "../../types";
 
-const AdminNavbar: React.FC<any> = (props) => {
+const AdminNavbar: React.FC<any> = () => {
   const { currentState } = useContent();
   const navigate = useNavigate();
   const dispatch: ThunkDispatch<RootState, unknown, any> = useDispatch();
@@ -45,7 +46,7 @@ const AdminNavbar: React.FC<any> = (props) => {
         id="navbar-main"
       >
         <Container
-          style={{ marginTop: "50px", borderBottom: "1px solid #ccc" }}
+          style={{ borderBottom: "1px solid #ccc" }}
           fluid
           className="pt-4 pb-3 align-items-center d-none d-md-flex"
           navbar

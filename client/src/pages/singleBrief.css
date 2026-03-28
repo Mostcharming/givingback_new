@@ -1,0 +1,436 @@
+/* singleBrief.css - Reactstrap styling for Single Brief page */
+
+.brief-page {
+  min-height: 100vh;
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb-section {
+  padding: 1rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.breadcrumb-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #6c757d;
+}
+
+/* Header Banner */
+.header-banner {
+  background: #128330;
+  color: white;
+  padding: 1.5rem 0;
+}
+
+.banner-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+@media (max-width: 576px) {
+  .banner-img {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+.banner-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+@media (max-width: 576px) {
+  .banner-title {
+    font-size: 1.25rem;
+  }
+}
+
+.banner-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0.5rem 0 0 0;
+}
+
+@media (max-width: 576px) {
+  .banner-subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+.icon-button {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.icon-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+}
+
+.icon-lg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Main Content */
+.main-content {
+  padding: 2rem 0;
+}
+
+@media (max-width: 576px) {
+  .main-content {
+    padding: 1rem 0;
+  }
+}
+
+/* Details Row */
+.details-row {
+  margin-bottom: 2rem;
+}
+
+.detail-item {
+  padding-bottom: 1rem;
+}
+
+.detail-item .d-flex {
+  align-items: flex-start;
+}
+
+.detail-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #6c757d;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.detail-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.detail-value {
+  font-weight: 500;
+  color: #212529;
+  margin: 0.25rem 0 0 0;
+}
+
+/* Tags/Badges */
+.badge {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.badge-success {
+  background-color: #d4edda;
+  color: #128330;
+}
+
+.badge-outline-primary {
+  background-color: white;
+  border: 1px solid #128330;
+  color: #128330;
+}
+
+/* CTA Card */
+.cta-card {
+  border: 1px solid #128330;
+  background-color: #12833051;
+  border-radius: 0.75rem;
+}
+
+.cta-card .card-body {
+  padding: 1.5rem;
+}
+
+@media (max-width: 576px) {
+  .cta-card .card-body {
+    padding: 1rem;
+  }
+}
+
+.cta-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+}
+
+@media (max-width: 576px) {
+  .cta-title {
+    font-size: 1.25rem;
+  }
+}
+
+.cta-subtitle {
+  color: #495057;
+  margin: 0;
+}
+
+/* Section Styling */
+.section-spacing {
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 576px) {
+  .section-title {
+    font-size: 1.25rem;
+  }
+}
+
+.section-text {
+  color: #495057;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Requirements */
+.requirements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.requirement-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.requirement-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #6c757d;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.requirement-text {
+  color: #495057;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 1.5rem;
+  position: relative;
+}
+
+.timeline-marker {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #007bff;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 0.875rem;
+  top: 2.5rem;
+  width: 0.25rem;
+  height: 3rem;
+  background-color: #dee2e6;
+}
+
+.timeline-content {
+  padding-top: 0.25rem;
+  flex-grow: 1;
+}
+
+.timeline-date {
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.timeline-event {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0 0;
+}
+
+/* Sponsor Card */
+.sponsor-card {
+  border: 1px solid rgba(0, 123, 255, 0.25);
+  background-color: #f0f7ff;
+  border-radius: 0.75rem;
+}
+
+.sponsor-card .card-body {
+  padding: 1.5rem;
+}
+
+@media (max-width: 576px) {
+  .sponsor-card .card-body {
+    padding: 1rem;
+  }
+}
+
+.sponsor-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sponsor-name {
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+}
+
+.sponsor-description {
+  color: #495057;
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0 0;
+  line-height: 1.6;
+}
+
+/* CTA Button */
+.cta-button {
+  width: 100%;
+  padding: 1rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: #0056b3;
+}
+
+/* Utility Classes */
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.text-light {
+  color: #6c757d;
+}
+
+.text-dark {
+  color: #212529;
+}
+
+.text-medium {
+  color: #495057;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+
+.object-cover {
+  object-fit: cover;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.align-items-start {
+  align-items: flex-start;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .main-content {
+    padding: 1.5rem 0;
+  }
+
+  .section-spacing {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .gap-2 {
+    gap: 0.5rem;
+  }
+
+  .gap-3 {
+    gap: 0.75rem;
+  }
+
+  .gap-4 {
+    gap: 1rem;
+  }
+
+  .gap-6 {
+    gap: 1rem;
+  }
+
+  .timeline-item {
+    gap: 1rem;
+  }
+
+  .timeline-marker {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .timeline-line {
+    left: 0.75rem;
+    height: 2.5rem;
+  }
+}

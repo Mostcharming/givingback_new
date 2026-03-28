@@ -1355,6 +1355,7 @@ export const getDonorProjects = async (
         "organization_id",
         "multi_ngo",
         "cost",
+        "ispublic",
         "scope",
         "allocated",
         "beneficiary_overview",

@@ -41,6 +41,7 @@ import ProjectViewDetail from "../pages/project/single";
 import MilestoneUpdatesPage from "../pages/project/single/MilestoneUpdatesPage";
 import AdminDashboard from "../pages/report/dashboard";
 import SendMoney from "../pages/send";
+import SingleBriefs from "../pages/singleBrief";
 
 const routes = [
   {
@@ -272,9 +273,8 @@ const routes = [
   },
   {
     path: "/briefs/:id",
-    name: "Briefs",
     icon: <Clipboard />,
-    component: <Briefs />,
+    component: <SingleBriefs />,
     layout: "/ngo",
   },
   {

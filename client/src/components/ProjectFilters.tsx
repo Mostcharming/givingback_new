@@ -12,6 +12,7 @@ interface ProjectFiltersProps {
   onDateChange: (date: string) => void;
   locationFilter?: string;
   onLocationChange?: (location: string) => void;
+  showStatusFilter?: boolean;
 }
 
 export const ProjectFilters = ({
@@ -25,6 +26,7 @@ export const ProjectFilters = ({
   onDateChange,
   locationFilter = "All locations",
   onLocationChange,
+  showStatusFilter = true,
 }: ProjectFiltersProps) => {
   const isDonorOrCorporate = role === "donor" || role === "corporate";
 
@@ -78,7 +80,7 @@ export const ProjectFilters = ({
     >
       <div className="row">
         {/* Status Filter - Only show for NGO and Admin */}
-        {!isDonorOrCorporate && (
+        {!isDonorOrCorporate && showStatusFilter && (
           <div className="mr-2">
             <div>
               <label className="form-label text-muted small fw-normal">
