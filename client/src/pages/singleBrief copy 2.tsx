@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { capitalize } from "@mui/material";
 import {
   Bookmark,
   Briefcase,
@@ -8,56 +6,10 @@ import {
   Link as LinkIcon,
   MapPin,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
 import { Badge, Button, Card, CardBody, Col, Container, Row } from "reactstrap";
-import place from "../assets/images/home/GivingBackNG-logo.svg";
-import Loading from "../components/home/loading";
-import useBackendService from "../services/backend_service";
 import "./singleBrief.css";
 
-const SingleBriefs: React.FC<any> = () => {
-  const [brief, setBrief] = useState<any>({});
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-
-  const { mutate: getBriefData, isLoading } = useBackendService(
-    "/allprojects",
-    "GET",
-    {
-      onSuccess: (res: any) => {
-        setBrief(res.projects[0]);
-      },
-      onError: () => {
-        toast.error("Error getting brief data");
-      },
-    }
-  );
-
-  useEffect(() => {
-    getBriefData({ projectType: "present", id: id, status: "brief" });
-  }, [id, getBriefData]);
-
-  const handleBack = () => {
-    navigate("/briefs");
-  };
-
-  if (isLoading) {
-    return <Loading type={"inline"} />;
-  }
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const milestones = brief.milestones || [];
-
+export default function SingleBriefs() {
   return (
     <div className="brief-page">
       {/* Breadcrumb Navigation */}
@@ -66,13 +18,7 @@ const SingleBriefs: React.FC<any> = () => {
           <Row>
             <Col>
               <div className="d-flex align-items-center gap-2 text-sm">
-                <span
-                  className="text-decoration-none cursor-pointer"
-                  onClick={handleBack}
-                  style={{ cursor: "pointer" }}
-                >
-                  Briefs
-                </span>
+                <span className="">Briefs</span>
                 <svg
                   className="breadcrumb-icon"
                   viewBox="0 0 19 19"
@@ -86,7 +32,7 @@ const SingleBriefs: React.FC<any> = () => {
                     strokeLinejoin="round"
                   />
                 </svg>
-                <span className="">{capitalize(brief.title) || "Brief"}</span>
+                <span className="">Community Health Initiative</span>
               </div>
             </Col>
           </Row>
@@ -99,20 +45,20 @@ const SingleBriefs: React.FC<any> = () => {
           <Row className="align-items-start">
             <Col xs="auto" className="mb-3 mb-sm-0">
               <img
-                src={brief.projectImages?.[0]?.image || place}
-                alt={brief.title || "Brief"}
+                src="https://api.builder.io/api/v1/image/assets/TEMP/f6f64a63c375d830364f82103fd5f57910b41881?width=100"
+                alt="Community Health Initiative"
                 className="banner-img"
               />
             </Col>
             <Col xs="12" sm="auto" className="flex-grow-1">
-              <h1 className="banner-title">{capitalize(brief.title)}</h1>
+              <h1 className="banner-title">Community Health Initiative</h1>
               <p className="banner-subtitle">
-                {brief.donor?.organizationName || "Sponsor"}
+                Sponsored by HealthPlus Foundation
               </p>
             </Col>
             <Col xs="auto" className="d-flex gap-2">
               <Button color="link" className="icon-button" title="Share">
-                <LinkIcon className="icon-sm text-white" />
+                <LinkIcon size={10} className="icon-sm text-white" />
               </Button>
               <Button color="link" className="icon-button" title="Bookmark">
                 <Bookmark className="icon-sm text-white" />
@@ -132,9 +78,7 @@ const SingleBriefs: React.FC<any> = () => {
               <Briefcase className="detail-icon" />
               <div>
                 <p className="detail-label">Budget</p>
-                <p className="detail-value">
-                  NGN {brief.cost?.toLocaleString() || "N/A"}
-                </p>
+                <p className="detail-value">$75,000 - $120,000</p>
               </div>
             </div>
           </Col>
@@ -145,7 +89,7 @@ const SingleBriefs: React.FC<any> = () => {
               <MapPin className="detail-icon" />
               <div>
                 <p className="detail-label">Location</p>
-                <p className="detail-value">{brief.state || "N/A"}</p>
+                <p className="detail-value">South west, Nigeria</p>
               </div>
             </div>
           </Col>
@@ -156,9 +100,7 @@ const SingleBriefs: React.FC<any> = () => {
               <Calendar className="detail-icon" />
               <div>
                 <p className="detail-label">Deadline</p>
-                <p className="detail-value">
-                  {brief.endDate ? formatDate(brief.endDate) : "N/A"}
-                </p>
+                <p className="detail-value">May 30, 2025</p>
               </div>
             </div>
           </Col>
@@ -168,16 +110,18 @@ const SingleBriefs: React.FC<any> = () => {
         <Row className="mb-4">
           <Col>
             <div className="d-flex flex-wrap gap-2">
-              {brief.category && (
-                <Badge color="success" pill>
-                  {brief.category}
-                </Badge>
-              )}
-              {brief.scope && (
-                <Badge color="success" outline pill>
-                  {brief.scope}
-                </Badge>
-              )}
+              <Badge color="success" pill>
+                Healthcare
+              </Badge>
+              <Badge color="success" outline pill>
+                Rural health
+              </Badge>
+              <Badge color="success" outline pill>
+                Preventive care
+              </Badge>
+              <Badge color="success" outline pill>
+                Mobile services
+              </Badge>
             </div>
           </Col>
         </Row>
@@ -191,11 +135,8 @@ const SingleBriefs: React.FC<any> = () => {
                   <Col md="8" xs="12" className="mb-3 mb-md-0">
                     <h2 className="cta-title">Ready to make an impact?</h2>
                     <p className="cta-subtitle">
-                      Apply before{" "}
-                      {brief.endDate
-                        ? formatDate(brief.endDate)
-                        : "the deadline"}{" "}
-                      to be considered for this opportunity
+                      Apply before May 30, 2025 to be considered for this
+                      opportunity
                     </p>
                   </Col>
                   <Col md="4" xs="12" className="text-md-end">
@@ -219,7 +160,15 @@ const SingleBriefs: React.FC<any> = () => {
           <Col>
             <h2 className="section-title">About this project</h2>
             <p className="section-text">
-              {brief.description || "No description available."}
+              Funding for mobile health clinics in under-served rural areas to
+              provide basic healthcare and preventive services. This initiative
+              aims to address the growing healthcare disparities in rural
+              communities where access to medical services is limited. The
+              program will focus on preventive care, basic treatments, health
+              education, and connecting patients to...{" "}
+              <Button color="link" size="sm" className="p-0">
+                Read more
+              </Button>
             </p>
           </Col>
         </Row>
@@ -229,16 +178,37 @@ const SingleBriefs: React.FC<any> = () => {
           <Col>
             <h2 className="section-title">Requirements</h2>
             <div className="requirements-list">
-              {brief.requirements && brief.requirements.length > 0 ? (
-                brief.requirements.map((req: string, index: number) => (
-                  <div key={index} className="requirement-item">
-                    <CheckCircle2 className="requirement-icon" />
-                    <p className="requirement-text">{req}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="section-text">No specific requirements listed.</p>
-              )}
+              <div className="requirement-item">
+                <CheckCircle2 className="requirement-icon" />
+                <p className="requirement-text">
+                  Minimum of 3 years operating experience in healthcare services
+                </p>
+              </div>
+              <div className="requirement-item">
+                <CheckCircle2 className="requirement-icon" />
+                <p className="requirement-text">
+                  Licensed medical professionals on staff or as committed
+                  partners
+                </p>
+              </div>
+              <div className="requirement-item">
+                <CheckCircle2 className="requirement-icon" />
+                <p className="requirement-text">
+                  Demonstrated ability to manage grants of similar size
+                </p>
+              </div>
+              <div className="requirement-item">
+                <CheckCircle2 className="requirement-icon" />
+                <p className="requirement-text">
+                  Experience working in rural or under-served communities
+                </p>
+              </div>
+              <div className="requirement-item">
+                <CheckCircle2 className="requirement-icon" />
+                <p className="requirement-text">
+                  Ability to commence work within 60 days of funding
+                </p>
+              </div>
             </div>
           </Col>
         </Row>
@@ -248,7 +218,11 @@ const SingleBriefs: React.FC<any> = () => {
           <Col>
             <h2 className="section-title">Eligibility</h2>
             <p className="section-text">
-              {brief.eligibility || "No eligibility criteria specified."}
+              This opportunity is open to registered non-profit organizations
+              with 501(c)(3) status or equivalent. Public health departments,
+              community health centers, and other healthcare-focused
+              organizations are encouraged to apply. Collaborative proposals
+              involving multiple organizations are welcome.
             </p>
           </Col>
         </Row>
@@ -258,8 +232,11 @@ const SingleBriefs: React.FC<any> = () => {
           <Col>
             <h2 className="section-title">Expected Impact</h2>
             <p className="section-text">
-              {brief.expectedImpact ||
-                "No expected impact information specified."}
+              The selected organization(s) will be expected to reach at least
+              2,000 individuals with direct services in the first year, with
+              increasing outreach in subsequent years. Priority will be given to
+              proposals that demonstrate potential for significant health
+              outcome improvements and community engagement.
             </p>
           </Col>
         </Row>
@@ -269,28 +246,41 @@ const SingleBriefs: React.FC<any> = () => {
           <Col>
             <h2 className="section-title">Timeline</h2>
             <div className="timeline">
-              {milestones && milestones.length > 0 ? (
-                milestones.map((milestone: any, index: number) => (
-                  <div key={index} className="timeline-item">
-                    <div className="timeline-marker" />
-                    {index < milestones.length - 1 && (
-                      <div className="timeline-line" />
-                    )}
-                    <div className="timeline-content">
-                      <p className="timeline-date">
-                        {milestone.dueDate
-                          ? formatDate(milestone.dueDate)
-                          : "TBD"}
-                      </p>
-                      <p className="timeline-event">{milestone.title}</p>
-                    </div>
+              {[
+                {
+                  date: "May 30, 2025",
+                  event: "Application deadline",
+                },
+                {
+                  date: "June 15, 2025",
+                  event: "Finalist notifications",
+                },
+                {
+                  date: "June 25-30, 2025",
+                  event: "Finalist interviews",
+                },
+                {
+                  date: "July 15, 2025",
+                  event: "Candidate announcement",
+                },
+                {
+                  date: "August 1, 2025",
+                  event: "Funding disbursement",
+                },
+                {
+                  date: "September 1, 2025",
+                  event: "Project launch",
+                },
+              ].map((item, index) => (
+                <div key={index} className="timeline-item">
+                  <div className="timeline-marker" />
+                  {index < 5 && <div className="timeline-line" />}
+                  <div className="timeline-content">
+                    <p className="timeline-date">{item.date}</p>
+                    <p className="timeline-event">{item.event}</p>
                   </div>
-                ))
-              ) : (
-                <p className="section-text">
-                  No timeline information available.
-                </p>
-              )}
+                </div>
+              ))}
             </div>
           </Col>
         </Row>
@@ -304,18 +294,17 @@ const SingleBriefs: React.FC<any> = () => {
                 <Row className="mt-3">
                   <Col xs="auto">
                     <img
-                      src={brief.donor?.profileImage || place}
-                      alt={brief.donor?.organizationName || "Sponsor"}
+                      src="https://api.builder.io/api/v1/image/assets/TEMP/c7abff9c932d5d0188d0a8e66686898bcbe29143?width=80"
+                      alt="HealthPlus Foundation"
                       className="sponsor-logo"
                     />
                   </Col>
                   <Col>
-                    <p className="sponsor-name">
-                      {brief.donor?.organizationName || "Sponsor"}
-                    </p>
+                    <p className="sponsor-name">Community Health Initiative</p>
                     <p className="sponsor-description">
-                      {brief.donor?.bio ||
-                        "Organization dedicated to making a positive impact."}
+                      HealthPlus Foundation is committed to improving healthcare
+                      access in underserved communities through strategic grants
+                      and partnerships with effective organizations.
                     </p>
                   </Col>
                 </Row>
@@ -327,7 +316,7 @@ const SingleBriefs: React.FC<any> = () => {
         {/* Final CTA Button */}
         <Row>
           <Col>
-            <Button color="success" size="lg" block className="cta-button">
+            <Button color="primary" size="lg" block className="cta-button">
               Apply for this opportunity
             </Button>
           </Col>
@@ -335,6 +324,4 @@ const SingleBriefs: React.FC<any> = () => {
       </Container>
     </div>
   );
-};
-
-export default SingleBriefs;
+}
