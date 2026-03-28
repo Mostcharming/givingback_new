@@ -107,7 +107,7 @@ const SingleBriefs: React.FC<any> = () => {
             <Col xs="12" sm="auto" className="flex-grow-1">
               <h1 className="banner-title">{capitalize(brief.title)}</h1>
               <p className="banner-subtitle">
-                {brief.donor?.name || "Sponsor"}
+                Sponsored by {brief.donor?.name || "Sponsor"}
               </p>
             </Col>
             <Col xs="auto" className="d-flex gap-2">
@@ -145,7 +145,9 @@ const SingleBriefs: React.FC<any> = () => {
               <MapPin className="detail-icon" />
               <div>
                 <p className="detail-label">Location</p>
-                <p className="detail-value">{brief.state || "N/A"}</p>
+                <p className="detail-value">
+                  {brief.state || "N/A"}, {brief.city || "N/A"}
+                </p>
               </div>
             </div>
           </Col>
