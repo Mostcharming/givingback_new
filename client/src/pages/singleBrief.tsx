@@ -107,7 +107,7 @@ const SingleBriefs: React.FC<any> = () => {
             <Col xs="12" sm="auto" className="flex-grow-1">
               <h1 className="banner-title">{capitalize(brief.title)}</h1>
               <p className="banner-subtitle">
-                {brief.donor?.organizationName || "Sponsor"}
+                {brief.donor?.name || "Sponsor"}
               </p>
             </Col>
             <Col xs="auto" className="d-flex gap-2">
@@ -304,14 +304,14 @@ const SingleBriefs: React.FC<any> = () => {
                 <Row className="mt-3">
                   <Col xs="auto">
                     <img
-                      src={brief.donor?.profileImage || place}
-                      alt={brief.donor?.organizationName || "Sponsor"}
+                      src={brief.donor?.image || place}
+                      alt={brief.donor?.name || "Sponsor"}
                       className="sponsor-logo"
                     />
                   </Col>
                   <Col>
                     <p className="sponsor-name">
-                      {brief.donor?.organizationName || "Sponsor"}
+                      {brief.donor?.name || "Sponsor"}
                     </p>
                     <p className="sponsor-description">
                       {brief.donor?.bio ||
