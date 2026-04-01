@@ -1410,11 +1410,20 @@ export const getDonorProjects = async (
           );
         }
 
+        // Check if milestones are added for this project
+        const milestonesResult: any = await db("milestone")
+          .where({ project_id: project.id })
+          .count("id as count")
+          .first();
+        const hasMilestones = (milestonesResult?.count || 0) > 0;
+
         return {
           ...project,
           organization: project.multi_ngo
             ? organizations
             : organizations[0] || null,
+          hasMilestones: hasMilestones,
+          milestonesCount: milestonesResult?.count || 0,
         };
       })
     );
@@ -2024,10 +2033,10 @@ export const editProject = async (
       return;
     }
 
-    if (project.status !== "brief") {
+    if (project.status === "active") {
       res.status(400).json({
         status: "fail",
-        error: `Project is in ${project.status} status. Only projects with brief status can be edited`,
+        error: `Project is in ${project.status} status. Active projects cannot be edited`,
       });
       return;
     }

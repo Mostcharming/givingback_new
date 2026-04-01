@@ -25,6 +25,11 @@ export interface Project {
   ispublic?: number;
   capital?: string;
   createdAt?: string;
+  hasMilestones?: boolean;
+  milestonesCount?: number;
+  allocated?: number | null;
+  multi_ngo?: number;
+  organization_id?: number | null;
 }
 
 export interface StatCardItem {

@@ -1,5 +1,6 @@
 import {
   Calendar,
+  Check,
   CheckCheck,
   CheckCircle,
   FileText,
@@ -40,6 +41,197 @@ const getStatusIcon = (status: string) => {
     default:
       return null;
   }
+};
+
+// Progress bar component for project completion tracking
+const ProjectProgressBar = ({ project }: { project: Project }) => {
+  const [hoveredStep, setHoveredStep] = React.useState<string | null>(null);
+
+  const steps = [
+    {
+      label: "Create Brief",
+      key: "brief",
+      description: "Create and save your project brief with details",
+    },
+    {
+      label: "Add Milestones",
+      key: "milestones",
+      description: "Add milestones to track project progress",
+    },
+    {
+      label: "Publish",
+      key: "publish",
+      description: "Publish the brief to make it visible to NGOs",
+    },
+    {
+      label: "Review Apps",
+      key: "review",
+      description: "Review and manage NGO applications",
+    },
+    {
+      label: "Allocate Funds",
+      key: "allocate",
+      description: "Allocate budget to selected NGOs",
+    },
+  ];
+
+  const getCompletedSteps = () => {
+    const completed: string[] = [];
+
+    // Step 1: Create Brief (draft status = brief created)
+    if (project.status && project.status !== "draft") {
+      completed.push("brief");
+    }
+
+    // Step 2: Add Milestones
+    if (project.hasMilestones) {
+      completed.push("milestones");
+    }
+
+    // Step 3: Publish (brief or active status)
+    if (
+      ["brief", "active", "completed"].includes(
+        project.status?.toLowerCase() || ""
+      )
+    ) {
+      completed.push("publish");
+    }
+
+    // Step 4: Review Applications (when organization is assigned - multi_ngo or organization_id exists)
+    if (project.multi_ngo === 1 || project.organization_id) {
+      completed.push("review");
+    }
+
+    // Step 5: Allocate Funds (active or completed)
+    if (
+      project.allocated ||
+      project.status === "active" ||
+      project.status === "completed"
+    ) {
+      completed.push("allocate");
+    }
+
+    return completed;
+  };
+
+  const completedSteps = getCompletedSteps();
+
+  const colors = ["#FF6B6B", "#FFD93D", "#6BCB77", "#4D96FF", "#A78BFA"];
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        position: "relative",
+      }}
+    >
+      <div style={{ display: "flex", gap: "3px", alignItems: "center" }}>
+        {steps.map((step, index) => (
+          <div
+            key={step.key}
+            style={{
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onMouseEnter={() => setHoveredStep(step.key)}
+            onMouseLeave={() => setHoveredStep(null)}
+          >
+            <div
+              style={{
+                width: "20px",
+                height: "20px",
+                borderRadius: "50%",
+                backgroundColor: completedSteps.includes(step.key)
+                  ? colors[index]
+                  : "#E5E7EB",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "10px",
+                fontWeight: "700",
+                color: completedSteps.includes(step.key) ? "#fff" : "#9CA3AF",
+                transition: "all 0.3s ease",
+                cursor: "pointer",
+                position: "relative",
+                zIndex: 10,
+              }}
+            >
+              {completedSteps.includes(step.key) && (
+                <Check size={12} strokeWidth={3} />
+              )}
+            </div>
+
+            {/* Tooltip - shows on hover */}
+            {hoveredStep === step.key && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "100%",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  backgroundColor: "#1F2937",
+                  color: "#fff",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                  fontWeight: "500",
+                  whiteSpace: "nowrap",
+                  marginBottom: "10px",
+                  zIndex: 1000,
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                  animation: "fadeIn 0.2s ease",
+                }}
+              >
+                {step.description}
+                {/* Arrow pointing down */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    borderLeft: "5px solid transparent",
+                    borderRight: "5px solid transparent",
+                    borderTop: "5px solid #1F2937",
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div
+        style={{
+          fontSize: "11px",
+          fontWeight: "600",
+          color: "#4F46E5",
+          whiteSpace: "nowrap",
+          minWidth: "30px",
+          textAlign: "center",
+        }}
+      >
+        {completedSteps.length}/{steps.length}
+      </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-5px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+        }
+      `}</style>
+    </div>
+  );
 };
 
 export const StatusBadge = ({ status }: { status: string }) => {
@@ -182,8 +374,9 @@ export const ProjectCard = ({ project }: { project: Project }) => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "flex-start",
-                  gap: "8px",
+                  gap: "12px",
                   marginBottom: "8px",
+                  flexWrap: "wrap",
                 }}
               >
                 <h4
@@ -195,7 +388,16 @@ export const ProjectCard = ({ project }: { project: Project }) => {
                 >
                   {project.title}
                 </h4>
-                <StatusBadge status={project.status} />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  <StatusBadge status={project.status} />
+                  <ProjectProgressBar project={project} />
+                </div>
               </div>
               <p style={STYLES.projectDescription}>{project.description}</p>
 
