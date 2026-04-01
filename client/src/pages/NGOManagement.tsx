@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CheckCircle, FileText, Monitor } from "lucide-react";
+import { CheckCircle, FileText, Monitor, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -8,6 +8,7 @@ import { Button, Col, Container, Row } from "reactstrap";
 import EmptyNGO from "../assets/images/emptyngo.svg";
 import AddNGOModal from "../components/AddNGOModal";
 import NGOCard from "../components/NGOCard";
+import NGODetailsModal from "../components/NGODetailsModal";
 import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
 import "./ngo-management.css";
@@ -26,6 +27,9 @@ const NGOManagement = () => {
   const [yourNgos, setYourNgos] = useState([]);
   const [verifiedNgos, setVerifiedNgos] = useState([]);
   const [areas, setAreas] = useState<Array<{ name: string }>>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedNGO, setSelectedNGO] = useState<any>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const tabs = ["Paper-based NGOs", "Your NGOs", "Verified NGOs"];
 
@@ -112,9 +116,37 @@ const NGOManagement = () => {
     setIsModalOpen(!isModalOpen);
   };
 
+  const getFilteredNgos = () => {
+    const query = searchQuery.toLowerCase();
+    if (activeTab === "Paper-based NGOs") {
+      return paperBasedNgos.filter((ngo: any) =>
+        ngo.name?.toLowerCase().includes(query)
+      );
+    } else if (activeTab === "Your NGOs") {
+      return yourNgos.filter((ngo: any) =>
+        ngo.name?.toLowerCase().includes(query)
+      );
+    } else if (activeTab === "Verified NGOs") {
+      return verifiedNgos.filter((ngo: any) =>
+        ngo.name?.toLowerCase().includes(query)
+      );
+    }
+    return [];
+  };
+
   const handleModalSuccess = () => {
     // Refresh the data
     fetchOrganizationCounts({});
+  };
+
+  const handleViewProfile = (ngo: any) => {
+    setSelectedNGO(ngo);
+    setIsProfileModalOpen(true);
+  };
+
+  const handleCloseProfileModal = () => {
+    setIsProfileModalOpen(false);
+    setSelectedNGO(null);
   };
 
   return (
@@ -265,15 +297,96 @@ const NGOManagement = () => {
         </div>
       </div>
 
+      {/* Search Box */}
+      <div style={{ padding: "0px 0px 24px 0px" }}>
+        <div
+          style={{
+            position: "relative",
+            maxWidth: "450px",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <Search
+            size={18}
+            style={{
+              position: "absolute",
+              left: "14px",
+              color: "#999",
+              pointerEvents: "none",
+              zIndex: 1,
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Search NGOs by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px 16px 12px 40px",
+              fontSize: "14px",
+              fontWeight: "500",
+              border: "2px solid #e8e8e8",
+              borderRadius: "8px",
+              outline: "none",
+              transition: "all 0.3s ease",
+              boxSizing: "border-box",
+              backgroundColor: "#ffffff",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = "#28a745";
+              e.currentTarget.style.boxShadow =
+                "0 4px 12px rgba(40, 167, 69, 0.15)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = "#e8e8e8";
+              e.currentTarget.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.05)";
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              style={{
+                position: "absolute",
+                right: "12px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#999",
+                transition: "color 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                (e.target as HTMLElement).style.color = "#666";
+              }}
+              onMouseLeave={(e) => {
+                (e.target as HTMLElement).style.color = "#999";
+              }}
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Tab Content */}
       <div className="ngo-tab-content">
         {activeTab === "Paper-based NGOs" && (
           <div className="tab-pane">
-            {paperBasedNgos.length > 0 ? (
+            {getFilteredNgos().length > 0 ? (
               <div>
                 <div>
-                  {paperBasedNgos.map((ngo) => (
-                    <NGOCard key={ngo.id} ngo={ngo} />
+                  {getFilteredNgos().map((ngo) => (
+                    <NGOCard
+                      key={ngo.id}
+                      ngo={ngo}
+                      onViewProfile={handleViewProfile}
+                    />
                   ))}
                 </div>
               </div>
@@ -285,7 +398,9 @@ const NGOManagement = () => {
                   style={{ maxWidth: "200px", marginBottom: "20px" }}
                 />
                 <p style={{ fontSize: "16px", color: "#666666" }}>
-                  No data available at the moment
+                  {searchQuery
+                    ? "No NGOs found matching your search"
+                    : "No data available at the moment"}
                 </p>
               </div>
             )}
@@ -293,7 +408,7 @@ const NGOManagement = () => {
         )}
         {activeTab === "Your NGOs" && (
           <div className="tab-pane">
-            {yourNgos.length > 0 ? (
+            {getFilteredNgos().length > 0 ? (
               <div>
                 <div style={{ marginBottom: "16px" }}>
                   <p
@@ -303,12 +418,16 @@ const NGOManagement = () => {
                       color: "#1a1a1a",
                     }}
                   >
-                    Your NGOs: {yourNgos.length}
+                    Your NGOs: {getFilteredNgos().length}
                   </p>
                 </div>
                 <div>
-                  {yourNgos.map((ngo) => (
-                    <NGOCard key={ngo.id} ngo={ngo} />
+                  {getFilteredNgos().map((ngo) => (
+                    <NGOCard
+                      key={ngo.id}
+                      ngo={ngo}
+                      onViewProfile={handleViewProfile}
+                    />
                   ))}
                 </div>
               </div>
@@ -320,7 +439,9 @@ const NGOManagement = () => {
                   style={{ maxWidth: "200px", marginBottom: "20px" }}
                 />
                 <p style={{ fontSize: "16px", color: "#666666" }}>
-                  No data available at the moment
+                  {searchQuery
+                    ? "No NGOs found matching your search"
+                    : "No data available at the moment"}
                 </p>
               </div>
             )}
@@ -328,7 +449,7 @@ const NGOManagement = () => {
         )}
         {activeTab === "Verified NGOs" && (
           <div className="tab-pane">
-            {verifiedNgos.length > 0 ? (
+            {getFilteredNgos().length > 0 ? (
               <div>
                 <div style={{ marginBottom: "16px" }}>
                   <p
@@ -338,12 +459,16 @@ const NGOManagement = () => {
                       color: "#1a1a1a",
                     }}
                   >
-                    Verified NGOs: {verifiedNgos.length}
+                    Verified NGOs: {getFilteredNgos().length}
                   </p>
                 </div>
                 <div>
-                  {verifiedNgos.map((ngo) => (
-                    <NGOCard key={ngo.id} ngo={ngo} />
+                  {getFilteredNgos().map((ngo) => (
+                    <NGOCard
+                      key={ngo.id}
+                      ngo={ngo}
+                      onViewProfile={handleViewProfile}
+                    />
                   ))}
                 </div>
               </div>
@@ -355,13 +480,22 @@ const NGOManagement = () => {
                   style={{ maxWidth: "200px", marginBottom: "20px" }}
                 />
                 <p style={{ fontSize: "16px", color: "#666666" }}>
-                  No data available at the moment
+                  {searchQuery
+                    ? "No NGOs found matching your search"
+                    : "No data available at the moment"}
                 </p>
               </div>
             )}
           </div>
         )}
       </div>
+
+      {/* NGO Details Modal */}
+      <NGODetailsModal
+        open={isProfileModalOpen}
+        onClose={handleCloseProfileModal}
+        ngoData={selectedNGO}
+      />
     </Container>
   );
 };

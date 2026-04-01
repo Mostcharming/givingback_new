@@ -17,9 +17,10 @@ interface NGO {
 
 interface NGOCardProps {
   ngo: NGO;
+  onViewProfile?: (ngo: NGO) => void;
 }
 
-const NGOCard = ({ ngo }: NGOCardProps) => {
+const NGOCard = ({ ngo, onViewProfile }: NGOCardProps) => {
   const navigate = useNavigate();
   const isVerified = ngo.is_verified === 1 || ngo.is_verified === true;
   const country = ngo.country || "Nigeria";
@@ -27,6 +28,12 @@ const NGOCard = ({ ngo }: NGOCardProps) => {
 
   const handleContactClick = () => {
     navigate("/donor/messages");
+  };
+
+  const handleViewProfile = () => {
+    if (onViewProfile) {
+      onViewProfile(ngo);
+    }
   };
 
   return (
@@ -76,8 +83,11 @@ const NGOCard = ({ ngo }: NGOCardProps) => {
         )}
       </div>
 
-      {/* Third line: Contact Button */}
-      <div className="ngo-card-footer">
+      {/* Third line: Contact Button and View Profile Button */}
+      <div
+        className="ngo-card-footer"
+        style={{ display: "flex", gap: "12px", alignItems: "center" }}
+      >
         <Button
           onClick={handleContactClick}
           style={{
@@ -92,6 +102,7 @@ const NGOCard = ({ ngo }: NGOCardProps) => {
             cursor: "pointer",
             transition: "background-color 0.3s ease",
             boxShadow: "0 2px 8px rgba(40, 167, 69, 0.2)",
+            width: "auto",
           }}
           onMouseEnter={(e) => {
             (e.target as HTMLElement).style.backgroundColor = "#218838";
@@ -102,6 +113,33 @@ const NGOCard = ({ ngo }: NGOCardProps) => {
         >
           Contact NGO
         </Button>
+        {onViewProfile && (
+          <Button
+            onClick={handleViewProfile}
+            style={{
+              backgroundColor: "#6c757d",
+              color: "#fff",
+              border: "none",
+              borderRadius: "6px",
+              padding: "10px 24px",
+              marginTop: "20px",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "background-color 0.3s ease",
+              boxShadow: "0 2px 8px rgba(108, 117, 125, 0.2)",
+              width: "auto",
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.backgroundColor = "#5a6268";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.backgroundColor = "#6c757d";
+            }}
+          >
+            View Profile
+          </Button>
+        )}
       </div>
     </div>
   );
