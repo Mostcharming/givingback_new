@@ -21,6 +21,12 @@ const NGODetailsModal: React.FC<NGODetailsModalProps> = ({
 }) => {
   if (!ngoData) return null;
 
+  // Handle both data structures: from applications and from organizations list
+  const ngoName = ngoData.ngo_name || ngoData.name || "N/A";
+  const ngoImage = ngoData.ngo_image || ngoData.image || EmptyNGO;
+  const cityLga = ngoData.city_lga || ngoData.ngo_details?.location?.city_lga || "N/A";
+  const state = ngoData.state || ngoData.ngo_details?.state || "";
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle
@@ -53,8 +59,8 @@ const NGODetailsModal: React.FC<NGODetailsModalProps> = ({
             }}
           >
             <img
-              src={ngoData.ngo_image || EmptyNGO}
-              alt={ngoData.ngo_name}
+              src={ngoImage}
+              alt={ngoName}
               style={{
                 width: "70px",
                 height: "70px",
@@ -73,7 +79,7 @@ const NGODetailsModal: React.FC<NGODetailsModalProps> = ({
                   color: "#333",
                 }}
               >
-                {ngoData.ngo_name}
+                {ngoName}
               </h4>
             </div>
           </div>
@@ -96,10 +102,8 @@ const NGODetailsModal: React.FC<NGODetailsModalProps> = ({
                 color: "#666",
               }}
             >
-              Location: {ngoData.ngo_details?.location?.city_lga || "N/A"}
-              {ngoData.ngo_details?.state
-                ? `, ${ngoData.ngo_details.state}`
-                : ""}
+              Location: {cityLga}
+              {state ? `, ${state}` : ""}
             </p>
             {ngoData.ngo_details?.address && (
               <p
