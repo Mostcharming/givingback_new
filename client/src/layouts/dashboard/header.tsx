@@ -9,7 +9,6 @@ import {
   DropdownMenu,
   DropdownToggle,
   FormGroup,
-  InputGroup,
   Media,
   Nav,
   Navbar,
@@ -51,40 +50,17 @@ const AdminNavbar: React.FC<any> = () => {
           className="pt-4 pb-3 align-items-center d-none d-md-flex"
           navbar
         >
-          <FormGroup className="mb-0">
-            <InputGroup>
-              {/* <InputGroupAddon addonType="prepend">
-                <InputGroupText
-                  style={{
-                    cursor: "pointer",
-                    backgroundColor: "white",
-                    height: "100%",
-                  }}
-                >
-                  <FaSearch />
-                </InputGroupText>
-              </InputGroupAddon> */}
-              {/* <Input
-                className="p-2 form-control form-control-alternative"
-                placeholder="Search NGO’s, projects, locations"
-                type="text"
-                style={{
-                  cursor: "pointer",
-                  width: "30vw",
-                  // backgroundColor: "#F2F2F2",
-                  height: "100%",
-                }}
-                // value={searchText}
-                // onChange={(e) => setSearchText(e.target.value)}
-              /> */}
-            </InputGroup>
-          </FormGroup>
-          {/* <p style={{ fontWeight: "bold" }}>{getCurrentRoute()}</p> */}
-          {/* <Form className="navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto"></Form> */}
+          <FormGroup className="mb-0"></FormGroup>
           <Nav className="align-items-center d-none d-md-flex" navbar>
             <UncontrolledDropdown nav>
               <DropdownToggle className="pr-0" nav>
                 <Media className="align-items-center">
+                  <span
+                    style={{ color: "black" }}
+                    className="mb-0 text-sm font-weight-bold mr-2"
+                  >
+                    {currentState.user?.name}
+                  </span>
                   <span className="avatar avatar-sm rounded-circle">
                     <img alt="..." src={currentState.userimage?.filename} />
                   </span>
