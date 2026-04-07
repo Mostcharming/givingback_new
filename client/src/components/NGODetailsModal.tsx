@@ -24,7 +24,8 @@ const NGODetailsModal: React.FC<NGODetailsModalProps> = ({
   // Handle both data structures: from applications and from organizations list
   const ngoName = ngoData.ngo_name || ngoData.name || "N/A";
   const ngoImage = ngoData.ngo_image || ngoData.image || EmptyNGO;
-  const cityLga = ngoData.city_lga || ngoData.ngo_details?.location?.city_lga || "N/A";
+  const cityLga =
+    ngoData.city_lga || ngoData.ngo_details?.location?.city_lga || "N/A";
   const state = ngoData.state || ngoData.ngo_details?.state || "";
 
   return (

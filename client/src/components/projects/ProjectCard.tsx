@@ -116,8 +116,6 @@ const ProjectProgressBar = ({ project }: { project: Project }) => {
 
   const completedSteps = getCompletedSteps();
 
-  const colors = ["#FF6B6B", "#FFD93D", "#6BCB77", "#4D96FF", "#A78BFA"];
-
   return (
     <div
       style={{
@@ -127,82 +125,115 @@ const ProjectProgressBar = ({ project }: { project: Project }) => {
         position: "relative",
       }}
     >
-      <div style={{ display: "flex", gap: "3px", alignItems: "center" }}>
-        {steps.map((step, index) => (
-          <div
-            key={step.key}
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            onMouseEnter={() => setHoveredStep(step.key)}
-            onMouseLeave={() => setHoveredStep(null)}
-          >
-            <div
-              style={{
-                width: "20px",
-                height: "20px",
-                borderRadius: "50%",
-                backgroundColor: completedSteps.includes(step.key)
-                  ? colors[index]
-                  : "#E5E7EB",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "10px",
-                fontWeight: "700",
-                color: completedSteps.includes(step.key) ? "#fff" : "#9CA3AF",
-                transition: "all 0.3s ease",
-                cursor: "pointer",
-                position: "relative",
-                zIndex: 10,
-              }}
-            >
-              {completedSteps.includes(step.key) && (
-                <Check size={12} strokeWidth={3} />
-              )}
-            </div>
+      <div style={{ display: "flex", gap: "0", alignItems: "center" }}>
+        {steps.map((step, index) => {
+          const isCompleted = completedSteps.includes(step.key);
+          const isNextIncomplete =
+            index < steps.length - 1 &&
+            !completedSteps.includes(steps[index + 1].key);
+          const isFirstIncomplete =
+            !isCompleted && completedSteps.length === index;
 
-            {/* Tooltip - shows on hover */}
-            {hoveredStep === step.key && (
+          return (
+            <div
+              key={step.key}
+              style={{ display: "flex", alignItems: "center" }}
+            >
+              {/* Circle */}
               <div
                 style={{
-                  position: "absolute",
-                  bottom: "100%",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  backgroundColor: "#1F2937",
-                  color: "#fff",
-                  padding: "8px 12px",
-                  borderRadius: "6px",
-                  fontSize: "11px",
-                  fontWeight: "500",
-                  whiteSpace: "nowrap",
-                  marginBottom: "10px",
-                  zIndex: 1000,
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                  animation: "fadeIn 0.2s ease",
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
+                onMouseEnter={() => setHoveredStep(step.key)}
+                onMouseLeave={() => setHoveredStep(null)}
               >
-                {step.description}
-                {/* Arrow pointing down */}
                 <div
                   style={{
-                    position: "absolute",
-                    top: "100%",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    borderLeft: "5px solid transparent",
-                    borderRight: "5px solid transparent",
-                    borderTop: "5px solid #1F2937",
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "50%",
+                    backgroundColor: isCompleted
+                      ? "#6BCB77"
+                      : isFirstIncomplete
+                      ? "#FFD93D"
+                      : "#D3D3D3",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "10px",
+                    fontWeight: "700",
+                    color: "#fff",
+                    transition: "all 0.3s ease",
+                    cursor: "pointer",
+                    position: "relative",
+                    zIndex: 10,
+                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                  }}
+                >
+                  {isCompleted && <Check size={14} strokeWidth={3} />}
+                </div>
+
+                {/* Tooltip - shows on hover */}
+                {hoveredStep === step.key && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      backgroundColor: "#1F2937",
+                      color: "#fff",
+                      padding: "8px 12px",
+                      borderRadius: "6px",
+                      fontSize: "11px",
+                      fontWeight: "500",
+                      whiteSpace: "nowrap",
+                      marginBottom: "10px",
+                      zIndex: 1000,
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                      animation: "fadeIn 0.2s ease",
+                    }}
+                  >
+                    {step.description}
+                    {/* Arrow pointing down */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "100%",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        borderLeft: "5px solid transparent",
+                        borderRight: "5px solid transparent",
+                        borderTop: "5px solid #1F2937",
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Connector Line */}
+              {index < steps.length - 1 && (
+                <div
+                  style={{
+                    width: "32px",
+                    height: "3px",
+                    backgroundColor:
+                      isCompleted && isNextIncomplete
+                        ? "#FFD93D"
+                        : isCompleted
+                        ? "#6BCB77"
+                        : "#D3D3D3",
+                    margin: "0 2px",
+                    transition: "all 0.3s ease",
                   }}
                 />
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div
@@ -211,11 +242,11 @@ const ProjectProgressBar = ({ project }: { project: Project }) => {
           fontWeight: "600",
           color: "#4F46E5",
           whiteSpace: "nowrap",
-          minWidth: "30px",
+          minWidth: "35px",
           textAlign: "center",
         }}
       >
-        {completedSteps.length}/{steps.length}
+        {/* {completedSteps.length}/{steps.length} */}
       </div>
 
       <style>{`
