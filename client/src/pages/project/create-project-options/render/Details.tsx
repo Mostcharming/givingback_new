@@ -76,18 +76,9 @@ const Details = ({
                   className="form-control p-3"
                   name="status"
                   required
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      status: e.target.value,
-                    }))
-                  }
+                  value={formData.status || "completed"}
+                  disabled
                 >
-                  <option value="" disabled>
-                    Project Status
-                  </option>
-                  <option value="active">Active</option>
                   <option value="completed">Completed</option>
                 </select>
               </InputGroup>
