@@ -1,17 +1,21 @@
 import { Plus, Upload, X } from "lucide-react";
 import { useState } from "react";
+import { toast } from "react-toastify";
 import { Button, Modal, ModalBody, ModalHeader } from "reactstrap";
+import useBackendService from "../services/backend_service";
 import "./submit-proposal-modal.css";
 
 interface SubmitProposalModalProps {
   isOpen: boolean;
   onClose: () => void;
   briefTitle?: string;
+  projectId?: number;
 }
 
 export default function SubmitProposalModal({
   isOpen,
   onClose,
+  projectId,
 }: SubmitProposalModalProps) {
   const [coverLetter, setCoverLetter] = useState("");
   const [supportingDocument, setSupportingDocument] = useState<File | null>(
@@ -19,6 +23,29 @@ export default function SubmitProposalModal({
   );
   const [deliverables, setDeliverables] = useState<string[]>([]);
   const [newDeliverable, setNewDeliverable] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Use backend service for API call
+  const submitProposalMutation = useBackendService<
+    { status: string; message: string },
+    Error
+  >(`/auth/projects/${projectId}/apply`, "POST", {
+    onSuccess: () => {
+      toast.success("Proposal submitted successfully!");
+      // Reset form
+      setCoverLetter("");
+      setSupportingDocument(null);
+      setDeliverables([]);
+      setNewDeliverable("");
+      setSubmitError(null);
+      onClose();
+    },
+    onError: () => {
+      const errorMessage = "An error occurred while submitting the proposal";
+      setSubmitError(errorMessage);
+      toast.error(errorMessage);
+    },
+  });
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -41,22 +68,36 @@ export default function SubmitProposalModal({
     setDeliverables(deliverables.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!coverLetter.trim()) {
-      alert("Please write a cover letter");
+      setSubmitError("Please write a cover letter");
       return;
     }
-    // Handle submission logic here
-    console.log("Submitting proposal", {
-      coverLetter,
-      supportingDocument,
-      deliverables,
-    });
-    setCoverLetter("");
-    setSupportingDocument(null);
-    setDeliverables([]);
-    setNewDeliverable("");
-    onClose();
+
+    if (deliverables.length === 0) {
+      setSubmitError("Please add at least one deliverable");
+      return;
+    }
+
+    if (!projectId) {
+      setSubmitError("Project ID is missing");
+      return;
+    }
+
+    setSubmitError(null);
+
+    const formData = new FormData();
+    formData.append("projectId", projectId.toString());
+    formData.append("coverLetter", coverLetter);
+    formData.append("deliverables", JSON.stringify(deliverables));
+
+    // Append file if exists
+    if (supportingDocument) {
+      formData.append("supportingDocument", supportingDocument);
+    }
+
+    // Call the mutation
+    await submitProposalMutation.mutateAsync(formData);
   };
 
   return (
@@ -409,23 +450,47 @@ export default function SubmitProposalModal({
           </label>
         </div>
 
+        {/* Error Message */}
+        {submitError && (
+          <div
+            style={{
+              padding: "12px 16px",
+              backgroundColor: "#fee",
+              borderRadius: "8px",
+              border: "1px solid #fcc",
+              color: "#c33",
+              fontSize: "13px",
+              marginTop: "8px",
+            }}
+          >
+            {submitError}
+          </div>
+        )}
+
         {/* Submit Button */}
         <Button
           color="success"
           size="lg"
           block
           onClick={handleSubmit}
+          disabled={submitProposalMutation.isLoading}
           style={{
             borderRadius: "10px",
             fontSize: "15px",
             fontWeight: 500,
             padding: "21px",
-            background: "#016741",
+            background: submitProposalMutation.isLoading ? "#999" : "#016741",
             border: "none",
             marginTop: "8px",
+            cursor: submitProposalMutation.isLoading
+              ? "not-allowed"
+              : "pointer",
+            opacity: submitProposalMutation.isLoading ? 0.7 : 1,
           }}
         >
-          Submit proposal
+          {submitProposalMutation.isLoading
+            ? "Submitting..."
+            : "Submit proposal"}
         </Button>
       </ModalBody>
     </Modal>

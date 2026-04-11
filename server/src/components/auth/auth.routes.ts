@@ -27,6 +27,7 @@ import {
   resend,
   resetPassword,
   signup,
+  submitProposal,
   updateOne,
   updateProjectApplicationStatus,
   verify,
@@ -56,6 +57,7 @@ router.put(
   "/donor/projects/:projectId/applications/:applicationId/status",
   updateProjectApplicationStatus
 );
+router.post("/projects/:projectId/apply", uploadimg, submitProposal as any);
 router.put("/", uploadimg, updateOne);
 router.post("/changepassword", changePassword);
 router.delete("/bank/:id", deleteBank);

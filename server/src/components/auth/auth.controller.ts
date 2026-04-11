@@ -2249,6 +2249,7 @@ export const getProjectApplications = async (
         "project_application.description",
         "project_application.deliverables",
         "project_application.status",
+        "project_application.file_url",
         "project_application.createdAt",
         "project_application.updatedAt",
         "organizations.name as ngo_name",
@@ -2842,6 +2843,133 @@ export const deleteMilestoneUpdate = async (
     res.status(500).json({
       status: "fail",
       error: "An error occurred while deleting the milestone update",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+export const submitProposal = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = (req.user as User)?.id;
+    const { projectId, coverLetter, deliverables } = req.body;
+
+    // Validate required fields
+    if (!projectId || !coverLetter || !deliverables) {
+      res.status(400).json({
+        status: "fail",
+        error: "Project ID, cover letter, and deliverables are required",
+      });
+      return;
+    }
+
+    // Validate projectId exists
+    const project = await db("project")
+      .where({ id: projectId })
+      .select("id", "title")
+      .first();
+
+    if (!project) {
+      res.status(404).json({
+        status: "fail",
+        error: "Project not found",
+      });
+      return;
+    }
+
+    // Get NGO ID from organizations table using user_id
+    const organization = await db("organizations")
+      .where({ user_id: userId })
+      .select("id")
+      .first();
+
+    if (!organization) {
+      res.status(404).json({
+        status: "fail",
+        error: "Organization not found for this user",
+      });
+      return;
+    }
+
+    // Check if organization already applied for this project
+    const existingApplication = await db("project_application")
+      .where({ project_id: projectId, ngo_id: organization.id })
+      .first();
+
+    if (existingApplication) {
+      res.status(409).json({
+        status: "fail",
+        error: "Your organization has already applied for this project",
+      });
+      return;
+    }
+
+    // Get file URL from uploaded file if exists
+    let fileUrl = null;
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      fileUrl = req.files[0].location;
+    }
+
+    // Parse deliverables array if it's a string
+    let deliverablesList = deliverables;
+    if (typeof deliverables === "string") {
+      try {
+        deliverablesList = JSON.parse(deliverables);
+      } catch {
+        deliverablesList = [deliverables];
+      }
+    }
+
+    // Create project application
+    const applicationData = {
+      project_id: projectId,
+      ngo_id: organization.id,
+      description: coverLetter,
+      deliverables: JSON.stringify(deliverablesList),
+      file_url: fileUrl,
+      applied_date: new Date(),
+      proposed_budget: 0,
+      timeline: 0,
+      status: "pending",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const [applicationId] = await db("project_application").insert(
+      applicationData
+    );
+
+    // Fetch the created application with related data
+    const createdApplication = await db("project_application")
+      .where({ id: applicationId })
+      .select(
+        "id",
+        "project_id",
+        "ngo_id",
+        "applied_date",
+        "proposed_budget",
+        "timeline",
+        "description",
+        "deliverables",
+        "file_url",
+        "status",
+        "createdAt",
+        "updatedAt"
+      )
+      .first();
+
+    res.status(201).json({
+      status: "success",
+      message: "Proposal submitted successfully",
+      data: createdApplication,
+    });
+  } catch (error) {
+    console.error("Submit Proposal Error:", error);
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while submitting the proposal",
       details: error instanceof Error ? error.message : "Unknown error",
     });
   }
