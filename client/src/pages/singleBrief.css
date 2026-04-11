@@ -20,25 +20,25 @@
 .header-banner {
   background: #128330;
   color: white;
-  padding: 1.5rem 0;
+  padding: 1rem 0;
 }
 
 .banner-img {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   object-fit: cover;
 }
 
 @media (max-width: 576px) {
   .banner-img {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
   }
 }
 
 .banner-title {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: white;
   margin: 0;
@@ -46,19 +46,19 @@
 
 @media (max-width: 576px) {
   .banner-title {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
 }
 
 .banner-subtitle {
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.9);
-  margin: 0.5rem 0 0 0;
+  margin: 0.25rem 0 0 0;
 }
 
 @media (max-width: 576px) {
   .banner-subtitle {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
   }
 }
 
@@ -82,18 +82,18 @@
 
 /* Main Content */
 .main-content {
-  padding: 2rem 0;
+  padding: 1.25rem 0;
 }
 
 @media (max-width: 576px) {
   .main-content {
-    padding: 1rem 0;
+    padding: 0.75rem 0;
   }
 }
 
 /* Details Row */
 .details-row {
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
 }
 
 .detail-item {
@@ -178,19 +178,19 @@
 
 /* Section Styling */
 .section-spacing {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .section-title {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: #212529;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 @media (max-width: 576px) {
   .section-title {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
 }
 

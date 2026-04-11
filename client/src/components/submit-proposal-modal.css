@@ -1,0 +1,26 @@
+.submit-proposal-modal {
+  font-family: "Archivo", sans-serif;
+}
+
+.submit-proposal-modal .modal-content {
+  border-radius: 10px;
+  border: none;
+}
+
+.submit-proposal-modal-header {
+  background-color: #fff;
+  border-bottom: 1px solid #ddd !important;
+}
+
+.submit-proposal-modal .modal-header .btn-close {
+  filter: invert(0.3);
+}
+
+.submit-proposal-modal textarea::placeholder {
+  color: #999;
+}
+
+.submit-proposal-modal textarea:focus {
+  background-color: #f6f6f6;
+  box-shadow: none;
+}

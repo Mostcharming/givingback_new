@@ -13,12 +13,14 @@ import { toast } from "react-toastify";
 import { Badge, Button, Card, CardBody, Col, Container, Row } from "reactstrap";
 import place from "../assets/images/home/GivingBackNG-logo.svg";
 import Loading from "../components/home/loading";
+import SubmitProposalModal from "../components/SubmitProposalModal";
 import useBackendService from "../services/backend_service";
 import { capitalizeFirstLetter } from "../services/capitalize";
 import "./singleBrief.css";
 
 const SingleBriefs: React.FC<any> = () => {
   const [brief, setBrief] = useState<any>({});
+  const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -210,6 +212,7 @@ const SingleBriefs: React.FC<any> = () => {
                       size="lg"
                       block
                       className="rounded-lg"
+                      onClick={() => setIsProposalModalOpen(true)}
                     >
                       Apply now
                     </Button>
@@ -361,12 +364,25 @@ const SingleBriefs: React.FC<any> = () => {
         {/* Final CTA Button */}
         <Row>
           <Col>
-            <Button color="success" size="lg" block className="cta-button">
+            <Button
+              color="success"
+              size="lg"
+              block
+              className="cta-button"
+              onClick={() => setIsProposalModalOpen(true)}
+            >
               Apply for this opportunity
             </Button>
           </Col>
         </Row>
       </Container>
+
+      {/* Submit Proposal Modal */}
+      <SubmitProposalModal
+        isOpen={isProposalModalOpen}
+        onClose={() => setIsProposalModalOpen(false)}
+        briefTitle={brief.title}
+      />
     </div>
   );
 };
