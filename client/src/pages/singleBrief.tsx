@@ -21,6 +21,8 @@ import "./singleBrief.css";
 const SingleBriefs: React.FC<any> = () => {
   const [brief, setBrief] = useState<any>({});
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [isCheckingApplication, setIsCheckingApplication] = useState(true);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -37,9 +39,29 @@ const SingleBriefs: React.FC<any> = () => {
     }
   );
 
+  const { mutate: checkApplicationStatus } = useBackendService(
+    `/auth/projects/${id}/application-status`,
+    "GET",
+    {
+      onSuccess: (res: any) => {
+        setHasApplied(res.hasApplied || false);
+        setIsCheckingApplication(false);
+      },
+      onError: () => {
+        setIsCheckingApplication(false);
+      },
+    }
+  );
+
   useEffect(() => {
     getBriefData({ projectType: "present", id: id, status: "brief" });
   }, [id, getBriefData]);
+
+  useEffect(() => {
+    if (id) {
+      checkApplicationStatus({});
+    }
+  }, [id, checkApplicationStatus]);
 
   const handleBack = () => {
     navigate("/briefs");
@@ -226,13 +248,20 @@ const SingleBriefs: React.FC<any> = () => {
                   </Col>
                   <Col md="4" xs="12" className="text-md-end">
                     <Button
-                      color="success"
+                      color={hasApplied ? "secondary" : "success"}
                       size="lg"
                       block
                       className="rounded-lg"
-                      onClick={() => setIsProposalModalOpen(true)}
+                      onClick={() =>
+                        !hasApplied && setIsProposalModalOpen(true)
+                      }
+                      disabled={hasApplied || isCheckingApplication}
                     >
-                      Apply now
+                      {isCheckingApplication
+                        ? "Checking..."
+                        : hasApplied
+                        ? "Applied"
+                        : "Apply now"}
                     </Button>
                   </Col>
                 </Row>
@@ -383,13 +412,18 @@ const SingleBriefs: React.FC<any> = () => {
         <Row>
           <Col>
             <Button
-              color="success"
+              color={hasApplied ? "secondary" : "success"}
               size="lg"
               block
               className="cta-button"
-              onClick={() => setIsProposalModalOpen(true)}
+              onClick={() => !hasApplied && setIsProposalModalOpen(true)}
+              disabled={hasApplied || isCheckingApplication}
             >
-              Apply for this opportunity
+              {isCheckingApplication
+                ? "Checking..."
+                : hasApplied
+                ? "Applied"
+                : "Apply for this opportunity"}
             </Button>
           </Col>
         </Row>
@@ -400,6 +434,11 @@ const SingleBriefs: React.FC<any> = () => {
         isOpen={isProposalModalOpen}
         onClose={() => setIsProposalModalOpen(false)}
         briefTitle={brief.title}
+        projectId={id}
+        onSuccess={() => {
+          setHasApplied(true);
+          setIsProposalModalOpen(false);
+        }}
       />
     </div>
   );

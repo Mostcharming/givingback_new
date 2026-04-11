@@ -6,6 +6,7 @@ import {
   addSingleNGO,
   bulkUploadNGOsEndpoint,
   changePassword,
+  checkApplicationStatus,
   createMilestone,
   createProject,
   deleteBank,
@@ -58,6 +59,7 @@ router.put(
   updateProjectApplicationStatus
 );
 router.post("/projects/:projectId/apply", uploadimg, submitProposal as any);
+router.get("/projects/:projectId/application-status", checkApplicationStatus);
 router.put("/", uploadimg, updateOne);
 router.post("/changepassword", changePassword);
 router.delete("/bank/:id", deleteBank);

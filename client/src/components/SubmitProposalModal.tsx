@@ -9,13 +9,15 @@ interface SubmitProposalModalProps {
   isOpen: boolean;
   onClose: () => void;
   briefTitle?: string;
-  projectId?: number;
+  projectId?: string;
+  onSuccess?: () => void;
 }
 
 export default function SubmitProposalModal({
   isOpen,
   onClose,
   projectId,
+  onSuccess,
 }: SubmitProposalModalProps) {
   const [coverLetter, setCoverLetter] = useState("");
   const [supportingDocument, setSupportingDocument] = useState<File | null>(
@@ -38,6 +40,9 @@ export default function SubmitProposalModal({
       setDeliverables([]);
       setNewDeliverable("");
       setSubmitError(null);
+      if (onSuccess) {
+        onSuccess();
+      }
       onClose();
     },
     onError: () => {

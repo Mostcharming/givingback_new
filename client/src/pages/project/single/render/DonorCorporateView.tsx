@@ -4,6 +4,7 @@ import {
   CheckCircle,
   ChevronLeft,
   Clock,
+  Download,
   MapPin,
   Clock as PendingIcon,
   Users,
@@ -144,6 +145,25 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
   ) => {
     setSelectedApplicationId(applicationId);
     updateApplicationStatus({ status: newStatus });
+  };
+
+  const handleDownloadFile = (fileUrl: string, fileName?: string) => {
+    if (!fileUrl) {
+      toast.error("File URL not available");
+      return;
+    }
+
+    try {
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = fileName || "proposal-document";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast.error("Failed to download file");
+    }
   };
 
   const counts = {
@@ -495,56 +515,56 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
                     </div>
 
                     {/* Proposed Budget */}
-                    {app.proposed_budget && (
-                      <div>
-                        <p
-                          style={{
-                            margin: "0 0 6px 0",
-                            fontSize: "12px",
-                            color: "#999",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Proposed Budget
-                        </p>
-                        <p
-                          style={{
-                            margin: "0",
-                            fontSize: "13px",
-                            color: "#333",
-                            fontWeight: "600",
-                          }}
-                        >
-                          {formatCurrency(app.proposed_budget)}
-                        </p>
-                      </div>
-                    )}
+                    <div>
+                      <p
+                        style={{
+                          margin: "0 0 6px 0",
+                          fontSize: "12px",
+                          color: "#999",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Proposed Budget
+                      </p>
+                      <p
+                        style={{
+                          margin: "0",
+                          fontSize: "13px",
+                          color: "#333",
+                          fontWeight: "600",
+                        }}
+                      >
+                        {app.proposed_budget && app.proposed_budget !== 0
+                          ? formatCurrency(app.proposed_budget)
+                          : "Not Specified"}
+                      </p>
+                    </div>
 
                     {/* Timeline */}
-                    {app.timeline && (
-                      <div>
-                        <p
-                          style={{
-                            margin: "0 0 6px 0",
-                            fontSize: "12px",
-                            color: "#999",
-                            fontWeight: "600",
-                          }}
-                        >
-                          Timeline
-                        </p>
-                        <p
-                          style={{
-                            margin: "0",
-                            fontSize: "13px",
-                            color: "#333",
-                            fontWeight: "500",
-                          }}
-                        >
-                          {app.timeline}
-                        </p>
-                      </div>
-                    )}
+                    <div>
+                      <p
+                        style={{
+                          margin: "0 0 6px 0",
+                          fontSize: "12px",
+                          color: "#999",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Timeline
+                      </p>
+                      <p
+                        style={{
+                          margin: "0",
+                          fontSize: "13px",
+                          color: "#333",
+                          fontWeight: "500",
+                        }}
+                      >
+                        {app.timeline && app.timeline !== "0"
+                          ? app.timeline
+                          : "Not Specified"}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Project Summary and Description */}
@@ -611,6 +631,38 @@ const DonorCorporateView: React.FC<DonorCorporateViewProps> = ({
                             )
                           )}
                         </ul>
+                      </div>
+                    )}
+
+                    {/* Download Attached File */}
+                    {app.file_url && (
+                      <div style={{ marginBottom: "20px" }}>
+                        <button
+                          type="button"
+                          className="btn"
+                          onClick={() =>
+                            handleDownloadFile(
+                              app.file_url,
+                              `proposal-${app.ngo_name}-${app.id}`
+                            )
+                          }
+                          style={{
+                            backgroundColor: "#0056b3",
+                            color: "white",
+                            padding: "10px 16px",
+                            borderRadius: "4px",
+                            border: "none",
+                            fontSize: "13px",
+                            fontWeight: "500",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          <Download size={16} />
+                          Download Attached File
+                        </button>
                       </div>
                     )}
 

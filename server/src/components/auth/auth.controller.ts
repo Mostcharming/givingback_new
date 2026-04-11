@@ -2974,3 +2974,54 @@ export const submitProposal = async (
     });
   }
 };
+
+export const checkApplicationStatus = async (
+  req: UserRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = (req.user as User)?.id;
+    const { projectId } = req.params;
+
+    // Validate projectId
+    if (!projectId) {
+      res.status(400).json({
+        status: "fail",
+        error: "Project ID is required",
+      });
+      return;
+    }
+
+    // Get NGO ID from organizations table using user_id
+    const organization = await db("organizations")
+      .where({ user_id: userId })
+      .select("id")
+      .first();
+
+    if (!organization) {
+      res.status(404).json({
+        status: "fail",
+        hasApplied: false,
+      });
+      return;
+    }
+
+    // Check if organization already applied for this project
+    const existingApplication = await db("project_application")
+      .where({ project_id: projectId, ngo_id: organization.id })
+      .first();
+
+    res.status(200).json({
+      status: "success",
+      hasApplied: !!existingApplication,
+    });
+  } catch (error) {
+    console.error("Error checking application status:", error);
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while checking application status",
+      details: error instanceof Error ? error.message : "Unknown error",
+      hasApplied: false,
+    });
+  }
+};
