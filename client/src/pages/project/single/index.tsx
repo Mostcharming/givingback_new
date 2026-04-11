@@ -41,7 +41,10 @@ const ProjectViewDetail: React.FC<any> = () => {
     "GET",
     {
       onSuccess: (res: any) => {
-        setProject(res.projects[0]);
+        const matchedProject = res.projects.find(
+          (project: any) => project.id === Number(id)
+        );
+        setProject(matchedProject);
       },
       onError: () => {
         toast.error("Error getting projects data");
@@ -50,7 +53,10 @@ const ProjectViewDetail: React.FC<any> = () => {
   );
 
   useEffect(() => {
-    getTableData({ projectType: "present", id: id });
+    getTableData({
+      // projectType: "present",
+      id: id,
+    });
   }, [id, getTableData]);
 
   const handleBack = () => {
