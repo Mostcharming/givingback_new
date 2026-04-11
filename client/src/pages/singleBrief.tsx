@@ -177,12 +177,30 @@ const SingleBriefs: React.FC<any> = () => {
           <Col>
             <div className="d-flex flex-wrap gap-2">
               {brief.category && (
-                <Badge color="success" pill>
+                <Badge
+                  pill
+                  style={{
+                    backgroundColor: "#e2efe9",
+                    color: "#128330",
+                    // border: "1px solid #128330",
+                    padding: "10px 16px",
+                    fontSize: "14px",
+                  }}
+                >
                   {brief.category}
                 </Badge>
               )}
               {brief.scope && (
-                <Badge color="success" outline pill>
+                <Badge
+                  pill
+                  style={{
+                    backgroundColor: "#e2efe9",
+                    color: "#128330",
+                    // border: "1px solid #128330",
+                    padding: "10px 16px",
+                    fontSize: "14px",
+                  }}
+                >
                   {brief.scope}
                 </Badge>
               )}
