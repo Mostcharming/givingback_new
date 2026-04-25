@@ -3,7 +3,7 @@ import { FolderOpenDot } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Button, Container, Row } from "reactstrap";
+import { Button } from "reactstrap";
 import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
 import "./emptyProject.css";
@@ -48,7 +48,7 @@ const List = ({ type }) => {
       onError: () => {
         toast.error("Failed to fetch Projects.");
       },
-    }
+    },
   );
   useEffect(() => {
     if (type === "past") {
@@ -61,6 +61,7 @@ const List = ({ type }) => {
       if (role === "NGO") {
         fetchUsers({
           page: currentPage,
+          limit: 20,
           // projectType: "present",
           // status: "active",
           organization_id: currentState.user.id,
@@ -246,7 +247,7 @@ const List = ({ type }) => {
                           </span>
                         </button>
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
@@ -289,23 +290,28 @@ const List = ({ type }) => {
               </div>
             ) : (
               <>
-                <Container style={{ maxWidth: "unset" }}>
-                  <Row>
-                    {responseData.map((project) => {
-                      // if (type === "past") {
-                      const img = project.projectImages[0]?.image;
-                      // }
-                      return (
+                <div
+                // style={{
+                //   maxWidth: "1200px",
+                //   margin: "0 auto",
+                //   padding: "0 16px",
+                // }}
+                >
+                  {responseData.map((project) => {
+                    // if (type === "past") {
+                    const img = project.projectImages[0]?.image;
+                    // }
+                    return (
+                      <div key={project.id} style={{ marginBottom: "24px" }}>
                         <ProjectItem
                           type={type}
                           project={project}
                           image={img}
-                          key={project.id}
                         />
-                      );
-                    })}
-                  </Row>
-                </Container>
+                      </div>
+                    );
+                  })}
+                </div>
 
                 <div className="d-flex justify-content-between mt-4">
                   <Button

@@ -76,8 +76,8 @@ export const ProjectItem = (props: ProjectItemProps) => {
         className="card shadow-sm rounded"
         style={{
           cursor: "pointer",
-          maxWidth: "1000px",
-          margin: "0 auto",
+          // maxWidth: "1000px",
+          // margin: "0 auto",
           border: "1px solid #e5e5e5",
           transition: "box-shadow 0.3s ease, transform 0.2s ease",
           padding: "24px",

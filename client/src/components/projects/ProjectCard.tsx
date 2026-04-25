@@ -91,7 +91,7 @@ const ProjectProgressBar = ({ project }: { project: Project }) => {
     // Step 3: Publish (brief or active status)
     if (
       ["brief", "active", "completed"].includes(
-        project.status?.toLowerCase() || ""
+        project.status?.toLowerCase() || "",
       )
     ) {
       completed.push("publish");
@@ -158,8 +158,8 @@ const ProjectProgressBar = ({ project }: { project: Project }) => {
                     backgroundColor: isCompleted
                       ? "#6BCB77"
                       : isFirstIncomplete
-                      ? "#FFD93D"
-                      : "#D3D3D3",
+                        ? "#FFD93D"
+                        : "#D3D3D3",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -224,8 +224,8 @@ const ProjectProgressBar = ({ project }: { project: Project }) => {
                       isCompleted && isNextIncomplete
                         ? "#FFD93D"
                         : isCompleted
-                        ? "#6BCB77"
-                        : "#D3D3D3",
+                          ? "#6BCB77"
+                          : "#D3D3D3",
                     margin: "0 2px",
                     transition: "all 0.3s ease",
                   }}
@@ -331,7 +331,7 @@ export const ProjectCard = ({ project }: { project: Project }) => {
         // toast.error(errorMessage);
         setIsPublishing(false);
       },
-    }
+    },
   );
 
   const handleOptionsClick = () => {
