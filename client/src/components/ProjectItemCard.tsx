@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MapPin } from "lucide-react";
-import { Image } from "react-bootstrap";
+import { Calendar, MapPin, Wallet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Col } from "reactstrap";
-import place from "../assets/images/home/GivingBackNG-logo.svg";
 import { getStatusBadgeProps } from "../helper";
 import { useContent } from "../services/useContext";
 
@@ -45,31 +43,20 @@ export const ProjectItem = (props: ProjectItemProps) => {
     }
   };
 
-  const image = props.image ? `${props.image}` : place;
   const badgeProps = getStatusBadgeProps(props.project.status);
   const cost = props.project.cost ?? props.project.allocated ?? 0;
 
+  // Calculate progress
   const totalMilestones = props.project.milestones?.length || 0;
   const completedMilestones =
     props.project.milestones?.filter((m) =>
-      m.updates?.some((u) => u.status?.toLowerCase() === "completed")
+      m.updates?.some((u) => u.status?.toLowerCase() === "completed"),
     ).length || 0;
-  const completedMilestoneTargets =
-    props.project.milestones
-      ?.filter((m) =>
-        m.updates?.some((u) => u.status?.toLowerCase() === "completed")
-      )
-      .reduce((sum, m) => sum + (m.target || 0), 0) || 0;
-
   const progressPercent = totalMilestones
     ? Math.round((completedMilestones / totalMilestones) * 100)
     : 0;
-  const formatter = new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-  });
 
-  // Truncate description for donor/corporate users to maintain consistent card height
+  // Truncate description for compact card display
   const truncateDescription = (text: string, maxLength: number = 100) => {
     if (text.length > maxLength) {
       return text.substring(0, maxLength) + "...";
@@ -77,139 +64,180 @@ export const ProjectItem = (props: ProjectItemProps) => {
     return text;
   };
 
-  const displayDescription =
-    role === "donor" || role === "corporate"
-      ? truncateDescription(props.project.description)
-      : props.project.description;
+  const displayDescription = truncateDescription(
+    props.project.description,
+    150,
+  );
 
   return (
-    <Col className="px-3 mt-4" lg={12}>
+    <Col className="px-3 mt-3" lg={12}>
       <div
         onClick={details}
         className="card shadow-sm rounded"
-        style={{ 
-          cursor: "pointer", 
-          maxWidth: "1000px", 
+        style={{
+          cursor: "pointer",
+          maxWidth: "1000px",
           margin: "0 auto",
           border: "1px solid #e5e5e5",
           transition: "box-shadow 0.3s ease, transform 0.2s ease",
+          padding: "24px",
+          borderRadius: "12px",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.12)";
-          e.currentTarget.style.transform = "translateY(-2px)";
+          e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
+          e.currentTarget.style.transform = "translateY(-1px)";
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.boxShadow = "";
           e.currentTarget.style.transform = "translateY(0)";
         }}
       >
-        <div className="position-relative">
-          <Image
-            src={image}
-            alt="Person drinking from water tap"
-            width={600}
-            height={300}
-            className="card-img-top"
-            style={{ height: "300px", objectFit: "cover" }}
-          />
-          <div className="position-absolute top-0 end-0 right-0 m-3">
-            <span
-              className="rounded-pill px-3 py-2"
+        {/* Header with title and status */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: "12px",
+          }}
+        >
+          <div style={{ flex: 1 }}>
+            <h3
               style={{
-                backgroundColor: badgeProps.backgroundColor,
-                color: badgeProps.color,
-                fontSize: "14px",
-                fontWeight: "500",
+                margin: "0 0 4px 0",
+                fontSize: "16px",
+                fontWeight: "600",
+                color: "#1a1a1a",
               }}
             >
-              {badgeProps.text}
+              {props.project.title}
+            </h3>
+            <p
+              style={{
+                margin: "0",
+                fontSize: "13px",
+                color: "#666",
+                lineHeight: "1.4",
+              }}
+            >
+              {displayDescription}
+            </p>
+          </div>
+          <span
+            style={{
+              backgroundColor: badgeProps.backgroundColor,
+              color: badgeProps.color,
+              padding: "4px 8px",
+              borderRadius: "12px",
+              fontSize: "11px",
+              fontWeight: "600",
+              whiteSpace: "nowrap",
+              marginLeft: "12px",
+            }}
+          >
+            {badgeProps.text}
+          </span>
+        </div>
+
+        {/* Progress Bar */}
+        <div style={{ marginBottom: "16px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "8px",
+            }}
+          >
+            <span style={{ fontSize: "13px", color: "#666" }}>Progress</span>
+            <span
+              style={{ fontSize: "14px", fontWeight: "600", color: "#16a34a" }}
+            >
+              {progressPercent} %
             </span>
+          </div>
+          <div
+            style={{
+              height: "8px",
+              backgroundColor: "#e9ecef",
+              borderRadius: "4px",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                height: "100%",
+                backgroundColor: "#16a34a",
+                width: `${progressPercent}%`,
+                transition: "width 0.3s ease",
+              }}
+            />
           </div>
         </div>
 
-        <div className="card-body p-4">
-          <h2 className="card-title h3 fw-bold text-dark mb-3">
-            {props.project.title}
-          </h2>
-
-          <p
-            className="card-text text-muted mb-4"
+        {/* Info Row with icons */}
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            flexWrap: "wrap",
+            fontSize: "13px",
+          }}
+        >
+          {/* Budget */}
+          <div
             style={{
-              fontSize: "16px",
-              lineHeight: "1.5",
-              minHeight: "60px",
               display: "flex",
-              alignItems: "flex-start",
+              alignItems: "center",
+              gap: "6px",
+              color: "#555",
             }}
           >
-            {displayDescription}
-          </p>
+            <Wallet size={16} style={{ color: "#000" }} />
+            <span style={{ fontWeight: "500" }}>
+              Budget:{" "}
+              {new Intl.NumberFormat("en-NG", {
+                style: "currency",
+                currency: "NGN",
+              }).format(cost)}
+            </span>
+          </div>
 
-          <div className="mb-4">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <span className="text-muted" style={{ fontSize: "16px" }}>
-                Progress
-              </span>
-              <span
-                className="fw-bold text-success"
-                style={{ fontSize: "18px" }}
-              >
-                {progressPercent} %
-              </span>
-            </div>
-
+          {/* Deadline */}
+          {props.project.endDate && (
             <div
-              className="progress"
-              style={{ height: "8px", backgroundColor: "#e9ecef" }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                color: "#555",
+              }}
             >
-              <div
-                className="progress-bar bg-success"
-                role="progressbar"
-                style={{ width: `${progressPercent}%` }}
-                aria-valuenow={76}
-                aria-valuemin={0}
-                aria-valuemax={100}
-              ></div>
-            </div>
-          </div>
-
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <span className="h5 fw-bold text-dark mb-0">
-                {formatter.format(completedMilestoneTargets)}
-              </span>{" "}
-              <span className="text-muted ms-1"> raised</span>
-            </div>
-            <div className="text-muted">
-              Goal:{" "}
-              <span className="fw-semibold">{formatter.format(cost)}</span>
-            </div>
-          </div>
-
-          {(role === "donor" || role === "corporate") && (
-            <div className="d-flex justify-content-between align-items-center pt-3 border-top">
-              <div className="d-flex align-items-center gap-2">
-                <MapPin size={20} className="text-muted" />
-                <span className="text-muted" style={{ fontSize: "14px" }}>
-                  {props.project.state || "No location specified"}
-                </span>
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  details();
-                }}
-                className="btn btn-success"
-                style={{
-                  fontSize: "14px",
-                  padding: "8px 16px",
-                  borderRadius: "6px",
-                }}
-              >
-                Donate - View details
-              </button>
+              <Calendar size={16} style={{ color: "#000" }} />
+              <span style={{ fontWeight: "500" }}>
+                Deadline:{" "}
+                {new Date(props.project.endDate).toLocaleDateString("en-NG", {
+                  month: "short",
+                  day: "numeric",
+                })}
+              </span>
             </div>
           )}
+
+          {/* Location */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              color: "#555",
+            }}
+          >
+            <MapPin size={16} style={{ color: "#000" }} />
+            <span style={{ fontWeight: "500" }}>
+              Location: {props.project.state || "Nigeria"}
+            </span>
+          </div>
         </div>
       </div>
     </Col>
