@@ -48,7 +48,7 @@ const DN_Projects = () => {
         setCardItems(getDefaultStatsItems());
         toast.error("Error getting project statistics");
       },
-    }
+    },
   );
 
   const { mutate: fetchDonorProjects } = useBackendService(
@@ -63,7 +63,7 @@ const DN_Projects = () => {
         toast.error("Failed to fetch donor projects.");
         setProjects([]);
       },
-    }
+    },
   );
 
   useEffect(() => {

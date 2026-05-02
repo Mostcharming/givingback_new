@@ -76,6 +76,12 @@ const CreateProject = () => {
     onError: () => {},
   });
   useEffect(() => {
+    if (role === "NGO") {
+      setFormData((prev) => ({
+        ...prev,
+        status: "completed",
+      }));
+    }
     getAreas({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -122,7 +128,7 @@ const CreateProject = () => {
       onError: () => {
         toast.error("Error submitting form");
       },
-    }
+    },
   );
 
   const handleSubmit = (e: React.FormEvent) => {

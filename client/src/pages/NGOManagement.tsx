@@ -63,7 +63,7 @@ const NGOManagement = () => {
           verifiedOrganizationsCount: 0,
         });
       },
-    }
+    },
   );
 
   const { mutate: fetchOrganizations } = useBackendService(
@@ -83,7 +83,7 @@ const NGOManagement = () => {
       onError: (error) => {
         toast.error("Failed to fetch organizations.");
       },
-    }
+    },
   );
 
   useEffect(() => {
@@ -120,15 +120,15 @@ const NGOManagement = () => {
     const query = searchQuery.toLowerCase();
     if (activeTab === "Paper-based NGOs") {
       return paperBasedNgos.filter((ngo: any) =>
-        ngo.name?.toLowerCase().includes(query)
+        ngo.name?.toLowerCase().includes(query),
       );
     } else if (activeTab === "Your NGOs") {
       return yourNgos.filter((ngo: any) =>
-        ngo.name?.toLowerCase().includes(query)
+        ngo.name?.toLowerCase().includes(query),
       );
     } else if (activeTab === "Verified NGOs") {
       return verifiedNgos.filter((ngo: any) =>
-        ngo.name?.toLowerCase().includes(query)
+        ngo.name?.toLowerCase().includes(query),
       );
     }
     return [];

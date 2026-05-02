@@ -83,7 +83,7 @@ export const create = async (req: any, res: Response, next: NextFunction) => {
 
     await new Email({ email: email, url, token, additionalData }).sendEmail(
       "donoronboard",
-      "Welcome to the GivingBack Family!"
+      "Welcome to the GivingBack Family!",
     );
     await new Email({
       email: "info@givingbackng.org",
@@ -121,6 +121,7 @@ export const createp = async (req: any, res: Response) => {
       category,
       duration,
       description,
+      status,
       cost,
       raised,
       sponsors,
@@ -164,7 +165,7 @@ export const createp = async (req: any, res: Response) => {
     if (sponsors && sponsors.length > 0) {
       sponsors.forEach((sponsor: Sponsor, index: number) => {
         const sponsorImage = req.files.find(
-          (file: any) => file.fieldname === `sponsors[${index}][image]`
+          (file: any) => file.fieldname === `sponsors[${index}][image]`,
         );
         if (!sponsorImage) {
           missingFields.push(`sponsors[${index}][image]`);
@@ -202,7 +203,7 @@ export const createp = async (req: any, res: Response) => {
         sponsors.map(async (sponsor: Sponsor, index: number) => {
           const { name, sponsorDescription } = sponsor;
           const sponsorImage = req.files.find(
-            (file: any) => file.fieldname === `sponsors[${index}][image]`
+            (file: any) => file.fieldname === `sponsors[${index}][image]`,
           );
 
           const sponsorData = {
@@ -213,7 +214,7 @@ export const createp = async (req: any, res: Response) => {
           };
 
           await db("previousprojects_sponsors").insert(sponsorData);
-        })
+        }),
       );
     }
 
@@ -230,7 +231,7 @@ export const createp = async (req: any, res: Response) => {
           };
 
           await db("previousprojects_beneficiaries").insert(beneficiaryData);
-        })
+        }),
       );
     }
 
@@ -244,7 +245,7 @@ export const createp = async (req: any, res: Response) => {
               project_id: projectId,
             });
           }
-        })
+        }),
       );
     }
 
@@ -481,10 +482,12 @@ export const createProject = async (req: Request, res: Response) => {
       });
     }
 
+    const finalStatus = status === "completed" ? "unverified" : status;
+
     const [project_id] = await trx("project").insert({
       title,
       description,
-      status,
+      status: finalStatus,
       startDate,
       endDate,
       category: interest_area,
@@ -508,7 +511,7 @@ export const createProject = async (req: Request, res: Response) => {
     if (sponsors && sponsors.length > 0) {
       const sponsorUploads = Array.isArray(req.files)
         ? req.files.filter((file: any) =>
-            file.fieldname.startsWith("sponsors[")
+            file.fieldname.startsWith("sponsors["),
           )
         : [];
       for (let i = 0; i < sponsors.length; i++) {

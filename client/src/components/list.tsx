@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FolderOpenDot } from "lucide-react";
+import { CheckCircle, FileText, FolderOpenDot, Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -8,7 +8,6 @@ import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
 import "./emptyProject.css";
 import Loading from "./home/loading";
-import { ProjectFilters } from "./ProjectFilters";
 import { ProjectItem } from "./ProjectItemCard";
 
 const List = ({ type }) => {
@@ -18,23 +17,23 @@ const List = ({ type }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProjects, setTotalProjects] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [activeTab, setActiveTab] = useState("All Projects");
+  const [activeTab, setActiveTab] = useState("Active");
   const role = authState.user?.role;
-  const [statusFilter, setStatusFilter] = useState("All Projects");
-  const [categoryFilter, setCategoryFilter] = useState("All Categories");
-  const [dateFilter, setDateFilter] = useState("Any time");
-  const [locationFilter, setLocationFilter] = useState("All locations");
-  const [areas, setAreas] = useState([]);
-  const { mutate: getAreas } = useBackendService("/areas", "GET", {
-    onSuccess: (res2: any) => {
-      setAreas(res2 as any[]);
-    },
-    onError: () => {},
-  });
+  // const [statusFilter, setStatusFilter] = useState("All Projects");
+  // const [categoryFilter, setCategoryFilter] = useState("All Categories");
+  // const [dateFilter, setDateFilter] = useState("Any time");
+  // const [locationFilter, setLocationFilter] = useState("All locations");
+  // const [areas, setAreas] = useState([]);
+  // const { mutate: getAreas } = useBackendService("/areas", "GET", {
+  //   onSuccess: (res2: any) => {
+  //     setAreas(res2 as any[]);
+  //   },
+  //   onError: () => {},
+  // });
 
-  useEffect(() => {
-    getAreas({});
-  }, []);
+  // useEffect(() => {
+  //   getAreas({});
+  // }, []);
 
   const { mutate: fetchUsers, isLoading } = useBackendService(
     "/allprojects",
@@ -76,71 +75,77 @@ const List = ({ type }) => {
       }
     }
   }, [role]);
-  useEffect(() => {
-    const isDefault =
-      statusFilter === "All Projects" &&
-      categoryFilter === "All Categories" &&
-      dateFilter === "Any time" &&
-      locationFilter === "All locations";
+  // useEffect(() => {
+  //   const isDefault =
+  //     statusFilter === "All Projects" &&
+  //     categoryFilter === "All Categories" &&
+  //     dateFilter === "Any time" &&
+  //     locationFilter === "All locations";
 
-    if (isDefault) {
-      if (role === "NGO") {
-        fetchUsers({
-          page: 1,
-          organization_id: currentState.user.id,
-        });
-      } else if (role === "donor" || role === "corporate") {
-        fetchUsers({
-          page: 1,
-          projectType: "present",
-          status: "active",
-        });
-      }
-      return;
-    }
-    if (role === "NGO") {
+  //   if (isDefault) {
+  //     if (role === "NGO") {
+  //       fetchUsers({
+  //         page: 1,
+  //         organization_id: currentState.user.id,
+  //       });
+  //     } else if (role === "donor" || role === "corporate") {
+  //       fetchUsers({
+  //         page: 1,
+  //         projectType: "present",
+  //         status: "active",
+  //       });
+  //     }
+  //     return;
+  //   }
+  //   if (role === "NGO") {
+  //     fetchUsers({
+  //       page: currentPage,
+  //       category:
+  //         categoryFilter !== "All Categories" ? categoryFilter : undefined,
+  //       status: statusFilter !== "All Projects" ? statusFilter : undefined,
+  //       startDate: dateFilter !== "Any time" ? dateFilter : undefined,
+  //       organization_id: currentState.user.id,
+  //     });
+  //   } else if (role === "donor" || role === "corporate") {
+  //     fetchUsers({
+  //       page: currentPage,
+  //       category:
+  //         categoryFilter !== "All Categories" ? categoryFilter : undefined,
+  //       status: statusFilter !== "All Projects" ? statusFilter : undefined,
+  //       projectType: "present",
+  //       startDate: dateFilter !== "Any time" ? dateFilter : undefined,
+  //       state: locationFilter !== "All locations" ? locationFilter : undefined,
+  //     });
+  //   }
+  // }, [
+  //   currentPage,
+  //   statusFilter,
+  //   categoryFilter,
+  //   dateFilter,
+  //   locationFilter,
+  //   role,
+  // ]);
+
+  useEffect(() => {
+    if (
+      activeTab === "Applications" ||
+      activeTab === "Past" ||
+      activeTab === "Completed"
+    ) {
       fetchUsers({
         page: currentPage,
-        category:
-          categoryFilter !== "All Categories" ? categoryFilter : undefined,
-        status: statusFilter !== "All Projects" ? statusFilter : undefined,
-        startDate: dateFilter !== "Any time" ? dateFilter : undefined,
+        projectType:
+          activeTab === "Past"
+            ? "previous"
+            : activeTab === "Completed"
+              ? "completed"
+              : "present",
         organization_id: currentState.user.id,
       });
-    } else if (role === "donor" || role === "corporate") {
-      fetchUsers({
-        page: currentPage,
-        category:
-          categoryFilter !== "All Categories" ? categoryFilter : undefined,
-        status: statusFilter !== "All Projects" ? statusFilter : undefined,
-        projectType: "present",
-        startDate: dateFilter !== "Any time" ? dateFilter : undefined,
-        state: locationFilter !== "All locations" ? locationFilter : undefined,
-      });
-    }
-  }, [
-    currentPage,
-    statusFilter,
-    categoryFilter,
-    dateFilter,
-    locationFilter,
-    role,
-  ]);
-
-  useEffect(() => {
-    if (activeTab === "Contributed to" || activeTab === "Sponsoring") {
-      fetchUsers({
-        page: currentPage,
-        projectType: "present",
-        status: "active",
-        donor_id: currentState.user.id,
-      });
-    } else if (activeTab === "All Projects") {
+    } else if (activeTab === "Active") {
       if (role === "NGO") {
         fetchUsers({
           page: currentPage,
-          // projectType: "present",
-          // status: "active",
           organization_id: currentState.user.id,
         });
       } else if (role === "donor" || role === "corporate") {
@@ -202,7 +207,7 @@ const List = ({ type }) => {
         {isLoading && <Loading type={"inline"} />}
         {!isLoading && (
           <>
-            <ProjectFilters
+            {/* <ProjectFilters
               statusFilter={statusFilter}
               categoryFilter={categoryFilter}
               dateFilter={dateFilter}
@@ -213,45 +218,49 @@ const List = ({ type }) => {
               onDateChange={setDateFilter}
               locationFilter={locationFilter}
               onLocationChange={setLocationFilter}
-            />
+            /> */}
             {/* Tab Navigation */}
-            {role !== "NGO" && (
-              <div style={{ marginLeft: "-1.5rem", marginRight: "-1.5rem" }}>
-                <ul
-                  className="nav nav-tabs mt-4 border-bottom border-2"
-                  style={{
-                    paddingLeft: "1.5rem",
-                    paddingRight: "1.5rem",
-                    marginBottom: "-2px",
-                  }}
-                >
-                  {["All Projects", "Contributed to", "Sponsoring"].map(
-                    (tab) => (
-                      <li className="nav-item" key={tab}>
-                        <button
-                          onClick={() => setActiveTab(tab)}
-                          className={`nav-link border-0 ${
-                            activeTab === tab ? "text-success " : "text-muted"
-                          }`}
-                        >
-                          <span
-                            style={{
-                              background: "transparent",
-                              borderBottom:
-                                activeTab === tab ? "2px solid #198754" : "",
-                              paddingBottom: "8px",
-                              display: "inline-block",
-                            }}
-                          >
-                            {tab}
-                          </span>
-                        </button>
-                      </li>
-                    ),
-                  )}
-                </ul>
+            <div className="tab-container" style={{ marginBottom: "24px" }}>
+              <div className="tab-wrapper" style={{ width: "70vw" }}>
+                {["Active", "Completed", "Past", "Applications"].map((tab) => {
+                  const getIcon = () => {
+                    if (tab === "Active")
+                      return (
+                        <FileText size={14} style={{ marginRight: "4px" }} />
+                      );
+                    if (tab === "Completed")
+                      return (
+                        <CheckCircle size={14} style={{ marginRight: "4px" }} />
+                      );
+                    if (tab === "Past")
+                      return (
+                        <CheckCircle size={14} style={{ marginRight: "4px" }} />
+                      );
+                    if (tab === "Applications")
+                      return <Send size={14} style={{ marginRight: "4px" }} />;
+                    return null;
+                  };
+
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`tab-button ${
+                        activeTab === tab ? "tab-active" : ""
+                      }`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {getIcon()}
+                      {tab}
+                    </button>
+                  );
+                })}
               </div>
-            )}
+            </div>
 
             {responseData.length === 0 ? (
               <div
