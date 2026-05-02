@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { capitalize } from "@mui/material";
 import { Calendar, MapPin, Wallet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { Col } from "reactstrap";
 import { getStatusBadgeProps } from "../helper";
 import { useContent } from "../services/useContext";
@@ -18,6 +20,15 @@ export const ProjectItem = (props: ProjectItemProps) => {
   const role = authState.user?.role;
 
   const details = () => {
+    // Check if on Applications tab with pending status
+    if (
+      props.activeTab === "Applications" &&
+      props.project.status === "pending"
+    ) {
+      toast.warning("You cannot currently view the details of this project");
+      return;
+    }
+
     if (props.type === "past") {
       switch (role) {
         case "NGO":
@@ -111,7 +122,7 @@ export const ProjectItem = (props: ProjectItemProps) => {
                 color: "#1a1a1a",
               }}
             >
-              {props.project.title}
+              {capitalize(props.project.title)}
             </h3>
             <p
               style={{
