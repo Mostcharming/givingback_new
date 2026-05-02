@@ -359,6 +359,7 @@ const List = ({ type }) => {
                           type={type}
                           project={project}
                           image={img}
+                          activeTab={activeTab}
                         />
                       </div>
                     );

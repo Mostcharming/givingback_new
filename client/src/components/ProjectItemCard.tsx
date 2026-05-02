@@ -9,6 +9,7 @@ interface ProjectItemProps {
   type: string;
   project: any;
   image?: string;
+  activeTab?: string;
 }
 
 export const ProjectItem = (props: ProjectItemProps) => {
@@ -139,41 +140,51 @@ export const ProjectItem = (props: ProjectItemProps) => {
           </span>
         </div>
 
-        {/* Progress Bar */}
-        <div style={{ marginBottom: "16px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "8px",
-            }}
-          >
-            <span style={{ fontSize: "13px", color: "#666" }}>Progress</span>
-            <span
-              style={{ fontSize: "14px", fontWeight: "600", color: "#16a34a" }}
-            >
-              {progressPercent} %
-            </span>
-          </div>
-          <div
-            style={{
-              height: "8px",
-              backgroundColor: "#e9ecef",
-              borderRadius: "4px",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                backgroundColor: "#16a34a",
-                width: `${progressPercent}%`,
-                transition: "width 0.3s ease",
-              }}
-            />
-          </div>
-        </div>
+        {/* Progress Bar - Hide for Past and Applications */}
+        {props.type !== "past" &&
+          props.activeTab !== "Applications" &&
+          props.activeTab !== "Past" && (
+            <div style={{ marginBottom: "16px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "8px",
+                }}
+              >
+                <span style={{ fontSize: "13px", color: "#666" }}>
+                  Progress
+                </span>
+                <span
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: "#16a34a",
+                  }}
+                >
+                  {progressPercent} %
+                </span>
+              </div>
+              <div
+                style={{
+                  height: "8px",
+                  backgroundColor: "#e9ecef",
+                  borderRadius: "4px",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    height: "100%",
+                    backgroundColor: "#16a34a",
+                    width: `${progressPercent}%`,
+                    transition: "width 0.3s ease",
+                  }}
+                />
+              </div>
+            </div>
+          )}
 
         {/* Info Row with icons */}
         <div

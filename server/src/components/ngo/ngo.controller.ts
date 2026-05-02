@@ -1271,6 +1271,7 @@ export const getApplications = async (
         return {
           ...project,
           status: application.status, // Replace with application status
+          cost: application.proposed_budget,
           applicationId: application.id,
           applicationCreatedAt: application.createdAt,
           projectType: "present",

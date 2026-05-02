@@ -19,6 +19,30 @@ export function getStatusBadgeProps(status: string) {
         backgroundColor: "#d4edda", // light green
         color: "#155724", // dark green
       };
+    case "approved":
+      return {
+        text: "Approved",
+        backgroundColor: "#d4edda", // light green
+        color: "#155724", // dark green
+      };
+    case "pending":
+      return {
+        text: "Pending",
+        backgroundColor: "#fff3cd", // light yellow
+        color: "#856404", // dark yellow
+      };
+    case "verified":
+      return {
+        text: "Verified",
+        backgroundColor: "#d4edda", // light green
+        color: "#155724", // dark green
+      };
+    case "unverified":
+      return {
+        text: "Unverified",
+        backgroundColor: "#e2e3e5", // light grey
+        color: "#6c757d", // dark grey
+      };
     default:
       return {
         text: status,
