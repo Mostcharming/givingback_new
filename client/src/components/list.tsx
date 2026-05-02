@@ -13,6 +13,10 @@ import { ProjectItem } from "./ProjectItemCard";
 const List = ({ type }) => {
   const { authState, currentState } = useContent();
   const [responseData, setResponseData] = useState([]);
+  const [activeProjects, setActiveProjects] = useState([]);
+  const [completedProjects, setCompletedProjects] = useState([]);
+  const [pastProjects, setPastProjects] = useState([]);
+  const [applications, setApplications] = useState([]);
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProjects, setTotalProjects] = useState(0);
@@ -35,14 +39,29 @@ const List = ({ type }) => {
   //   getAreas({});
   // }, []);
 
+  const [fetchingTab, setFetchingTab] = useState<string | null>(null);
+
   const { mutate: fetchUsers, isLoading } = useBackendService(
     "/allprojects",
     "GET",
     {
       onSuccess: (res: any) => {
-        setResponseData(res.projects);
+        const projects = res.projects;
         setTotalProjects(res.totalItems || 0);
         setTotalPages(res.totalPages || 1);
+
+        // Store data in the appropriate tab state
+        if (fetchingTab === "Active") {
+          setActiveProjects(projects);
+        } else if (fetchingTab === "Completed") {
+          setCompletedProjects(projects);
+        } else if (fetchingTab === "Past") {
+          setPastProjects(projects);
+        } else if (fetchingTab === "Applications") {
+          setApplications(projects);
+        }
+
+        setResponseData(projects);
       },
       onError: () => {
         toast.error("Failed to fetch Projects.");
@@ -51,6 +70,7 @@ const List = ({ type }) => {
   );
   useEffect(() => {
     if (type === "past") {
+      setFetchingTab("Past");
       fetchUsers({
         page: currentPage,
         projectType: "previous",
@@ -58,19 +78,18 @@ const List = ({ type }) => {
       });
     } else {
       if (role === "NGO") {
+        setFetchingTab("Active");
         fetchUsers({
           page: currentPage,
           limit: 20,
-          // projectType: "present",
-          // status: "active",
           organization_id: currentState.user.id,
         });
       } else if (role === "donor" || role === "corporate") {
+        setFetchingTab("Active");
         fetchUsers({
           page: currentPage,
           projectType: "present",
           status: "active",
-          // donor_id: currentState.user.id,
         });
       }
     }
@@ -126,37 +145,98 @@ const List = ({ type }) => {
   //   role,
   // ]);
 
+  // Load data for Active tab
   useEffect(() => {
-    if (
-      activeTab === "Applications" ||
-      activeTab === "Past" ||
-      activeTab === "Completed"
-    ) {
-      fetchUsers({
-        page: currentPage,
-        projectType:
-          activeTab === "Past"
-            ? "previous"
-            : activeTab === "Completed"
-              ? "completed"
-              : "present",
-        organization_id: currentState.user.id,
-      });
-    } else if (activeTab === "Active") {
+    if (activeTab === "Active" && activeProjects.length === 0) {
+      setFetchingTab("Active");
       if (role === "NGO") {
         fetchUsers({
-          page: currentPage,
+          page: 1,
           organization_id: currentState.user.id,
         });
       } else if (role === "donor" || role === "corporate") {
         fetchUsers({
-          page: currentPage,
+          page: 1,
           projectType: "present",
           status: "active",
         });
       }
     }
-  }, [activeTab, currentPage, currentState.user.id, fetchUsers, role]);
+  }, [
+    activeTab,
+    role,
+    currentState.user.id,
+    fetchUsers,
+    activeProjects.length,
+  ]);
+
+  // Load data for Completed tab
+  useEffect(() => {
+    if (activeTab === "Completed" && completedProjects.length === 0) {
+      setFetchingTab("Completed");
+      fetchUsers({
+        page: 1,
+        projectType: "completed",
+        organization_id: currentState.user.id,
+      });
+    }
+  }, [activeTab, currentState.user.id, fetchUsers, completedProjects.length]);
+
+  // Load data for Past tab
+  useEffect(() => {
+    if (activeTab === "Past" && pastProjects.length === 0) {
+      setFetchingTab("Past");
+      fetchUsers({
+        page: 1,
+        projectType: "previous",
+        organization_id: currentState.user.id,
+      });
+    }
+  }, [activeTab, currentState.user.id, fetchUsers, pastProjects.length]);
+
+  // Load data for Applications tab
+  useEffect(() => {
+    if (activeTab === "Applications" && applications.length === 0) {
+      setFetchingTab("Applications");
+      fetchUsers({
+        page: 1,
+        projectType: "present",
+        organization_id: currentState.user.id,
+      });
+    }
+  }, [activeTab, currentState.user.id, fetchUsers, applications.length]);
+
+  // Update responseData to show the correct tab's data
+  useEffect(() => {
+    if (role === "NGO") {
+      if (activeTab === "Active") {
+        setResponseData(activeProjects);
+      } else if (activeTab === "Completed") {
+        setResponseData(completedProjects);
+      } else if (activeTab === "Past") {
+        setResponseData(pastProjects);
+      } else if (activeTab === "Applications") {
+        setResponseData(applications);
+      }
+    } else if (role === "donor" || role === "corporate") {
+      if (activeTab === "Active") {
+        setResponseData(activeProjects);
+      } else if (activeTab === "Completed") {
+        setResponseData(completedProjects);
+      } else if (activeTab === "Past") {
+        setResponseData(pastProjects);
+      } else if (activeTab === "Applications") {
+        setResponseData(applications);
+      }
+    }
+  }, [
+    activeTab,
+    activeProjects,
+    completedProjects,
+    pastProjects,
+    applications,
+    role,
+  ]);
   const nextPage = () => {
     if (currentPage * 6 < totalProjects) {
       setCurrentPage(currentPage + 1);
