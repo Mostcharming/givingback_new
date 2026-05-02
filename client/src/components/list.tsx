@@ -3,7 +3,6 @@ import { CheckCircle, FileText, FolderOpenDot, Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Button } from "reactstrap";
 import useBackendService from "../services/backend_service";
 import { useContent } from "../services/useContext";
 import "./emptyProject.css";
@@ -18,9 +17,6 @@ const List = ({ type }) => {
   const [pastProjects, setPastProjects] = useState([]);
   const [applications, setApplications] = useState([]);
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalProjects, setTotalProjects] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
   const [activeTab, setActiveTab] = useState("Active");
   const role = authState.user?.role;
   // const [statusFilter, setStatusFilter] = useState("All Projects");
@@ -39,61 +35,60 @@ const List = ({ type }) => {
   //   getAreas({});
   // }, []);
 
-  const [fetchingTab, setFetchingTab] = useState<string | null>(null);
-
-  const { mutate: fetchUsers, isLoading } = useBackendService(
-    "/allprojects",
-    "GET",
-    {
+  // Fetch Active Projects for NGO
+  const { mutate: fetchActiveProjects, isLoading: isLoadingActive } =
+    useBackendService("/ngo/projects/active", "GET", {
       onSuccess: (res: any) => {
-        const projects = res.projects;
-        setTotalProjects(res.totalItems || 0);
-        setTotalPages(res.totalPages || 1);
-
-        // Store data in the appropriate tab state
-        if (fetchingTab === "Active") {
-          setActiveProjects(projects);
-        } else if (fetchingTab === "Completed") {
-          setCompletedProjects(projects);
-        } else if (fetchingTab === "Past") {
-          setPastProjects(projects);
-        } else if (fetchingTab === "Applications") {
-          setApplications(projects);
-        }
-
-        setResponseData(projects);
+        setActiveProjects(res.projects || []);
       },
       onError: () => {
-        toast.error("Failed to fetch Projects.");
+        toast.error("Failed to fetch active projects.");
+        setActiveProjects([]);
       },
-    },
-  );
-  useEffect(() => {
-    if (type === "past") {
-      setFetchingTab("Past");
-      fetchUsers({
-        page: currentPage,
-        projectType: "previous",
-        organization_id: currentState.user.id,
-      });
-    } else {
-      if (role === "NGO") {
-        setFetchingTab("Active");
-        fetchUsers({
-          page: currentPage,
-          limit: 20,
-          organization_id: currentState.user.id,
-        });
-      } else if (role === "donor" || role === "corporate") {
-        setFetchingTab("Active");
-        fetchUsers({
-          page: currentPage,
-          projectType: "present",
-          status: "active",
-        });
-      }
-    }
-  }, [role]);
+    });
+
+  // Fetch Completed Projects for NGO
+  const { mutate: fetchCompletedProjects, isLoading: isLoadingCompleted } =
+    useBackendService("/ngo/projects/completed", "GET", {
+      onSuccess: (res: any) => {
+        setCompletedProjects(res.projects || []);
+      },
+      onError: () => {
+        toast.error("Failed to fetch completed projects.");
+        setCompletedProjects([]);
+      },
+    });
+
+  // Fetch Past Projects for NGO
+  const { mutate: fetchPastProjects, isLoading: isLoadingPast } =
+    useBackendService("/ngo/projects/past", "GET", {
+      onSuccess: (res: any) => {
+        setPastProjects(res.projects || []);
+      },
+      onError: () => {
+        toast.error("Failed to fetch past projects.");
+        setPastProjects([]);
+      },
+    });
+
+  // Fetch Applications for NGO
+  const { mutate: fetchApplications, isLoading: isLoadingApplications } =
+    useBackendService("/ngo/projects/applications", "GET", {
+      onSuccess: (res: any) => {
+        setApplications(res.projects || []);
+      },
+      onError: () => {
+        toast.error("Failed to fetch applications.");
+        setApplications([]);
+      },
+    });
+
+  // Determine if loading
+  const isLoading =
+    isLoadingActive ||
+    isLoadingCompleted ||
+    isLoadingPast ||
+    isLoadingApplications;
   // useEffect(() => {
   //   const isDefault =
   //     statusFilter === "All Projects" &&
@@ -147,64 +142,39 @@ const List = ({ type }) => {
 
   // Load data for Active tab
   useEffect(() => {
-    if (activeTab === "Active" && activeProjects.length === 0) {
-      setFetchingTab("Active");
-      if (role === "NGO") {
-        fetchUsers({
-          page: 1,
-          organization_id: currentState.user.id,
-        });
-      } else if (role === "donor" || role === "corporate") {
-        fetchUsers({
-          page: 1,
-          projectType: "present",
-          status: "active",
-        });
-      }
+    if (activeTab === "Active" && activeProjects.length === 0 && role === "NGO") {
+      fetchActiveProjects({});
     }
-  }, [
-    activeTab,
-    role,
-    currentState.user.id,
-    fetchUsers,
-    activeProjects.length,
-  ]);
+  }, [activeTab, role, activeProjects.length, fetchActiveProjects]);
 
   // Load data for Completed tab
   useEffect(() => {
-    if (activeTab === "Completed" && completedProjects.length === 0) {
-      setFetchingTab("Completed");
-      fetchUsers({
-        page: 1,
-        projectType: "completed",
-        organization_id: currentState.user.id,
-      });
+    if (
+      activeTab === "Completed" &&
+      completedProjects.length === 0 &&
+      role === "NGO"
+    ) {
+      fetchCompletedProjects({});
     }
-  }, [activeTab, currentState.user.id, fetchUsers, completedProjects.length]);
+  }, [activeTab, role, completedProjects.length, fetchCompletedProjects]);
 
   // Load data for Past tab
   useEffect(() => {
-    if (activeTab === "Past" && pastProjects.length === 0) {
-      setFetchingTab("Past");
-      fetchUsers({
-        page: 1,
-        projectType: "previous",
-        organization_id: currentState.user.id,
-      });
+    if (activeTab === "Past" && pastProjects.length === 0 && role === "NGO") {
+      fetchPastProjects({});
     }
-  }, [activeTab, currentState.user.id, fetchUsers, pastProjects.length]);
+  }, [activeTab, role, pastProjects.length, fetchPastProjects]);
 
   // Load data for Applications tab
   useEffect(() => {
-    if (activeTab === "Applications" && applications.length === 0) {
-      setFetchingTab("Applications");
-      fetchUsers({
-        page: 1,
-        projectType: "present",
-        organization_id: currentState.user.id,
-      });
+    if (
+      activeTab === "Applications" &&
+      applications.length === 0 &&
+      role === "NGO"
+    ) {
+      fetchApplications({});
     }
-  }, [activeTab, currentState.user.id, fetchUsers, applications.length]);
+  }, [activeTab, role, applications.length, fetchApplications]);
 
   // Update responseData to show the correct tab's data
   useEffect(() => {
@@ -237,17 +207,6 @@ const List = ({ type }) => {
     applications,
     role,
   ]);
-  const nextPage = () => {
-    if (currentPage * 6 < totalProjects) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const previousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
 
   const handleAddProject = () => {
     switch (role) {
@@ -400,35 +359,6 @@ const List = ({ type }) => {
                       </div>
                     );
                   })}
-                </div>
-
-                <div className="d-flex justify-content-between mt-4">
-                  <Button
-                    style={{
-                      backgroundColor: currentPage === 1 ? "grey" : "#7B80DD",
-                      color: "white",
-                      border: "none",
-                      cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                    }}
-                    onClick={previousPage}
-                    disabled={currentPage === 1}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    style={{
-                      backgroundColor:
-                        currentPage === totalPages ? "grey" : "#7B80DD",
-                      color: "white",
-                      border: "none",
-                      cursor:
-                        currentPage === totalPages ? "not-allowed" : "pointer",
-                    }}
-                    onClick={nextPage}
-                    disabled={currentPage === totalPages}
-                  >
-                    Next
-                  </Button>
                 </div>
               </>
             )}

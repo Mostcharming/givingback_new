@@ -5,7 +5,7 @@ export const getProjects = async (
   db: Knex,
   filters: ProjectFilter,
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
 ) => {
   const offset = (page - 1) * limit;
   const { projectType, donor_id, organization_id, ...searchFilters } = filters;
@@ -23,7 +23,7 @@ export const getProjects = async (
       "description",
       "createdAt",
       "updatedAt",
-      "organization_id"
+      "organization_id",
     )
     .orderBy("createdAt", "desc");
 
@@ -47,7 +47,7 @@ export const getProjects = async (
       "status",
       "createdAt",
       "updatedAt",
-      "organization_id"
+      "organization_id",
     )
     .orderBy("createdAt", "desc");
 
@@ -73,40 +73,40 @@ export const getProjects = async (
         previousProjectsQuery = previousProjectsQuery.where(
           db.raw(`LOWER(${key})`),
           "LIKE",
-          `%${(value as string).toLowerCase()}%`
+          `%${(value as string).toLowerCase()}%`,
         );
         presentProjectsQuery = presentProjectsQuery.where(
           db.raw(`LOWER(${key})`),
           "LIKE",
-          `%${(value as string).toLowerCase()}%`
+          `%${(value as string).toLowerCase()}%`,
         );
       } else if (key === "status") {
         previousProjectsQuery = previousProjectsQuery.where(
           db.raw("LOWER(status)"),
           "=",
-          (value as string).toLowerCase()
+          (value as string).toLowerCase(),
         );
         presentProjectsQuery = presentProjectsQuery.where(
           db.raw("LOWER(status)"),
           "=",
-          (value as string).toLowerCase()
+          (value as string).toLowerCase(),
         );
       } else if (key === "state") {
         previousProjectsQuery = previousProjectsQuery.where(
           db.raw("LOWER(state)"),
           "=",
-          (value as string).toLowerCase()
+          (value as string).toLowerCase(),
         );
         presentProjectsQuery = presentProjectsQuery.where(
           db.raw("LOWER(state)"),
           "=",
-          (value as string).toLowerCase()
+          (value as string).toLowerCase(),
         );
       } else if (key === "startDate" || key === "endDate") {
         presentProjectsQuery = presentProjectsQuery.where(
           key,
           key === "startDate" ? ">=" : "<=",
-          value
+          value,
         );
       }
     }
@@ -155,7 +155,7 @@ export const getProjects = async (
         beneficiaries,
         projectImages,
       };
-    })
+    }),
   );
 
   const presentProjectsWithDetails = await Promise.all(
@@ -176,7 +176,7 @@ export const getProjects = async (
           "city_lga",
           "address",
           "about",
-          "image"
+          "image",
         )
         .first();
 
@@ -189,7 +189,7 @@ export const getProjects = async (
           "description",
           "status",
           "due_date",
-          "createdAt"
+          "createdAt",
         );
 
       const sponsors = await db("project_sponsor")
@@ -208,13 +208,13 @@ export const getProjects = async (
               "organization_id",
               "status",
               "narration",
-              "createdAt"
+              "createdAt",
             );
 
           // Calculate percentage completion
           const totalAchievement = updates.reduce(
             (sum, update) => sum + (update.achievement || 0),
-            0
+            0,
           );
           const target = milestone.target || 0;
           const percentageComplete =
@@ -225,7 +225,7 @@ export const getProjects = async (
             updates,
             percentage_complete: percentageComplete,
           };
-        })
+        }),
       );
 
       const beneficiaries = await db("beneficiary")
@@ -245,7 +245,7 @@ export const getProjects = async (
         sponsors,
         projectImages,
       };
-    })
+    }),
   );
 
   return {

@@ -15,6 +15,10 @@ import {
   deleteImage,
   deleteMilestone,
   deleteSponsor,
+  getActiveProjects,
+  getApplications,
+  getCompleteProjects,
+  getPastProjects,
   respondBrief,
   withdraw,
 } from "./ngo.controller";
@@ -30,8 +34,14 @@ router.route("/onboard").post(
 
   verifyNew("organizations", "cac"),
 
-  create as any
+  create as any,
 );
+
+// Get projects by status (no pagination)
+router.get("/projects/active", getActiveProjects as any);
+router.get("/projects/completed", getCompleteProjects as any);
+router.get("/projects/past", getPastProjects);
+router.get("/projects/applications", getApplications as any);
 router.route("/previous-project").post(uploadimg, createp as any);
 router.route("/milestone").post(uploadimg, addMilestoneUpdate as any);
 router.route("/withdraw_request").post(withdraw as any);

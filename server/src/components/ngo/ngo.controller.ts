@@ -710,4 +710,592 @@ export const deleteImage = async (req: Request, res: Response) => {
   }
 };
 
+// Get active projects (no pagination)
+export const getActiveProjects = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const organization = await db("organizations")
+      .where("user_id", req.user.id)
+      .first();
+    if (!organization) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found.",
+      });
+    }
+
+    // Query project table with status filter for active
+    const activeProjects = await db("project")
+      .select(
+        "id",
+        "title",
+        db.raw('DATE_FORMAT(startDate, "%Y-%m-%d") AS startDate'),
+        db.raw('DATE_FORMAT(endDate, "%Y-%m-%d") AS endDate'),
+        "description",
+        "objectives",
+        "category",
+        "donor_id",
+        "cost",
+        "state",
+        "country",
+        "city",
+        "scope",
+        "allocated",
+        "beneficiary_overview",
+        "status",
+        "createdAt",
+        "updatedAt",
+        "organization_id",
+      )
+      .where("status", "active")
+      .where("organization_id", organization.id)
+      .orderBy("createdAt", "desc");
+
+    // Fetch related details for active projects
+    const activeProjectsWithDetails = await Promise.all(
+      activeProjects.map(async (project) => {
+        const projectId = project.id;
+
+        const donorDetails = await db("donors")
+          .where({ id: project.donor_id })
+          .select(
+            "id",
+            "name",
+            "phoneNumber",
+            "industry",
+            "email",
+            "interest_area",
+            "state",
+            "city_lga",
+            "address",
+            "about",
+            "image",
+          )
+          .first();
+
+        const milestones = await db("milestone")
+          .where({ project_id: projectId })
+          .select(
+            "id",
+            "milestone",
+            "target",
+            "description",
+            "status",
+            "due_date",
+            "createdAt",
+          );
+
+        const sponsors = await db("project_sponsor")
+          .where({ project_id: projectId })
+          .select("id", "name", "image", "description");
+
+        const detailedMilestones = await Promise.all(
+          milestones.map(async (milestone) => {
+            const updates = await db("milestone_update")
+              .where({ milestone_id: milestone.id })
+              .select(
+                "id",
+                "achievement",
+                "position",
+                "image",
+                "organization_id",
+                "status",
+                "narration",
+                "createdAt",
+              );
+
+            // Calculate percentage completion
+            const totalAchievement = updates.reduce(
+              (sum, update) => sum + (update.achievement || 0),
+              0,
+            );
+            const target = milestone.target || 0;
+            const percentageComplete =
+              target > 0 ? Math.round((totalAchievement / target) * 100) : 0;
+
+            return {
+              ...milestone,
+              updates,
+              percentage_complete: percentageComplete,
+            };
+          }),
+        );
+
+        const beneficiaries = await db("beneficiary")
+          .where({ project_id: projectId })
+          .select("id", "state", "city", "community", "contact");
+
+        const projectImages = await db("project_images")
+          .where({ project_id: projectId })
+          .select("id", "image");
+
+        return {
+          ...project,
+          projectType: "present",
+          donor: donorDetails,
+          milestones: detailedMilestones,
+          beneficiaries,
+          sponsors,
+          projectImages,
+        };
+      }),
+    );
+
+    res.status(200).json({
+      projects: activeProjectsWithDetails,
+      totalItems: activeProjectsWithDetails.length,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Unable to fetch active projects" });
+  }
+};
+
+// Get completed projects (no pagination)
+export const getCompleteProjects = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const organization = await db("organizations")
+      .where("user_id", req.user.id)
+      .first();
+    if (!organization) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found.",
+      });
+    }
+
+    // Query project table with status filter for completed
+    const completedProjects = await db("project")
+      .select(
+        "id",
+        "title",
+        db.raw('DATE_FORMAT(startDate, "%Y-%m-%d") AS startDate'),
+        db.raw('DATE_FORMAT(endDate, "%Y-%m-%d") AS endDate'),
+        "description",
+        "objectives",
+        "category",
+        "donor_id",
+        "cost",
+        "state",
+        "country",
+        "city",
+        "scope",
+        "allocated",
+        "beneficiary_overview",
+        "status",
+        "createdAt",
+        "updatedAt",
+        "organization_id",
+      )
+      .where("status", "completed")
+      .where("organization_id", organization.id)
+      .orderBy("createdAt", "desc");
+
+    // Fetch related details for completed projects
+    const completedProjectsWithDetails = await Promise.all(
+      completedProjects.map(async (project) => {
+        const projectId = project.id;
+
+        const donorDetails = await db("donors")
+          .where({ id: project.donor_id })
+          .select(
+            "id",
+            "name",
+            "phoneNumber",
+            "industry",
+            "email",
+            "interest_area",
+            "state",
+            "city_lga",
+            "address",
+            "about",
+            "image",
+          )
+          .first();
+
+        const milestones = await db("milestone")
+          .where({ project_id: projectId })
+          .select(
+            "id",
+            "milestone",
+            "target",
+            "description",
+            "status",
+            "due_date",
+            "createdAt",
+          );
+
+        const sponsors = await db("project_sponsor")
+          .where({ project_id: projectId })
+          .select("id", "name", "image", "description");
+
+        const detailedMilestones = await Promise.all(
+          milestones.map(async (milestone) => {
+            const updates = await db("milestone_update")
+              .where({ milestone_id: milestone.id })
+              .select(
+                "id",
+                "achievement",
+                "position",
+                "image",
+                "organization_id",
+                "status",
+                "narration",
+                "createdAt",
+              );
+
+            // Calculate percentage completion
+            const totalAchievement = updates.reduce(
+              (sum, update) => sum + (update.achievement || 0),
+              0,
+            );
+            const target = milestone.target || 0;
+            const percentageComplete =
+              target > 0 ? Math.round((totalAchievement / target) * 100) : 0;
+
+            return {
+              ...milestone,
+              updates,
+              percentage_complete: percentageComplete,
+            };
+          }),
+        );
+
+        const beneficiaries = await db("beneficiary")
+          .where({ project_id: projectId })
+          .select("id", "state", "city", "community", "contact");
+
+        const projectImages = await db("project_images")
+          .where({ project_id: projectId })
+          .select("id", "image");
+
+        return {
+          ...project,
+          projectType: "present",
+          donor: donorDetails,
+          milestones: detailedMilestones,
+          beneficiaries,
+          sponsors,
+          projectImages,
+        };
+      }),
+    );
+
+    res.status(200).json({
+      projects: completedProjectsWithDetails,
+      totalItems: completedProjectsWithDetails.length,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Unable to fetch completed projects" });
+  }
+};
+
+// Get past projects (verified or unverified status - no pagination)
+export const getPastProjects = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // Query project table with status filter for verified/unverified
+    const pastProjects = await db("project")
+      .select(
+        "id",
+        "title",
+        db.raw('DATE_FORMAT(startDate, "%Y-%m-%d") AS startDate'),
+        db.raw('DATE_FORMAT(endDate, "%Y-%m-%d") AS endDate'),
+        "description",
+        "objectives",
+        "category",
+        "donor_id",
+        "cost",
+        "state",
+        "country",
+        "city",
+        "scope",
+        "allocated",
+        "beneficiary_overview",
+        "status",
+        "createdAt",
+        "updatedAt",
+        "organization_id",
+      )
+      .whereIn("status", ["verified", "unverified"])
+      .orderBy("createdAt", "desc");
+
+    // Fetch related details for past projects
+    const pastProjectsWithDetails = await Promise.all(
+      pastProjects.map(async (project) => {
+        const projectId = project.id;
+
+        const donorDetails = await db("donors")
+          .where({ id: project.donor_id })
+          .select(
+            "id",
+            "name",
+            "phoneNumber",
+            "industry",
+            "email",
+            "interest_area",
+            "state",
+            "city_lga",
+            "address",
+            "about",
+            "image",
+          )
+          .first();
+
+        const milestones = await db("milestone")
+          .where({ project_id: projectId })
+          .select(
+            "id",
+            "milestone",
+            "target",
+            "description",
+            "status",
+            "due_date",
+            "createdAt",
+          );
+
+        const sponsors = await db("project_sponsor")
+          .where({ project_id: projectId })
+          .select("id", "name", "image", "description");
+
+        const detailedMilestones = await Promise.all(
+          milestones.map(async (milestone) => {
+            const updates = await db("milestone_update")
+              .where({ milestone_id: milestone.id })
+              .select(
+                "id",
+                "achievement",
+                "position",
+                "image",
+                "organization_id",
+                "status",
+                "narration",
+                "createdAt",
+              );
+
+            // Calculate percentage completion
+            const totalAchievement = updates.reduce(
+              (sum, update) => sum + (update.achievement || 0),
+              0,
+            );
+            const target = milestone.target || 0;
+            const percentageComplete =
+              target > 0 ? Math.round((totalAchievement / target) * 100) : 0;
+
+            return {
+              ...milestone,
+              updates,
+              percentage_complete: percentageComplete,
+            };
+          }),
+        );
+
+        const beneficiaries = await db("beneficiary")
+          .where({ project_id: projectId })
+          .select("id", "state", "city", "community", "contact");
+
+        const projectImages = await db("project_images")
+          .where({ project_id: projectId })
+          .select("id", "image");
+
+        return {
+          ...project,
+          projectType: "past",
+          donor: donorDetails,
+          milestones: detailedMilestones,
+          beneficiaries,
+          sponsors,
+          projectImages,
+        };
+      }),
+    );
+
+    res.status(200).json({
+      projects: pastProjectsWithDetails,
+      totalItems: pastProjectsWithDetails.length,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Unable to fetch past projects" });
+  }
+};
+
+// Get applications (projects applied to by NGO)
+export const getApplications = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const organization = await db("organizations")
+      .where("user_id", req.user.id)
+      .first();
+    if (!organization) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found.",
+      });
+    }
+
+    // Get all applications for this organization
+    const applications = await db("project_application")
+      .where("ngo_id", organization.id)
+      .select("id", "project_id", "status", "createdAt");
+
+    if (applications.length === 0) {
+      return res.status(200).json({
+        projects: [],
+        totalItems: 0,
+      });
+    }
+
+    // Fetch full project details for each application
+    const applicationsWithProjectDetails = await Promise.all(
+      applications.map(async (application) => {
+        const projectId = application.project_id;
+
+        const project = await db("project")
+          .select(
+            "id",
+            "title",
+            db.raw('DATE_FORMAT(startDate, "%Y-%m-%d") AS startDate'),
+            db.raw('DATE_FORMAT(endDate, "%Y-%m-%d") AS endDate'),
+            "description",
+            "objectives",
+            "category",
+            "donor_id",
+            "cost",
+            "state",
+            "country",
+            "city",
+            "scope",
+            "allocated",
+            "beneficiary_overview",
+            "status",
+            "createdAt",
+            "updatedAt",
+            "organization_id",
+          )
+          .where({ id: projectId })
+          .first();
+
+        if (!project) {
+          return null;
+        }
+
+        const donorDetails = await db("donors")
+          .where({ id: project.donor_id })
+          .select(
+            "id",
+            "name",
+            "phoneNumber",
+            "industry",
+            "email",
+            "interest_area",
+            "state",
+            "city_lga",
+            "address",
+            "about",
+            "image",
+          )
+          .first();
+
+        const milestones = await db("milestone")
+          .where({ project_id: projectId })
+          .select(
+            "id",
+            "milestone",
+            "target",
+            "description",
+            "status",
+            "due_date",
+            "createdAt",
+          );
+
+        const sponsors = await db("project_sponsor")
+          .where({ project_id: projectId })
+          .select("id", "name", "image", "description");
+
+        const detailedMilestones = await Promise.all(
+          milestones.map(async (milestone) => {
+            const updates = await db("milestone_update")
+              .where({ milestone_id: milestone.id })
+              .select(
+                "id",
+                "achievement",
+                "position",
+                "image",
+                "organization_id",
+                "status",
+                "narration",
+                "createdAt",
+              );
+
+            // Calculate percentage completion
+            const totalAchievement = updates.reduce(
+              (sum, update) => sum + (update.achievement || 0),
+              0,
+            );
+            const target = milestone.target || 0;
+            const percentageComplete =
+              target > 0 ? Math.round((totalAchievement / target) * 100) : 0;
+
+            return {
+              ...milestone,
+              updates,
+              percentage_complete: percentageComplete,
+            };
+          }),
+        );
+
+        const beneficiaries = await db("beneficiary")
+          .where({ project_id: projectId })
+          .select("id", "state", "city", "community", "contact");
+
+        const projectImages = await db("project_images")
+          .where({ project_id: projectId })
+          .select("id", "image");
+
+        // Return project with application status replacing project status
+        return {
+          ...project,
+          status: application.status, // Replace with application status
+          applicationId: application.id,
+          applicationCreatedAt: application.createdAt,
+          projectType: "present",
+          donor: donorDetails,
+          milestones: detailedMilestones,
+          beneficiaries,
+          sponsors,
+          projectImages,
+        };
+      }),
+    );
+
+    // Filter out null values (projects that don't exist)
+    const validApplications = applicationsWithProjectDetails.filter(
+      (app) => app !== null,
+    );
+
+    res.status(200).json({
+      projects: validApplications,
+      totalItems: validApplications.length,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Unable to fetch applications" });
+  }
+};
+
 // Similarly for sponsor, beneficiary, image...
