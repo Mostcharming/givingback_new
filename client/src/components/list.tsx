@@ -10,7 +10,7 @@ import Loading from "./home/loading";
 import { ProjectItem } from "./ProjectItemCard";
 
 const List = ({ type }) => {
-  const { authState, currentState } = useContent();
+  const { authState } = useContent();
   const [responseData, setResponseData] = useState([]);
   const [activeProjects, setActiveProjects] = useState([]);
   const [completedProjects, setCompletedProjects] = useState([]);
@@ -142,7 +142,11 @@ const List = ({ type }) => {
 
   // Load data for Active tab
   useEffect(() => {
-    if (activeTab === "Active" && activeProjects.length === 0 && role === "NGO") {
+    if (
+      activeTab === "Active" &&
+      activeProjects.length === 0 &&
+      role === "NGO"
+    ) {
       fetchActiveProjects({});
     }
   }, [activeTab, role, activeProjects.length, fetchActiveProjects]);
