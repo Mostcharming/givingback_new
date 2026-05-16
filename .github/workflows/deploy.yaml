@@ -11,17 +11,17 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-      - name: Reset Backend Repository
+      - name: Sync Backend Repository
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.BACKEND_HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            git add .
-            git commit -m "hi" || echo "Nothing to commit"
-            git reset --hard HEAD
-            git pull origin main
+            cd /home/ubuntu/server
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
 
       - name: Clean Backend Directories
         uses: appleboy/ssh-action@v0.1.6
@@ -80,17 +80,37 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Reset Frontend Repository
+      - name: Sync Frontend Repository
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.FRONTEND_HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            git add .
-            git commit -m "hi" || echo "Nothing to commit"
-            git reset --hard HEAD
-            git pull origin main
+            cd /home/ubuntu/client
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+      - name: Install Frontend Dependencies
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/client
+            npm install
+
+      - name: Build Frontend
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.FRONTEND_HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/client
+            npm run build
 
       - name: Deploy Frontend Build to Web Server
         uses: appleboy/ssh-action@v0.1.6
