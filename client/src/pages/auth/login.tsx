@@ -48,6 +48,7 @@ const Login = () => {
   // Add at the top, inside the component
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Determine if both fields are filled
   const isFormValid = email.trim() !== "" && password.trim() !== "";
@@ -58,13 +59,15 @@ const Login = () => {
     {
       onSuccess: (response: any) => {
         toast.success("Logged in successfully");
+        setIsSubmitting(false);
         dispatch(login_auth(response));
         navigate("/dashboard");
       },
       onError: (error: any) => {
-        toast.error(error.response.data.error);
+        setIsSubmitting(false);
+        toast.error(error.response?.data?.error || "Login failed");
       },
-    }
+    },
   );
 
   useEffect(() => {
@@ -94,6 +97,7 @@ const Login = () => {
     const password = (form.elements.namedItem("password") as HTMLInputElement)
       .value;
     const uuid = "";
+    setIsSubmitting(true);
     login({ email, password, uuid });
   };
 
@@ -166,9 +170,9 @@ const Login = () => {
                   width: "-webkit-fill-available",
                 }}
                 type="submit"
-                disabled={!isFormValid || isLoading}
+                disabled={!isFormValid || isSubmitting}
               >
-                {isLoading ? "Loading..." : "Continue"}
+                {isSubmitting ? "Loading..." : "Continue"}
               </Button>
             </div>
           </Form>

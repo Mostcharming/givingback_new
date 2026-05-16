@@ -18,6 +18,7 @@ app.set("views", path.join(__dirname, "views"));
 
 const whitelist: string[] = [
   "http://192.168.1.147:5173",
+  "http://192.168.1.165:5173",
   "https://givebackng.org",
   "https://api.givebackng.org",
   "https://www.givebackng.org",
@@ -40,7 +41,7 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Methods", "GET, PATCH, POST, PUT, DELETE");
   res.header(
     "Access-Control-Allow-Headers",
-    "Content-Type, Access-Control-Allow-Origin, Origin, X-Requested-With, Accept"
+    "Content-Type, Access-Control-Allow-Origin, Origin, X-Requested-With, Accept",
   );
   res.header("Access-Control-Allow-Credentials", "true");
   next();
