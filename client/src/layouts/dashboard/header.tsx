@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useNavigate } from "react-router-dom";
 // reactstrap components
+import { Bell, Calendar } from "lucide-react";
 import { FaChevronDown } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import {
@@ -22,6 +23,8 @@ import { RootState } from "../../types";
 
 const AdminNavbar: React.FC<any> = () => {
   const { currentState } = useContent();
+  const { authState } = useContent();
+  const role = authState.user?.role;
   const navigate = useNavigate();
   const dispatch: ThunkDispatch<RootState, unknown, any> = useDispatch();
 
@@ -55,6 +58,38 @@ const AdminNavbar: React.FC<any> = () => {
             <UncontrolledDropdown nav>
               <DropdownToggle className="pr-0" nav>
                 <Media className="align-items-center">
+                  {role === "NGO" && (
+                    <>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "50%",
+                          backgroundColor: "#E2EFE9",
+                          marginRight: "10px",
+                        }}
+                      >
+                        <Calendar color="#128330" size={18} />
+                      </span>
+                    </>
+                  )}
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      backgroundColor: "#E2EFE9",
+                      marginRight: "10px",
+                    }}
+                  >
+                    <Bell color="#128330" size={18} />
+                  </span>
                   <span
                     style={{ color: "black" }}
                     className="mb-0 text-sm font-weight-bold mr-2"
