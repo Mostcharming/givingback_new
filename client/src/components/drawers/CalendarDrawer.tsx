@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface CalendarEvent {
   id: number;
@@ -13,53 +13,85 @@ interface DayGroup {
   events: CalendarEvent[];
 }
 
-const initialData: DayGroup[] = [
-  {
-    label: "Mon, 22 Apr",
-    events: [
+// Mock API service
+const mockCalendarAPI = {
+  fetchCalendarEvents: async (): Promise<DayGroup[]> => {
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Return sample data
+    return [
       {
-        id: 1,
-        title: "New Borehole Tap",
-        startTime: "10:20 AM",
-        endTime: "11:20 AM",
+        label: "Mon, 22 Apr",
+        events: [
+          {
+            id: 1,
+            title: "Project Kickoff Meeting",
+            startTime: "10:20 AM",
+            endTime: "11:20 AM",
+          },
+          {
+            id: 2,
+            title: "Donor Review Session",
+            startTime: "2:00 PM",
+            endTime: "3:30 PM",
+          },
+        ],
       },
       {
-        id: 2,
-        title: "New Borehole Tap",
-        startTime: "10:20 AM",
-        endTime: "11:20 AM",
+        label: "Tue, 23 Apr",
+        events: [
+          {
+            id: 3,
+            title: "Budget Planning",
+            startTime: "9:00 AM",
+            endTime: "10:30 AM",
+          },
+          {
+            id: 4,
+            title: "NGO Coordination Call",
+            startTime: "11:00 AM",
+            endTime: "12:00 PM",
+          },
+          {
+            id: 5,
+            title: "Field Visit",
+            startTime: "3:00 PM",
+            endTime: "5:00 PM",
+          },
+        ],
       },
-    ],
+      {
+        label: "Wed, 24 Apr",
+        events: [
+          {
+            id: 6,
+            title: "Milestone Review",
+            startTime: "10:00 AM",
+            endTime: "11:00 AM",
+          },
+          {
+            id: 7,
+            title: "Financial Report Submission",
+            startTime: "2:00 PM",
+            endTime: "3:00 PM",
+          },
+        ],
+      },
+      {
+        label: "Thu, 25 Apr",
+        events: [
+          {
+            id: 8,
+            title: "Stakeholder Meeting",
+            startTime: "9:30 AM",
+            endTime: "10:30 AM",
+          },
+        ],
+      },
+    ];
   },
-  {
-    label: "Tue, 23 Apr",
-    events: [
-      {
-        id: 3,
-        title: "New Borehole Tap",
-        startTime: "10:20 AM",
-        endTime: "11:20 AM",
-      },
-    ],
-  },
-  {
-    label: "Wed, 24 Apr",
-    events: [
-      {
-        id: 4,
-        title: "New Borehole Tap",
-        startTime: "10:20 AM",
-        endTime: "11:20 AM",
-      },
-      {
-        id: 5,
-        title: "New Borehole Tap",
-        startTime: "10:20 AM",
-        endTime: "11:20 AM",
-      },
-    ],
-  },
-];
+};
 
 function CloseIcon() {
   return (
@@ -93,7 +125,28 @@ interface CalendarDrawerProps {
 }
 
 const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
-  const [dayGroups, setDayGroups] = useState<DayGroup[]>(initialData);
+  const [dayGroups, setDayGroups] = useState<DayGroup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch calendar events on component mount
+  useEffect(() => {
+    const fetchCalendarEvents = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await mockCalendarAPI.fetchCalendarEvents();
+        setDayGroups(data);
+      } catch (err) {
+        setError("Failed to load calendar events");
+        console.error("Error fetching calendar events:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCalendarEvents();
+  }, []);
 
   const removeEvent = (eventId: number) => {
     setDayGroups((prev) =>
@@ -411,127 +464,41 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
           paddingBottom: "30px",
         }}
       >
-        {dayGroups.map((group) => (
-          <div key={group.label} style={{ marginTop: "20px" }}>
-            <p
-              style={{
-                color: "#666",
-                fontFamily: "Archivo",
-                fontSize: "12px",
-                fontWeight: 400,
-                lineHeight: "1.5",
-                marginBottom: "12px",
-              }}
-            >
-              {group.label}
-            </p>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "11px" }}
-            >
-              {group.events.map((event) => (
-                <div
-                  key={event.id}
-                  style={{
-                    position: "relative",
-                    borderRadius: "10px",
-                    border: "1px solid rgba(18,131,48,0.40)",
-                    backgroundColor: "#F0F5F6",
-                    paddingLeft: "16px",
-                    paddingRight: "16px",
-                    paddingTop: "16px",
-                    paddingBottom: "16px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                    // group: "group",
-                  }}
-                  onMouseEnter={(e) => {
-                    const closeBtn = e.currentTarget.querySelector("button");
-                    if (closeBtn) {
-                      closeBtn.style.opacity = "1";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    const closeBtn = e.currentTarget.querySelector("button");
-                    if (closeBtn) {
-                      closeBtn.style.opacity = "0";
-                    }
-                  }}
-                >
-                  <p
-                    style={{
-                      color: "#1E1E1E",
-                      fontFamily: "Archivo",
-                      fontWeight: 500,
-                      fontSize: "14px",
-                      lineHeight: "1.5",
-                    }}
-                  >
-                    {event.title}
-                  </p>
-                  <p
-                    style={{
-                      color: "#444",
-                      fontFamily: "Archivo",
-                      fontWeight: 400,
-                      fontSize: "12px",
-                      lineHeight: "1.5",
-                    }}
-                  >
-                    {event.startTime} - {event.endTime}
-                  </p>
-                  <button
-                    onClick={() => removeEvent(event.id)}
-                    style={{
-                      position: "absolute",
-                      top: "12px",
-                      right: "12px",
-                      opacity: 0,
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      transition: "opacity 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.opacity =
-                        "0.6";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.opacity =
-                        "0";
-                    }}
-                    aria-label="Remove event"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M15 5L5 15"
-                        stroke="#999"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M5 5L15 15"
-                        stroke="#999"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-            </div>
+        {loading && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "200px",
+              color: "#999",
+              fontFamily: "Archivo",
+              fontSize: "14px",
+            }}
+          >
+            Loading events...
           </div>
-        ))}
+        )}
 
-        {dayGroups.length === 0 && (
+        {error && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "200px",
+              color: "#CE0303",
+              fontFamily: "Archivo",
+              fontSize: "14px",
+              padding: "20px",
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && dayGroups.length === 0 && (
           <div
             style={{
               display: "flex",
@@ -546,6 +513,131 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
             No events scheduled
           </div>
         )}
+
+        {!loading &&
+          !error &&
+          dayGroups.map((group) => (
+            <div key={group.label} style={{ marginTop: "20px" }}>
+              <p
+                style={{
+                  color: "#666",
+                  fontFamily: "Archivo",
+                  fontSize: "12px",
+                  fontWeight: 400,
+                  lineHeight: "1.5",
+                  marginBottom: "12px",
+                }}
+              >
+                {group.label}
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "11px",
+                }}
+              >
+                {group.events.map((event) => (
+                  <div
+                    key={event.id}
+                    style={{
+                      position: "relative",
+                      borderRadius: "10px",
+                      border: "1px solid rgba(18,131,48,0.40)",
+                      backgroundColor: "#F0F5F6",
+                      paddingLeft: "16px",
+                      paddingRight: "16px",
+                      paddingTop: "16px",
+                      paddingBottom: "16px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "4px",
+                    }}
+                    onMouseEnter={(e) => {
+                      const closeBtn = e.currentTarget.querySelector("button");
+                      if (closeBtn) {
+                        closeBtn.style.opacity = "1";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      const closeBtn = e.currentTarget.querySelector("button");
+                      if (closeBtn) {
+                        closeBtn.style.opacity = "0";
+                      }
+                    }}
+                  >
+                    <p
+                      style={{
+                        color: "#1E1E1E",
+                        fontFamily: "Archivo",
+                        fontWeight: 500,
+                        fontSize: "14px",
+                        lineHeight: "1.5",
+                      }}
+                    >
+                      {event.title}
+                    </p>
+                    <p
+                      style={{
+                        color: "#444",
+                        fontFamily: "Archivo",
+                        fontWeight: 400,
+                        fontSize: "12px",
+                        lineHeight: "1.5",
+                      }}
+                    >
+                      {event.startTime} - {event.endTime}
+                    </p>
+                    <button
+                      onClick={() => removeEvent(event.id)}
+                      style={{
+                        position: "absolute",
+                        top: "12px",
+                        right: "12px",
+                        opacity: 0,
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        transition: "opacity 0.3s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.opacity =
+                          "0.6";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.opacity =
+                          "0";
+                      }}
+                      aria-label="Remove event"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M15 5L5 15"
+                          stroke="#999"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M5 5L15 15"
+                          stroke="#999"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
       </div>
     </div>
   );

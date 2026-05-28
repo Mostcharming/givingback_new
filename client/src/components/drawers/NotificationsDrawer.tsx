@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 type IconType = "deposit" | "withdrawal" | "info";
 
@@ -13,98 +13,107 @@ interface Notification {
   time: string;
 }
 
-const notifications: Notification[] = [
-  {
-    id: 1,
-    iconType: "deposit",
-    amount: "₦ 50,000",
-    action: " deposited into ",
-    target: "wallet",
-    status: " successfully",
-    time: "Today, 12:36 PM",
+// Mock API service
+const mockNotificationAPI = {
+  fetchNotifications: async (): Promise<Notification[]> => {
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Return sample data
+    return [
+      {
+        id: 1,
+        iconType: "deposit",
+        amount: "₦ 50,000",
+        action: " deposited into ",
+        target: "wallet",
+        status: " successfully",
+        time: "Today, 12:36 PM",
+      },
+      {
+        id: 2,
+        iconType: "withdrawal",
+        amount: "₦ 75,000",
+        action: " withdrawn from ",
+        target: "wallet",
+        status: " successfully",
+        time: "Today, 11:45 AM",
+      },
+      {
+        id: 3,
+        iconType: "info",
+        amount: "₦ 25,000",
+        action: " transfer to ",
+        target: "project fund",
+        status: " completed",
+        time: "Today, 10:20 AM",
+      },
+      {
+        id: 4,
+        iconType: "deposit",
+        amount: "₦ 100,000",
+        action: " deposited into ",
+        target: "wallet",
+        status: " successfully",
+        time: "Yesterday, 3:15 PM",
+      },
+      {
+        id: 5,
+        iconType: "deposit",
+        amount: "₦ 50,000",
+        action: " deposited into ",
+        target: "wallet",
+        status: " successfully",
+        time: "Yesterday, 2:00 PM",
+      },
+      {
+        id: 6,
+        iconType: "withdrawal",
+        amount: "₦ 30,000",
+        action: " withdrawn from ",
+        target: "wallet",
+        status: " successfully",
+        time: "Yesterday, 1:30 PM",
+      },
+      {
+        id: 7,
+        iconType: "info",
+        amount: "₦ 15,000",
+        action: " payment received from ",
+        target: "donor",
+        status: " confirmed",
+        time: "May 27, 5:45 PM",
+      },
+      {
+        id: 8,
+        iconType: "deposit",
+        amount: "₦ 200,000",
+        action: " deposited into ",
+        target: "wallet",
+        status: " successfully",
+        time: "May 27, 11:00 AM",
+      },
+      {
+        id: 9,
+        iconType: "withdrawal",
+        amount: "₦ 45,000",
+        action: " withdrawn from ",
+        target: "wallet",
+        status: " successfully",
+        time: "May 26, 4:30 PM",
+      },
+      {
+        id: 10,
+        iconType: "info",
+        amount: "₦ 10,000",
+        action: " transaction fee from ",
+        target: "wallet",
+        status: " deducted",
+        time: "May 26, 2:15 PM",
+      },
+    ];
   },
-  {
-    id: 2,
-    iconType: "withdrawal",
-    amount: "₦ 50,000",
-    action: " deposited into ",
-    target: "wallet",
-    status: " successfully",
-    time: "Today, 12:36 PM",
-  },
-  {
-    id: 3,
-    iconType: "info",
-    amount: "₦ 50,000",
-    action: " deposited into ",
-    target: "wallet",
-    status: " successfully",
-    time: "Today, 12:36 PM",
-  },
-  {
-    id: 4,
-    iconType: "deposit",
-    amount: "₦ 50,000",
-    action: " deposited into ",
-    target: "wallet",
-    status: " successfully",
-    time: "Today, 12:36 PM",
-  },
-  {
-    id: 5,
-    iconType: "deposit",
-    amount: "₦ 50,000",
-    action: " deposited into ",
-    target: "wallet",
-    status: " successfully",
-    time: "Today, 12:36 PM",
-  },
-  {
-    id: 6,
-    iconType: "withdrawal",
-    amount: "₦ 50,000",
-    action: " deposited into ",
-    target: "wallet",
-    status: " successfully",
-    time: "Today, 12:36 PM",
-  },
-  {
-    id: 7,
-    iconType: "info",
-    amount: "₦ 50,000",
-    action: " deposited into ",
-    target: "wallet",
-    status: " successfully",
-    time: "Today, 12:36 PM",
-  },
-  {
-    id: 8,
-    iconType: "deposit",
-    amount: "₦ 50,000",
-    action: " deposited into ",
-    target: "wallet",
-    status: " successfully",
-    time: "Today, 12:36 PM",
-  },
-  {
-    id: 9,
-    iconType: "withdrawal",
-    amount: "₦ 50,000",
-    action: " deposited into ",
-    target: "wallet",
-    status: " successfully",
-    time: "Today, 12:36 PM",
-  },
-  {
-    id: 10,
-    iconType: "info",
-    amount: "₦ 50,000",
-    action: " deposited into ",
-    target: "wallet",
-    status: " successfully",
-    time: "Today, 12:36 PM",
-  },
-];
+};
 
 function DepositIcon() {
   return (
@@ -315,9 +324,9 @@ function NotificationItem({ notification }: { notification: Notification }) {
             fontSize: "16px",
             lineHeight: "1.5",
             fontFamily: "Archivo",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            margin: 0,
+            whiteSpace: "normal",
+            wordBreak: "break-word",
           }}
         >
           <span style={{ fontWeight: 500, color: "#1E1E1E" }}>
@@ -357,6 +366,28 @@ interface NotificationsDrawerProps {
 const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
   onClose,
 }) => {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch notifications on component mount
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await mockNotificationAPI.fetchNotifications();
+        setNotifications(data);
+      } catch (err) {
+        setError("Failed to load notifications");
+        console.error("Error fetching notifications:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
   return (
     <div
       style={{
@@ -428,20 +459,72 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
           flex: 1,
         }}
       >
-        {notifications.map((notif, index) => (
-          <div key={notif.id}>
-            <NotificationItem notification={notif} />
-            {index < notifications.length - 1 && (
-              <div
-                style={{
-                  height: "1px",
-                  backgroundColor: "#DDDDDD",
-                  margin: 0,
-                }}
-              />
-            )}
+        {loading && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "200px",
+              color: "#999",
+              fontFamily: "Archivo",
+              fontSize: "14px",
+            }}
+          >
+            Loading notifications...
           </div>
-        ))}
+        )}
+
+        {error && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "200px",
+              color: "#CE0303",
+              fontFamily: "Archivo",
+              fontSize: "14px",
+              padding: "20px",
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && notifications.length === 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "200px",
+              color: "#999",
+              fontFamily: "Archivo",
+              fontSize: "14px",
+            }}
+          >
+            No notifications
+          </div>
+        )}
+
+        {!loading &&
+          !error &&
+          notifications.map((notif, index) => (
+            <div key={notif.id}>
+              <NotificationItem notification={notif} />
+              {index < notifications.length - 1 && (
+                <div
+                  style={{
+                    height: "1px",
+                    backgroundColor: "#DDDDDD",
+                    margin: 0,
+                  }}
+                />
+              )}
+            </div>
+          ))}
       </div>
     </div>
   );

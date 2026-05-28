@@ -1,4 +1,5 @@
 import { Request } from "express";
+import { CreateNotificationDTO } from "./notifications-calendar.interface";
 
 export interface FullUser {
   id: string;
@@ -52,4 +53,18 @@ export interface UserRequest extends Request {
   };
   user?: User;
   files?: any;
+  saveNotification?: (
+    userId: number,
+    notificationData: Omit<CreateNotificationDTO, "user_id">,
+  ) => Promise<void>;
+  saveMultipleNotifications?: (
+    notifications: Array<{
+      user_id: number;
+      icon_type: "deposit" | "withdrawal" | "info";
+      amount: number;
+      action: string;
+      target: string;
+      status: string;
+    }>,
+  ) => Promise<void>;
 }

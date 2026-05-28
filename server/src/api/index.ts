@@ -8,6 +8,7 @@ import cron from "node-cron";
 import path from "path";
 
 import routes from "../components/index";
+import { notificationMiddleware } from "../middleware/notifications";
 
 import { fetchRateFromGoogle } from "../utils/rateUtils";
 
@@ -66,6 +67,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(compression());
+app.use(notificationMiddleware);
 
 app.use("/rest/v1", routes);
 
