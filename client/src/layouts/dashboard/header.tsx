@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 // reactstrap components
 import { Bell, Calendar } from "lucide-react";
@@ -16,6 +17,8 @@ import {
   UncontrolledDropdown,
 } from "reactstrap";
 import { ThunkDispatch } from "redux-thunk";
+import CalendarDrawer from "../../components/drawers/CalendarDrawer";
+import NotificationsDrawer from "../../components/drawers/NotificationsDrawer";
 import useBackendService from "../../services/backend_service";
 import { useContent } from "../../services/useContext";
 import { logout_auth } from "../../store/reducers/authReducer";
@@ -27,6 +30,9 @@ const AdminNavbar: React.FC<any> = () => {
   const role = authState.user?.role;
   const navigate = useNavigate();
   const dispatch: ThunkDispatch<RootState, unknown, any> = useDispatch();
+  const [openDrawer, setOpenDrawer] = useState<
+    "notification" | "calendar" | null
+  >(null);
 
   const { mutate: logout } = useBackendService("/auth/logout", "GET", {
     onSuccess: () => {
@@ -38,6 +44,76 @@ const AdminNavbar: React.FC<any> = () => {
 
   return (
     <>
+      {/* Backdrop/Overlay with blur effect */}
+      {openDrawer && (
+        <div
+          onClick={() => setOpenDrawer(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.3)",
+            backdropFilter: "blur(4px)",
+            zIndex: 998,
+            animation: "fadeIn 0.3s ease-in-out",
+          }}
+        />
+      )}
+
+      {/* Notification Drawer */}
+      {openDrawer === "notification" && (
+        <div
+          style={{
+            position: "fixed",
+            top: "80px",
+            right: "20px",
+            zIndex: 999,
+            animation: "slideIn 0.3s ease-in-out",
+          }}
+        >
+          <NotificationsDrawer onClose={() => setOpenDrawer(null)} />
+        </div>
+      )}
+
+      {/* Calendar Drawer */}
+      {openDrawer === "calendar" && (
+        <div
+          style={{
+            position: "fixed",
+            top: "80px",
+            right: "20px",
+            zIndex: 999,
+            animation: "slideIn 0.3s ease-in-out",
+          }}
+        >
+          <CalendarDrawer onClose={() => setOpenDrawer(null)} />
+        </div>
+      )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideIn {
+          from {
+            transform: translateY(-20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
+
       <Navbar
         style={{
           height: "10px",
@@ -60,7 +136,12 @@ const AdminNavbar: React.FC<any> = () => {
                 <Media className="align-items-center">
                   {role === "NGO" && (
                     <>
-                      <span
+                      <button
+                        onClick={() =>
+                          setOpenDrawer(
+                            openDrawer === "calendar" ? null : "calendar",
+                          )
+                        }
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -70,13 +151,32 @@ const AdminNavbar: React.FC<any> = () => {
                           borderRadius: "50%",
                           backgroundColor: "#E2EFE9",
                           marginRight: "10px",
+                          border: "none",
+                          cursor: "pointer",
+                          background: "none",
+                          transition: "background-color 0.3s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          (
+                            e.currentTarget as HTMLButtonElement
+                          ).style.backgroundColor = "#d4e8e0";
+                        }}
+                        onMouseLeave={(e) => {
+                          (
+                            e.currentTarget as HTMLButtonElement
+                          ).style.backgroundColor = "#E2EFE9";
                         }}
                       >
                         <Calendar color="#128330" size={18} />
-                      </span>
+                      </button>
                     </>
                   )}
-                  <span
+                  <button
+                    onClick={() =>
+                      setOpenDrawer(
+                        openDrawer === "notification" ? null : "notification",
+                      )
+                    }
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -86,10 +186,23 @@ const AdminNavbar: React.FC<any> = () => {
                       borderRadius: "50%",
                       backgroundColor: "#E2EFE9",
                       marginRight: "10px",
+                      border: "none",
+                      cursor: "pointer",
+                      transition: "background-color 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      (
+                        e.currentTarget as HTMLButtonElement
+                      ).style.backgroundColor = "#d4e8e0";
+                    }}
+                    onMouseLeave={(e) => {
+                      (
+                        e.currentTarget as HTMLButtonElement
+                      ).style.backgroundColor = "#E2EFE9";
                     }}
                   >
                     <Bell color="#128330" size={18} />
-                  </span>
+                  </button>
                   <span
                     style={{ color: "black" }}
                     className="mb-0 text-sm font-weight-bold mr-2"
