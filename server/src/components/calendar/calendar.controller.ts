@@ -28,14 +28,12 @@ export const createCalendarEvent = async (
     } = req.body;
 
     // Verify user is NGO
-    const ngo = await db("ngos").where({ user_id: userId }).first();
+    const ngo = await db("organizations").where({ user_id: userId }).first();
     if (!ngo) {
-      return res
-        .status(403)
-        .json({
-          status: "fail",
-          message: "Only NGOs can create calendar events",
-        });
+      return res.status(403).json({
+        status: "fail",
+        message: "Only NGOs can create calendar events",
+      });
     }
 
     // Validate required fields
@@ -96,14 +94,12 @@ export const getCalendarEvents = async (
     const { start_date, end_date, event_type } = req.query;
 
     // Verify user is NGO
-    const ngo = await db("ngos").where({ user_id: userId }).first();
+    const ngo = await db("organizations").where({ user_id: userId }).first();
     if (!ngo) {
-      return res
-        .status(403)
-        .json({
-          status: "fail",
-          message: "Only NGOs can view calendar events",
-        });
+      return res.status(403).json({
+        status: "fail",
+        message: "Only NGOs can view calendar events",
+      });
     }
 
     let query = db("calendar_events").where({ user_id: userId });
@@ -148,14 +144,12 @@ export const getCalendarEventById = async (
     const { id } = req.params;
 
     // Verify user is NGO
-    const ngo = await db("ngos").where({ user_id: userId }).first();
+    const ngo = await db("organizations").where({ user_id: userId }).first();
     if (!ngo) {
-      return res
-        .status(403)
-        .json({
-          status: "fail",
-          message: "Only NGOs can view calendar events",
-        });
+      return res.status(403).json({
+        status: "fail",
+        message: "Only NGOs can view calendar events",
+      });
     }
 
     const event = await db("calendar_events")
@@ -191,8 +185,16 @@ export const updateCalendarEvent = async (
   try {
     const userId = (req.user as User)?.id;
     const { id } = req.params;
-    const { title, description, start_time, end_time, event_type, location, attendees } = req.body;
-    
+    const {
+      title,
+      description,
+      start_time,
+      end_time,
+      event_type,
+      location,
+      attendees,
+    } = req.body;
+
     const updateData: UpdateCalendarEventDTO = {
       ...(title && { title }),
       ...(description && { description }),
@@ -204,14 +206,12 @@ export const updateCalendarEvent = async (
     };
 
     // Verify user is NGO
-    const ngo = await db("ngos").where({ user_id: userId }).first();
+    const ngo = await db("orga").where({ user_id: userId }).first();
     if (!ngo) {
-      return res
-        .status(403)
-        .json({
-          status: "fail",
-          message: "Only NGOs can update calendar events",
-        });
+      return res.status(403).json({
+        status: "fail",
+        message: "Only NGOs can update calendar events",
+      });
     }
 
     // Check if event exists and belongs to user
@@ -279,14 +279,12 @@ export const deleteCalendarEvent = async (
     const { id } = req.params;
 
     // Verify user is NGO
-    const ngo = await db("ngos").where({ user_id: userId }).first();
+    const ngo = await db("organizations").where({ user_id: userId }).first();
     if (!ngo) {
-      return res
-        .status(403)
-        .json({
-          status: "fail",
-          message: "Only NGOs can delete calendar events",
-        });
+      return res.status(403).json({
+        status: "fail",
+        message: "Only NGOs can delete calendar events",
+      });
     }
 
     // Check if event exists and belongs to user
@@ -327,14 +325,12 @@ export const getCalendarEventsByProject = async (
     const { projectId } = req.params;
 
     // Verify user is NGO
-    const ngo = await db("ngos").where({ user_id: userId }).first();
+    const ngo = await db("organizations").where({ user_id: userId }).first();
     if (!ngo) {
-      return res
-        .status(403)
-        .json({
-          status: "fail",
-          message: "Only NGOs can view calendar events",
-        });
+      return res.status(403).json({
+        status: "fail",
+        message: "Only NGOs can view calendar events",
+      });
     }
 
     const events = await db("calendar_events")

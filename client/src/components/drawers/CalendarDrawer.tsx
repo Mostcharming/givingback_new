@@ -1,97 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
-
-interface CalendarEvent {
-  id: number;
-  title: string;
-  startTime: string;
-  endTime: string;
-}
-
-interface DayGroup {
-  label: string;
-  events: CalendarEvent[];
-}
-
-// Mock API service
-const mockCalendarAPI = {
-  fetchCalendarEvents: async (): Promise<DayGroup[]> => {
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Return sample data
-    return [
-      {
-        label: "Mon, 22 Apr",
-        events: [
-          {
-            id: 1,
-            title: "Project Kickoff Meeting",
-            startTime: "10:20 AM",
-            endTime: "11:20 AM",
-          },
-          {
-            id: 2,
-            title: "Donor Review Session",
-            startTime: "2:00 PM",
-            endTime: "3:30 PM",
-          },
-        ],
-      },
-      {
-        label: "Tue, 23 Apr",
-        events: [
-          {
-            id: 3,
-            title: "Budget Planning",
-            startTime: "9:00 AM",
-            endTime: "10:30 AM",
-          },
-          {
-            id: 4,
-            title: "NGO Coordination Call",
-            startTime: "11:00 AM",
-            endTime: "12:00 PM",
-          },
-          {
-            id: 5,
-            title: "Field Visit",
-            startTime: "3:00 PM",
-            endTime: "5:00 PM",
-          },
-        ],
-      },
-      {
-        label: "Wed, 24 Apr",
-        events: [
-          {
-            id: 6,
-            title: "Milestone Review",
-            startTime: "10:00 AM",
-            endTime: "11:00 AM",
-          },
-          {
-            id: 7,
-            title: "Financial Report Submission",
-            startTime: "2:00 PM",
-            endTime: "3:00 PM",
-          },
-        ],
-      },
-      {
-        label: "Thu, 25 Apr",
-        events: [
-          {
-            id: 8,
-            title: "Stakeholder Meeting",
-            startTime: "9:30 AM",
-            endTime: "10:30 AM",
-          },
-        ],
-      },
-    ];
-  },
-};
+import React from "react";
+import { useCalendarEvents } from "../../hooks/useCalendarEvents";
 
 function CloseIcon() {
   return (
@@ -125,39 +34,7 @@ interface CalendarDrawerProps {
 }
 
 const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
-  const [dayGroups, setDayGroups] = useState<DayGroup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Fetch calendar events on component mount
-  useEffect(() => {
-    const fetchCalendarEvents = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await mockCalendarAPI.fetchCalendarEvents();
-        setDayGroups(data);
-      } catch (err) {
-        setError("Failed to load calendar events");
-        console.error("Error fetching calendar events:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCalendarEvents();
-  }, []);
-
-  const removeEvent = (eventId: number) => {
-    setDayGroups((prev) =>
-      prev
-        .map((group) => ({
-          ...group,
-          events: group.events.filter((e) => e.id !== eventId),
-        }))
-        .filter((group) => group.events.length > 0),
-    );
-  };
+  const { dayGroups, loading, error, deleteEvent, isNGO } = useCalendarEvents();
 
   return (
     <div
@@ -464,7 +341,24 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
           paddingBottom: "30px",
         }}
       >
-        {loading && (
+        {!isNGO && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "200px",
+              color: "#999",
+              fontFamily: "Archivo",
+              fontSize: "14px",
+              textAlign: "center",
+            }}
+          >
+            Calendar is only available for NGO users
+          </div>
+        )}
+
+        {isNGO && loading && (
           <div
             style={{
               display: "flex",
@@ -480,7 +374,7 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
           </div>
         )}
 
-        {error && (
+        {isNGO && error && (
           <div
             style={{
               display: "flex",
@@ -498,7 +392,7 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
           </div>
         )}
 
-        {!loading && !error && dayGroups.length === 0 && (
+        {isNGO && !loading && !error && dayGroups.length === 0 && (
           <div
             style={{
               display: "flex",
@@ -514,7 +408,8 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
           </div>
         )}
 
-        {!loading &&
+        {isNGO &&
+          !loading &&
           !error &&
           dayGroups.map((group) => (
             <div key={group.label} style={{ marginTop: "20px" }}>
@@ -586,10 +481,18 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
                         lineHeight: "1.5",
                       }}
                     >
-                      {event.startTime} - {event.endTime}
+                      {new Date(event.start_time).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
+                      -{" "}
+                      {new Date(event.end_time).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </p>
                     <button
-                      onClick={() => removeEvent(event.id)}
+                      onClick={() => deleteEvent(event.id)}
                       style={{
                         position: "absolute",
                         top: "12px",

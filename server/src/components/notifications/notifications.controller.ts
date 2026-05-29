@@ -8,13 +8,13 @@ import { User, UserRequest } from "../../interfaces";
 export const getNGONotifications = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const userId = (req.user as User)?.id;
 
     // Verify user is NGO
-    const ngo = await db("ngos").where({ user_id: userId }).first();
+    const ngo = await db("organizations").where({ user_id: userId }).first();
     if (!ngo) {
       return res
         .status(403)
@@ -32,7 +32,9 @@ export const getNGONotifications = async (
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: "fail", message: "Error fetching notifications" });
+    res
+      .status(500)
+      .json({ status: "fail", message: "Error fetching notifications" });
   }
 };
 
@@ -42,22 +44,22 @@ export const getNGONotifications = async (
 export const getDonorCorporateNotifications = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const userId = (req.user as User)?.id;
 
     // Check if user is donor or corporate
     const donor = await db("donors").where({ user_id: userId }).first();
-    const organization = await db("organizations").where({ user_id: userId }).first();
+    const organization = await db("organizations")
+      .where({ user_id: userId })
+      .first();
 
     if (!donor && !organization) {
-      return res
-        .status(403)
-        .json({
-          status: "fail",
-          message: "User is neither a donor nor corporate organization",
-        });
+      return res.status(403).json({
+        status: "fail",
+        message: "User is neither a donor nor corporate organization",
+      });
     }
 
     const notifications = await db("notifications")
@@ -71,7 +73,9 @@ export const getDonorCorporateNotifications = async (
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: "fail", message: "Error fetching notifications" });
+    res
+      .status(500)
+      .json({ status: "fail", message: "Error fetching notifications" });
   }
 };
 
@@ -81,7 +85,7 @@ export const getDonorCorporateNotifications = async (
 export const getAdminNotifications = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const userId = (req.user as User)?.id;
@@ -105,7 +109,9 @@ export const getAdminNotifications = async (
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: "fail", message: "Error fetching notifications" });
+    res
+      .status(500)
+      .json({ status: "fail", message: "Error fetching notifications" });
   }
 };
 
@@ -115,7 +121,7 @@ export const getAdminNotifications = async (
 export const markNotificationAsRead = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { id } = req.params;
@@ -142,7 +148,9 @@ export const markNotificationAsRead = async (
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: "fail", message: "Error updating notification" });
+    res
+      .status(500)
+      .json({ status: "fail", message: "Error updating notification" });
   }
 };
 
@@ -152,7 +160,7 @@ export const markNotificationAsRead = async (
 export const deleteNotification = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { id } = req.params;
@@ -176,7 +184,9 @@ export const deleteNotification = async (
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: "fail", message: "Error deleting notification" });
+    res
+      .status(500)
+      .json({ status: "fail", message: "Error deleting notification" });
   }
 };
 
@@ -186,7 +196,7 @@ export const deleteNotification = async (
 export const clearAllNotifications = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const userId = (req.user as User)?.id;
@@ -199,6 +209,8 @@ export const clearAllNotifications = async (
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: "fail", message: "Error clearing notifications" });
+    res
+      .status(500)
+      .json({ status: "fail", message: "Error clearing notifications" });
   }
 };
