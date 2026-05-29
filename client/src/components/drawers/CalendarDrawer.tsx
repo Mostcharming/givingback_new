@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
+import React, { useState } from "react";
 import { useCalendarEvents } from "../../hooks/useCalendarEvents";
 
 function CloseIcon() {
@@ -35,6 +35,7 @@ interface CalendarDrawerProps {
 
 const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
   const { dayGroups, loading, error, deleteEvent, isNGO } = useCalendarEvents();
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   return (
     <div
@@ -135,7 +136,11 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
               fontSize: "18px",
             }}
           >
-            Mon, 22 Apr
+            {selectedDate.toLocaleDateString("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+            })}
           </span>
           <svg
             width="18"
@@ -171,6 +176,7 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {/* Today button */}
           <button
+            onClick={() => setSelectedDate(new Date())}
             style={{
               display: "flex",
               alignItems: "center",
@@ -201,6 +207,11 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
           </button>
           {/* Prev arrow */}
           <button
+            onClick={() => {
+              const prevDate = new Date(selectedDate);
+              prevDate.setDate(prevDate.getDate() - 1);
+              setSelectedDate(prevDate);
+            }}
             style={{
               display: "flex",
               alignItems: "center",
@@ -238,6 +249,11 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
           </button>
           {/* Next arrow */}
           <button
+            onClick={() => {
+              const nextDate = new Date(selectedDate);
+              nextDate.setDate(nextDate.getDate() + 1);
+              setSelectedDate(nextDate);
+            }}
             style={{
               display: "flex",
               alignItems: "center",
