@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight, Play, Trash2, Video, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function MediaGallery({ project, role }) {
+  console.log("Project media:", project);
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
   const isVideoFile = (url) => {
@@ -20,21 +21,46 @@ export default function MediaGallery({ project, role }) {
     return videoExtensions.some((ext) => lowerUrl.includes(ext));
   };
 
-  const mediaItems =
-    project?.projectImages?.map((item, index) => ({
-      id: index + 1,
-      type: isVideoFile(item.image) ? "video" : "image",
-      src: item.image,
-      alt: `Project media ${index + 1}`,
-    })) || [];
+  const mediaItems = (() => {
+    const items: any[] = [];
+    let idCounter = 1;
+
+    // Add project images
+    project?.projectImages?.forEach((item: any) => {
+      items.push({
+        id: idCounter++,
+        type: isVideoFile(item.image) ? "video" : "image",
+        src: item.image,
+        alt: `Project media ${idCounter}`,
+        source: "project",
+      });
+    });
+
+    // Add milestone update images
+    project?.milestones?.forEach((milestone: any) => {
+      milestone?.updates?.forEach((update: any) => {
+        if (update.image) {
+          items.push({
+            id: idCounter++,
+            type: isVideoFile(update.image) ? "video" : "image",
+            src: update.image,
+            alt: `Milestone update media ${idCounter}`,
+            source: "milestone",
+          });
+        }
+      });
+    });
+
+    return items;
+  })();
 
   const handleDelete = (itemId) => {
     console.log(`Delete item with id: ${itemId}`);
   };
 
-  const handleUploadMedia = () => {
-    console.log("Upload new media");
-  };
+  // const handleUploadMedia = () => {
+  //   console.log("Upload new media");
+  // };
 
   const openLightbox = (index) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
@@ -242,7 +268,7 @@ export default function MediaGallery({ project, role }) {
             <small>Upload images or videos to get started.</small>
           </div>
         )}
-        {role === "NGO" && (
+        {/* {role === "NGO" && (
           <div className="row">
             <div className="col">
               <button className="upload-btn w-50" onClick={handleUploadMedia}>
@@ -250,7 +276,7 @@ export default function MediaGallery({ project, role }) {
               </button>
             </div>
           </div>
-        )}
+        )} */}
         {/* Upload Button */}
       </div>
 

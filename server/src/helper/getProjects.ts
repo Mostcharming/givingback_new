@@ -61,53 +61,58 @@ export const getProjects = async (
   // Apply search filters
   for (const [key, value] of Object.entries(searchFilters)) {
     if (value) {
-      const searchFields = [
-        "title",
-        "description",
-        "objectives",
-        "category",
-        "scope",
-        "id",
-      ];
-      if (searchFields.includes(key)) {
-        previousProjectsQuery = previousProjectsQuery.where(
-          db.raw(`LOWER(${key})`),
-          "LIKE",
-          `%${(value as string).toLowerCase()}%`,
-        );
-        presentProjectsQuery = presentProjectsQuery.where(
-          db.raw(`LOWER(${key})`),
-          "LIKE",
-          `%${(value as string).toLowerCase()}%`,
-        );
-      } else if (key === "status") {
-        previousProjectsQuery = previousProjectsQuery.where(
-          db.raw("LOWER(status)"),
-          "=",
-          (value as string).toLowerCase(),
-        );
-        presentProjectsQuery = presentProjectsQuery.where(
-          db.raw("LOWER(status)"),
-          "=",
-          (value as string).toLowerCase(),
-        );
-      } else if (key === "state") {
-        previousProjectsQuery = previousProjectsQuery.where(
-          db.raw("LOWER(state)"),
-          "=",
-          (value as string).toLowerCase(),
-        );
-        presentProjectsQuery = presentProjectsQuery.where(
-          db.raw("LOWER(state)"),
-          "=",
-          (value as string).toLowerCase(),
-        );
-      } else if (key === "startDate" || key === "endDate") {
-        presentProjectsQuery = presentProjectsQuery.where(
-          key,
-          key === "startDate" ? ">=" : "<=",
-          value,
-        );
+      // Handle id as exact match
+      if (key === "id") {
+        previousProjectsQuery = previousProjectsQuery.where({ id: value });
+        presentProjectsQuery = presentProjectsQuery.where({ id: value });
+      } else {
+        const searchFields = [
+          "title",
+          "description",
+          "objectives",
+          "category",
+          "scope",
+        ];
+        if (searchFields.includes(key)) {
+          previousProjectsQuery = previousProjectsQuery.where(
+            db.raw(`LOWER(${key})`),
+            "LIKE",
+            `%${(value as string).toLowerCase()}%`,
+          );
+          presentProjectsQuery = presentProjectsQuery.where(
+            db.raw(`LOWER(${key})`),
+            "LIKE",
+            `%${(value as string).toLowerCase()}%`,
+          );
+        } else if (key === "status") {
+          previousProjectsQuery = previousProjectsQuery.where(
+            db.raw("LOWER(status)"),
+            "=",
+            (value as string).toLowerCase(),
+          );
+          presentProjectsQuery = presentProjectsQuery.where(
+            db.raw("LOWER(status)"),
+            "=",
+            (value as string).toLowerCase(),
+          );
+        } else if (key === "state") {
+          previousProjectsQuery = previousProjectsQuery.where(
+            db.raw("LOWER(state)"),
+            "=",
+            (value as string).toLowerCase(),
+          );
+          presentProjectsQuery = presentProjectsQuery.where(
+            db.raw("LOWER(state)"),
+            "=",
+            (value as string).toLowerCase(),
+          );
+        } else if (key === "startDate" || key === "endDate") {
+          presentProjectsQuery = presentProjectsQuery.where(
+            key,
+            key === "startDate" ? ">=" : "<=",
+            value,
+          );
+        }
       }
     }
   }
@@ -180,7 +185,7 @@ export const getProjects = async (
         )
         .first();
 
-      const milestones = await db("milestone")
+      let milestonesQuery = db("milestone")
         .where({ project_id: projectId })
         .select(
           "id",
@@ -192,13 +197,20 @@ export const getProjects = async (
           "createdAt",
         );
 
+      // Filter by organization_id if provided
+      if (organization_id) {
+        milestonesQuery = milestonesQuery.where({ organization_id });
+      }
+
+      const milestones = await milestonesQuery;
+
       const sponsors = await db("project_sponsor")
         .where({ project_id: projectId })
         .select("id", "name", "image", "description");
 
       const detailedMilestones = await Promise.all(
         milestones.map(async (milestone) => {
-          const updates = await db("milestone_update")
+          let updatesQuery = db("milestone_update")
             .where({ milestone_id: milestone.id })
             .select(
               "id",
@@ -210,6 +222,8 @@ export const getProjects = async (
               "narration",
               "createdAt",
             );
+
+          const updates = await updatesQuery;
 
           // Calculate percentage completion
           const totalAchievement = updates.reduce(

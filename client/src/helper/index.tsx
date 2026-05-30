@@ -43,6 +43,12 @@ export function getStatusBadgeProps(status: string) {
         backgroundColor: "#e2e3e5", // light grey
         color: "#6c757d", // dark grey
       };
+    case "brief":
+      return {
+        text: "Brief",
+        backgroundColor: "#cfe2ff", // light blue
+        color: "#084298", // dark blue
+      };
     default:
       return {
         text: status,

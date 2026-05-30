@@ -27,7 +27,7 @@ async function initializeStripe() {
 export const getAllProjectsForAllUsers = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const {
@@ -68,8 +68,13 @@ export const getAllProjectsForAllUsers = async (
       db,
       filters,
       parseInt(page as string),
-      parseInt(limit as string)
+      parseInt(limit as string),
     );
+
+    // If id filter was provided and no projects found, return error
+    if (id && previousProjects.length === 0 && presentProjects.length === 0) {
+      return res.status(404).json({ error: "Project not found" });
+    }
 
     const totalItems = previousProjects.length + presentProjects.length;
     const totalPages = Math.ceil(totalItems / parseInt(limit as string));
@@ -91,7 +96,7 @@ export const getAllProjectsForAllUsers = async (
 export const getAllNames = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const names = await db("areas").select("id", "name");
@@ -198,7 +203,7 @@ export const makeDonation = async (req: Request, res: any): Promise<void> => {
 
     await new Email({ email: email, url, token, additionalData }).sendEmail(
       "donatengo",
-      "Donation Received"
+      "Donation Received",
     );
     await new Email({
       email: "info@givingbackng.org",
@@ -214,7 +219,7 @@ export const makeDonation = async (req: Request, res: any): Promise<void> => {
 
 export const stripeHandler = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const stripe = await initializeStripe();
@@ -356,7 +361,7 @@ export const handleDonation = async (req: Request, res: any): Promise<void> => {
 
     await new Email({ email: email, url, token, additionalData }).sendEmail(
       "fundngo",
-      "Funding Received"
+      "Funding Received",
     );
     await new Email({
       email: "info@givingbackng.org",
@@ -377,7 +382,7 @@ export const handleDonation = async (req: Request, res: any): Promise<void> => {
 
 export const handleStripeCheckoutSuccess = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   const { sessionId, status, user_id, amount } = req.body;
   if (!sessionId) {
@@ -390,7 +395,7 @@ export const handleStripeCheckoutSuccess = async (
     const stripe = await initializeStripe();
 
     const session = await stripe.checkout.sessions.retrieve(
-      sessionId as string
+      sessionId as string,
     );
 
     if (session.payment_status === "paid") {
@@ -480,7 +485,7 @@ export const handleStripeCheckoutSuccess = async (
 
       await new Email({ email: email, url, token, additionalData }).sendEmail(
         "fundngo",
-        "Funding Received"
+        "Funding Received",
       );
       await new Email({
         email: "info@givingbackng.org",

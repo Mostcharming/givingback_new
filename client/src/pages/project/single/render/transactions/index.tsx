@@ -38,7 +38,7 @@ const Transactions = ({ project }) => {
 
         toast.error("Error getting projects data");
       },
-    }
+    },
   );
   useEffect(() => {
     getTableData({
@@ -58,7 +58,7 @@ const Transactions = ({ project }) => {
 
   return (
     <div style={{ width: "80vw" }} className="row">
-      <div className="col-12 mt-5">
+      <div className="col-12">
         {!hasUpdates ? (
           <div className="d-flex flex-column align-items-center justify-content-center">
             <div className="mb-4">

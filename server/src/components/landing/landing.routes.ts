@@ -11,7 +11,7 @@ import {
 
 const router = express.Router();
 
-router.get("/allprojects", getAllProjectsForAllUsers);
+router.get("/allprojects", getAllProjectsForAllUsers as any);
 router.get("/areas", getAllNames);
 
 router.route("/donate").post(makeDonation);

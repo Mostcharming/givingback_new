@@ -30,9 +30,9 @@ const Sponsor = ({ handleMessage, logo, project }) => {
           </div>
         ))}
 
-        <button className="disabled btn btn-success rounded-lg py-3 w-100">
+        {/* <button className="disabled btn btn-success rounded-lg py-3 w-100">
           Add New Sponsor
-        </button>
+        </button> */}
       </div>
     </div>
   );

@@ -42,22 +42,28 @@ const ProjectViewDetail: React.FC<any> = () => {
     {
       onSuccess: (res: any) => {
         const matchedProject = res.projects.find(
-          (project: any) => project.id === Number(id)
+          (project: any) => project.id === Number(id),
         );
         setProject(matchedProject);
       },
       onError: () => {
         toast.error("Error getting projects data");
       },
-    }
+    },
   );
 
   useEffect(() => {
-    getTableData({
+    const params: any = {
       // projectType: "present",
       id: id,
-    });
-  }, [id, getTableData]);
+    };
+    
+    if (role === "NGO") {
+      params.organization_id = currentState.user.id;
+    }
+    
+    getTableData(params);
+  }, [id, getTableData, role]);
 
   const handleBack = () => {
     switch (role) {
@@ -181,7 +187,7 @@ const ProjectViewDetail: React.FC<any> = () => {
                   {/* Tab Navigation */}
                   <ul
                     style={{ width: "80vw" }}
-                    className="nav nav-tabs mb-4 border-bottom border-2"
+                    className="nav nav-tabs mb-2 border-bottom border-2"
                   >
                     {TABS.map((tab) => (
                       <li className="nav-item" key={tab}>
