@@ -562,6 +562,7 @@ const DonorMilestoneUpdates: React.FC<DonorMilestoneUpdatesProps> = ({
         isOpen={isCreateMilestoneModalOpen}
         toggle={() => setIsCreateMilestoneModalOpen(false)}
         projectId={project?.id}
+        milestonesCount={milestones.length}
         onSuccess={(newMilestone) => {
           handleMilestoneCreated(newMilestone);
           setIsCreateMilestoneModalOpen(false);

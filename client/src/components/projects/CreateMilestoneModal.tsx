@@ -21,6 +21,7 @@ interface CreateMilestoneModalProps {
   toggle: () => void;
   projectId: string | number;
   onSuccess?: (milestone: any) => void;
+  milestonesCount?: number;
 }
 
 export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
@@ -28,6 +29,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
   toggle,
   projectId,
   onSuccess,
+  milestonesCount = 0,
 }) => {
   const [formData, setFormData] = useState({
     title: "",
@@ -72,7 +74,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
         toast.error("Failed to create milestone");
         setIsLoading(false);
       },
-    }
+    },
   );
 
   const resetForm = () => {
@@ -88,7 +90,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -106,6 +108,10 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
   };
 
   const validateForm = (): boolean => {
+    if (milestonesCount >= 5) {
+      toast.error("Maximum 5 milestones allowed per project");
+      return false;
+    }
     if (!formData.title.trim()) {
       toast.error("Please enter milestone title");
       return false;
@@ -121,6 +127,17 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
       toast.error("Please select a due date");
       return false;
     }
+    ``;
+    // Check if due date is not in the past
+    const selectedDate = new Date(formData.dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate < today) {
+      toast.error("Due date cannot be in the past");
+      return false;
+    }
+
     if (!formData.description.trim()) {
       toast.error("Please enter milestone description");
       return false;
@@ -226,6 +243,7 @@ export const CreateMilestoneModal: React.FC<CreateMilestoneModalProps> = ({
                 placeholderText="Select due date"
                 className="calendar-input p-2"
                 calendarClassName="custom-calendar"
+                minDate={new Date()}
               />
             </InputGroup>
           </FormGroup>

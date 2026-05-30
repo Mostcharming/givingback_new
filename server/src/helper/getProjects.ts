@@ -197,11 +197,6 @@ export const getProjects = async (
           "createdAt",
         );
 
-      // Filter by organization_id if provided
-      if (organization_id) {
-        milestonesQuery = milestonesQuery.where({ organization_id });
-      }
-
       const milestones = await milestonesQuery;
 
       const sponsors = await db("project_sponsor")
@@ -222,6 +217,11 @@ export const getProjects = async (
               "narration",
               "createdAt",
             );
+
+          // Filter by organization_id if provided
+          if (organization_id) {
+            updatesQuery = updatesQuery.where({ organization_id });
+          }
 
           const updates = await updatesQuery;
 
