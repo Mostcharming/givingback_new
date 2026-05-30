@@ -6,6 +6,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Layouts and Pages
+import { OnboardingProvider } from "./contexts/OnboardingContext";
 import Auth from "./layouts/auth/auth";
 import Dashboard from "./layouts/dashboard/layout";
 import About from "./pages/home/about";
@@ -107,65 +108,67 @@ function App() {
   const { authState } = useContent();
 
   return (
-    <>
-      <ToastContainer
-        position="top-right"
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
-
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/*" element={<HomeRoutes />} />
-        <Route path="/auth/*" element={<Auth />} />
-        <Route path="/signup/*" element={<Signup />} />
-
-        {/* Protected Routes */}
-        <Route
-          path="/admin/*"
-          element={
-            <ProtectedRoute
-              element={<Dashboard compare="/admin" />}
-              roles={["admin"]}
-              authState={authState}
-            />
-          }
-        />
-        <Route
-          path="/donor/*"
-          element={
-            <ProtectedRoute
-              element={<Dashboard compare="/donor" />}
-              roles={["donor", "corporate"]}
-              authState={authState}
-            />
-          }
-        />
-        <Route
-          path="/ngo/*"
-          element={
-            <ProtectedRoute
-              element={<Dashboard compare="/ngo" />}
-              roles={["ngo"]}
-              authState={authState}
-            />
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={<DashboardRoute authState={authState} />}
+    <OnboardingProvider>
+      <>
+        <ToastContainer
+          position="top-right"
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
         />
 
-        {/* Error Route */}
-        <Route path="/error" element={<Error />} />
-        <Route path="*" element={<Error />} />
-      </Routes>
-    </>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/*" element={<HomeRoutes />} />
+          <Route path="/auth/*" element={<Auth />} />
+          <Route path="/signup/*" element={<Signup />} />
+
+          {/* Protected Routes */}
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute
+                element={<Dashboard compare="/admin" />}
+                roles={["admin"]}
+                authState={authState}
+              />
+            }
+          />
+          <Route
+            path="/donor/*"
+            element={
+              <ProtectedRoute
+                element={<Dashboard compare="/donor" />}
+                roles={["donor", "corporate"]}
+                authState={authState}
+              />
+            }
+          />
+          <Route
+            path="/ngo/*"
+            element={
+              <ProtectedRoute
+                element={<Dashboard compare="/ngo" />}
+                roles={["ngo"]}
+                authState={authState}
+              />
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={<DashboardRoute authState={authState} />}
+          />
+
+          {/* Error Route */}
+          <Route path="/error" element={<Error />} />
+          <Route path="*" element={<Error />} />
+        </Routes>
+      </>
+    </OnboardingProvider>
   );
 }
 

@@ -24,6 +24,7 @@ import {
   UncontrolledDropdown,
 } from "reactstrap";
 import { ThunkDispatch } from "redux-thunk";
+import { useOnboarding } from "../../contexts/OnboardingContext";
 import useBackendService from "../../services/backend_service";
 import { useContent } from "../../services/useContext";
 import { logout_auth } from "../../store/reducers/authReducer";
@@ -38,6 +39,7 @@ interface SidebarRoute {
 
 const Sidebar: React.FC<any> = (props) => {
   const { currentState } = useContent();
+  const { currentSidebarLink } = useOnboarding();
   const [collapseOpen, setCollapseOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -68,21 +70,48 @@ const Sidebar: React.FC<any> = (props) => {
     return routes
       .filter((prop) => prop.layout === compare && prop.name)
       .filter((prop) =>
-        prop.name.toLowerCase().includes(searchQuery.toLowerCase())
+        prop.name.toLowerCase().includes(searchQuery.toLowerCase()),
       )
-      .map((prop, key) => (
-        <NavItem key={key} className="custom-nav-item m-2">
-          <NavLink
-            to={prop.layout + prop.path}
-            tag={NavLinkRRD}
-            onClick={closeCollapse}
-            className={`custom-nav-link`}
+      .map((prop, key) => {
+        // Extract the route identifier from the path
+        const routeId = prop.path.split("/")[1]; // Gets the first segment of the path
+        const isHighlighted = currentSidebarLink === routeId;
+
+        return (
+          <NavItem
+            key={key}
+            className="custom-nav-item m-2"
+            style={{
+              backgroundColor: isHighlighted ? "#f0f8f4" : "transparent",
+              borderRadius: "8px",
+              transition: "background-color 0.2s ease",
+            }}
           >
-            {prop.icon}
-            <h6 className="pl-2">{prop.name}</h6>
-          </NavLink>
-        </NavItem>
-      ));
+            <NavLink
+              to={prop.layout + prop.path}
+              tag={NavLinkRRD}
+              onClick={closeCollapse}
+              className={`custom-nav-link`}
+              style={{
+                borderLeft: isHighlighted ? "4px solid #128330" : "none",
+                paddingLeft: isHighlighted ? "12px" : "16px",
+                transition: "all 0.2s ease",
+              }}
+            >
+              {prop.icon}
+              <h6
+                className="pl-2"
+                style={{
+                  color: isHighlighted ? "#128330" : "inherit",
+                  fontWeight: isHighlighted ? 600 : 400,
+                }}
+              >
+                {prop.name}
+              </h6>
+            </NavLink>
+          </NavItem>
+        );
+      });
   };
 
   const { compare, routes, logo } = props;

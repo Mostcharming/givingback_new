@@ -30,6 +30,7 @@ import Logo from "../../assets/images/home/GivingBackNG-logo.svg";
 import DashBox from "../../components/dashbox";
 import DonorDashBox from "../../components/donorDashbox";
 import { formatDate } from "../../components/formatTime";
+import NGOOnboardingModal from "../../components/NGOOnboardingModal";
 import Tables from "../../components/tables";
 import useBackendService from "../../services/backend_service";
 import { capitalizeFirstLetter } from "../../services/capitalize";
@@ -52,6 +53,7 @@ const Dashboard = () => {
     { month: string; amount: number }[]
   >([]);
   const [showNGOLoginModal, setShowNGOLoginModal] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const role = authState.user?.role;
   const isFirstTimeLogin = authState?.user?.first_time_login === 0;
   const hasActiveProject = currentState?.activeProjectsCount > 0;
@@ -364,7 +366,7 @@ const Dashboard = () => {
 
   return (
     <>
-      {role === "NGO" && (
+      {role === "NGO" && !showNGOLoginModal && !showOnboarding && (
         <Modal
           isOpen={!userBankDetails}
           backdrop="static"
@@ -461,7 +463,7 @@ const Dashboard = () => {
 
       {role === "NGO" && showNGOLoginModal && (
         <Modal
-          isOpen={showNGOLoginModal}
+          isOpen={showNGOLoginModal && window.innerWidth >= 768}
           centered
           toggle={() => setShowNGOLoginModal(false)}
           backdrop
@@ -546,7 +548,10 @@ const Dashboard = () => {
                 marginBottom: "12px",
               }}
               className="btn-hover"
-              onClick={() => setShowNGOLoginModal(false)}
+              onClick={() => {
+                setShowNGOLoginModal(false);
+                setShowOnboarding(true);
+              }}
             >
               Take a tour
             </Button>
@@ -570,6 +575,12 @@ const Dashboard = () => {
           </ModalBody>
         </Modal>
       )}
+
+      {/* NGO Onboarding Tour Modal */}
+      <NGOOnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+      />
 
       <Container>
         <Col className="p-4">{renderBreadcrumbs(role)} </Col>
