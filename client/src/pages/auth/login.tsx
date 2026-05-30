@@ -61,6 +61,7 @@ const Login = () => {
         toast.success("Logged in successfully");
         setIsSubmitting(false);
         dispatch(login_auth(response));
+        sessionStorage.setItem("ngoJustLoggedIn", "true");
         navigate("/dashboard");
       },
       onError: (error: any) => {

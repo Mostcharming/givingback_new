@@ -261,13 +261,7 @@ interface NotificationsDrawerProps {
 const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
   onClose,
 }) => {
-  const {
-    notifications,
-    loading,
-    error,
-    deleteNotification,
-    clearAllNotifications,
-  } = useNotifications();
+  const { notifications, loading, error } = useNotifications();
   return (
     <div
       style={{

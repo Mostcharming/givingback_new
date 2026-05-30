@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import { useCalendarEvents } from "../../hooks/useCalendarEvents";
+import AddEventModal from "./AddEventModal";
 
 function CloseIcon() {
   return (
@@ -34,8 +36,35 @@ interface CalendarDrawerProps {
 }
 
 const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
-  const { dayGroups, loading, error, deleteEvent, isNGO } = useCalendarEvents();
+  const { dayGroups, loading, error, deleteEvent, createEvent, isNGO } =
+    useCalendarEvents();
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  const handleAddEvent = async (eventData: {
+    title: string;
+    date: string;
+    from: string;
+    to: string;
+  }) => {
+    try {
+      await createEvent({
+        title: eventData.title,
+        description: null,
+        start_time: `${eventData.date}T${eventData.from}:00`,
+        end_time: `${eventData.date}T${eventData.to}:00`,
+        event_type: "other",
+        project_id: null,
+        location: null,
+        attendees: null,
+      });
+      toast.success("Event added successfully!");
+      setShowAddModal(false);
+    } catch (error) {
+      toast.error("Failed to add event");
+      console.error(error);
+    }
+  };
 
   return (
     <div
@@ -292,26 +321,28 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
         </div>
 
         {/* Add button */}
-        <button
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "4px",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            opacity: 1,
-            transition: "opacity 0.3s ease",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.opacity = "0.7";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.opacity = "1";
-          }}
-          aria-label="Add event"
-        >
+        {isNGO && (
+          <button
+            onClick={() => setShowAddModal(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "4px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              opacity: 1,
+              transition: "opacity 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.opacity = "0.7";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.opacity = "1";
+            }}
+            aria-label="Add event"
+          >
           <svg
             width="20"
             height="20"
@@ -334,7 +365,8 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
               strokeLinejoin="round"
             />
           </svg>
-        </button>
+          </button>
+        )}
       </div>
 
       {/* Divider */}
@@ -558,6 +590,12 @@ const CalendarDrawer: React.FC<CalendarDrawerProps> = ({ onClose }) => {
             </div>
           ))}
       </div>
+      
+      <AddEventModal
+        show={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAddEvent}
+      />
     </div>
   );
 };

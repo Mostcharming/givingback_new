@@ -26,6 +26,7 @@ import {
   ModalHeader,
   Row,
 } from "reactstrap";
+import Logo from "../../assets/images/home/GivingBackNG-logo.svg";
 import DashBox from "../../components/dashbox";
 import DonorDashBox from "../../components/donorDashbox";
 import { formatDate } from "../../components/formatTime";
@@ -50,6 +51,7 @@ const Dashboard = () => {
   const [chartData, setChartData] = useState<
     { month: string; amount: number }[]
   >([]);
+  const [showNGOLoginModal, setShowNGOLoginModal] = useState(false);
   const role = authState.user?.role;
   const isFirstTimeLogin = authState?.user?.first_time_login === 0;
   const hasActiveProject = currentState?.activeProjectsCount > 0;
@@ -81,7 +83,7 @@ const Dashboard = () => {
       onError: () => {
         toast.error("Error getting Dashboard details");
       },
-    }
+    },
   );
   const { mutate: getTableData } = useBackendService(
     "/admin/transactions",
@@ -129,7 +131,7 @@ const Dashboard = () => {
 
         toast.error("Error getting projects data");
       },
-    }
+    },
   );
   useEffect(() => {
     setUserBankDetails(hasBankDetails);
@@ -144,6 +146,14 @@ const Dashboard = () => {
         ? `Today, ${formattedTime}`
         : `${now.toLocaleDateString()}, ${formattedTime}`;
     setLastUpdated(formattedDate);
+    // Check if NGO just logged in
+    if (
+      role === "NGO" &&
+      sessionStorage.getItem("ngoJustLoggedIn") === "true"
+    ) {
+      setShowNGOLoginModal(true);
+      sessionStorage.removeItem("ngoJustLoggedIn");
+    }
 
     if (role === "admin") {
       getDashAdmin({});
@@ -445,6 +455,118 @@ const Dashboard = () => {
                 Get started
               </Button>
             </div>
+          </ModalBody>
+        </Modal>
+      )}
+
+      {role === "NGO" && showNGOLoginModal && (
+        <Modal
+          isOpen={showNGOLoginModal}
+          centered
+          toggle={() => setShowNGOLoginModal(false)}
+          backdrop
+        >
+          <ModalHeader
+            toggle={() => setShowNGOLoginModal(false)}
+            className="border-0 py-3 px-4"
+            style={{ backgroundColor: "white" }}
+          />
+          <ModalBody
+            style={{
+              backgroundColor: "white",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+              padding: "0px 50px 40px 50px",
+            }}
+          >
+            {/* Logo */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                // width: "112px",
+                // height: "112px",
+                marginBottom: "16px",
+              }}
+            >
+              <img
+                src={Logo}
+                alt="GivingBack Nigeria Logo"
+                style={{
+                  width: "101px",
+                  height: "90px",
+                  objectFit: "contain",
+                }}
+              />
+            </div>
+
+            {/* Title */}
+            <h2
+              style={{
+                fontSize: 18,
+                lineHeight: "150%",
+                color: "#1E1E1E",
+                marginTop: "8px",
+                marginBottom: "4px",
+                fontWeight: 500,
+              }}
+            >
+              Welcome to GivingBack
+            </h2>
+
+            {/* Subtitle */}
+            <p
+              style={{
+                fontSize: 16,
+                lineHeight: "150%",
+                color: "#666",
+                marginTop: "8px",
+                marginBottom: "32px",
+                maxWidth: "400px",
+              }}
+            >
+              Set up your organization, apply for projects, and manage
+              impact—all in one place.
+            </p>
+
+            {/* Take a tour button */}
+            <Button
+              style={{
+                width: "100%",
+                height: "58px",
+                fontSize: 15,
+                backgroundColor: "#128330",
+                color: "white",
+                border: "none",
+                borderRadius: "10px",
+                fontWeight: 500,
+                marginBottom: "12px",
+              }}
+              className="btn-hover"
+              onClick={() => setShowNGOLoginModal(false)}
+            >
+              Take a tour
+            </Button>
+
+            {/* Skip button */}
+            <Button
+              style={{
+                width: "100%",
+                height: "58px",
+                fontSize: 15,
+                color: "#128330",
+                backgroundColor: "white",
+                border: "1px solid #128330",
+                borderRadius: "10px",
+                fontWeight: 500,
+              }}
+              onClick={() => setShowNGOLoginModal(false)}
+            >
+              Skip
+            </Button>
           </ModalBody>
         </Modal>
       )}
