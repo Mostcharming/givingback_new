@@ -1,6 +1,8 @@
 import { Plus, Search, Send } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Image, Modal } from "react-bootstrap";
+import { toast } from "react-toastify";
+import useBackendService from "../../../../../services/backend_service";
 
 interface MileStoneUpdatesProps {
   logo: any;
@@ -16,6 +18,27 @@ const MileStoneUpdates = ({
   activeMilestoneIndex = null,
 }: MileStoneUpdatesProps) => {
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
+  const [narration, setNarration] = useState("");
+  const [targetAchieved, setTargetAchieved] = useState("");
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { mutate: submitUpdate } = useBackendService("/ngo/milestone", "POST", {
+    onSuccess: (res: any) => {
+      toast.success("Update added successfully!");
+      setNarration("");
+      setTargetAchieved("");
+      setUploadedImage(null);
+      setPreviewUrl(null);
+      window.location.reload();
+    },
+    onError: () => {
+      toast.error("Failed to add update");
+      setIsSubmitting(false);
+    },
+  });
 
   const activeMilestone =
     activeMilestoneIndex !== null && project?.milestones
@@ -24,6 +47,45 @@ const MileStoneUpdates = ({
 
   const hasUpdates =
     activeMilestone?.updates && activeMilestone.updates.length > 0;
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploadedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmitUpdate = async () => {
+    if (!narration.trim()) {
+      toast.error("Please enter a narrative");
+      return;
+    }
+
+    if (!targetAchieved.trim()) {
+      toast.error("Please enter target achieved amount");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const formData = new FormData();
+    formData.append("narration", narration);
+    formData.append("achievement", targetAchieved);
+    formData.append("position", String(activeMilestoneIndex));
+    formData.append("milestone_id", activeMilestone.id);
+    formData.append("status", "pending");
+
+    if (uploadedImage) {
+      formData.append("image", uploadedImage);
+    }
+
+    submitUpdate(formData);
+  };
 
   const getStatusBadgeStyle = (status: string) => {
     const statusLower = status?.toLowerCase() || "pending";
@@ -164,7 +226,7 @@ const MileStoneUpdates = ({
                           className="rounded"
                           style={{
                             maxWidth: "80px",
-                            maxHeight: "150px",
+                            maxHeight: "80px",
                             cursor: "pointer",
                             border: "1px solid #e0e0e0",
                             transition: "transform 0.2s ease",
@@ -187,31 +249,113 @@ const MileStoneUpdates = ({
             {role === "NGO" && (
               <div className="bg-white border mt-4">
                 <div className="container-fluid h-100">
-                  <div className="row h-100 align-items-center">
-                    <div className="col">
-                      <div className="d-flex align-items-center justify-content-between py-4 px-3">
-                        <span
-                          className="text-muted"
-                          style={{ fontSize: "16px" }}
-                        >
-                          Add new update
-                        </span>
-                        <div className="d-flex gap-3">
+                  <div className="p-4">
+                    <div className="mb-3">
+                      <label
+                        className="form-label text-muted"
+                        style={{ fontSize: "12px" }}
+                      >
+                        Target Achieved (Amount)
+                      </label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        placeholder="Enter target achieved amount"
+                        value={targetAchieved}
+                        onChange={(e) => setTargetAchieved(e.target.value)}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+
+                    <div className="mb-3">
+                      <label
+                        className="form-label text-muted"
+                        style={{ fontSize: "12px" }}
+                      >
+                        Update Narrative
+                      </label>
+                      <textarea
+                        className="form-control"
+                        placeholder="Write your update narrative here..."
+                        rows={3}
+                        value={narration}
+                        onChange={(e) => setNarration(e.target.value)}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+
+                    {previewUrl && (
+                      <div className="mb-3">
+                        <div className="position-relative d-inline-block">
+                          <Image
+                            src={previewUrl}
+                            alt="Preview"
+                            className="rounded"
+                            style={{
+                              maxWidth: "120px",
+                              maxHeight: "120px",
+                              border: "1px solid #e0e0e0",
+                            }}
+                          />
                           <button
-                            className="btn btn-link p-0 text-muted"
-                            style={{ border: "none", background: "none" }}
+                            onClick={() => {
+                              setUploadedImage(null);
+                              setPreviewUrl(null);
+                              if (fileInputRef.current) {
+                                fileInputRef.current.value = "";
+                              }
+                            }}
+                            className="btn btn-sm btn-danger position-absolute"
+                            style={{
+                              top: "-8px",
+                              right: "-8px",
+                              borderRadius: "50%",
+                              width: "24px",
+                              height: "24px",
+                              padding: "0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
                           >
-                            <Plus size={20} />
-                          </button>
-                          <button
-                            className="btn btn-link p-0 text-muted"
-                            style={{ border: "none", background: "none" }}
-                          >
-                            <Send size={20} />
+                            ×
                           </button>
                         </div>
                       </div>
+                    )}
+
+                    <div className="d-flex gap-2">
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="btn btn-link p-0 text-muted"
+                        style={{ border: "none", background: "none" }}
+                        disabled={isSubmitting}
+                        title="Upload image"
+                      >
+                        <Plus size={20} />
+                      </button>
+                      <button
+                        onClick={handleSubmitUpdate}
+                        className="btn btn-link p-0 text-success"
+                        style={{ border: "none", background: "none" }}
+                        disabled={
+                          isSubmitting ||
+                          !narration.trim() ||
+                          !targetAchieved.trim()
+                        }
+                        title="Submit update"
+                      >
+                        <Send size={20} />
+                      </button>
                     </div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      style={{ display: "none" }}
+                    />
                   </div>
                 </div>
               </div>

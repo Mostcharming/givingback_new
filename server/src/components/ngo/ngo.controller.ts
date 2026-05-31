@@ -276,20 +276,17 @@ export const createp = async (req: any, res: Response) => {
 
 export const addMilestoneUpdate = async (req: any, res: Response) => {
   try {
-    const { achievement, position, status, narration, milestone_id } = req.body;
-    let filename: string | null = null;
+    const { status, narration, milestone_id, achievement, position } = req.body;
+    const userId = req.user.id;
+    let imageUrl: string | null = null;
 
     const missingFields: string[] = [];
-    if (!achievement) missingFields.push("achievement");
     if (!status) missingFields.push("status");
     if (!narration) missingFields.push("narration");
     if (!milestone_id) missingFields.push("milestone_id");
-
-    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-      if ((req.files[0] as any).fieldname === "image") {
-        filename = (req.files[0] as any).location;
-      }
-    }
+    if (!achievement) missingFields.push("achievement");
+    if (position === undefined || position === null || position === "")
+      missingFields.push("position");
 
     if (missingFields.length > 0) {
       return res.status(400).json({
@@ -298,23 +295,53 @@ export const addMilestoneUpdate = async (req: any, res: Response) => {
       });
     }
 
+    // Get organization for NGO
+    const organization = await db("organizations")
+      .where("user_id", userId)
+      .first();
+
+    if (!organization) {
+      return res.status(404).json({
+        status: "fail",
+        error: "Organization not found",
+      });
+    }
+
+    // Get image if uploaded
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      const imageFile = req.files.find((f: any) => f.fieldname === "image");
+      if (imageFile) {
+        imageUrl = (imageFile as any).location;
+      }
+    }
+
+    // Insert milestone update
     const [newMilestoneUpdateId] = await db("milestone_update").insert({
-      achievement,
-      position,
       status,
       narration,
-      image: filename,
+      image: imageUrl,
       milestone_id,
+      organization_id: organization.id,
+      achievement,
+      position,
+      createdAt: new Date(),
     });
 
     const newMilestoneUpdate = await db("milestone_update")
       .where({ id: newMilestoneUpdateId })
       .first();
 
-    res.status(201).json({ newMilestoneUpdate });
+    res.status(201).json({
+      status: "success",
+      message: "Milestone update added successfully",
+      data: newMilestoneUpdate,
+    });
   } catch (error) {
     console.error("Error adding milestone update:", error);
-    res.status(500).json({ error: "Unable to add milestone update" });
+    res.status(500).json({
+      status: "fail",
+      error: "Unable to add milestone update",
+    });
   }
 };
 
