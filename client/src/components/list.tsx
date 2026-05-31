@@ -19,23 +19,7 @@ const List = ({ type }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Active");
   const role = authState.user?.role;
-  // const [statusFilter, setStatusFilter] = useState("All Projects");
-  // const [categoryFilter, setCategoryFilter] = useState("All Categories");
-  // const [dateFilter, setDateFilter] = useState("Any time");
-  // const [locationFilter, setLocationFilter] = useState("All locations");
-  // const [areas, setAreas] = useState([]);
-  // const { mutate: getAreas } = useBackendService("/areas", "GET", {
-  //   onSuccess: (res2: any) => {
-  //     setAreas(res2 as any[]);
-  //   },
-  //   onError: () => {},
-  // });
 
-  // useEffect(() => {
-  //   getAreas({});
-  // }, []);
-
-  // Fetch Active Projects for NGO
   const { mutate: fetchActiveProjects, isLoading: isLoadingActive } =
     useBackendService("/ngo/projects/active", "GET", {
       onSuccess: (res: any) => {
@@ -47,7 +31,6 @@ const List = ({ type }) => {
       },
     });
 
-  // Fetch Completed Projects for NGO
   const { mutate: fetchCompletedProjects, isLoading: isLoadingCompleted } =
     useBackendService("/ngo/projects/completed", "GET", {
       onSuccess: (res: any) => {
@@ -59,7 +42,6 @@ const List = ({ type }) => {
       },
     });
 
-  // Fetch Past Projects for NGO
   const { mutate: fetchPastProjects, isLoading: isLoadingPast } =
     useBackendService("/ngo/projects/past", "GET", {
       onSuccess: (res: any) => {
@@ -71,7 +53,6 @@ const List = ({ type }) => {
       },
     });
 
-  // Fetch Applications for NGO
   const { mutate: fetchApplications, isLoading: isLoadingApplications } =
     useBackendService("/ngo/projects/applications", "GET", {
       onSuccess: (res: any) => {
@@ -89,58 +70,7 @@ const List = ({ type }) => {
     isLoadingCompleted ||
     isLoadingPast ||
     isLoadingApplications;
-  // useEffect(() => {
-  //   const isDefault =
-  //     statusFilter === "All Projects" &&
-  //     categoryFilter === "All Categories" &&
-  //     dateFilter === "Any time" &&
-  //     locationFilter === "All locations";
 
-  //   if (isDefault) {
-  //     if (role === "NGO") {
-  //       fetchUsers({
-  //         page: 1,
-  //         organization_id: currentState.user.id,
-  //       });
-  //     } else if (role === "donor" || role === "corporate") {
-  //       fetchUsers({
-  //         page: 1,
-  //         projectType: "present",
-  //         status: "active",
-  //       });
-  //     }
-  //     return;
-  //   }
-  //   if (role === "NGO") {
-  //     fetchUsers({
-  //       page: currentPage,
-  //       category:
-  //         categoryFilter !== "All Categories" ? categoryFilter : undefined,
-  //       status: statusFilter !== "All Projects" ? statusFilter : undefined,
-  //       startDate: dateFilter !== "Any time" ? dateFilter : undefined,
-  //       organization_id: currentState.user.id,
-  //     });
-  //   } else if (role === "donor" || role === "corporate") {
-  //     fetchUsers({
-  //       page: currentPage,
-  //       category:
-  //         categoryFilter !== "All Categories" ? categoryFilter : undefined,
-  //       status: statusFilter !== "All Projects" ? statusFilter : undefined,
-  //       projectType: "present",
-  //       startDate: dateFilter !== "Any time" ? dateFilter : undefined,
-  //       state: locationFilter !== "All locations" ? locationFilter : undefined,
-  //     });
-  //   }
-  // }, [
-  //   currentPage,
-  //   statusFilter,
-  //   categoryFilter,
-  //   dateFilter,
-  //   locationFilter,
-  //   role,
-  // ]);
-
-  // Load data for Active tab
   useEffect(() => {
     if (
       activeTab === "Active" &&
@@ -151,7 +81,6 @@ const List = ({ type }) => {
     }
   }, [activeTab, role, activeProjects.length, fetchActiveProjects]);
 
-  // Load data for Completed tab
   useEffect(() => {
     if (
       activeTab === "Completed" &&
@@ -162,14 +91,12 @@ const List = ({ type }) => {
     }
   }, [activeTab, role, completedProjects.length, fetchCompletedProjects]);
 
-  // Load data for Past tab
   useEffect(() => {
     if (activeTab === "Past" && pastProjects.length === 0 && role === "NGO") {
       fetchPastProjects({});
     }
   }, [activeTab, role, pastProjects.length, fetchPastProjects]);
 
-  // Load data for Applications tab
   useEffect(() => {
     if (
       activeTab === "Applications" &&
@@ -180,7 +107,6 @@ const List = ({ type }) => {
     }
   }, [activeTab, role, applications.length, fetchApplications]);
 
-  // Update responseData to show the correct tab's data
   useEffect(() => {
     if (role === "NGO") {
       if (activeTab === "Active") {
@@ -250,19 +176,6 @@ const List = ({ type }) => {
         {isLoading && <Loading type={"inline"} />}
         {!isLoading && (
           <>
-            {/* <ProjectFilters
-              statusFilter={statusFilter}
-              categoryFilter={categoryFilter}
-              dateFilter={dateFilter}
-              areas={areas}
-              role={role}
-              onStatusChange={setStatusFilter}
-              onCategoryChange={setCategoryFilter}
-              onDateChange={setDateFilter}
-              locationFilter={locationFilter}
-              onLocationChange={setLocationFilter}
-            /> */}
-            {/* Tab Navigation */}
             <div className="tab-container" style={{ marginBottom: "24px" }}>
               <div className="tab-wrapper" style={{ width: "70vw" }}>
                 {["Active", "Completed", "Past", "Applications"].map((tab) => {
@@ -342,17 +255,9 @@ const List = ({ type }) => {
               </div>
             ) : (
               <>
-                <div
-                // style={{
-                //   maxWidth: "1200px",
-                //   margin: "0 auto",
-                //   padding: "0 16px",
-                // }}
-                >
+                <div>
                   {responseData.map((project) => {
-                    // if (type === "past") {
                     const img = project.projectImages[0]?.image;
-                    // }
                     return (
                       <div key={project.id} style={{ marginBottom: "24px" }}>
                         <ProjectItem

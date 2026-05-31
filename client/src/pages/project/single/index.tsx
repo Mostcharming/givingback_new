@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChevronRight } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import place from "../../../assets/images/home//GivingBackNG-logo.svg";
 import logo from "../../../assets/images/logo.png";
@@ -32,7 +32,9 @@ const ProjectViewDetail: React.FC<any> = () => {
   const { id } = useParams<{ id: string }>();
   const { authState, currentState } = useContent();
   const navigate = useNavigate();
+  const location = useLocation();
   const role = authState.user?.role;
+  const fromApplicationsTab = (location.state as any)?.fromApplicationsTab;
 
   const TABS =
     role === "NGO"
@@ -57,16 +59,15 @@ const ProjectViewDetail: React.FC<any> = () => {
 
   useEffect(() => {
     const params: any = {
-      // projectType: "present",
       id: id,
     };
 
-    if (role === "NGO") {
+    if (role === "NGO" && !fromApplicationsTab) {
       params.organization_id = currentState.user.id;
     }
 
     getTableData(params);
-  }, [id, getTableData, role]);
+  }, [id, getTableData, role, fromApplicationsTab, currentState.user.id]);
 
   // Reset milestone tab when Updates tab is activated
   useEffect(() => {
@@ -130,7 +131,15 @@ const ProjectViewDetail: React.FC<any> = () => {
             {/* Milestone Tabs */}
             {project?.milestones && project.milestones.length > 0 && (
               <>
-                <div className="tab-container" style={{ marginBottom: "24px", flexDirection: "column" }}>
+                <div
+                  className="tab-container"
+                  style={{
+                    marginBottom: "24px",
+                    flexDirection: "column",
+                    zIndex: 1000,
+                    position: "relative",
+                  }}
+                >
                   <div className="tab-wrapper" style={{ width: "70vw" }}>
                     {project.milestones.map((milestone: any, index: number) => (
                       <button
@@ -145,12 +154,17 @@ const ProjectViewDetail: React.FC<any> = () => {
                           justifyContent: "center",
                         }}
                       >
-                        {milestone.milestone}
+                        Milestone {index + 1}
                       </button>
                     ))}
                   </div>
                 </div>
-                <MileStoneUpdates logo={logo} project={project} role={role} />
+                <MileStoneUpdates
+                  logo={logo}
+                  project={project}
+                  role={role}
+                  activeMilestoneIndex={activeMilestoneTab}
+                />
               </>
             )}
             {!project?.milestones ||

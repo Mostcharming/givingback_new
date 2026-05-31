@@ -226,9 +226,11 @@ const Briefs = () => {
                                   className="rounded-pill px-3 py-1"
                                   style={{
                                     backgroundColor: project.hasApplied
-                                      ? "#d4f4dd"
+                                      ? "#d3d3d3"
                                       : "#e2efe9",
-                                    color: "#128330",
+                                    color: project.hasApplied
+                                      ? "#333333"
+                                      : "#128330",
                                     fontSize: "12px",
                                   }}
                                 >
