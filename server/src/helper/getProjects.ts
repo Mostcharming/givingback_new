@@ -8,7 +8,8 @@ export const getProjects = async (
   limit: number = 10,
 ) => {
   const offset = (page - 1) * limit;
-  const { projectType, donor_id, organization_id, ...searchFilters } = filters;
+  const { projectType, donor_id, organization_id, ngo_id, ...searchFilters } =
+    filters;
 
   // Base queries for present and previous projects
   let previousProjectsQuery = db("previousprojects")
@@ -250,6 +251,15 @@ export const getProjects = async (
         .where({ project_id: projectId })
         .select("id", "image");
 
+      // Check if organization has applied for this project
+      let hasApplied = false;
+      if (ngo_id) {
+        const existingApplication = await db("project_application")
+          .where({ project_id: projectId, ngo_id: ngo_id })
+          .first();
+        hasApplied = !!existingApplication;
+      }
+
       return {
         ...project,
         projectType: "present",
@@ -258,6 +268,7 @@ export const getProjects = async (
         beneficiaries,
         sponsors,
         projectImages,
+        hasApplied,
       };
     }),
   );

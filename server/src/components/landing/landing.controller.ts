@@ -35,6 +35,7 @@ export const getAllProjectsForAllUsers = async (
       limit = 10,
       donor_id,
       organization_id,
+      ngo_id,
       projectType,
       title,
       description,
@@ -51,6 +52,7 @@ export const getAllProjectsForAllUsers = async (
     const filters = {
       donor_id: donor_id as string,
       organization_id: organization_id as string,
+      ngo_id: ngo_id as string,
       projectType: projectType as "present" | "previous",
       title: title as string,
       description: description as string,

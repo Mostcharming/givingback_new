@@ -24,6 +24,9 @@ import ShareModal from "./ShareModal";
 const ProjectViewDetail: React.FC<any> = () => {
   const [project, setProject] = useState<any>({});
   const [activeTab, setActiveTab] = useState("Details");
+  const [activeMilestoneTab, setActiveMilestoneTab] = useState<number | null>(
+    null,
+  );
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const { id } = useParams<{ id: string }>();
@@ -57,13 +60,20 @@ const ProjectViewDetail: React.FC<any> = () => {
       // projectType: "present",
       id: id,
     };
-    
+
     if (role === "NGO") {
       params.organization_id = currentState.user.id;
     }
-    
+
     getTableData(params);
   }, [id, getTableData, role]);
+
+  // Reset milestone tab when Updates tab is activated
+  useEffect(() => {
+    if (activeTab === "Updates") {
+      setActiveMilestoneTab(0);
+    }
+  }, [activeTab]);
 
   const handleBack = () => {
     switch (role) {
@@ -115,7 +125,40 @@ const ProjectViewDetail: React.FC<any> = () => {
           </>
         );
       case "Updates":
-        return <MileStoneUpdates logo={logo} project={project} role={role} />;
+        return (
+          <div>
+            {/* Milestone Tabs */}
+            {project?.milestones && project.milestones.length > 0 && (
+              <>
+                <div className="tab-container" style={{ marginBottom: "24px", flexDirection: "column" }}>
+                  <div className="tab-wrapper" style={{ width: "70vw" }}>
+                    {project.milestones.map((milestone: any, index: number) => (
+                      <button
+                        key={milestone.id}
+                        onClick={() => setActiveMilestoneTab(index)}
+                        className={`tab-button ${
+                          activeMilestoneTab === index ? "tab-active" : ""
+                        }`}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {milestone.milestone}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <MileStoneUpdates logo={logo} project={project} role={role} />
+              </>
+            )}
+            {!project?.milestones ||
+              (project.milestones.length === 0 && (
+                <MileStoneUpdates logo={logo} project={project} role={role} />
+              ))}
+          </div>
+        );
       case "Media":
         return <MediaGallery project={project} role={role} />;
       case "Transactions":

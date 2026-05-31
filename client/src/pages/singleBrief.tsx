@@ -36,7 +36,7 @@ const SingleBriefs: React.FC<any> = () => {
       onError: () => {
         toast.error("Error getting brief data");
       },
-    }
+    },
   );
 
   const { mutate: checkApplicationStatus } = useBackendService(
@@ -50,7 +50,7 @@ const SingleBriefs: React.FC<any> = () => {
       onError: () => {
         setIsCheckingApplication(false);
       },
-    }
+    },
   );
 
   useEffect(() => {
@@ -64,7 +64,7 @@ const SingleBriefs: React.FC<any> = () => {
   }, [id, checkApplicationStatus]);
 
   const handleBack = () => {
-    navigate("/briefs");
+    navigate("/ngo/briefs");
   };
 
   if (isLoading) {
@@ -260,8 +260,8 @@ const SingleBriefs: React.FC<any> = () => {
                       {isCheckingApplication
                         ? "Checking..."
                         : hasApplied
-                        ? "Applied"
-                        : "Apply now"}
+                          ? "Applied"
+                          : "Apply now"}
                     </Button>
                   </Col>
                 </Row>
@@ -422,8 +422,8 @@ const SingleBriefs: React.FC<any> = () => {
               {isCheckingApplication
                 ? "Checking..."
                 : hasApplied
-                ? "Applied"
-                : "Apply for this opportunity"}
+                  ? "Applied"
+                  : "Apply for this opportunity"}
             </Button>
           </Col>
         </Row>

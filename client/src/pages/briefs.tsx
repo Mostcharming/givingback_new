@@ -15,8 +15,10 @@ import { ProjectFilters } from "../components/ProjectFilters";
 import Loading from "../components/home/loading";
 import useBackendService from "../services/backend_service";
 import { capitalizeFirstLetter } from "../services/capitalize";
+import { useContent } from "../services/useContext";
 
 const Briefs = () => {
+  const { authState, currentState } = useContent();
   const [responseData, setResponseData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProjects, setTotalProjects] = useState(0);
@@ -24,6 +26,7 @@ const Briefs = () => {
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [dateFilter, setDateFilter] = useState("Any time");
   const [areas, setAreas] = useState([]);
+  const role = authState.user?.role;
 
   const { mutate: getAreas } = useBackendService("/areas", "GET", {
     onSuccess: (res2: any) => {
@@ -48,36 +51,48 @@ const Briefs = () => {
       onError: () => {
         toast.error("Failed to fetch Briefs.");
       },
-    }
+    },
   );
 
   useEffect(() => {
-    fetchBriefs({
+    const params: any = {
       page: currentPage,
       status: "brief",
-    });
+    };
+    if (role === "NGO") {
+      params.ngo_id = currentState.user.id;
+    }
+    fetchBriefs(params);
   }, []);
 
   useEffect(() => {
     const isDefault =
       categoryFilter === "All Categories" && dateFilter === "Any time";
 
+    const params: any = {
+      status: "brief",
+    };
+
+    if (role === "NGO") {
+      params.ngo_id = currentState.user.id;
+    }
+
     if (isDefault) {
       fetchBriefs({
+        ...params,
         page: 1,
-        status: "brief",
       });
       return;
     }
 
     fetchBriefs({
+      ...params,
       page: currentPage,
-      status: "brief",
       category:
         categoryFilter !== "All Categories" ? categoryFilter : undefined,
       startDate: dateFilter !== "Any time" ? dateFilter : undefined,
     });
-  }, [currentPage, categoryFilter, dateFilter]);
+  }, [currentPage, categoryFilter, dateFilter, role]);
 
   const nextPage = () => {
     if (currentPage * 6 < totalProjects) {
@@ -172,7 +187,7 @@ const Briefs = () => {
                       {responseData.map((project) => {
                         const truncateDescription = (
                           text: string,
-                          maxWords: number = 200
+                          maxWords: number = 200,
                         ) => {
                           const words = text.split(" ");
                           if (words.length > maxWords) {
@@ -182,7 +197,7 @@ const Briefs = () => {
                         };
 
                         const displayDescription = truncateDescription(
-                          project.description || ""
+                          project.description || "",
                         );
                         const isTruncated =
                           (project.description || "").split(" ").length > 200;
@@ -210,12 +225,14 @@ const Briefs = () => {
                                 <span
                                   className="rounded-pill px-3 py-1"
                                   style={{
-                                    backgroundColor: "#e2efe9",
+                                    backgroundColor: project.hasApplied
+                                      ? "#d4f4dd"
+                                      : "#e2efe9",
                                     color: "#128330",
                                     fontSize: "12px",
                                   }}
                                 >
-                                  New
+                                  {project.hasApplied ? "Applied" : "New"}
                                 </span>
                               </div>
                               <Bookmark
@@ -308,7 +325,7 @@ const Briefs = () => {
                                     <span className="fw-semibold">
                                       {project.deadline
                                         ? new Date(
-                                            project.deadline
+                                            project.deadline,
                                           ).toLocaleDateString("en-NG")
                                         : "N/A"}
                                     </span>

@@ -1,6 +1,7 @@
 export interface ProjectFilter {
   donor_id?: string;
   organization_id?: string;
+  ngo_id?: string;
   projectType?: "present" | "previous";
   title?: string;
   description?: string;
