@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MessageCircle, Search, Send } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image } from "react-bootstrap";
 import {
   FormGroup,
@@ -23,9 +23,9 @@ interface Chat {
 }
 
 interface Message {
-  id: string;
-  chatId: string;
-  senderUserId: string;
+  id: string | number;
+  chatId: string | number;
+  senderUserId: string | number;
   senderUserType: string;
   message: string;
   attachments: any[];
@@ -39,6 +39,48 @@ const isAdminChat = (chat: Chat | null) => {
   return chat?.otherParticipant?.userType === ADMIN_USER_TYPE;
 };
 
+const getDateSeparator = (
+  currentDate: Date,
+  previousDate: Date | null,
+): string | null => {
+  // If it's the first message, show the separator
+  if (!previousDate) {
+    return formatDateSeparator(currentDate);
+  }
+
+  // Check if dates are different
+  const currentDay = currentDate.toDateString();
+  const previousDay = previousDate.toDateString();
+
+  if (currentDay !== previousDay) {
+    return formatDateSeparator(currentDate);
+  }
+
+  return null;
+};
+
+const formatDateSeparator = (date: Date): string => {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const dateString = date.toDateString();
+  const todayString = today.toDateString();
+  const yesterdayString = yesterday.toDateString();
+
+  if (dateString === todayString) {
+    return "Today";
+  } else if (dateString === yesterdayString) {
+    return "Yesterday";
+  } else {
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+};
+
 function MessageDonor() {
   const { authState } = useContent();
   const [chats, setChats] = useState<Chat[]>([]);
@@ -46,20 +88,36 @@ function MessageDonor() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageText, setMessageText] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [searchValidation, setSearchValidation] = useState<
+    "valid" | "invalid" | null
+  >(null);
+  const [showSearchTooltip, setShowSearchTooltip] = useState(false);
+  const [searchedDonor, setSearchedDonor] = useState<any>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const fetchChatsAPI = useBackendService<{ chats: Chat[] }, any>(
     "/chats",
-    "GET"
+    "GET",
   );
 
   const fetchMessagesAPI = useBackendService<{ messages: Message[] }, any>(
     selectedChat?.id ? `/chats/${selectedChat.id}/messages` : "/chats",
-    "GET"
+    "GET",
   );
 
   const sendMessageAPI = useBackendService<{ data: Message }, any>(
     selectedChat?.id ? `/chats/${selectedChat.id}/messages` : "/chats",
-    "POST"
+    "POST",
+  );
+
+  const createChatAPI = useBackendService<{ chat: Chat }, any>(
+    "/chats",
+    "POST",
+  );
+
+  const searchDonorAPI = useBackendService<{ donor: any }, any>(
+    `/chats/search-donor`,
+    "POST",
   );
   useEffect(() => {
     const loadChats = async () => {
@@ -82,7 +140,20 @@ function MessageDonor() {
       const loadMessages = async () => {
         try {
           const result = await fetchMessagesAPI.mutateAsync({});
-          setMessages(result.messages || []);
+          // Transform snake_case properties from backend to camelCase
+          const transformedMessages = (result.messages || []).map(
+            (msg: any) => ({
+              id: msg.id,
+              chatId: msg.chat_id,
+              senderUserId: msg.sender_user_id,
+              senderUserType: msg.sender_user_type,
+              message: msg.message,
+              attachments: msg.attachments || [],
+              status: msg.status,
+              createdAt: msg.created_at,
+            }),
+          );
+          setMessages(transformedMessages);
         } catch (error) {
           console.error("Failed to fetch messages:", error);
         }
@@ -93,18 +164,31 @@ function MessageDonor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedChat?.id]);
 
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   const handleAdminChatClick = async () => {
-    try {
-      const adminChat = chats.find(
-        (chat) => chat.otherParticipant?.userType === ADMIN_USER_TYPE
-      );
-      if (adminChat) {
-        setSelectedChat(adminChat);
-        const messagesResult = await fetchMessagesAPI.mutateAsync({});
-        setMessages(messagesResult.messages || []);
+    const adminChat = chats.find(
+      (chat) => chat.otherParticipant?.userType === ADMIN_USER_TYPE,
+    );
+
+    if (adminChat) {
+      setSelectedChat(adminChat);
+    } else {
+      // Create a new chat with admin if it doesn't exist
+      try {
+        const result = await createChatAPI.mutateAsync({
+          otherParticipant: {
+            userType: ADMIN_USER_TYPE,
+          },
+        });
+        setSelectedChat(result.chat);
+        setChats([...chats, result.chat]);
+      } catch (error) {
+        console.error("Failed to create admin chat:", error);
       }
-    } catch (error) {
-      console.error("Failed to get/create admin chat:", error);
     }
   };
 
@@ -128,6 +212,62 @@ function MessageDonor() {
     }
   };
 
+  const handleSearchChange = async (value: string) => {
+    setSearchText(value);
+
+    if (!value.trim()) {
+      setSearchValidation(null);
+      setSearchedDonor(null);
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      setSearchValidation("invalid");
+      setSearchedDonor(null);
+      return;
+    }
+
+    // Search for donor
+    try {
+      const result = await searchDonorAPI.mutateAsync({ email: value });
+      if (result.donor) {
+        setSearchValidation("valid");
+        setSearchedDonor(result.donor);
+      } else {
+        setSearchValidation("invalid");
+        setSearchedDonor(null);
+      }
+    } catch (error) {
+      console.error("Failed to search donor:", error);
+      setSearchValidation("invalid");
+      setSearchedDonor(null);
+    }
+  };
+
+  const handleStartChatWithDonor = async () => {
+    if (!searchedDonor) return;
+
+    try {
+      const result = await createChatAPI.mutateAsync({
+        otherParticipant: {
+          userId: searchedDonor.id,
+          userType: "donor",
+        },
+      });
+
+      // Add the new chat to the list
+      setChats([...chats, result.chat]);
+      setSelectedChat(result.chat);
+      setSearchText("");
+      setSearchValidation(null);
+      setSearchedDonor(null);
+    } catch (error) {
+      console.error("Failed to create chat with donor:", error);
+    }
+  };
+
   const filteredChats = chats.filter((chat) => {
     const displayName =
       chat.otherParticipant?.userId || chat.otherParticipant?.userType;
@@ -140,13 +280,31 @@ function MessageDonor() {
 
   return (
     <>
+      <style>{`
+        @media (max-width: 768px) {
+          .messages-container {
+            flex-direction: column !important;
+            height: auto !important;
+          }
+          .messages-sidebar {
+            width: 100% !important;
+            border-end: none !important;
+            border-bottom: 1px solid #e8ebf2 !important;
+            max-height: 40vh;
+          }
+          .messages-main {
+            flex: 1;
+            min-height: 60vh;
+          }
+        }
+      `}</style>
       <div
-        className="d-flex"
+        className="d-flex messages-container"
         style={{ backgroundColor: "#f5f7fa", height: "95vh" }}
       >
         {/* Left Sidebar */}
         <div
-          className="bg-white p-3 border-end d-flex flex-column"
+          className="messages-sidebar bg-white p-3 border-end d-flex flex-column"
           style={{ width: "420px", borderColor: "#e8ebf2" }}
         >
           {/* Header */}
@@ -161,23 +319,118 @@ function MessageDonor() {
 
           {/* Search */}
           <div className="p-3">
-            <FormGroup>
-              <InputGroup className="input-group-alternative">
-                <InputGroupAddon addonType="prepend">
-                  <InputGroupText style={{ backgroundColor: "white" }}>
-                    <Search />
-                  </InputGroupText>
-                </InputGroupAddon>
-                <Input
-                  style={{ backgroundColor: "white", height: "100%" }}
-                  className="p-3"
-                  placeholder="Search"
-                  type="search"
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                />
-              </InputGroup>
-            </FormGroup>
+            <div style={{ position: "relative" }}>
+              <FormGroup>
+                <InputGroup className="input-group-alternative">
+                  <InputGroupAddon addonType="prepend">
+                    <InputGroupText style={{ backgroundColor: "white" }}>
+                      <Search />
+                    </InputGroupText>
+                  </InputGroupAddon>
+                  <Input
+                    style={{
+                      backgroundColor: "white",
+                      height: "100%",
+                      borderColor:
+                        searchValidation === "valid"
+                          ? "#128330"
+                          : searchValidation === "invalid"
+                            ? "#dc3545"
+                            : "#e8ebf2",
+                      borderWidth: searchValidation ? "2px" : "1px",
+                    }}
+                    className="p-3"
+                    placeholder={
+                      authState.user?.role === "ngo"
+                        ? "Search donors by email"
+                        : "Search"
+                    }
+                    type="text"
+                    value={searchText}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    onFocus={() =>
+                      authState.user?.role === "ngo" &&
+                      setShowSearchTooltip(true)
+                    }
+                    onBlur={() => setShowSearchTooltip(false)}
+                    title={
+                      authState.user?.role === "ngo"
+                        ? "Search for donors by email"
+                        : ""
+                    }
+                  />
+                </InputGroup>
+              </FormGroup>
+
+              {/* Tooltip */}
+              {showSearchTooltip &&
+                authState.user?.role === "ngo" &&
+                !searchText && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: "0",
+                      backgroundColor: "#333",
+                      color: "white",
+                      padding: "8px 12px",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                      whiteSpace: "nowrap",
+                      zIndex: 1000,
+                      marginTop: "4px",
+                    }}
+                  >
+                    Search for donors by email
+                  </div>
+                )}
+
+              {/* Donor suggestion */}
+              {searchValidation === "valid" && searchedDonor && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: "0",
+                    right: "0",
+                    backgroundColor: "white",
+                    border: "1px solid #128330",
+                    borderRadius: "4px",
+                    marginTop: "4px",
+                    zIndex: 1000,
+                  }}
+                >
+                  <div
+                    className="p-3 d-flex align-items-center justify-content-between"
+                    style={{ cursor: "pointer" }}
+                    onClick={handleStartChatWithDonor}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#f1f2f7";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "white";
+                    }}
+                  >
+                    <div>
+                      <p className="mb-0 small fw-medium">
+                        {searchedDonor.name || "Donor"}
+                      </p>
+                      <p className="mb-0 small" style={{ color: "#888888" }}>
+                        {searchedDonor.email}
+                      </p>
+                    </div>
+                    <div
+                      style={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        backgroundColor: "#128330",
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Contact List */}
@@ -309,7 +562,7 @@ function MessageDonor() {
 
         {/* Main Content Area */}
         <div
-          className="flex-grow-1 d-flex flex-column"
+          className="messages-main flex-grow-1 d-flex flex-column"
           style={{ minHeight: 0 }}
         >
           {!selectedChat ? (
@@ -377,47 +630,93 @@ function MessageDonor() {
                     </div>
                   </div>
                 ) : (
-                  messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className="mb-3 d-flex"
-                      style={{
-                        justifyContent:
-                          message.senderUserId === String(authState.user?.id)
-                            ? "flex-end"
-                            : "flex-start",
-                      }}
-                    >
-                      <div
-                        style={{
-                          maxWidth: "60%",
-                          padding: "10px 16px",
-                          borderRadius: "8px",
-                          backgroundColor:
-                            message.senderUserId === String(authState.user?.id)
-                              ? "#128330"
-                              : "#e8ebf2",
-                          color:
-                            message.senderUserId === String(authState.user?.id)
-                              ? "white"
-                              : "#000000",
-                        }}
-                      >
-                        <p className="mb-0 small">{message.message}</p>
-                        <p
-                          className="mb-0 text-end"
+                  messages.map((message, index) => {
+                    const currentDate = new Date(message.createdAt);
+                    const previousMessage =
+                      index > 0 ? messages[index - 1] : null;
+                    const previousDate = previousMessage
+                      ? new Date(previousMessage.createdAt)
+                      : null;
+                    const dateSeparator = getDateSeparator(
+                      currentDate,
+                      previousDate,
+                    );
+
+                    return (
+                      <div key={message.id}>
+                        {dateSeparator && (
+                          <div className="d-flex align-items-center my-3">
+                            <div
+                              style={{
+                                flex: 1,
+                                height: "1px",
+                                backgroundColor: "#e8ebf2",
+                              }}
+                            />
+                            <div
+                              style={{
+                                margin: "0 12px",
+                                fontSize: "12px",
+                                color: "#888888",
+                                fontWeight: "500",
+                              }}
+                            >
+                              {dateSeparator}
+                            </div>
+                            <div
+                              style={{
+                                flex: 1,
+                                height: "1px",
+                                backgroundColor: "#e8ebf2",
+                              }}
+                            />
+                          </div>
+                        )}
+                        <div
+                          className="mb-3 d-flex"
                           style={{
-                            fontSize: "10px",
-                            opacity: 0.7,
-                            marginTop: "4px",
+                            justifyContent:
+                              message.senderUserId ===
+                              String(authState.user?.id)
+                                ? "flex-end"
+                                : "flex-start",
                           }}
                         >
-                          {new Date(message.createdAt).toLocaleTimeString()}
-                        </p>
+                          <div
+                            style={{
+                              maxWidth: "60%",
+                              padding: "10px 16px",
+                              borderRadius: "8px",
+                              backgroundColor:
+                                message.senderUserId ===
+                                String(authState.user?.id)
+                                  ? "#128330"
+                                  : "#e8ebf2",
+                              color:
+                                message.senderUserId ===
+                                String(authState.user?.id)
+                                  ? "white"
+                                  : "#000000",
+                            }}
+                          >
+                            <p className="mb-0 small">{message.message}</p>
+                            <p
+                              className="mb-0 text-end"
+                              style={{
+                                fontSize: "10px",
+                                opacity: 0.7,
+                                marginTop: "4px",
+                              }}
+                            >
+                              {new Date(message.createdAt).toLocaleTimeString()}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Message Input */}

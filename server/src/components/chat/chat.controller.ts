@@ -5,7 +5,7 @@ import { User, UserRequest } from "../../interfaces";
 export const getChats = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -89,13 +89,13 @@ export const getChats = async (
           createdAt: chat.created_at,
           updatedAt: chat.updated_at,
         };
-      })
+      }),
     );
 
     enrichedChats.sort(
       (a, b) =>
         new Date(b.lastMessage?.timestamp || b.updatedAt).getTime() -
-        new Date(a.lastMessage?.timestamp || a.updatedAt).getTime()
+        new Date(a.lastMessage?.timestamp || a.updatedAt).getTime(),
     );
 
     res.status(200).json({
@@ -114,14 +114,18 @@ export const getChats = async (
 export const getOrCreateChat = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
     const userRole = (req.user as User)?.role;
-    const { otherUserId, otherUserType } = req.body;
+    const { otherUserId, otherUserType, otherParticipant } = req.body;
 
-    if (!userId || !userRole || !otherUserType) {
+    // Support both flat structure and nested otherParticipant structure
+    const finalOtherUserId = otherUserId || otherParticipant?.userId || null;
+    const finalOtherUserType = otherUserType || otherParticipant?.userType;
+
+    if (!userId || !userRole || !finalOtherUserType) {
       res.status(400).json({
         error:
           "Missing required fields: otherUserType is required, otherUserId is optional for admin",
@@ -130,7 +134,7 @@ export const getOrCreateChat = async (
     }
 
     // For admin chats, otherUserId can be null
-    if (otherUserType !== "admin" && !otherUserId) {
+    if (finalOtherUserType !== "admin" && !finalOtherUserId) {
       res.status(400).json({
         error: "otherUserId is required for non-admin chats",
       });
@@ -140,23 +144,23 @@ export const getOrCreateChat = async (
     // Determine participant order - admin is always participant2 with potentially null ID
     let participant1Id, participant1Type, participant2Id, participant2Type;
 
-    if (otherUserType === "admin") {
+    if (finalOtherUserType === "admin") {
       // Admin is always participant2 with potentially null ID
       participant1Id = userId;
       participant1Type = userRole;
       participant2Id = null;
-      participant2Type = otherUserType;
+      participant2Type = finalOtherUserType;
     } else {
       // Regular ordering for non-admin participants
-      const shouldSwap = userId < otherUserId;
+      const shouldSwap = userId < finalOtherUserId;
       if (shouldSwap) {
         participant1Id = userId;
         participant1Type = userRole;
-        participant2Id = otherUserId;
-        participant2Type = otherUserType;
+        participant2Id = finalOtherUserId;
+        participant2Type = finalOtherUserType;
       } else {
-        participant1Id = otherUserId;
-        participant1Type = otherUserType;
+        participant1Id = finalOtherUserId;
+        participant1Type = finalOtherUserType;
         participant2Id = userId;
         participant2Type = userRole;
       }
@@ -182,23 +186,29 @@ export const getOrCreateChat = async (
       chat = await db("chat").where("id", chatId).first();
     }
 
+    // Format response to match getChats response format
+    const isParticipant1 = chat.participant1_user_id === userId;
+    const otherParticipantId = isParticipant1
+      ? chat.participant2_user_id
+      : chat.participant1_user_id;
+    const otherParticipantType = isParticipant1
+      ? chat.participant2_user_type
+      : chat.participant1_user_type;
+
     res.status(200).json({
       message: "Chat retrieved/created successfully",
       chat: {
         id: chat.id,
-        participant1: {
-          userId: chat.participant1_user_id,
-          userType: chat.participant1_user_type,
+        otherParticipant: {
+          userId: otherParticipantId,
+          userType: otherParticipantType,
         },
-        participant2: {
-          userId: chat.participant2_user_id,
-          userType: chat.participant2_user_type,
-        },
-        unreadCounts: {
-          participant1: chat.participant1_unread_count,
-          participant2: chat.participant2_unread_count,
-        },
+        unreadCount: isParticipant1
+          ? chat.participant1_unread_count
+          : chat.participant2_unread_count,
+        lastMessage: null,
         createdAt: chat.created_at,
+        updatedAt: chat.updated_at,
       },
     });
   } catch (error) {
@@ -210,10 +220,66 @@ export const getOrCreateChat = async (
   }
 };
 
+export const searchDonor = async (
+  req: UserRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const userId = (req.user as User)?.id;
+    const userRole = (req.user as User)?.role;
+    const { email } = req.body;
+
+    if (!userId || !userRole) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    // Only NGOs can search for donors
+    if (userRole !== "ngo") {
+      res.status(403).json({ error: "Only NGOs can search for donors" });
+      return;
+    }
+
+    if (!email || typeof email !== "string") {
+      res.status(400).json({ error: "Email is required" });
+      return;
+    }
+
+    // Search for donor by email
+    const donor = await db("users")
+      .where("email", email.toLowerCase().trim())
+      .where("role", "donor")
+      .select("id", "email", "name", "role")
+      .first();
+
+    if (!donor) {
+      res.status(404).json({ error: "Donor not found", donor: null });
+      return;
+    }
+
+    res.status(200).json({
+      message: "Donor found",
+      donor: {
+        id: donor.id,
+        email: donor.email,
+        name: donor.name,
+        role: donor.role,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: "Unable to search for donor",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
 export const getChatMessages = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -253,7 +319,7 @@ export const getChatMessages = async (
         "status",
         "read_at",
         "created_at",
-        "updated_at"
+        "updated_at",
       );
 
     res.status(200).json({
@@ -272,7 +338,7 @@ export const getChatMessages = async (
 export const sendMessage = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -305,14 +371,26 @@ export const sendMessage = async (
       return;
     }
 
+    // Prepare attachments - only stringify if there's actual data
+    let attachmentsData = null;
+    if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+      attachmentsData = JSON.stringify(attachments);
+    }
+
     const [messageId] = await db("chat_message").insert({
       chat_id: chatId,
       sender_user_id: userId,
       sender_user_type: userRole,
-      message,
-      attachments: attachments ? JSON.stringify(attachments) : null,
+      message: message.trim(),
+      attachments: attachmentsData,
       status: "sent",
+      created_at: new Date(),
+      updated_at: new Date(),
     });
+
+    if (!messageId) {
+      throw new Error("Failed to insert message - no ID returned");
+    }
 
     const otherParticipantField = isParticipant1
       ? "participant2_unread_count"
@@ -323,6 +401,21 @@ export const sendMessage = async (
     // Get the inserted message
     const newMessage = await db("chat_message").where("id", messageId).first();
 
+    if (!newMessage) {
+      throw new Error("Failed to retrieve inserted message");
+    }
+
+    // Safely parse attachments
+    let parsedAttachments = null;
+    if (newMessage.attachments) {
+      try {
+        parsedAttachments = JSON.parse(newMessage.attachments);
+      } catch (parseError) {
+        console.error("Error parsing attachments:", parseError);
+        parsedAttachments = null;
+      }
+    }
+
     res.status(201).json({
       message: "Message sent successfully",
       data: {
@@ -331,15 +424,13 @@ export const sendMessage = async (
         senderUserId: newMessage.sender_user_id,
         senderUserType: newMessage.sender_user_type,
         message: newMessage.message,
-        attachments: newMessage.attachments
-          ? JSON.parse(newMessage.attachments)
-          : null,
+        attachments: parsedAttachments,
         status: newMessage.status,
         createdAt: newMessage.created_at,
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("sendMessage error:", error);
     res.status(500).json({
       error: "Unable to send message",
       details: error instanceof Error ? error.message : "Unknown error",
@@ -350,7 +441,7 @@ export const sendMessage = async (
 export const markMessageAsRead = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -417,7 +508,7 @@ export const markMessageAsRead = async (
 export const markChatAsRead = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -494,7 +585,7 @@ export const markChatAsRead = async (
 export const deleteMessage = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -534,7 +625,7 @@ export const deleteMessage = async (
 export const deleteChat = async (
   req: UserRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
