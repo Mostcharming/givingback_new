@@ -10,6 +10,7 @@ import {
   markMessageAsRead,
   searchDonor,
   sendMessage,
+  streamChatEvents,
 } from "./chat.controller";
 
 const router = express.Router();
@@ -20,6 +21,7 @@ router.use(secureLogin);
 // Chat routes
 router.route("/").get(getChats);
 router.route("/").post(getOrCreateChat);
+router.route("/events/stream").get(streamChatEvents);
 router.route("/search-donor").post(searchDonor);
 router.route("/:chatId").delete(deleteChat);
 

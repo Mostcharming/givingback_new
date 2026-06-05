@@ -85,6 +85,10 @@ export const secureLogin = async (
       token = req.headers.authorization.split(' ')[1]
     }
 
+    if (!token && typeof req.query.token === 'string') {
+      token = req.query.token
+    }
+
     if (!token) {
       res
         .status(401)

@@ -8,19 +8,33 @@ const auth_1 = require("../../middleware/auth");
 const general_1 = require("../../middleware/general");
 const auth_controller_1 = require("./auth.controller");
 const router = express_1.default.Router();
-// Route to sign up a new user
 router.post("/signup", auth_1.verifyNewUser, auth_controller_1.signup);
-// Route to log in a user
 router.post("/login", auth_1.verifyLogin, auth_controller_1.login);
-// Route to log out a user
-router.get("/logout", auth_controller_1.logout);
 router.post("/new/onboard", general_1.uploadimg, auth_1.verifyNewUser, auth_controller_1.onboard);
-// Routes for verifying and resending
-router.route("/verify").post(auth_1.secureLogin, auth_controller_1.verify).put(auth_1.secureLogin, auth_controller_1.resend);
+router.route("/verify").post(auth_controller_1.verify).put(auth_1.secureLogin, auth_controller_1.resend);
 router.post("/forgotpassword", auth_controller_1.forgotPassword);
 router.post("/resetpassword", auth_controller_1.resetPassword);
-// Route to get user details (requires secure login)
-router.get("/", auth_1.secureLogin, auth_controller_1.getOne);
-// Route to change password (requires secure login)
-router.post("/changepassword", auth_1.secureLogin, auth_controller_1.changePassword);
+router.use(auth_1.secureLogin);
+router.get("/logout", auth_controller_1.logout);
+router.get("/", auth_controller_1.getOne);
+router.get("/organization-counts", auth_controller_1.getOrganizationCounts);
+router.get("/donor/project-stats", auth_controller_1.getDonorProjectMetrics);
+router.get("/donor/projects", auth_controller_1.getDonorProjects);
+router.post("/donor/projects", auth_controller_1.createProject);
+router.put("/donor/projects/:id", auth_controller_1.editProject);
+router.put("/donor/projects/:id/publish", auth_controller_1.publishProjectBrief);
+router.get("/donor/projects/:projectId/applications", auth_controller_1.getProjectApplications);
+router.put("/donor/projects/:projectId/applications/:applicationId/status", auth_controller_1.updateProjectApplicationStatus);
+router.post("/projects/:projectId/apply", general_1.uploadimg, auth_controller_1.submitProposal);
+router.get("/projects/:projectId/application-status", auth_controller_1.checkApplicationStatus);
+router.put("/", general_1.uploadimg, auth_controller_1.updateOne);
+router.post("/changepassword", auth_controller_1.changePassword);
+router.delete("/bank/:id", auth_controller_1.deleteBank);
+router.get("/organizations", auth_controller_1.getAllOrganizations);
+router.post("/organizations", auth_controller_1.addSingleNGO);
+router.get("/bulk/sample", auth_controller_1.downloadSampleNGOFile);
+router.post("/bulk/upload", general_1.uploadbulk, auth_controller_1.bulkUploadNGOsEndpoint);
+router.post("/milestones", auth_controller_1.createMilestone);
+router.delete("/milestones/:milestoneUpdateId", auth_controller_1.deleteMilestoneUpdate);
+router.get("/projects/:projectId/organizations", auth_controller_1.getProjectOrganizations);
 exports.default = router;

@@ -1,0 +1,20 @@
+extends baseEmail
+
+block content
+  p Hello #{donorName},
+  p Your project brief has been successfully saved as a draft.
+  p
+    strong Project Details:
+  ul
+    li
+      strong Title: 
+      | #{projectTitle}
+    li
+      strong Description: 
+      | #{projectDescription}
+    li
+      strong Budget: 
+      | #{budget} NGN
+  p You can complete your project brief at any time by logging into your dashboard and editing the draft.
+  p Once you're ready to publish the brief, you'll be able to submit it for NGO review and execution.
+  p If you have any questions or need assistance, please don't hesitate to contact us.

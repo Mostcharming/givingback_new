@@ -1,0 +1,123 @@
+graph TD
+    A[Donor Signs Up] --> B{Donor Type?}
+    B -->|Individual Donor| C[Fill Personal Information]
+    B -->|Corporate Donor| D[Fill Corporate Information]
+    C --> E[Account Created]
+    D --> E
+    E --> F{Next Action?}
+    F -->|Create Own NGO| G[Register NGO on Platform]
+    F -->|Interact with Existing NGOs| H[Browse Available NGOs]
+    G --> I[NGO Profile Setup Complete]
+    I --> J[Access Donor Dashboard]
+    H --> J
+
+    J --> K[Create New Brief/Project]
+    K --> L[Fill Brief Details]
+    L --> M{Set Visibility?}
+    M -->|Private| N[Select Specific NGOs]
+    M -->|Public| O[Available to All NGOs]
+    M -->|Selected Area| P[Target Specific Geographic Area]
+    N --> Q{Save or Push?}
+    O --> Q
+    P --> Q
+
+    Q -->|Save as Draft| R[Brief Saved - Draft State]
+    Q -->|Push to Active| S{Check Wallet Balance}
+
+    R --> T{Ready to Publish?}
+    T -->|Yes| S
+    T -->|No| U[Edit Draft Later]
+    U --> R
+
+    S -->|Sufficient Funds| V[Brief Activated - Notifications Sent]
+    S -->|Insufficient Funds| W[Redirect to Wallet Funding]
+    W --> X{Funding Method?}
+    X -->|International Payment| Y[Use Stripe]
+    X -->|Local Payment| Z[Use Paystack]
+    Y --> AA[Wallet Funded]
+    Z --> AA
+    AA --> V
+
+    V --> AB[Create Project Milestones]
+    AB --> AC[Define Milestone Details]
+    AC --> AD[Set Milestone Targets & Deadlines]
+    AD --> AE[Milestones Published]
+
+    AE --> AF[NGOs Receive Notifications]
+    AF --> AG[Monitor NGO Applications]
+    AG --> AH{Review Applications}
+    AH -->|Message for Details| AHM[Open Messaging<br/>with NGO]
+    AHM --> AHO[Ask Questions<br/>About Proposal]
+    AHO --> AHP{Continue Review?}
+    AHP -->|Yes| AH
+    AHP -->|No| AIR{Make Decision}
+
+    AH -->|Approve| AI[Select NGO Partner]
+    AH -->|Reject| AJ[Notify NGO - Application Rejected]
+    AIR -->|Approved| AI
+    AIR -->|Rejected| AJ
+
+    AJ --> AJM{Message NGO?}
+    AJM -->|Yes| AJN[Send Message<br/>Explaining Decision]
+    AJN --> AJO[Discuss Feedback]
+    AJO --> AG
+    AJM -->|No| AG
+
+    AI --> AIM{Message NGO?}
+    AIM -->|Yes| AIMN[Open Messaging<br/>with NGO]
+    AIMN --> AIMO[Discuss Project Start<br/>Expectations & Timeline]
+    AIMO --> AIK[Release 30percent Budget for Mobilization]
+    AIM -->|No| AIK
+
+    AIK --> AL[Project Officially Started]
+    AL --> AM[Monitor Milestone Updates<br/>from NGO]
+
+    AM --> AMR[NGO Submits Milestone<br/>Update]
+    AMR --> AMR2[Donor Receives:<br/>Documentation & Evidence]
+    AMR2 --> AMR3[Review Description &<br/>Progress Metrics]
+    AMR3 --> AMP{Verify Milestone<br/>Completion}
+
+    AMP -->|APPROVED ✅| AMQ[Milestone Verified<br/>& Approved]
+    AMQ --> AMQP[💰 Release Payment<br/>to NGO Wallet]
+    AMQP --> AMQM{More Milestones?}
+    AMQM -->|Yes| AMQN[Continue Monitoring<br/>Next Milestone]
+    AMQN --> AM
+    AMQM -->|No| APF["📋 All Milestones<br/>Submitted"]
+
+    AMP -->|REJECTED ❌| AMREJ[Milestone Rejected]
+    AMREJ --> AMREJ2[Project Terminated<br/>No Further Payment]
+    AMREJ2 --> AMREJ3[End]
+
+    AMP -->|NEEDS REVISION 🔄| AMM[Request Changes<br/>from NGO]
+    AMM --> AMH{Message NGO<br/>for Clarification?}
+    AMH -->|Yes| AMHM[Open Messaging<br/>with NGO]
+    AMHM --> AMHO[Explain Required<br/>Revisions & Issues]
+    AMHO --> AMH2{Need to<br/>Discuss More?}
+    AMH2 -->|Yes| AMHM
+    AMH2 -->|No| AM
+    AMH -->|No| AM
+
+    APF --> APD{Mark Project<br/>as COMPLETED?}
+    APD -->|Yes| APDC[Mark as COMPLETED]
+    APD -->|No| APD2[Request Additional<br/>Work/Milestones]
+    APD2 --> AM
+    
+    APDC --> AQL[Generate Final<br/>Project Report]
+    AQL --> AQS[View Project Report<br/>& Impact Summary]
+    AQS --> AS[Project Officially<br/>Marked COMPLETED]
+    AS --> AT[End]
+
+    style A fill:#4CAF50,color:#fff
+    style E fill:#4CAF50,color:#fff
+    style V fill:#2196F3,color:#fff
+    style AL fill:#2196F3,color:#fff
+    style AS fill:#4CAF50,color:#fff
+    style AT fill:#4CAF50,color:#fff
+    style AHM fill:#9C27B0,color:#fff
+    style AJN fill:#9C27B0,color:#fff
+    style AIMN fill:#9C27B0,color:#fff
+    style AMHM fill:#9C27B0,color:#fff
+    style AMQP fill:#FF5722,color:#fff
+    style AMQ fill:#4CAF50,color:#fff
+    style APDC fill:#4CAF50,color:#fff
+    style AMREJ fill:#f44336,color:#fff

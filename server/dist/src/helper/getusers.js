@@ -36,8 +36,9 @@ const getUserImage = (userId) => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.getUserImage = getUserImage;
 const fetchUsers = (filters) => __awaiter(void 0, void 0, void 0, function* () {
-    const { page = 1, limit = 10, name, interest_area, active, state, user_id, organization_id, } = filters;
-    const offset = (page - 1) * limit;
+    const { page = 1, limit = 10, name, interest_area, active, state, user_id, organization_id, all = false, } = filters;
+    const offset = all ? 0 : (page - 1) * limit;
+    const pageLimit = all ? undefined : limit;
     // Build the query for users
     let query = (0, config_1.default)("users").select("id", "email", "role");
     if (user_id) {
@@ -97,14 +98,16 @@ const fetchUsers = (filters) => __awaiter(void 0, void 0, void 0, function* () {
             allUsersDetails.push(userDetails);
         }
     }
-    const paginatedUsers = allUsersDetails.slice(offset, offset + limit);
+    const paginatedUsers = all
+        ? allUsersDetails
+        : allUsersDetails.slice(offset, offset + limit);
     const totalItems = allUsersDetails.length;
-    const totalPages = Math.ceil(totalItems / limit);
+    const totalPages = all ? 1 : Math.ceil(totalItems / limit);
     return {
         users: paginatedUsers,
         totalItems,
         totalPages,
-        currentPage: page,
+        currentPage: all ? 1 : page,
     };
 });
 exports.fetchUsers = fetchUsers;

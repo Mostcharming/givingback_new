@@ -13,14 +13,28 @@ import logo from "../../assets/images/logo.png";
 import useBackendService from "../../services/backend_service";
 import { useContent } from "../../services/useContext";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+
 interface Chat {
   id: string;
-  otherParticipant: { userId: string | null; userType: string };
+  otherParticipant: {
+    userId: string | null;
+    userType: string;
+    email?: string | null;
+  };
   unreadCount: number;
   lastMessage: string | null;
   createdAt: string;
   updatedAt: string;
 }
+
+type ChatEvent =
+  | { type: "connected" }
+  | {
+      type: "message";
+      chatId: string | number;
+      message: Message;
+    };
 
 interface Message {
   id: string | number;
@@ -33,10 +47,33 @@ interface Message {
   createdAt: string;
 }
 
+const mapMessageFromApi = (msg: any): Message => ({
+  id: msg.id,
+  chatId: msg.chatId ?? msg.chat_id,
+  senderUserId: msg.senderUserId ?? msg.sender_user_id,
+  senderUserType: msg.senderUserType ?? msg.sender_user_type,
+  message: msg.message,
+  attachments: msg.attachments || [],
+  status: msg.status,
+  createdAt: msg.createdAt ?? msg.created_at,
+});
+
 const ADMIN_USER_TYPE = "admin";
 
 const isAdminChat = (chat: Chat | null) => {
   return chat?.otherParticipant?.userType === ADMIN_USER_TYPE;
+};
+
+const getUserTypeDisplay = (userType?: string | null) => {
+  const normalized = userType?.toLowerCase();
+  if (normalized === "admin") return "ADMIN";
+  if (normalized === "ngo") return "NGO";
+  return "DONOR";
+};
+
+const capitalizeFirstLetter = (value?: string | null) => {
+  if (!value) return value;
+  return value.charAt(0).toUpperCase() + value.slice(1);
 };
 
 const getDateSeparator = (
@@ -83,6 +120,10 @@ const formatDateSeparator = (date: Date): string => {
 
 function MessageDonor() {
   const { authState } = useContent();
+  const currentUserId =
+    authState.user?.id !== undefined && authState.user?.id !== null
+      ? String(authState.user.id)
+      : null;
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -94,6 +135,8 @@ function MessageDonor() {
   const [showSearchTooltip, setShowSearchTooltip] = useState(false);
   const [searchedDonor, setSearchedDonor] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const selectedChatIdRef = useRef<string | null>(null);
+  const chatsRef = useRef<Chat[]>([]);
 
   const fetchChatsAPI = useBackendService<{ chats: Chat[] }, any>(
     "/chats",
@@ -119,6 +162,23 @@ function MessageDonor() {
     `/chats/search-donor`,
     "POST",
   );
+
+  const isOwnMessage = (message: Message) => {
+    if (!currentUserId) return false;
+    return String(message.senderUserId) === currentUserId;
+  };
+
+  useEffect(() => {
+    selectedChatIdRef.current =
+      selectedChat?.id !== undefined && selectedChat?.id !== null
+        ? String(selectedChat.id)
+        : null;
+  }, [selectedChat?.id]);
+
+  useEffect(() => {
+    chatsRef.current = chats;
+  }, [chats]);
+
   useEffect(() => {
     const loadChats = async () => {
       try {
@@ -140,18 +200,8 @@ function MessageDonor() {
       const loadMessages = async () => {
         try {
           const result = await fetchMessagesAPI.mutateAsync({});
-          // Transform snake_case properties from backend to camelCase
-          const transformedMessages = (result.messages || []).map(
-            (msg: any) => ({
-              id: msg.id,
-              chatId: msg.chat_id,
-              senderUserId: msg.sender_user_id,
-              senderUserType: msg.sender_user_type,
-              message: msg.message,
-              attachments: msg.attachments || [],
-              status: msg.status,
-              createdAt: msg.created_at,
-            }),
+          const transformedMessages = (result.messages || []).map((msg: any) =>
+            mapMessageFromApi(msg),
           );
           setMessages(transformedMessages);
         } catch (error) {
@@ -163,6 +213,75 @@ function MessageDonor() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedChat?.id]);
+
+  useEffect(() => {
+    if (!authState.user?.id || !authState.token) return;
+
+    const events = new EventSource(
+      `${API_BASE_URL}/chats/events/stream?token=${encodeURIComponent(authState.token)}`,
+    );
+
+    events.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data) as ChatEvent;
+
+        if (payload.type !== "message") return;
+
+        const incomingMessage = mapMessageFromApi(payload.message);
+        const incomingChatId = String(payload.chatId);
+        const knownChat = chatsRef.current.some(
+          (chat) => String(chat.id) === incomingChatId,
+        );
+
+        if (!knownChat) {
+          fetchChatsAPI
+            .mutateAsync({})
+            .then((result) => setChats(result.chats || []))
+            .catch((error) =>
+              console.error("Failed to refresh chats after realtime event:", error),
+            );
+        }
+
+        setChats((currentChats) =>
+          currentChats.map((chat) => {
+            if (String(chat.id) !== incomingChatId) return chat;
+
+            return {
+              ...chat,
+              unreadCount:
+                selectedChatIdRef.current === incomingChatId
+                  ? chat.unreadCount
+                  : chat.unreadCount + 1,
+              lastMessage: incomingMessage.message,
+              updatedAt: incomingMessage.createdAt,
+            };
+          }),
+        );
+
+        if (selectedChatIdRef.current !== incomingChatId) return;
+
+        setMessages((currentMessages) => {
+          const exists = currentMessages.some(
+            (message) => String(message.id) === String(incomingMessage.id),
+          );
+
+          if (exists) return currentMessages;
+
+          return [...currentMessages, incomingMessage];
+        });
+      } catch (error) {
+        console.error("Failed to process chat realtime event:", error);
+      }
+    };
+
+    events.onerror = (error) => {
+      console.error("Chat realtime connection failed:", error);
+    };
+
+    return () => {
+      events.close();
+    };
+  }, [authState.token, authState.user?.id]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -205,7 +324,19 @@ function MessageDonor() {
         attachments: [],
       });
 
-      setMessages([...messages, result.data]);
+      const sentMessage = mapMessageFromApi(result.data);
+      setMessages((currentMessages) => [...currentMessages, sentMessage]);
+      setChats((currentChats) =>
+        currentChats.map((chat) =>
+          String(chat.id) === String(sentMessage.chatId)
+            ? {
+                ...chat,
+                lastMessage: sentMessage.message,
+                updatedAt: sentMessage.createdAt,
+              }
+            : chat,
+        ),
+      );
       setMessageText("");
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -544,14 +675,12 @@ function MessageDonor() {
                         style={{ color: "#000000" }}
                       >
                         {chat.otherParticipant?.userType === "admin"
-                          ? "GivingBack Admin"
-                          : `User ${
-                              chat.otherParticipant?.userId || "Unknown"
-                            }`}
+                        ? "GivingBack Admin"
+                        : capitalizeFirstLetter(chat.otherParticipant?.email) || "Unknown"}
                       </span>
                     </div>
                     <p className="mb-0 small" style={{ color: "#888888" }}>
-                      {chat.otherParticipant?.userType}
+                      {getUserTypeDisplay(chat.otherParticipant?.userType)}
                     </p>
                   </div>
                 </div>
@@ -605,9 +734,7 @@ function MessageDonor() {
                 <h2 className="h5 fw-medium mb-0" style={{ color: "#000000" }}>
                   {isAdminChat(selectedChat)
                     ? "GivingBack Admin"
-                    : `User ${
-                        selectedChat.otherParticipant?.userId || "Unknown"
-                      }`}
+                    : `${capitalizeFirstLetter(selectedChat.otherParticipant?.email) || "Unknown"} • ${getUserTypeDisplay(selectedChat.otherParticipant?.userType)}`}
                 </h2>
               </div>
 
@@ -675,11 +802,9 @@ function MessageDonor() {
                         <div
                           className="mb-3 d-flex"
                           style={{
-                            justifyContent:
-                              message.senderUserId ===
-                              String(authState.user?.id)
-                                ? "flex-end"
-                                : "flex-start",
+                            justifyContent: isOwnMessage(message)
+                              ? "flex-end"
+                              : "flex-start",
                           }}
                         >
                           <div
@@ -687,16 +812,12 @@ function MessageDonor() {
                               maxWidth: "60%",
                               padding: "10px 16px",
                               borderRadius: "8px",
-                              backgroundColor:
-                                message.senderUserId ===
-                                String(authState.user?.id)
-                                  ? "#128330"
-                                  : "#e8ebf2",
-                              color:
-                                message.senderUserId ===
-                                String(authState.user?.id)
-                                  ? "white"
-                                  : "#000000",
+                              backgroundColor: isOwnMessage(message)
+                                ? "#128330"
+                                : "#e8ebf2",
+                              color: isOwnMessage(message)
+                                ? "white"
+                                : "#000000",
                             }}
                           >
                             <p className="mb-0 small">{message.message}</p>

@@ -39,10 +39,11 @@ function initializeStripe() {
 }
 const getAllProjectsForAllUsers = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { page = 1, limit = 10, donor_id, organization_id, projectType, title, description, objectives, category, scope, status, startDate, endDate, id, } = req.query;
+        const { page = 1, limit = 10, donor_id, organization_id, ngo_id, projectType, title, description, objectives, category, scope, status, state, startDate, endDate, id, } = req.query;
         const filters = {
             donor_id: donor_id,
             organization_id: organization_id,
+            ngo_id: ngo_id,
             projectType: projectType,
             title: title,
             description: description,
@@ -50,11 +51,16 @@ const getAllProjectsForAllUsers = (req, res, next) => __awaiter(void 0, void 0, 
             category: category,
             scope: scope,
             status: status,
+            state: state,
             startDate: startDate,
             endDate: endDate,
             id: id,
         };
         const { previousProjects, presentProjects } = yield (0, getProjects_1.getProjects)(config_1.default, filters, parseInt(page), parseInt(limit));
+        // If id filter was provided and no projects found, return error
+        if (id && previousProjects.length === 0 && presentProjects.length === 0) {
+            return res.status(404).json({ error: "Project not found" });
+        }
         const totalItems = previousProjects.length + presentProjects.length;
         const totalPages = Math.ceil(totalItems / parseInt(limit));
         res.status(200).json({
@@ -75,7 +81,8 @@ exports.getAllProjectsForAllUsers = getAllProjectsForAllUsers;
 const getAllNames = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const names = yield (0, config_1.default)("areas").select("id", "name");
-        res.json(names);
+        const sortedNames = names.sort((a, b) => a.name.localeCompare(b.name));
+        res.json(sortedNames);
     }
     catch (error) {
         res.status(500).json({ error: "Failed to fetch areas" });

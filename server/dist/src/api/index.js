@@ -12,13 +12,15 @@ const morgan_1 = __importDefault(require("morgan"));
 const node_cron_1 = __importDefault(require("node-cron"));
 const path_1 = __importDefault(require("path"));
 const index_1 = __importDefault(require("../components/index"));
+const notifications_1 = require("../middleware/notifications");
 const rateUtils_1 = require("../utils/rateUtils");
 const app = (0, express_1.default)();
 app.set("view engine", "pug");
 app.set("views", path_1.default.join(__dirname, "views"));
-app.enable("trust proxy");
+// app.enable("trust proxy");
 const whitelist = [
-    "http://192.168.1.187:5173",
+    "http://192.168.1.147:5173",
+    "http://192.168.1.165:5173",
     "https://givebackng.org",
     "https://api.givebackng.org",
     "https://www.givebackng.org",
@@ -47,15 +49,18 @@ if (process.env.NODE_ENV === "development") {
     app.use((0, morgan_1.default)("dev"));
 }
 const limiter = (0, express_rate_limit_1.default)({
-    max: 100,
+    max: 10000,
     windowMs: 60 * 60 * 1000,
     message: "Too many requests from this IP, please try again in an hour!",
 });
-app.use("/api", limiter);
+if (process.env.NODE_ENV === "production") {
+    app.use("/rest", limiter);
+}
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cookie_parser_1.default)());
 app.use((0, compression_1.default)());
+app.use(notifications_1.notificationMiddleware);
 app.use("/rest/v1", index_1.default);
 app.all("*", (err, req, res, next) => {
     const status = err.code || 500;

@@ -1,6 +1,7 @@
 import { NextFunction, Response } from "express";
 import db from "../../config";
 import { User, UserRequest } from "../../interfaces";
+import { addChatRealtimeClient, emitChatMessage } from "./chat.realtime";
 
 export const getChats = async (
   req: UserRequest,
@@ -416,18 +417,30 @@ export const sendMessage = async (
       }
     }
 
+    const messageData = {
+      id: newMessage.id,
+      chatId: newMessage.chat_id,
+      senderUserId: newMessage.sender_user_id,
+      senderUserType: newMessage.sender_user_type,
+      message: newMessage.message,
+      attachments: parsedAttachments,
+      status: newMessage.status,
+      createdAt: newMessage.created_at,
+    };
+
+    const recipientUserId = isParticipant1
+      ? chat.participant2_user_id
+      : chat.participant1_user_id;
+
+    emitChatMessage([recipientUserId], {
+      type: "message",
+      chatId,
+      message: messageData,
+    });
+
     res.status(201).json({
       message: "Message sent successfully",
-      data: {
-        id: newMessage.id,
-        chatId: newMessage.chat_id,
-        senderUserId: newMessage.sender_user_id,
-        senderUserType: newMessage.sender_user_type,
-        message: newMessage.message,
-        attachments: parsedAttachments,
-        status: newMessage.status,
-        createdAt: newMessage.created_at,
-      },
+      data: messageData,
     });
   } catch (error) {
     console.error("sendMessage error:", error);
@@ -436,6 +449,35 @@ export const sendMessage = async (
       details: error instanceof Error ? error.message : "Unknown error",
     });
   }
+};
+
+export const streamChatEvents = async (
+  req: UserRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const userId = (req.user as User)?.id;
+
+  if (!userId) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders?.();
+
+  const removeClient = addChatRealtimeClient(userId, res);
+  const heartbeat = setInterval(() => {
+    res.write(": heartbeat\n\n");
+  }, 30000);
+
+  req.on("close", () => {
+    clearInterval(heartbeat);
+    removeClient();
+    res.end();
+  });
 };
 
 export const markMessageAsRead = async (

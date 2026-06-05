@@ -9,6 +9,11 @@ const general_1 = require("../../middleware/general");
 const ngo_controller_1 = require("./ngo.controller");
 const router = express_1.default.Router();
 router.route("/onboard").post(general_1.uploadimg, (0, general_1.uploadHandler)("userimg"), (0, general_1.uploadHandler)("cacidimage"), createBankandAddress_1.createAddress, createBankandAddress_1.createBank, (0, general_1.verifyNew)("organizations", "cac"), ngo_controller_1.create);
+// Get projects by status (no pagination)
+router.get("/projects/active", ngo_controller_1.getActiveProjects);
+router.get("/projects/completed", ngo_controller_1.getCompleteProjects);
+router.get("/projects/past", ngo_controller_1.getPastProjects);
+router.get("/projects/applications", ngo_controller_1.getApplications);
 router.route("/previous-project").post(general_1.uploadimg, ngo_controller_1.createp);
 router.route("/milestone").post(general_1.uploadimg, ngo_controller_1.addMilestoneUpdate);
 router.route("/withdraw_request").post(ngo_controller_1.withdraw);

@@ -5,7 +5,7 @@ git commit -m "hi" || echo "Nothing to commit"
 git reset --hard HEAD
 git pull origin main
 
-sudo cp -r /home/ubuntu/client/dist/\* /var/www/html/
+sudo cp -r /home/ubuntu/client/dist/* /var/www/html/
 
 server------------------------------
 

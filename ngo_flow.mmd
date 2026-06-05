@@ -1,0 +1,119 @@
+graph TD
+    A[NGO Signs Up] --> B[Fill Organization Information]
+    B --> C[Complete KYC Verification]
+    C --> D{KYC Approved?}
+    D -->|Yes| E[Account Created & Activated]
+    D -->|No| F[Request Additional Information]
+    F --> C
+    E --> G[Access NGO Dashboard]
+
+    G --> H[Browse Available Opportunities]
+    H --> I{Receive Notifications?}
+    I -->|New Brief Matching Profile| J[Notification Received]
+    I -->|Browsing Dashboard| K[View Available Briefs]
+    J --> K
+
+    K --> L[View Brief Details]
+    L --> M[Review Project Scope]
+    M --> N[Check Budget & Milestones]
+    N --> O{Interested to Apply?}
+    O -->|No| K
+    O -->|Yes| P[Submit Application]
+
+    P --> Q[Provide Proposal]
+    Q --> R[Detail Implementation Plan]
+    R --> S[Highlight Team Expertise]
+    S --> T[Submit Application to Donor]
+    T --> U[Status: Pending Review]
+    U --> UM{Message Donor?}
+    UM -->|Yes| UMN[Open Messaging<br/>with Donor]
+    UMN --> UMO[Discuss Application<br/>& Answer Questions]
+    UMO --> U
+    UM -->|No| V
+
+    U --> V{Donor Decision?}
+    V -->|Rejected| W[Application Rejected]
+    W --> X[View Feedback from Donor]
+    X --> XM{Message Donor<br/>for Feedback?}
+    XM -->|Yes| XMN[Send Message]
+    XMN --> XMO[Discuss Rejection Reasons]
+    XMO --> Y
+    XM -->|No| Y
+    Y --> Y{Apply to Another Brief?}
+    Y -->|Yes| K
+    Y -->|No| Z[End]
+
+    V -->|Approved| AA[Application Approved]
+    AA --> AB[Congratulations: Partner Selected]
+    AB --> ABM{Message Donor?}
+    ABM -->|Yes| ABMN[Open Messaging<br/>with Donor]
+    ABMN --> ABMO[Discuss Project Start<br/>& Requirements]
+    ABMO --> AC
+    ABM -->|No| AC
+    AC --> AC[Receive 30percent Budget for Mobilization]
+    AC --> AD[Budget Received in NGO Wallet]
+    AD --> AE[Project Officially Started]
+
+    AE --> AF[Access Project Management Hub]
+    AF --> AG[View Milestones & Targets]
+    AG --> AH[Begin Working on Project]
+    AH --> AI[Milestone Updates Process]
+
+    AI --> AJ[NGO Prepares Milestone Update]
+    AJ --> AJ2[Upload Documentation &<br/>Images/Evidence]
+    AJ2 --> AJ3[Write Detailed Description<br/>of Work Completed]
+    AJ3 --> AJ4[Update Target Amount<br/>Percentage Covered]
+    AJ4 --> AN[Submit Milestone Update<br/>to Donor]
+    AN --> AO[Status: Pending<br/>Donor Verification]
+
+    AO --> AP{Donor Reviews &<br/>Verifies Milestone}
+    
+    AP -->|APPROVED| AQ[✅ Milestone Verified<br/>& Approved]
+    AQ --> AQP[💰 Payment Released<br/>to NGO Wallet]
+    AQP --> AQP2{More Milestones<br/>Remaining?}
+    AQP2 -->|Yes| AQP3[Start Next<br/>Milestone Work]
+    AQP3 --> AI
+    AQP2 -->|No| DONOR_MARK["🔔 Notify Donor:<br/>All Milestones Complete"]
+
+    AP -->|REJECTED| AR[❌ Milestone Rejected]
+    AR --> ARX[Project Ended<br/>No Further Payment]
+    ARX --> AU[End Project]
+
+    AP -->|NEEDS REVISION| ARA[Request Changes<br/>from NGO]
+    ARA --> ARM{Message Donor<br/>for Clarification?}
+    ARM -->|Yes| ARMN[Open Messaging<br/>with Donor]
+    ARMN --> ARMO[Discuss Required Changes]
+    ARMO --> ARM2{Understand<br/>Requirements?}
+    ARM2 -->|Yes| AN
+    ARM2 -->|No| ARMN
+    ARM -->|No| AN
+    
+    DONOR_MARK --> AX[Donor Reviews Final<br/>Project Report]
+    AX --> AXM{Donor Marks<br/>Project as<br/>Complete?}
+    AXM -->|Yes| AXC[Project Marked<br/>as COMPLETED]
+    AXM -->|No| AXH[Reopen for<br/>Additional Work]
+    AXH --> AI
+    
+    AXC --> AY[Final Project Report<br/>Generated]
+    AY --> AZ[View Project<br/>Impact Summary]
+    AZ --> BA[Receive Project<br/>Completion Certificate]
+    BA --> BB[Project Successfully<br/>Completed]
+    BB --> BC[End]
+
+    style A fill:#FF9800,color:#fff
+    style E fill:#FF9800,color:#fff
+    style AA fill:#4CAF50,color:#fff
+    style AC fill:#4CAF50,color:#fff
+    style AE fill:#2196F3,color:#fff
+    style AQP fill:#FF5722,color:#fff
+    style AQ fill:#4CAF50,color:#fff
+    style AXC fill:#4CAF50,color:#fff
+    style BB fill:#4CAF50,color:#fff
+    style BC fill:#4CAF50,color:#fff
+    style AR fill:#f44336,color:#fff
+    style ARX fill:#f44336,color:#fff
+    style AU fill:#f44336,color:#fff
+    style UMN fill:#9C27B0,color:#fff
+    style XMN fill:#9C27B0,color:#fff
+    style ABMN fill:#9C27B0,color:#fff
+    style ARMN fill:#9C27B0,color:#fff

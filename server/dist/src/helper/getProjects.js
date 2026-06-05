@@ -23,13 +23,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getProjects = void 0;
 const getProjects = (db_1, filters_1, ...args_1) => __awaiter(void 0, [db_1, filters_1, ...args_1], void 0, function* (db, filters, page = 1, limit = 10) {
     const offset = (page - 1) * limit;
-    const { projectType, donor_id, organization_id } = filters, searchFilters = __rest(filters, ["projectType", "donor_id", "organization_id"]);
+    const { projectType, donor_id, organization_id, ngo_id } = filters, searchFilters = __rest(filters, ["projectType", "donor_id", "organization_id", "ngo_id"]);
     // Base queries for present and previous projects
     let previousProjectsQuery = db("previousprojects")
         .select("id", "title", "category", "cost", "duration", "status", "raised", "description", "createdAt", "updatedAt", "organization_id")
         .orderBy("createdAt", "desc");
     let presentProjectsQuery = db("project")
-        .select("id", "title", db.raw('DATE_FORMAT(startDate, "%Y-%m-%d") AS startDate'), db.raw('DATE_FORMAT(endDate, "%Y-%m-%d") AS endDate'), "description", "objectives", "category", "donor_id", "cost", "scope", "allocated", "beneficiary_overview", "status", "createdAt", "updatedAt", "organization_id")
+        .select("id", "title", db.raw('DATE_FORMAT(startDate, "%Y-%m-%d") AS startDate'), db.raw('DATE_FORMAT(endDate, "%Y-%m-%d") AS endDate'), "description", "objectives", "category", "donor_id", "cost", "state", "country", "city", "scope", "allocated", "beneficiary_overview", "status", "createdAt", "updatedAt", "organization_id")
         .orderBy("createdAt", "desc");
     // Filtering by project type
     if (projectType === "previous") {
@@ -41,24 +41,34 @@ const getProjects = (db_1, filters_1, ...args_1) => __awaiter(void 0, [db_1, fil
     // Apply search filters
     for (const [key, value] of Object.entries(searchFilters)) {
         if (value) {
-            const searchFields = [
-                "title",
-                "description",
-                "objectives",
-                "category",
-                "scope",
-                "id",
-            ];
-            if (searchFields.includes(key)) {
-                previousProjectsQuery = previousProjectsQuery.where(db.raw(`LOWER(${key})`), "LIKE", `%${value.toLowerCase()}%`);
-                presentProjectsQuery = presentProjectsQuery.where(db.raw(`LOWER(${key})`), "LIKE", `%${value.toLowerCase()}%`);
+            // Handle id as exact match
+            if (key === "id") {
+                previousProjectsQuery = previousProjectsQuery.where({ id: value });
+                presentProjectsQuery = presentProjectsQuery.where({ id: value });
             }
-            else if (key === "status") {
-                previousProjectsQuery = previousProjectsQuery.where(db.raw("LOWER(status)"), "=", value.toLowerCase());
-                presentProjectsQuery = presentProjectsQuery.where(db.raw("LOWER(status)"), "=", value.toLowerCase());
-            }
-            else if (key === "startDate" || key === "endDate") {
-                presentProjectsQuery = presentProjectsQuery.where(key, key === "startDate" ? ">=" : "<=", value);
+            else {
+                const searchFields = [
+                    "title",
+                    "description",
+                    "objectives",
+                    "category",
+                    "scope",
+                ];
+                if (searchFields.includes(key)) {
+                    previousProjectsQuery = previousProjectsQuery.where(db.raw(`LOWER(${key})`), "LIKE", `%${value.toLowerCase()}%`);
+                    presentProjectsQuery = presentProjectsQuery.where(db.raw(`LOWER(${key})`), "LIKE", `%${value.toLowerCase()}%`);
+                }
+                else if (key === "status") {
+                    previousProjectsQuery = previousProjectsQuery.where(db.raw("LOWER(status)"), "=", value.toLowerCase());
+                    presentProjectsQuery = presentProjectsQuery.where(db.raw("LOWER(status)"), "=", value.toLowerCase());
+                }
+                else if (key === "state") {
+                    previousProjectsQuery = previousProjectsQuery.where(db.raw("LOWER(state)"), "=", value.toLowerCase());
+                    presentProjectsQuery = presentProjectsQuery.where(db.raw("LOWER(state)"), "=", value.toLowerCase());
+                }
+                else if (key === "startDate" || key === "endDate") {
+                    presentProjectsQuery = presentProjectsQuery.where(key, key === "startDate" ? ">=" : "<=", value);
+                }
             }
         }
     }
@@ -100,17 +110,27 @@ const getProjects = (db_1, filters_1, ...args_1) => __awaiter(void 0, [db_1, fil
             .where({ id: project.donor_id })
             .select("id", "name", "phoneNumber", "industry", "email", "interest_area", "state", "city_lga", "address", "about", "image")
             .first();
-        const milestones = yield db("milestone")
+        let milestonesQuery = db("milestone")
             .where({ project_id: projectId })
-            .select("id", "milestone", "target", "description", "status", "createdAt");
+            .select("id", "milestone", "target", "description", "status", "due_date", "createdAt");
+        const milestones = yield milestonesQuery;
         const sponsors = yield db("project_sponsor")
             .where({ project_id: projectId })
             .select("id", "name", "image", "description");
         const detailedMilestones = yield Promise.all(milestones.map((milestone) => __awaiter(void 0, void 0, void 0, function* () {
-            const updates = yield db("milestone_update")
+            let updatesQuery = db("milestone_update")
                 .where({ milestone_id: milestone.id })
-                .select("id", "achievement", "position", "image", "status", "narration", "createdAt");
-            return Object.assign(Object.assign({}, milestone), { updates });
+                .select("id", "achievement", "position", "image", "organization_id", "status", "narration", "createdAt");
+            // Filter by organization_id if provided
+            if (organization_id) {
+                updatesQuery = updatesQuery.where({ organization_id });
+            }
+            const updates = yield updatesQuery;
+            // Calculate percentage completion
+            const totalAchievement = updates.reduce((sum, update) => sum + (update.achievement || 0), 0);
+            const target = milestone.target || 0;
+            const percentageComplete = target > 0 ? Math.round((totalAchievement / target) * 100) : 0;
+            return Object.assign(Object.assign({}, milestone), { updates, percentage_complete: percentageComplete });
         })));
         const beneficiaries = yield db("beneficiary")
             .where({ project_id: projectId })
@@ -118,9 +138,18 @@ const getProjects = (db_1, filters_1, ...args_1) => __awaiter(void 0, [db_1, fil
         const projectImages = yield db("project_images")
             .where({ project_id: projectId })
             .select("id", "image");
+        // Check if organization has applied for this project
+        let hasApplied = false;
+        if (ngo_id) {
+            const existingApplication = yield db("project_application")
+                .where({ project_id: projectId, ngo_id: ngo_id })
+                .first();
+            hasApplied = !!existingApplication;
+        }
         return Object.assign(Object.assign({}, project), { projectType: "present", donor: donorDetails, milestones: detailedMilestones, beneficiaries,
             sponsors,
-            projectImages });
+            projectImages,
+            hasApplied });
     })));
     return {
         previousProjects: previousProjectsWithDetails,

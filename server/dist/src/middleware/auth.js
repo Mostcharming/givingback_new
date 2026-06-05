@@ -74,6 +74,9 @@ const secureLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         if (!token && ((_b = req.headers.authorization) === null || _b === void 0 ? void 0 : _b.startsWith('Bearer'))) {
             token = req.headers.authorization.split(' ')[1];
         }
+        if (!token && typeof req.query.token === 'string') {
+            token = req.query.token;
+        }
         if (!token) {
             res
                 .status(401)

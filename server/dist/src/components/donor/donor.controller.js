@@ -27,7 +27,11 @@ const getCountsHandler = (req, res, next) => __awaiter(void 0, void 0, void 0, f
             .first();
         let isDonor = !!donor;
         let orgId;
-        if (!donor) {
+        let donorId;
+        if (donor) {
+            donorId = donor.id;
+        }
+        else {
             const organization = yield (0, config_1.default)("organizations")
                 .where({ user_id: userId })
                 .select("id")
@@ -40,10 +44,11 @@ const getCountsHandler = (req, res, next) => __awaiter(void 0, void 0, void 0, f
             }
             orgId = organization.id;
         }
-        const counts = yield (0, dash_1.getCounts)(userId, isDonor, orgId);
+        const counts = yield (0, dash_1.getCounts)(userId, isDonor, orgId, donorId);
         res.status(200).json(counts);
     }
     catch (error) {
+        console.log(error);
         res.status(500).json({ error: "Unable to fetch dashboard data" });
     }
 });
@@ -110,7 +115,7 @@ const newDonor = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         yield transaction.commit();
         //email
         const token = 0;
-        const url = name;
+        const url = name ? name : "";
         const additionalData = { role: "Donor" };
         yield new mail_1.default({ email: email, url, token, additionalData }).sendEmail("donoronboard", "Welcome to the GivingBack Family!");
         yield new mail_1.default({

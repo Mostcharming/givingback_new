@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteImage = exports.deleteBeneficiary = exports.deleteSponsor = exports.deleteMilestone = exports.addProjectImages = exports.addBeneficiaries = exports.addSponsors = exports.addMilestones = exports.createProject = exports.respondBrief = exports.withdraw = exports.addMilestoneUpdate = exports.createp = exports.create = void 0;
+exports.getApplications = exports.getPastProjects = exports.getCompleteProjects = exports.getActiveProjects = exports.deleteImage = exports.deleteBeneficiary = exports.deleteSponsor = exports.deleteMilestone = exports.addProjectImages = exports.addBeneficiaries = exports.addSponsors = exports.addMilestones = exports.createProject = exports.respondBrief = exports.withdraw = exports.addMilestoneUpdate = exports.createp = exports.create = void 0;
 const config_1 = __importDefault(require("../../config"));
 const mail_1 = __importDefault(require("../../utils/mail"));
 const create = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -100,7 +100,7 @@ exports.create = create;
 const createp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const transaction = yield config_1.default.transaction();
     try {
-        const { title, category, duration, description, cost, raised, sponsors, beneficiaries, } = req.body;
+        const { title, category, duration, description, status, cost, raised, sponsors, beneficiaries, } = req.body;
         const missingFields = [];
         const userData = yield (0, config_1.default)("organizations")
             .where("user_id", req.user.id)
@@ -228,44 +228,69 @@ const createp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.createp = createp;
 const addMilestoneUpdate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { achievement, position, status, narration, milestone_id } = req.body;
-        let filename = null;
+        const { status, narration, milestone_id, achievement, position } = req.body;
+        const userId = req.user.id;
+        let imageUrl = null;
         const missingFields = [];
-        if (!achievement)
-            missingFields.push("achievement");
         if (!status)
             missingFields.push("status");
         if (!narration)
             missingFields.push("narration");
         if (!milestone_id)
             missingFields.push("milestone_id");
-        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-            if (req.files[0].fieldname === "image") {
-                filename = req.files[0].location;
-            }
-        }
+        if (!achievement)
+            missingFields.push("achievement");
+        if (position === undefined || position === null || position === "")
+            missingFields.push("position");
         if (missingFields.length > 0) {
             return res.status(400).json({
                 status: "fail",
                 error: `Missing required field(s): ${missingFields.join(", ")}`,
             });
         }
+        // Get organization for NGO
+        const organization = yield (0, config_1.default)("organizations")
+            .where("user_id", userId)
+            .first();
+        if (!organization) {
+            return res.status(404).json({
+                status: "fail",
+                error: "Organization not found",
+            });
+        }
+        // Get image if uploaded
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+            const imageFile = req.files.find((f) => f.fieldname === "image");
+            if (imageFile) {
+                imageUrl = imageFile.location;
+            }
+        }
+        // Insert milestone update
         const [newMilestoneUpdateId] = yield (0, config_1.default)("milestone_update").insert({
-            achievement,
-            position,
             status,
             narration,
-            image: filename,
+            image: imageUrl,
             milestone_id,
+            organization_id: organization.id,
+            achievement,
+            position,
+            createdAt: new Date(),
         });
         const newMilestoneUpdate = yield (0, config_1.default)("milestone_update")
             .where({ id: newMilestoneUpdateId })
             .first();
-        res.status(201).json({ newMilestoneUpdate });
+        res.status(201).json({
+            status: "success",
+            message: "Milestone update added successfully",
+            data: newMilestoneUpdate,
+        });
     }
     catch (error) {
         console.error("Error adding milestone update:", error);
-        res.status(500).json({ error: "Unable to add milestone update" });
+        res.status(500).json({
+            status: "fail",
+            error: "Unable to add milestone update",
+        });
     }
 });
 exports.addMilestoneUpdate = addMilestoneUpdate;
@@ -409,10 +434,11 @@ const createProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 message: "User not found.",
             });
         }
+        const finalStatus = status === "completed" ? "unverified" : status;
         const [project_id] = yield trx("project").insert({
             title,
             description,
-            status,
+            status: finalStatus,
             startDate,
             endDate,
             category: interest_area,
@@ -629,4 +655,256 @@ const deleteImage = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.deleteImage = deleteImage;
+// Get active projects (no pagination)
+const getActiveProjects = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const organization = yield (0, config_1.default)("organizations")
+            .where("user_id", req.user.id)
+            .first();
+        if (!organization) {
+            return res.status(404).json({
+                status: "fail",
+                message: "User not found.",
+            });
+        }
+        // Query project table with status filter for active
+        const activeProjects = yield (0, config_1.default)("project")
+            .select("id", "title", config_1.default.raw('DATE_FORMAT(startDate, "%Y-%m-%d") AS startDate'), config_1.default.raw('DATE_FORMAT(endDate, "%Y-%m-%d") AS endDate'), "description", "objectives", "category", "donor_id", "cost", "state", "country", "city", "scope", "allocated", "beneficiary_overview", "status", "createdAt", "updatedAt", "organization_id")
+            .where("status", "active")
+            .where("organization_id", organization.id)
+            .orderBy("createdAt", "desc");
+        // Fetch related details for active projects
+        const activeProjectsWithDetails = yield Promise.all(activeProjects.map((project) => __awaiter(void 0, void 0, void 0, function* () {
+            const projectId = project.id;
+            const donorDetails = yield (0, config_1.default)("donors")
+                .where({ id: project.donor_id })
+                .select("id", "name", "phoneNumber", "industry", "email", "interest_area", "state", "city_lga", "address", "about", "image")
+                .first();
+            const milestones = yield (0, config_1.default)("milestone")
+                .where({ project_id: projectId })
+                .select("id", "milestone", "target", "description", "status", "due_date", "createdAt");
+            const sponsors = yield (0, config_1.default)("project_sponsor")
+                .where({ project_id: projectId })
+                .select("id", "name", "image", "description");
+            const detailedMilestones = yield Promise.all(milestones.map((milestone) => __awaiter(void 0, void 0, void 0, function* () {
+                const updates = yield (0, config_1.default)("milestone_update")
+                    .where({ milestone_id: milestone.id })
+                    .select("id", "achievement", "position", "image", "organization_id", "status", "narration", "createdAt");
+                // Calculate percentage completion
+                const totalAchievement = updates.reduce((sum, update) => sum + (update.achievement || 0), 0);
+                const target = milestone.target || 0;
+                const percentageComplete = target > 0 ? Math.round((totalAchievement / target) * 100) : 0;
+                return Object.assign(Object.assign({}, milestone), { updates, percentage_complete: percentageComplete });
+            })));
+            const beneficiaries = yield (0, config_1.default)("beneficiary")
+                .where({ project_id: projectId })
+                .select("id", "state", "city", "community", "contact");
+            const projectImages = yield (0, config_1.default)("project_images")
+                .where({ project_id: projectId })
+                .select("id", "image");
+            return Object.assign(Object.assign({}, project), { projectType: "present", donor: donorDetails, milestones: detailedMilestones, beneficiaries,
+                sponsors,
+                projectImages });
+        })));
+        res.status(200).json({
+            projects: activeProjectsWithDetails,
+            totalItems: activeProjectsWithDetails.length,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Unable to fetch active projects" });
+    }
+});
+exports.getActiveProjects = getActiveProjects;
+// Get completed projects (no pagination)
+const getCompleteProjects = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const organization = yield (0, config_1.default)("organizations")
+            .where("user_id", req.user.id)
+            .first();
+        if (!organization) {
+            return res.status(404).json({
+                status: "fail",
+                message: "User not found.",
+            });
+        }
+        // Query project table with status filter for completed
+        const completedProjects = yield (0, config_1.default)("project")
+            .select("id", "title", config_1.default.raw('DATE_FORMAT(startDate, "%Y-%m-%d") AS startDate'), config_1.default.raw('DATE_FORMAT(endDate, "%Y-%m-%d") AS endDate'), "description", "objectives", "category", "donor_id", "cost", "state", "country", "city", "scope", "allocated", "beneficiary_overview", "status", "createdAt", "updatedAt", "organization_id")
+            .where("status", "completed")
+            .where("organization_id", organization.id)
+            .orderBy("createdAt", "desc");
+        // Fetch related details for completed projects
+        const completedProjectsWithDetails = yield Promise.all(completedProjects.map((project) => __awaiter(void 0, void 0, void 0, function* () {
+            const projectId = project.id;
+            const donorDetails = yield (0, config_1.default)("donors")
+                .where({ id: project.donor_id })
+                .select("id", "name", "phoneNumber", "industry", "email", "interest_area", "state", "city_lga", "address", "about", "image")
+                .first();
+            const milestones = yield (0, config_1.default)("milestone")
+                .where({ project_id: projectId })
+                .select("id", "milestone", "target", "description", "status", "due_date", "createdAt");
+            const sponsors = yield (0, config_1.default)("project_sponsor")
+                .where({ project_id: projectId })
+                .select("id", "name", "image", "description");
+            const detailedMilestones = yield Promise.all(milestones.map((milestone) => __awaiter(void 0, void 0, void 0, function* () {
+                const updates = yield (0, config_1.default)("milestone_update")
+                    .where({ milestone_id: milestone.id })
+                    .select("id", "achievement", "position", "image", "organization_id", "status", "narration", "createdAt");
+                // Calculate percentage completion
+                const totalAchievement = updates.reduce((sum, update) => sum + (update.achievement || 0), 0);
+                const target = milestone.target || 0;
+                const percentageComplete = target > 0 ? Math.round((totalAchievement / target) * 100) : 0;
+                return Object.assign(Object.assign({}, milestone), { updates, percentage_complete: percentageComplete });
+            })));
+            const beneficiaries = yield (0, config_1.default)("beneficiary")
+                .where({ project_id: projectId })
+                .select("id", "state", "city", "community", "contact");
+            const projectImages = yield (0, config_1.default)("project_images")
+                .where({ project_id: projectId })
+                .select("id", "image");
+            return Object.assign(Object.assign({}, project), { projectType: "present", donor: donorDetails, milestones: detailedMilestones, beneficiaries,
+                sponsors,
+                projectImages });
+        })));
+        res.status(200).json({
+            projects: completedProjectsWithDetails,
+            totalItems: completedProjectsWithDetails.length,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Unable to fetch completed projects" });
+    }
+});
+exports.getCompleteProjects = getCompleteProjects;
+// Get past projects (verified or unverified status - no pagination)
+const getPastProjects = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Query project table with status filter for verified/unverified
+        const pastProjects = yield (0, config_1.default)("project")
+            .select("id", "title", config_1.default.raw('DATE_FORMAT(startDate, "%Y-%m-%d") AS startDate'), config_1.default.raw('DATE_FORMAT(endDate, "%Y-%m-%d") AS endDate'), "description", "objectives", "category", "donor_id", "cost", "state", "country", "city", "scope", "allocated", "beneficiary_overview", "status", "createdAt", "updatedAt", "organization_id")
+            .whereIn("status", ["verified", "unverified"])
+            .orderBy("createdAt", "desc");
+        // Fetch related details for past projects
+        const pastProjectsWithDetails = yield Promise.all(pastProjects.map((project) => __awaiter(void 0, void 0, void 0, function* () {
+            const projectId = project.id;
+            const donorDetails = yield (0, config_1.default)("donors")
+                .where({ id: project.donor_id })
+                .select("id", "name", "phoneNumber", "industry", "email", "interest_area", "state", "city_lga", "address", "about", "image")
+                .first();
+            const milestones = yield (0, config_1.default)("milestone")
+                .where({ project_id: projectId })
+                .select("id", "milestone", "target", "description", "status", "due_date", "createdAt");
+            const sponsors = yield (0, config_1.default)("project_sponsor")
+                .where({ project_id: projectId })
+                .select("id", "name", "image", "description");
+            const detailedMilestones = yield Promise.all(milestones.map((milestone) => __awaiter(void 0, void 0, void 0, function* () {
+                const updates = yield (0, config_1.default)("milestone_update")
+                    .where({ milestone_id: milestone.id })
+                    .select("id", "achievement", "position", "image", "organization_id", "status", "narration", "createdAt");
+                // Calculate percentage completion
+                const totalAchievement = updates.reduce((sum, update) => sum + (update.achievement || 0), 0);
+                const target = milestone.target || 0;
+                const percentageComplete = target > 0 ? Math.round((totalAchievement / target) * 100) : 0;
+                return Object.assign(Object.assign({}, milestone), { updates, percentage_complete: percentageComplete });
+            })));
+            const beneficiaries = yield (0, config_1.default)("beneficiary")
+                .where({ project_id: projectId })
+                .select("id", "state", "city", "community", "contact");
+            const projectImages = yield (0, config_1.default)("project_images")
+                .where({ project_id: projectId })
+                .select("id", "image");
+            return Object.assign(Object.assign({}, project), { projectType: "past", donor: donorDetails, milestones: detailedMilestones, beneficiaries,
+                sponsors,
+                projectImages });
+        })));
+        res.status(200).json({
+            projects: pastProjectsWithDetails,
+            totalItems: pastProjectsWithDetails.length,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Unable to fetch past projects" });
+    }
+});
+exports.getPastProjects = getPastProjects;
+// Get applications (projects applied to by NGO)
+const getApplications = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const organization = yield (0, config_1.default)("organizations")
+            .where("user_id", req.user.id)
+            .first();
+        if (!organization) {
+            return res.status(404).json({
+                status: "fail",
+                message: "User not found.",
+            });
+        }
+        // Get all applications for this organization
+        const applications = yield (0, config_1.default)("project_application")
+            .where("ngo_id", organization.id)
+            .select("id", "project_id", "status", "createdAt");
+        if (applications.length === 0) {
+            return res.status(200).json({
+                projects: [],
+                totalItems: 0,
+            });
+        }
+        // Fetch full project details for each application
+        const applicationsWithProjectDetails = yield Promise.all(applications.map((application) => __awaiter(void 0, void 0, void 0, function* () {
+            const projectId = application.project_id;
+            const project = yield (0, config_1.default)("project")
+                .select("id", "title", config_1.default.raw('DATE_FORMAT(startDate, "%Y-%m-%d") AS startDate'), config_1.default.raw('DATE_FORMAT(endDate, "%Y-%m-%d") AS endDate'), "description", "objectives", "category", "donor_id", "cost", "state", "country", "city", "scope", "allocated", "beneficiary_overview", "status", "createdAt", "updatedAt", "organization_id")
+                .where({ id: projectId })
+                .first();
+            if (!project) {
+                return null;
+            }
+            const donorDetails = yield (0, config_1.default)("donors")
+                .where({ id: project.donor_id })
+                .select("id", "name", "phoneNumber", "industry", "email", "interest_area", "state", "city_lga", "address", "about", "image")
+                .first();
+            const milestones = yield (0, config_1.default)("milestone")
+                .where({ project_id: projectId })
+                .select("id", "milestone", "target", "description", "status", "due_date", "createdAt");
+            const sponsors = yield (0, config_1.default)("project_sponsor")
+                .where({ project_id: projectId })
+                .select("id", "name", "image", "description");
+            const detailedMilestones = yield Promise.all(milestones.map((milestone) => __awaiter(void 0, void 0, void 0, function* () {
+                const updates = yield (0, config_1.default)("milestone_update")
+                    .where({ milestone_id: milestone.id })
+                    .select("id", "achievement", "position", "image", "organization_id", "status", "narration", "createdAt");
+                // Calculate percentage completion
+                const totalAchievement = updates.reduce((sum, update) => sum + (update.achievement || 0), 0);
+                const target = milestone.target || 0;
+                const percentageComplete = target > 0 ? Math.round((totalAchievement / target) * 100) : 0;
+                return Object.assign(Object.assign({}, milestone), { updates, percentage_complete: percentageComplete });
+            })));
+            const beneficiaries = yield (0, config_1.default)("beneficiary")
+                .where({ project_id: projectId })
+                .select("id", "state", "city", "community", "contact");
+            const projectImages = yield (0, config_1.default)("project_images")
+                .where({ project_id: projectId })
+                .select("id", "image");
+            // Return project with application status replacing project status
+            return Object.assign(Object.assign({}, project), { status: application.status, cost: application.proposed_budget, applicationId: application.id, applicationCreatedAt: application.createdAt, projectType: "present", donor: donorDetails, milestones: detailedMilestones, beneficiaries,
+                sponsors,
+                projectImages });
+        })));
+        // Filter out null values (projects that don't exist)
+        const validApplications = applicationsWithProjectDetails.filter((app) => app !== null);
+        res.status(200).json({
+            projects: validApplications,
+            totalItems: validApplications.length,
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Unable to fetch applications" });
+    }
+});
+exports.getApplications = getApplications;
 // Similarly for sponsor, beneficiary, image...
