@@ -17,17 +17,24 @@ import {
   InputGroupAddon,
   InputGroupText,
   Label,
+  Modal,
+  ModalBody,
+  ModalHeader,
   Row,
 } from "reactstrap";
 import useBackendService from "../../../services/backend_service";
 import { useContent } from "../../../services/useContext";
 import { getCurrent } from "../../../store/reducers/userReducer";
 
+const DEFAULT_COUNTRY = "Nigeria";
+
 export default function ProfileUpdateForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { currentState, authState } = useContent();
   const dispatch = useDispatch();
   const role = authState.user?.role;
+  const isNGO = role === "NGO";
+  const [showProfileInfoModal, setShowProfileInfoModal] = useState(true);
 
   const [areas, setAreas] = useState([]);
   const { mutate: getAreas } = useBackendService("/areas", "GET", {
@@ -53,7 +60,7 @@ export default function ProfileUpdateForm() {
             user: response.user || null,
             userImage: response.userImage || null,
             wallet: response.wallet || null,
-          })
+          }),
         );
       },
       onError: (error: any) => {
@@ -61,7 +68,7 @@ export default function ProfileUpdateForm() {
           error.response?.data?.message || "Failed to update profile";
         toast.error(errorMessage);
       },
-    }
+    },
   );
 
   const [formData, setFormData] = useState({
@@ -70,7 +77,7 @@ export default function ProfileUpdateForm() {
     email: currentState?.user?.email || "",
     orgEmail: "",
     phone: currentState?.user?.phoneNumber || "",
-    country: currentState?.address?.[0]?.address || "Nigeria",
+    country: DEFAULT_COUNTRY,
     state: currentState?.address?.[0]?.state || "",
     registrationNumber: "",
     personalEmail: currentState?.user?.email || "",
@@ -106,7 +113,7 @@ export default function ProfileUpdateForm() {
   }, [areas, currentState?.user?.interest_area]);
 
   const handleFileChange = (file) => {
-    if (file) {
+    if (!isNGO && file) {
       setFormData((prev) => ({
         ...prev,
         image: file,
@@ -116,6 +123,10 @@ export default function ProfileUpdateForm() {
   };
 
   const handleRemoveImage = () => {
+    if (isNGO) {
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       image: null,
@@ -127,6 +138,10 @@ export default function ProfileUpdateForm() {
   };
 
   const handleAreasChange = (selectedOptions) => {
+    if (isNGO) {
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       areasOfInterest: selectedOptions || [],
@@ -136,16 +151,20 @@ export default function ProfileUpdateForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (isNGO) {
+      return;
+    }
+
     const formDataToSend = new FormData();
 
     // Add basic fields
     formDataToSend.append("name", formData.name);
     formDataToSend.append("phone", formData.phone);
     formDataToSend.append("state", formData.state);
-    formDataToSend.append("address", formData.country);
+    // formDataToSend.append("address", DEFAULT_COUNTRY);
     formDataToSend.append(
       "interest_area",
-      formData.areasOfInterest.map((area: any) => area.value).join(",")
+      formData.areasOfInterest.map((area: any) => area.value).join(","),
     );
 
     // Add role-specific fields
@@ -169,6 +188,37 @@ export default function ProfileUpdateForm() {
 
   return (
     <Container className="py-3" style={{ width: "80vw" }}>
+      <Modal
+        isOpen={showProfileInfoModal}
+        toggle={() => setShowProfileInfoModal(false)}
+        centered
+      >
+        <ModalHeader toggle={() => setShowProfileInfoModal(false)}>
+          Update Profile
+        </ModalHeader>
+        <ModalBody>
+          <p className="mb-4" style={{ color: "#475569", lineHeight: 1.6 }}>
+            Each profile category has its own update button. Choose the
+            category you want to change.
+          </p>
+          <div className="text-end">
+            <Button
+              type="button"
+              onClick={() => setShowProfileInfoModal(false)}
+              style={{
+                backgroundColor: "#02a95c",
+                borderColor: "#02a95c",
+                color: "white",
+                padding: "0.65rem 1.5rem",
+                fontWeight: "500",
+              }}
+            >
+              Got it
+            </Button>
+          </div>
+        </ModalBody>
+      </Modal>
+
       <CardBody className="p-4">
         <Form onSubmit={handleSubmit}>
           <Row className="mb-4">
@@ -211,11 +261,13 @@ export default function ProfileUpdateForm() {
                   type="button"
                   color="secondary"
                   outline
+                  disabled={isNGO}
                   onClick={() => fileInputRef.current?.click()}
                   style={{
                     marginLeft: "20px",
                     padding: "0.5rem 1rem",
                     borderColor: "#dee2e6",
+                    cursor: isNGO ? "not-allowed" : "pointer",
                   }}
                 >
                   Upload
@@ -225,12 +277,14 @@ export default function ProfileUpdateForm() {
                     type="button"
                     color="danger"
                     outline
+                    disabled={isNGO}
                     onClick={handleRemoveImage}
                     style={{
                       padding: "0.5rem 0.75rem",
                       display: "flex",
                       alignItems: "center",
                       gap: "0.5rem",
+                      cursor: isNGO ? "not-allowed" : "pointer",
                     }}
                   >
                     <Trash2 size={18} />
@@ -241,6 +295,7 @@ export default function ProfileUpdateForm() {
                   accept="image/*"
                   ref={fileInputRef}
                   onChange={(e) => handleFileChange(e.target.files[0])}
+                  disabled={isNGO}
                   style={{ display: "none" }}
                 />
               </div>
@@ -309,6 +364,7 @@ export default function ProfileUpdateForm() {
                     type="text"
                     name="name"
                     required
+                    disabled={isNGO}
                     value={formData.name}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -336,6 +392,7 @@ export default function ProfileUpdateForm() {
                   }
                   value={formData.email}
                   readOnly
+                  disabled={isNGO}
                   style={{
                     backgroundColor: "#F2F2F2",
                     border: "1px solid #dee2e6",
@@ -353,16 +410,13 @@ export default function ProfileUpdateForm() {
                 <Input
                   type="text"
                   placeholder="Nigeria"
-                  value={formData.country}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      country: e.target.value,
-                    }))
-                  }
+                  value={DEFAULT_COUNTRY}
+                  readOnly
+                  disabled={isNGO}
                   style={{
                     backgroundColor: "#F2F2F2",
                     border: "1px solid #dee2e6",
+                    cursor: "not-allowed",
                     padding: "0.75rem",
                   }}
                 />
@@ -375,6 +429,7 @@ export default function ProfileUpdateForm() {
                   type="text"
                   placeholder="Lagos"
                   value={formData.state}
+                  disabled={isNGO}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
@@ -384,6 +439,7 @@ export default function ProfileUpdateForm() {
                   style={{
                     backgroundColor: "#F2F2F2",
                     border: "1px solid #dee2e6",
+                    cursor: isNGO ? "not-allowed" : "text",
                     padding: "0.75rem",
                   }}
                 />
@@ -424,6 +480,7 @@ export default function ProfileUpdateForm() {
                     placeholder="Select areas of interest"
                     onChange={handleAreasChange}
                     value={formData.areasOfInterest}
+                    isDisabled={isNGO}
                     options={areas.map((category) => ({
                       value: category.name,
                       label: category.name,
@@ -448,6 +505,7 @@ export default function ProfileUpdateForm() {
                       : "Enter CAC registration number"
                   }
                   value={formData.registrationNumber}
+                  disabled={isNGO}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
@@ -457,6 +515,7 @@ export default function ProfileUpdateForm() {
                   style={{
                     backgroundColor: "#F2F2F2",
                     border: "1px solid #dee2e6",
+                    cursor: isNGO ? "not-allowed" : "text",
                     padding: "0.75rem",
                   }}
                 />
@@ -487,6 +546,7 @@ export default function ProfileUpdateForm() {
                     type="text"
                     name="phone"
                     required
+                    disabled={isNGO}
                     value={formData.phone}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -505,6 +565,7 @@ export default function ProfileUpdateForm() {
                   type="email"
                   placeholder="yourself@example.com"
                   value={formData.personalEmail}
+                  disabled
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
@@ -516,14 +577,13 @@ export default function ProfileUpdateForm() {
                     border: "1px solid #dee2e6",
                     padding: "0.75rem",
                   }}
-                  disabled
                 />
               </FormGroup>
             </Col>
           </Row>
 
           {/* Update Button */}
-          <div className="text-center mb-4">
+          {/* <div className="text-center mb-4">
             <Button
               type="submit"
               disabled={isUpdating}
@@ -538,16 +598,30 @@ export default function ProfileUpdateForm() {
                 cursor: isUpdating ? "not-allowed" : "pointer",
               }}
             >
-              {isUpdating ? "Updating..." : "Update Profile Information"}
+              {isUpdating ? "Updating..." : "Update"}
             </Button>
-          </div>
+          </div> */}
         </Form>
       </CardBody>
 
       {!(role === "donor" || role === "corporate") && (
         <CardBody className="p-4">
           <div className="mb-4">
-            <h5 className="fw-bold mb-1">KYC Verification</h5>
+            <div className="d-flex justify-content-between align-items-center">
+              <h5 className="fw-bold mb-1">KYC Verification</h5>
+              <div
+                style={{
+                  color: "#02a95c",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                  transition: "color 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#026e46")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#02a95c")}
+              >
+                Update
+              </div>
+            </div>
             <p className="text-muted mb-0" style={{ fontSize: "14px" }}>
               Update your KYC details to verify and secure your account
             </p>

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkApplicationStatus = exports.submitProposal = exports.deleteMilestoneUpdate = exports.getProjectOrganizations = exports.createMilestone = exports.updateProjectApplicationStatus = exports.getProjectApplications = exports.editProject = exports.publishProjectBrief = exports.createProject = exports.getDonorProjects = exports.getDonorProjectMetrics = exports.downloadSampleNGOFile = exports.bulkUploadNGOsEndpoint = exports.addSingleNGO = exports.getAllOrganizations = exports.deleteBank = exports.getOrganizationCounts = exports.updateOne = exports.changePassword = exports.deactivate = exports.resetPassword = exports.forgotPassword = exports.getOne = exports.resend = exports.onboard = exports.logout = exports.login = exports.verify = exports.signup = void 0;
+exports.checkApplicationStatus = exports.submitProposal = exports.deleteMilestoneUpdate = exports.payProjectOrganizationPayout = exports.getProjectOrganizationFundingDetail = exports.getProjectOrganizations = exports.createMilestone = exports.updateProjectApplicationStatus = exports.getProjectApplications = exports.editProject = exports.publishProjectBrief = exports.createProject = exports.getDonorProjects = exports.getDonorProjectMetrics = exports.downloadSampleNGOFile = exports.bulkUploadNGOsEndpoint = exports.addSingleNGO = exports.getAllOrganizations = exports.deleteBank = exports.getOrganizationCounts = exports.updateOne = exports.changePassword = exports.deactivate = exports.resetPassword = exports.forgotPassword = exports.getOne = exports.resend = exports.onboard = exports.logout = exports.login = exports.verify = exports.signup = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const xlsx_1 = __importDefault(require("xlsx"));
 const config_1 = __importDefault(require("../../config"));
@@ -2186,6 +2186,220 @@ const getProjectOrganizations = (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 });
 exports.getProjectOrganizations = getProjectOrganizations;
+const getProjectNgoBudget = (project, projectOrganization) => {
+    const ngoBudget = Number((projectOrganization === null || projectOrganization === void 0 ? void 0 : projectOrganization.budget) || 0);
+    if (ngoBudget > 0)
+        return ngoBudget;
+    const allocated = Number((projectOrganization === null || projectOrganization === void 0 ? void 0 : projectOrganization.allocated) || project.allocated || 0);
+    if (allocated > 0)
+        return allocated;
+    return Number(project.cost || 0);
+};
+const buildPayoutRows = (project, organizationId) => __awaiter(void 0, void 0, void 0, function* () {
+    const projectOrganization = yield (0, config_1.default)("project_organization")
+        .where({ project_id: project.id, organization_id: organizationId })
+        .first();
+    const budget = getProjectNgoBudget(project, projectOrganization);
+    const milestones = yield (0, config_1.default)("milestone")
+        .where({ project_id: project.id })
+        .select("id", "milestone", "target", "description", "status", "due_date", "createdAt")
+        .orderBy("createdAt", "asc");
+    const payouts = yield (0, config_1.default)("project_ngo_payout")
+        .where({ project_id: project.id, organization_id: organizationId })
+        .select("id", "payout_type", "milestone_id", "amount", "status", "paid_at");
+    const mobilizationPayout = payouts.find((payout) => payout.payout_type === "mobilization");
+    const milestoneAmount = milestones.length > 0 ? (budget * 0.7) / milestones.length : 0;
+    const milestoneRows = yield Promise.all(milestones.map((milestone) => __awaiter(void 0, void 0, void 0, function* () {
+        const updates = yield (0, config_1.default)("milestone_update")
+            .where({
+            milestone_id: milestone.id,
+            organization_id: organizationId,
+        })
+            .select("id", "status");
+        const payout = payouts.find((item) => item.payout_type === "milestone" &&
+            Number(item.milestone_id) === Number(milestone.id));
+        return {
+            type: "milestone",
+            milestoneId: milestone.id,
+            title: milestone.milestone,
+            description: milestone.description,
+            amount: Number((payout === null || payout === void 0 ? void 0 : payout.amount) || milestoneAmount),
+            status: (payout === null || payout === void 0 ? void 0 : payout.status) || "unpaid",
+            paidAt: (payout === null || payout === void 0 ? void 0 : payout.paid_at) || null,
+            hasMilestoneUpdate: updates.length > 0,
+            isUpdateApproved: updates.some((update) => String(update.status || "").toLowerCase() === "approved"),
+        };
+    })));
+    return {
+        budget,
+        rows: [
+            {
+                type: "mobilization",
+                milestoneId: null,
+                title: "30% Mobilization fee",
+                description: "Initial project mobilization payout",
+                amount: Number((mobilizationPayout === null || mobilizationPayout === void 0 ? void 0 : mobilizationPayout.amount) || budget * 0.3),
+                status: (mobilizationPayout === null || mobilizationPayout === void 0 ? void 0 : mobilizationPayout.status) || "unpaid",
+                paidAt: (mobilizationPayout === null || mobilizationPayout === void 0 ? void 0 : mobilizationPayout.paid_at) || null,
+                hasMilestoneUpdate: false,
+                isUpdateApproved: false,
+            },
+            ...milestoneRows,
+        ],
+    };
+});
+const getProjectOrganizationFundingDetail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { projectId, organizationId } = req.params;
+        const projectIdNum = Number(projectId);
+        const organizationIdNum = Number(organizationId);
+        if (!projectIdNum || !organizationIdNum) {
+            res.status(400).json({ status: "fail", error: "Invalid project or organization ID" });
+            return;
+        }
+        const project = yield (0, config_1.default)("project").where({ id: projectIdNum }).first();
+        if (!project) {
+            res.status(404).json({ status: "fail", error: "Project not found" });
+            return;
+        }
+        const organization = yield (0, config_1.default)("organizations")
+            .leftJoin("users", "organizations.user_id", "users.id")
+            .leftJoin("address", "organizations.user_id", "address.user_id")
+            .where("organizations.id", organizationIdNum)
+            .select("organizations.id", "organizations.name", "organizations.phone", "organizations.website", "organizations.interest_area", "organizations.cac", "organizations.description", "organizations.active", "organizations.is_verified", "organizations.user_id", "users.email", "address.address", "address.state", "address.city")
+            .first();
+        if (!organization) {
+            res.status(404).json({ status: "fail", error: "Organization not found" });
+            return;
+        }
+        const isLinkedToProject = project.multi_ngo
+            ? yield (0, config_1.default)("project_organization")
+                .where({ project_id: projectIdNum, organization_id: organizationIdNum })
+                .first()
+            : Number(project.organization_id) === organizationIdNum;
+        if (!isLinkedToProject) {
+            res.status(404).json({
+                status: "fail",
+                error: "Organization is not selected for this project",
+            });
+            return;
+        }
+        const image = yield getUserImage(organization.user_id);
+        const payoutData = yield buildPayoutRows(project, organizationIdNum);
+        res.status(200).json({
+            status: "success",
+            project: {
+                id: project.id,
+                title: project.title,
+                description: project.description,
+                objectives: project.objectives,
+                category: project.category,
+                cost: project.cost,
+                state: project.state,
+                country: project.country,
+                city: project.city,
+                status: project.status,
+            },
+            organization: Object.assign(Object.assign({}, organization), { image: (image === null || image === void 0 ? void 0 : image.filename) || null }),
+            budget: payoutData.budget,
+            rows: payoutData.rows,
+        });
+    }
+    catch (error) {
+        console.error("Get project organization funding detail error:", error);
+        res.status(500).json({
+            status: "fail",
+            error: "An error occurred while fetching organization funding details",
+            details: error instanceof Error ? error.message : "Unknown error",
+        });
+    }
+});
+exports.getProjectOrganizationFundingDetail = getProjectOrganizationFundingDetail;
+const payProjectOrganizationPayout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const { projectId, organizationId } = req.params;
+        const { type, milestoneId } = req.body;
+        const projectIdNum = Number(projectId);
+        const organizationIdNum = Number(organizationId);
+        const milestoneIdNum = milestoneId ? Number(milestoneId) : null;
+        if (!userId || !projectIdNum || !organizationIdNum) {
+            res.status(400).json({ status: "fail", error: "Invalid payout request" });
+            return;
+        }
+        if (type !== "mobilization" && type !== "milestone") {
+            res.status(400).json({ status: "fail", error: "Invalid payout type" });
+            return;
+        }
+        if (type === "milestone" && !milestoneIdNum) {
+            res.status(400).json({ status: "fail", error: "milestoneId is required" });
+            return;
+        }
+        const project = yield (0, config_1.default)("project").where({ id: projectIdNum }).first();
+        if (!project) {
+            res.status(404).json({ status: "fail", error: "Project not found" });
+            return;
+        }
+        const isLinkedToProject = project.multi_ngo
+            ? yield (0, config_1.default)("project_organization")
+                .where({ project_id: projectIdNum, organization_id: organizationIdNum })
+                .first()
+            : Number(project.organization_id) === organizationIdNum;
+        if (!isLinkedToProject) {
+            res.status(404).json({
+                status: "fail",
+                error: "Organization is not selected for this project",
+            });
+            return;
+        }
+        const payoutData = yield buildPayoutRows(project, organizationIdNum);
+        const row = payoutData.rows.find((item) => {
+            if (type === "mobilization")
+                return item.type === "mobilization";
+            return item.type === "milestone" && Number(item.milestoneId) === milestoneIdNum;
+        });
+        if (!row) {
+            res.status(404).json({ status: "fail", error: "Payout row not found" });
+            return;
+        }
+        if (row.status === "paid") {
+            res.status(409).json({ status: "fail", error: "Payout has already been paid" });
+            return;
+        }
+        const [payoutId] = yield (0, config_1.default)("project_ngo_payout").insert({
+            project_id: projectIdNum,
+            organization_id: organizationIdNum,
+            milestone_id: type === "milestone" ? milestoneIdNum : null,
+            payout_type: type,
+            amount: row.amount,
+            status: "paid",
+            paid_by_user_id: userId,
+            paid_at: new Date(),
+        });
+        yield (0, config_1.default)("donations").insert({
+            project_id: projectIdNum,
+            ngo_id: organizationIdNum,
+            donor_id: project.donor_id,
+            type: type === "mobilization" ? "Mobilization Payout" : "Milestone Payout",
+            amount: row.amount,
+        });
+        res.status(201).json({
+            status: "success",
+            message: "Payout recorded successfully",
+            data: Object.assign(Object.assign({ id: payoutId }, row), { status: "paid", paidAt: new Date() }),
+        });
+    }
+    catch (error) {
+        console.error("Pay project organization payout error:", error);
+        res.status(500).json({
+            status: "fail",
+            error: "An error occurred while recording payout",
+            details: error instanceof Error ? error.message : "Unknown error",
+        });
+    }
+});
+exports.payProjectOrganizationPayout = payProjectOrganizationPayout;
 const deleteMilestoneUpdate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {

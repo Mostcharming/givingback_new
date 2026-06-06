@@ -37,4 +37,6 @@ router.post("/bulk/upload", general_1.uploadbulk, auth_controller_1.bulkUploadNG
 router.post("/milestones", auth_controller_1.createMilestone);
 router.delete("/milestones/:milestoneUpdateId", auth_controller_1.deleteMilestoneUpdate);
 router.get("/projects/:projectId/organizations", auth_controller_1.getProjectOrganizations);
+router.get("/projects/:projectId/organizations/:organizationId/funding", auth_controller_1.getProjectOrganizationFundingDetail);
+router.post("/projects/:projectId/organizations/:organizationId/payouts", auth_controller_1.payProjectOrganizationPayout);
 exports.default = router;

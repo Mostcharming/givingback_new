@@ -20,11 +20,13 @@ import {
   getOne,
   getOrganizationCounts,
   getProjectApplications,
+  getProjectOrganizationFundingDetail,
   getProjectOrganizations,
   login,
   logout,
   onboard,
   publishProjectBrief,
+  payProjectOrganizationPayout,
   resend,
   resetPassword,
   signup,
@@ -71,5 +73,13 @@ router.post("/bulk/upload", uploadbulk, bulkUploadNGOsEndpoint);
 router.post("/milestones", createMilestone);
 router.delete("/milestones/:milestoneUpdateId", deleteMilestoneUpdate);
 router.get("/projects/:projectId/organizations", getProjectOrganizations);
+router.get(
+  "/projects/:projectId/organizations/:organizationId/funding",
+  getProjectOrganizationFundingDetail
+);
+router.post(
+  "/projects/:projectId/organizations/:organizationId/payouts",
+  payProjectOrganizationPayout
+);
 
 export default router;

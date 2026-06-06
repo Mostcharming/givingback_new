@@ -62,7 +62,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       const additionalData = { subject: "Welcome to the GivingBack Family!" };
       await new Email({ email: mail, url, token, additionalData }).sendEmail(
         "otp",
-        "Welcome to the GivingBack Family!"
+        "Welcome to the GivingBack Family!",
       );
     }
 
@@ -75,7 +75,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 
 export const verify = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const otp = Number(req.body.otp);
@@ -242,7 +242,7 @@ export const onboard = async (req: Request, res: Response) => {
             user_id: userId,
           };
           await db("userimg").insert(doc);
-        })
+        }),
       );
     }
 
@@ -267,7 +267,7 @@ export const onboard = async (req: Request, res: Response) => {
 
 export const resend = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const userId = (req.user as User)?.id;
   const user = await db("users").where({ id: userId }).first();
@@ -280,7 +280,7 @@ export const resend = async (
 
     await new Email({ email: userEmail, url, token: newToken }).sendEmail(
       "welcome",
-      "Welcome to the GivingBack Family!"
+      "Welcome to the GivingBack Family!",
     );
     res.status(200).json({ status: "success" });
   } else {
@@ -353,7 +353,7 @@ async function getDonationsCount(userId: number) {
 
 export const getOne = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const id = (req.user as User)?.id;
   let user = await db("organizations")
@@ -376,7 +376,7 @@ export const getOne = async (
         "address",
         "about",
         "image",
-        "additional_information"
+        "additional_information",
       )
       .first();
 
@@ -415,7 +415,7 @@ export const getOne = async (
 
 export const forgotPassword = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { email } = req.body;
   const token = generateOtp(9);
@@ -434,13 +434,13 @@ export const forgotPassword = async (
   const url = `https://givebackng.org/auth/resetPassword/${encodedToken}`;
   await new Email({ email, url, token }).sendEmail(
     "passwordReset",
-    "Your password reset token"
+    "Your password reset token",
   );
 };
 
 export const resetPassword = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { token, newPassword } = req.body;
 
@@ -462,7 +462,7 @@ export const resetPassword = async (
 
 export const deactivate = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   await db("users")
     .update({ active: 0 })
@@ -472,7 +472,7 @@ export const deactivate = async (
 
 export const changePassword = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const { oldPassword, newPassword } = req.body;
 
@@ -518,7 +518,7 @@ export const changePassword = async (
 
 export const updateOne = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const id = (req.user as User)?.id;
   const {
@@ -558,7 +558,7 @@ export const updateOne = async (
             user_id: id,
           };
           await db("userimg").insert(doc);
-        })
+        }),
       );
     }
 
@@ -617,7 +617,7 @@ export const updateOne = async (
           "website",
           "interest_area",
           "cac",
-          "active"
+          "active",
         )
         .first();
 
@@ -714,7 +714,7 @@ export const updateOne = async (
           "address",
           "about",
           "image",
-          "additional_information"
+          "additional_information",
         )
         .first();
 
@@ -745,7 +745,7 @@ export const updateOne = async (
 
 export const getOrganizationCounts = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -802,7 +802,7 @@ export const getOrganizationCounts = async (
 
 export const deleteBank = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const userId = (req.user as User)?.id;
   const { id } = req.params;
@@ -831,7 +831,7 @@ export const deleteBank = async (
 
 export const getAllOrganizations = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { is_verified, donor_id } = req.query;
@@ -850,7 +850,7 @@ export const getAllOrganizations = async (
 
     const organizations = await query.orderBy(
       "organizations.created_at",
-      "asc"
+      "asc",
     );
 
     res.status(200).json({
@@ -879,7 +879,7 @@ function generateRandomPassword(length: number = 12): string {
 
 export const addSingleNGO = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const transaction = await db.transaction();
 
@@ -1135,7 +1135,7 @@ const bulkUploadNGOs = async (fileBuffer: Buffer) => {
 
 export const bulkUploadNGOsEndpoint = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     if (!req.file || !req.file.buffer) {
@@ -1159,7 +1159,7 @@ export const bulkUploadNGOsEndpoint = async (
 
 export const downloadSampleNGOFile = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const workbook = xlsx.utils.book_new();
@@ -1235,11 +1235,11 @@ export const downloadSampleNGOFile = async (
 
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=sample_ngos_bulk.xlsx"
+      "attachment; filename=sample_ngos_bulk.xlsx",
     );
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
     res.send(Buffer.from(buffer));
   } catch (error) {
@@ -1250,7 +1250,7 @@ export const downloadSampleNGOFile = async (
 
 export const getDonorProjectMetrics = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -1317,7 +1317,7 @@ export const getDonorProjectMetrics = async (
 
 export const getDonorProjects = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -1362,7 +1362,7 @@ export const getDonorProjects = async (
         "status",
         "applications",
         "createdAt",
-        "updatedAt"
+        "updatedAt",
       )
       .orderBy("createdAt", "desc");
 
@@ -1376,7 +1376,7 @@ export const getDonorProjects = async (
             .where({ project_id: project.id })
             .select("organization_id");
           organizationIds = projectOrganizations.map(
-            (po: any) => po.organization_id
+            (po: any) => po.organization_id,
           );
         } else if (project.organization_id) {
           organizationIds = [project.organization_id];
@@ -1396,7 +1396,7 @@ export const getDonorProjects = async (
               "cac",
               "active",
               "is_verified",
-              "user_id"
+              "user_id",
             );
 
           organizations = await Promise.all(
@@ -1406,7 +1406,7 @@ export const getDonorProjects = async (
                 ...org,
                 image: image?.filename || null,
               };
-            })
+            }),
           );
         }
 
@@ -1425,7 +1425,7 @@ export const getDonorProjects = async (
           hasMilestones: hasMilestones,
           milestonesCount: milestonesResult?.count || 0,
         };
-      })
+      }),
     );
 
     res.status(200).json({
@@ -1443,7 +1443,7 @@ export const getDonorProjects = async (
 
 export const createProject = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const transaction = await db.transaction();
 
@@ -1583,7 +1583,7 @@ export const createProject = async (
       // selectedAreas is an array of area names like ["Education", "Healthcare"]
       const areas = Array.isArray(selectedAreas)
         ? selectedAreas.map((area: any) =>
-            typeof area === "string" ? area : area.value || area.label
+            typeof area === "string" ? area : area.value || area.label,
           )
         : [];
 
@@ -1605,8 +1605,8 @@ export const createProject = async (
         orgIds = organizations.map((org: any) => org.id);
         console.log(
           `Selected areas: ${areas.join(
-            ", "
-          )} => Found organizations: ${orgIds.join(", ")}`
+            ", ",
+          )} => Found organizations: ${orgIds.join(", ")}`,
         );
       }
       // For select-area, do NOT add to organization profile
@@ -1621,8 +1621,8 @@ export const createProject = async (
       orgIds = organizations.map((org: any) => org.id);
       console.log(
         `Public visibility with category: ${category} => Found organizations: ${orgIds.join(
-          ", "
-        )}`
+          ", ",
+        )}`,
       );
       // For public, do NOT add to organization profile
     }
@@ -1693,7 +1693,7 @@ export const createProject = async (
           },
         }).sendEmail(
           "donorbriefready",
-          "Your Project Brief is Ready for Review"
+          "Your Project Brief is Ready for Review",
         );
       } else if (status === "active") {
         await new Email({
@@ -1741,11 +1741,11 @@ export const createProject = async (
                     },
                   }).sendEmail(
                     "ngoprojectassignment",
-                    "New Project Assignment"
+                    "New Project Assignment",
                   );
 
                   console.log(
-                    `Email sent to NGO: ${organization.name} (${ngoUser.email})`
+                    `Email sent to NGO: ${organization.name} (${ngoUser.email})`,
                   );
                 }
               }
@@ -1753,7 +1753,7 @@ export const createProject = async (
           } catch (ngoEmailError) {
             console.error(
               "Error sending project assignment emails to NGOs:",
-              ngoEmailError
+              ngoEmailError,
             );
           }
         }
@@ -1791,11 +1791,11 @@ export const createProject = async (
                     },
                   }).sendEmail(
                     "ngoprojectnotification",
-                    "New Project Brief Available"
+                    "New Project Brief Available",
                   );
 
                   console.log(
-                    `Notification email sent to NGO: ${organization.name} (${ngoUser.email})`
+                    `Notification email sent to NGO: ${organization.name} (${ngoUser.email})`,
                   );
                 }
               }
@@ -1803,7 +1803,7 @@ export const createProject = async (
           } catch (ngoEmailError) {
             console.error(
               "Error sending project notification emails to NGOs:",
-              ngoEmailError
+              ngoEmailError,
             );
           }
         }
@@ -1848,7 +1848,7 @@ export const createProject = async (
 
 export const publishProjectBrief = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -1949,7 +1949,7 @@ export const publishProjectBrief = async (
     } catch (emailError) {
       console.error(
         "Error sending project publish notification email:",
-        emailError
+        emailError,
       );
     }
 
@@ -1983,7 +1983,7 @@ export const publishProjectBrief = async (
 
 export const editProject = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -2150,7 +2150,7 @@ export const editProject = async (
     } catch (emailError) {
       console.error(
         "Error sending project update notification email:",
-        emailError
+        emailError,
       );
     }
 
@@ -2188,7 +2188,7 @@ export const editProject = async (
 
 export const getProjectApplications = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { projectId } = req.params;
@@ -2235,7 +2235,7 @@ export const getProjectApplications = async (
       .leftJoin(
         "organizations",
         "project_application.ngo_id",
-        "organizations.id"
+        "organizations.id",
       )
       .leftJoin("userimg", "organizations.user_id", "userimg.user_id")
       .leftJoin("address", "organizations.user_id", "address.user_id")
@@ -2261,7 +2261,7 @@ export const getProjectApplications = async (
         "userimg.filename as ngo_image",
         "address.state",
         "address.city_lga",
-        "address.address"
+        "address.address",
       );
 
     const metricsResult: any = await db("project_application")
@@ -2294,7 +2294,7 @@ export const getProjectApplications = async (
 
     const applications = await query.orderBy(
       "project_application.createdAt",
-      "desc"
+      "desc",
     );
 
     const enrichedApplications = await Promise.all(
@@ -2315,7 +2315,9 @@ export const getProjectApplications = async (
         const completionPercentage =
           totalProjectsCount > 0
             ? parseFloat(
-                ((completedProjectsCount / totalProjectsCount) * 100).toFixed(2)
+                ((completedProjectsCount / totalProjectsCount) * 100).toFixed(
+                  2,
+                ),
               )
             : 0;
 
@@ -2361,7 +2363,7 @@ export const getProjectApplications = async (
             },
           },
         };
-      })
+      }),
     );
 
     res.status(200).json({
@@ -2384,7 +2386,7 @@ export const getProjectApplications = async (
 
 export const updateProjectApplicationStatus = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { projectId, applicationId } = req.params;
@@ -2412,7 +2414,7 @@ export const updateProjectApplicationStatus = async (
       res.status(400).json({
         status: "fail",
         error: `Invalid status. Status must be one of: ${validStatuses.join(
-          ", "
+          ", ",
         )}`,
       });
       return;
@@ -2515,18 +2517,18 @@ export const updateProjectApplicationStatus = async (
               },
             }).sendEmail(
               "ngoapplicationaccepted",
-              "Your Application Has Been Accepted"
+              "Your Application Has Been Accepted",
             );
 
             console.log(
-              `Acceptance email sent to NGO: ${organization.name} (${ngoUser.email})`
+              `Acceptance email sent to NGO: ${organization.name} (${ngoUser.email})`,
             );
           }
         }
       } catch (ngoEmailError) {
         console.error(
           "Error sending application acceptance email to NGO:",
-          ngoEmailError
+          ngoEmailError,
         );
       }
     }
@@ -2536,7 +2538,7 @@ export const updateProjectApplicationStatus = async (
       .leftJoin(
         "organizations",
         "project_application.ngo_id",
-        "organizations.id"
+        "organizations.id",
       )
       .leftJoin("userimg", "organizations.user_id", "userimg.user_id")
       .select(
@@ -2555,7 +2557,7 @@ export const updateProjectApplicationStatus = async (
         "organizations.phone",
         "organizations.website",
         "organizations.user_id",
-        "userimg.filename as ngo_image"
+        "userimg.filename as ngo_image",
       )
       .first();
 
@@ -2576,7 +2578,7 @@ export const updateProjectApplicationStatus = async (
 
 export const createMilestone = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const {
@@ -2645,7 +2647,7 @@ export const createMilestone = async (
 async function fetchOrganizationsWithDetails(
   organizationIds: number[],
   project: any,
-  projectId: number
+  projectId: number,
 ) {
   if (!organizationIds.length) return [];
 
@@ -2660,7 +2662,7 @@ async function fetchOrganizationsWithDetails(
       "cac",
       "active",
       "is_verified",
-      "user_id"
+      "user_id",
     );
 
   return Promise.all(
@@ -2686,13 +2688,13 @@ async function fetchOrganizationsWithDetails(
         allocated,
         ...(project.multi_ngo ? { budget } : {}),
       };
-    })
+    }),
   );
 }
 
 export const getProjectOrganizations = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { projectId } = req.params;
@@ -2732,7 +2734,7 @@ export const getProjectOrganizations = async (
     const organizations = await fetchOrganizationsWithDetails(
       organizationIds,
       project,
-      idNum
+      idNum,
     );
 
     res.status(200).json({
@@ -2755,9 +2757,314 @@ export const getProjectOrganizations = async (
   }
 };
 
+const getProjectNgoBudget = (project: any, projectOrganization: any) => {
+  const ngoBudget = Number(projectOrganization?.budget || 0);
+  if (ngoBudget > 0) return ngoBudget;
+
+  const allocated = Number(
+    projectOrganization?.allocated || project.allocated || 0,
+  );
+  if (allocated > 0) return allocated;
+
+  return Number(project.cost || 0);
+};
+
+const buildPayoutRows = async (project: any, organizationId: number) => {
+  const projectOrganization = await db("project_organization")
+    .where({ project_id: project.id, organization_id: organizationId })
+    .first();
+
+  const budget = getProjectNgoBudget(project, projectOrganization);
+  const milestones = await db("milestone")
+    .where({ project_id: project.id })
+    .select(
+      "id",
+      "milestone",
+      "target",
+      "description",
+      "status",
+      "due_date",
+      "createdAt",
+    )
+    .orderBy("createdAt", "asc");
+
+  const payouts = await db("project_ngo_payout")
+    .where({ project_id: project.id, organization_id: organizationId })
+    .select("id", "payout_type", "milestone_id", "amount", "status", "paid_at");
+
+  const mobilizationPayout = payouts.find(
+    (payout: any) => payout.payout_type === "mobilization",
+  );
+
+  const milestoneAmount =
+    milestones.length > 0 ? (budget * 0.7) / milestones.length : 0;
+
+  const milestoneRows = await Promise.all(
+    milestones.map(async (milestone: any) => {
+      const updates = await db("milestone_update")
+        .where({
+          milestone_id: milestone.id,
+          organization_id: organizationId,
+        })
+        .select("id", "status");
+
+      const payout = payouts.find(
+        (item: any) =>
+          item.payout_type === "milestone" &&
+          Number(item.milestone_id) === Number(milestone.id),
+      );
+
+      return {
+        type: "milestone",
+        milestoneId: milestone.id,
+        title: milestone.milestone,
+        description: milestone.description,
+        amount: Number(payout?.amount || milestoneAmount),
+        status: payout?.status || "unpaid",
+        paidAt: payout?.paid_at || null,
+        hasMilestoneUpdate: updates.length > 0,
+        isUpdateApproved: updates.some(
+          (update: any) =>
+            String(update.status || "").toLowerCase() === "approved",
+        ),
+      };
+    }),
+  );
+
+  return {
+    budget,
+    rows: [
+      {
+        type: "mobilization",
+        milestoneId: null,
+        title: "30% Mobilization fee",
+        description: "Initial project mobilization payout",
+        amount: Number(mobilizationPayout?.amount || budget * 0.3),
+        status: mobilizationPayout?.status || "unpaid",
+        paidAt: mobilizationPayout?.paid_at || null,
+        hasMilestoneUpdate: false,
+        isUpdateApproved: false,
+      },
+      ...milestoneRows,
+    ],
+  };
+};
+
+export const getProjectOrganizationFundingDetail = async (
+  req: UserRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { projectId, organizationId } = req.params;
+    const projectIdNum = Number(projectId);
+    const organizationIdNum = Number(organizationId);
+
+    if (!projectIdNum || !organizationIdNum) {
+      res
+        .status(400)
+        .json({ status: "fail", error: "Invalid project or organization ID" });
+      return;
+    }
+
+    const project = await db("project").where({ id: projectIdNum }).first();
+    if (!project) {
+      res.status(404).json({ status: "fail", error: "Project not found" });
+      return;
+    }
+
+    const organization = await db("organizations")
+      .leftJoin("users", "organizations.user_id", "users.id")
+      .leftJoin("address", "organizations.user_id", "address.user_id")
+      .where("organizations.id", organizationIdNum)
+      .select(
+        "organizations.id",
+        "organizations.name",
+        "organizations.phone",
+        "organizations.website",
+        "organizations.interest_area",
+        "organizations.cac",
+        "organizations.description",
+        "organizations.active",
+        "organizations.is_verified",
+        "organizations.user_id",
+        "users.email",
+        "address.address",
+        "address.state",
+        "address.city_lga",
+      )
+      .first();
+
+    if (!organization) {
+      res.status(404).json({ status: "fail", error: "Organization not found" });
+      return;
+    }
+
+    const isLinkedToProject = project.multi_ngo
+      ? await db("project_organization")
+          .where({
+            project_id: projectIdNum,
+            organization_id: organizationIdNum,
+          })
+          .first()
+      : Number(project.organization_id) === organizationIdNum;
+
+    if (!isLinkedToProject) {
+      res.status(404).json({
+        status: "fail",
+        error: "Organization is not selected for this project",
+      });
+      return;
+    }
+
+    const image = await getUserImage(organization.user_id);
+    const payoutData = await buildPayoutRows(project, organizationIdNum);
+
+    res.status(200).json({
+      status: "success",
+      project: {
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        objectives: project.objectives,
+        category: project.category,
+        cost: project.cost,
+        state: project.state,
+        country: project.country,
+        city: project.city,
+        status: project.status,
+      },
+      organization: {
+        ...organization,
+        image: image?.filename || null,
+      },
+      budget: payoutData.budget,
+      rows: payoutData.rows,
+    });
+  } catch (error: any) {
+    console.error("Get project organization funding detail error:", error);
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while fetching organization funding details",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+export const payProjectOrganizationPayout = async (
+  req: UserRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const userId = (req.user as User)?.id;
+    const { projectId, organizationId } = req.params;
+    const { type, milestoneId } = req.body;
+    const projectIdNum = Number(projectId);
+    const organizationIdNum = Number(organizationId);
+    const milestoneIdNum = milestoneId ? Number(milestoneId) : null;
+
+    if (!userId || !projectIdNum || !organizationIdNum) {
+      res.status(400).json({ status: "fail", error: "Invalid payout request" });
+      return;
+    }
+
+    if (type !== "mobilization" && type !== "milestone") {
+      res.status(400).json({ status: "fail", error: "Invalid payout type" });
+      return;
+    }
+
+    if (type === "milestone" && !milestoneIdNum) {
+      res
+        .status(400)
+        .json({ status: "fail", error: "milestoneId is required" });
+      return;
+    }
+
+    const project = await db("project").where({ id: projectIdNum }).first();
+    if (!project) {
+      res.status(404).json({ status: "fail", error: "Project not found" });
+      return;
+    }
+
+    const isLinkedToProject = project.multi_ngo
+      ? await db("project_organization")
+          .where({
+            project_id: projectIdNum,
+            organization_id: organizationIdNum,
+          })
+          .first()
+      : Number(project.organization_id) === organizationIdNum;
+
+    if (!isLinkedToProject) {
+      res.status(404).json({
+        status: "fail",
+        error: "Organization is not selected for this project",
+      });
+      return;
+    }
+
+    const payoutData = await buildPayoutRows(project, organizationIdNum);
+    const row = payoutData.rows.find((item: any) => {
+      if (type === "mobilization") return item.type === "mobilization";
+      return (
+        item.type === "milestone" && Number(item.milestoneId) === milestoneIdNum
+      );
+    });
+
+    if (!row) {
+      res.status(404).json({ status: "fail", error: "Payout row not found" });
+      return;
+    }
+
+    if (row.status === "paid") {
+      res
+        .status(409)
+        .json({ status: "fail", error: "Payout has already been paid" });
+      return;
+    }
+
+    const [payoutId] = await db("project_ngo_payout").insert({
+      project_id: projectIdNum,
+      organization_id: organizationIdNum,
+      milestone_id: type === "milestone" ? milestoneIdNum : null,
+      payout_type: type,
+      amount: row.amount,
+      status: "paid",
+      paid_by_user_id: userId,
+      paid_at: new Date(),
+    });
+
+    await db("donations").insert({
+      project_id: projectIdNum,
+      ngo_id: organizationIdNum,
+      donor_id: project.donor_id,
+      type:
+        type === "mobilization" ? "Mobilization Payout" : "Milestone Payout",
+      amount: row.amount,
+    });
+
+    res.status(201).json({
+      status: "success",
+      message: "Payout recorded successfully",
+      data: {
+        id: payoutId,
+        ...row,
+        status: "paid",
+        paidAt: new Date(),
+      },
+    });
+  } catch (error: any) {
+    console.error("Pay project organization payout error:", error);
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while recording payout",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
 export const deleteMilestoneUpdate = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { milestoneUpdateId } = req.params;
@@ -2850,7 +3157,7 @@ export const deleteMilestoneUpdate = async (
 
 export const submitProposal = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
@@ -2938,7 +3245,7 @@ export const submitProposal = async (
     };
 
     const [applicationId] = await db("project_application").insert(
-      applicationData
+      applicationData,
     );
 
     // Fetch the created application with related data
@@ -2956,7 +3263,7 @@ export const submitProposal = async (
         "file_url",
         "status",
         "createdAt",
-        "updatedAt"
+        "updatedAt",
       )
       .first();
 
@@ -2977,7 +3284,7 @@ export const submitProposal = async (
 
 export const checkApplicationStatus = async (
   req: UserRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;

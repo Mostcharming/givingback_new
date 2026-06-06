@@ -241,6 +241,11 @@ const routes = [
     component: <FundingDetail />,
     layout: "/donor",
   },
+  {
+    path: "/funding/:id/organizations/:organizationId",
+    component: <FundingDetail />,
+    layout: "/donor",
+  },
 
   //NGOs
   {
