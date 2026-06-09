@@ -231,16 +231,19 @@ export const searchDonor = async (
     const userRole = (req.user as User)?.role;
     const { email } = req.body;
 
-    if (!userId || !userRole) {
+    if (
+      !userId
+      // || !userRole
+    ) {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
 
     // Only NGOs can search for donors
-    if (userRole !== "ngo") {
-      res.status(403).json({ error: "Only NGOs can search for donors" });
-      return;
-    }
+    // if (userRole !== "ngo") {
+    //   res.status(403).json({ error: "Only NGOs can search for donors" });
+    //   return;
+    // }
 
     if (!email || typeof email !== "string") {
       res.status(400).json({ error: "Email is required" });
@@ -250,8 +253,8 @@ export const searchDonor = async (
     // Search for donor by email
     const donor = await db("users")
       .where("email", email.toLowerCase().trim())
-      .where("role", "donor")
-      .select("id", "email", "name", "role")
+      .whereIn("role", ["donor", "corporate"])
+      .select("id", "email", "role")
       .first();
 
     if (!donor) {

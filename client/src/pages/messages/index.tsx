@@ -2,6 +2,7 @@
 import { MessageCircle, Search, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Image } from "react-bootstrap";
+import { toast } from "react-toastify";
 import {
   FormGroup,
   Input,
@@ -74,6 +75,15 @@ const getUserTypeDisplay = (userType?: string | null) => {
 const capitalizeFirstLetter = (value?: string | null) => {
   if (!value) return value;
   return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
+const getBackendErrorMessage = (error: any, fallback: string) => {
+  return (
+    error?.response?.data?.message ||
+    error?.response?.data?.error ||
+    error?.message ||
+    fallback
+  );
 };
 
 const getDateSeparator = (
@@ -238,7 +248,10 @@ function MessageDonor() {
             .mutateAsync({})
             .then((result) => setChats(result.chats || []))
             .catch((error) =>
-              console.error("Failed to refresh chats after realtime event:", error),
+              console.error(
+                "Failed to refresh chats after realtime event:",
+                error,
+              ),
             );
         }
 
@@ -372,6 +385,7 @@ function MessageDonor() {
       }
     } catch (error) {
       console.error("Failed to search donor:", error);
+      toast.error(getBackendErrorMessage(error, "Failed to search donor"));
       setSearchValidation("invalid");
       setSearchedDonor(null);
     }
@@ -444,7 +458,7 @@ function MessageDonor() {
               Messages
             </h1>
             <p className="small mb-0" style={{ color: "#888888" }}>
-              Communicate with NGOs and GivingBack admin team.
+              Communicate with NGOs, Donors and GivingBack admin team.
             </p>
           </div>
 
@@ -675,8 +689,10 @@ function MessageDonor() {
                         style={{ color: "#000000" }}
                       >
                         {chat.otherParticipant?.userType === "admin"
-                        ? "GivingBack Admin"
-                        : capitalizeFirstLetter(chat.otherParticipant?.email) || "Unknown"}
+                          ? "GivingBack Admin"
+                          : capitalizeFirstLetter(
+                              chat.otherParticipant?.email,
+                            ) || "Unknown"}
                       </span>
                     </div>
                     <p className="mb-0 small" style={{ color: "#888888" }}>
