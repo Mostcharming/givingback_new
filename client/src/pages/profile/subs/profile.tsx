@@ -34,6 +34,7 @@ export default function ProfileUpdateForm() {
   const dispatch = useDispatch();
   const role = authState.user?.role;
   const isNGO = role === "NGO";
+  const isDonorOrCorporate = role === "donor" || role === "corporate";
   const [showProfileInfoModal, setShowProfileInfoModal] = useState(true);
 
   const [areas, setAreas] = useState([]);
@@ -189,7 +190,7 @@ export default function ProfileUpdateForm() {
   return (
     <Container className="py-3" style={{ width: "80vw" }}>
       <Modal
-        isOpen={showProfileInfoModal}
+        isOpen={Boolean(role) && showProfileInfoModal && !isDonorOrCorporate}
         toggle={() => setShowProfileInfoModal(false)}
         centered
       >
