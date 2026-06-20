@@ -393,17 +393,44 @@ function MessageDonor() {
 
   const handleStartChatWithDonor = async () => {
     if (!searchedDonor) return;
+    // If a chat already exists with this userId (don't care donor vs corporate), reuse it
+    const existingChat = chats.find((chat) => {
+      const otherId = chat.otherParticipant?.userId;
+      if (otherId !== undefined && otherId !== null) {
+        return String(otherId) === String(searchedDonor.id);
+      }
+
+      // Fallback: match by email when userId is not available
+      const otherEmail = chat.otherParticipant?.email;
+      if (otherEmail && searchedDonor.email) {
+        return String(otherEmail).toLowerCase() === String(searchedDonor.email).toLowerCase();
+      }
+
+      return false;
+    });
+
+    if (existingChat) {
+      setSelectedChat(existingChat);
+      setSearchText("");
+      setSearchValidation(null);
+      setSearchedDonor(null);
+      return;
+    }
 
     try {
+      // Treat `corporate` the same as `donor` when creating chats
+      const normalizedType =
+        searchedDonor.userType === "corporate" ? "donor" : searchedDonor.userType || "donor";
+
       const result = await createChatAPI.mutateAsync({
         otherParticipant: {
           userId: searchedDonor.id,
-          userType: "donor",
+          userType: normalizedType,
         },
       });
 
       // Add the new chat to the list
-      setChats([...chats, result.chat]);
+      setChats((prev) => [...prev, result.chat]);
       setSelectedChat(result.chat);
       setSearchText("");
       setSearchValidation(null);

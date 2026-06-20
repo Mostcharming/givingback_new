@@ -142,28 +142,37 @@ export const getOrCreateChat = async (
       return;
     }
 
+    // Normalize user types: treat `corporate` as `donor`
+    const normalizedUserRole = userRole === "corporate" ? "donor" : userRole;
+    const normalizedOtherUserType =
+      finalOtherUserType === "corporate" ? "donor" : finalOtherUserType;
+
     // Determine participant order - admin is always participant2 with potentially null ID
     let participant1Id, participant1Type, participant2Id, participant2Type;
 
-    if (finalOtherUserType === "admin") {
+    if (normalizedOtherUserType === "admin") {
       // Admin is always participant2 with potentially null ID
       participant1Id = userId;
-      participant1Type = userRole;
+      participant1Type = normalizedUserRole;
       participant2Id = null;
-      participant2Type = finalOtherUserType;
+      participant2Type = normalizedOtherUserType;
     } else {
       // Regular ordering for non-admin participants
-      const shouldSwap = userId < finalOtherUserId;
+      // Ensure numeric comparison and normalize types so ordering is consistent
+      const leftId = Number(userId);
+      const rightId = Number(finalOtherUserId);
+      const shouldSwap = leftId < rightId;
+
       if (shouldSwap) {
         participant1Id = userId;
-        participant1Type = userRole;
+        participant1Type = normalizedUserRole;
         participant2Id = finalOtherUserId;
-        participant2Type = finalOtherUserType;
+        participant2Type = normalizedOtherUserType;
       } else {
         participant1Id = finalOtherUserId;
-        participant1Type = finalOtherUserType;
+        participant1Type = normalizedOtherUserType;
         participant2Id = userId;
-        participant2Type = userRole;
+        participant2Type = normalizedUserRole;
       }
     }
 

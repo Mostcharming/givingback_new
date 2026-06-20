@@ -1,98 +1,102 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { ActionCard, MobilePage, RoutePill, SectionHeader, StatCard } from '@/components/mobile';
+import { donorRoutes, ngoRoutes } from '@/constants/mobile-routes';
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <MobilePage>
+      <SafeAreaView edges={['top']} style={styles.safeArea}>
+        <View style={styles.hero}>
+          <View style={styles.logoMark}>
+            <Ionicons color="#FFFFFF" name="heart" size={24} />
+          </View>
+          <Text style={styles.eyebrow}>GivingBackNG Mobile</Text>
+          <Text style={styles.title}>Manage impact work from the field.</Text>
+          <Text style={styles.subtitle}>
+            A mobile workspace for NGOs, donors, and corporate sponsors to track projects, funds,
+            briefs, reports, and conversations.
+          </Text>
+        </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <View style={styles.statsGrid}>
+          <StatCard label="NGO tools" value={ngoRoutes.length.toString()} />
+          <StatCard label="Donor tools" value={donorRoutes.length.toString()} />
+        </View>
+
+        <SectionHeader title="Role Workspaces" subtitle="Start with the route groups from web." />
+        <View style={styles.roleGrid}>
+          <ActionCard
+            description="Projects, briefs, funds, messages, profile, and past project updates."
+            icon="business-outline"
+            title="NGO"
+          />
+          <ActionCard
+            description="NGO discovery, briefs/projects, disbursement, reports, and settings."
+            icon="briefcase-outline"
+            title="Donor / Corporate"
+          />
+        </View>
+
+        <SectionHeader title="Core Mobile Pages" subtitle="First screens to build out with data." />
+        <View style={styles.pillList}>
+          {[...ngoRoutes.slice(0, 4), ...donorRoutes.slice(0, 4)].map((route) => (
+            <RoutePill key={`${route.role}-${route.name}`} icon={route.icon} label={route.name} />
+          ))}
+        </View>
+      </SafeAreaView>
+    </MobilePage>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  safeArea: {
+    gap: 20,
+    paddingBottom: 28,
+  },
+  hero: {
+    backgroundColor: '#0F3D2E',
+    borderRadius: 8,
+    gap: 10,
+    padding: 22,
+  },
+  logoMark: {
     alignItems: 'center',
-    gap: 8,
+    backgroundColor: '#1AA36F',
+    borderRadius: 8,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  eyebrow: {
+    color: '#BCEBD7',
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  title: {
+    color: '#FFFFFF',
+    fontSize: 30,
+    fontWeight: '800',
+    lineHeight: 36,
+  },
+  subtitle: {
+    color: '#D8F3E8',
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  roleGrid: {
+    gap: 12,
+  },
+  pillList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
   },
 });
