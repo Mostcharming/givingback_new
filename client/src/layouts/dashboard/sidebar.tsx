@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, NavLink as NavLinkRRD, useNavigate } from "react-router-dom";
 import {
@@ -30,6 +30,8 @@ import { useContent } from "../../services/useContext";
 import { logout_auth } from "../../store/reducers/authReducer";
 import { RootState } from "../../types";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+
 interface SidebarRoute {
   layout: string;
   path: string;
@@ -37,11 +39,28 @@ interface SidebarRoute {
   name: string;
 }
 
+interface ChatSummary {
+  id: string | number;
+  unreadCount?: number;
+}
+
+type ChatEvent =
+  | { type: "connected" }
+  | {
+      type: "message";
+      chatId: string | number;
+      message: {
+        senderUserId?: string | number;
+        sender_user_id?: string | number;
+      };
+    };
+
 const Sidebar: React.FC<any> = (props) => {
-  const { currentState } = useContent();
+  const { currentState, authState } = useContent();
   const { currentSidebarLink } = useOnboarding();
   const [collapseOpen, setCollapseOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
   const navigate = useNavigate();
   const dispatch: ThunkDispatch<RootState, unknown, any> = useDispatch();
@@ -53,6 +72,75 @@ const Sidebar: React.FC<any> = (props) => {
     },
     onError: () => {},
   });
+
+  const { mutateAsync: fetchChats } = useBackendService<
+    { chats: ChatSummary[] },
+    any
+  >("/chats", "GET");
+
+  useEffect(() => {
+    const loadUnreadMessagesCount = async () => {
+      if (!authState.user?.id) return;
+
+      try {
+        const result = await fetchChats({});
+        const totalUnread = (result.chats || []).reduce(
+          (total, chat) => total + Number(chat.unreadCount || 0),
+          0,
+        );
+        setUnreadMessagesCount(totalUnread);
+      } catch (error) {
+        console.error("Failed to fetch unread messages count:", error);
+      }
+    };
+
+    loadUnreadMessagesCount();
+    window.addEventListener(
+      "chat-unread-count-refresh",
+      loadUnreadMessagesCount,
+    );
+
+    if (!authState.user?.id || !authState.token) {
+      return () => {
+        window.removeEventListener(
+          "chat-unread-count-refresh",
+          loadUnreadMessagesCount,
+        );
+      };
+    }
+
+    const events = new EventSource(
+      `${API_BASE_URL}/chats/events/stream?token=${encodeURIComponent(authState.token)}`,
+    );
+
+    events.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data) as ChatEvent;
+        if (payload.type !== "message") return;
+
+        const senderId =
+          payload.message.senderUserId ?? payload.message.sender_user_id;
+        if (String(senderId) === String(authState.user?.id)) return;
+
+        setUnreadMessagesCount((count) => count + 1);
+      } catch (error) {
+        console.error("Failed to process unread chat event:", error);
+      }
+    };
+
+    events.onerror = (error) => {
+      console.error("Unread chat realtime connection failed:", error);
+    };
+
+    return () => {
+      events.close();
+      window.removeEventListener(
+        "chat-unread-count-refresh",
+        loadUnreadMessagesCount,
+      );
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authState.token, authState.user?.id]);
 
   // const activeRoute = (routeName: string) => {
   //   return props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
@@ -77,6 +165,9 @@ const Sidebar: React.FC<any> = (props) => {
         const routeId = prop.path.split("/")[1]; // Gets the first segment of the path
         const isHighlighted = currentSidebarLink === routeId;
 
+        const isMessagesRoute = prop.path.includes("/messages");
+        const badgeColor = unreadMessagesCount > 0 ? "#dc2626" : "#94a3b8";
+
         return (
           <NavItem
             key={key}
@@ -99,15 +190,41 @@ const Sidebar: React.FC<any> = (props) => {
               }}
             >
               {prop.icon}
-              <h6
-                className="pl-2"
-                style={{
-                  color: isHighlighted ? "#128330" : "inherit",
-                  fontWeight: isHighlighted ? 600 : 400,
-                }}
+              <div
+                className="d-flex align-items-center justify-content-between pl-2"
+                style={{ flex: 1, minWidth: 0 }}
               >
-                {prop.name}
-              </h6>
+                <h6
+                  className="mb-0"
+                  style={{
+                    color: isHighlighted ? "#128330" : "inherit",
+                    fontWeight: isHighlighted ? 600 : 400,
+                  }}
+                >
+                  {prop.name}
+                </h6>
+                {isMessagesRoute && (
+                  <span
+                    aria-label={`${unreadMessagesCount} unread messages`}
+                    style={{
+                      alignItems: "center",
+                      backgroundColor: badgeColor,
+                      borderRadius: "999px",
+                      color: "white",
+                      display: "inline-flex",
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      justifyContent: "center",
+                      lineHeight: 1,
+                      marginLeft: "0.5rem",
+                      minWidth: "1.45rem",
+                      padding: "0.25rem 0.45rem",
+                    }}
+                  >
+                    {unreadMessagesCount}
+                  </span>
+                )}
+              </div>
             </NavLink>
           </NavItem>
         );

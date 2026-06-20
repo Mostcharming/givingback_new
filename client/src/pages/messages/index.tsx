@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import axios from "axios";
 import { MessageCircle, Search, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Image } from "react-bootstrap";
@@ -178,6 +179,19 @@ function MessageDonor() {
     return String(message.senderUserId) === currentUserId;
   };
 
+  const markChatAsRead = async (chatId: string | number) => {
+    await axios.put(
+      `${API_BASE_URL}/chats/${chatId}/mark-as-read`,
+      {},
+      {
+        headers: {
+          Authorization: authState.token ? `Bearer ${authState.token}` : undefined,
+        },
+      },
+    );
+    window.dispatchEvent(new Event("chat-unread-count-refresh"));
+  };
+
   useEffect(() => {
     selectedChatIdRef.current =
       selectedChat?.id !== undefined && selectedChat?.id !== null
@@ -225,6 +239,33 @@ function MessageDonor() {
   }, [selectedChat?.id]);
 
   useEffect(() => {
+    if (!selectedChat?.id || selectedChat.unreadCount <= 0) return;
+
+    const markSelectedChatAsRead = async () => {
+      try {
+        await markChatAsRead(selectedChat.id);
+        setChats((currentChats) =>
+          currentChats.map((chat) =>
+            String(chat.id) === String(selectedChat.id)
+              ? { ...chat, unreadCount: 0 }
+              : chat,
+          ),
+        );
+        setSelectedChat((currentChat) =>
+          currentChat && String(currentChat.id) === String(selectedChat.id)
+            ? { ...currentChat, unreadCount: 0 }
+            : currentChat,
+        );
+      } catch (error) {
+        console.error("Failed to mark chat as read:", error);
+      }
+    };
+
+    markSelectedChatAsRead();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedChat?.id, selectedChat?.unreadCount]);
+
+  useEffect(() => {
     if (!authState.user?.id || !authState.token) return;
 
     const events = new EventSource(
@@ -263,7 +304,7 @@ function MessageDonor() {
               ...chat,
               unreadCount:
                 selectedChatIdRef.current === incomingChatId
-                  ? chat.unreadCount
+                  ? 0
                   : chat.unreadCount + 1,
               lastMessage: incomingMessage.message,
               updatedAt: incomingMessage.createdAt,
@@ -272,6 +313,11 @@ function MessageDonor() {
         );
 
         if (selectedChatIdRef.current !== incomingChatId) return;
+
+        markChatAsRead(incomingChatId)
+          .catch((error) =>
+            console.error("Failed to mark realtime message as read:", error),
+          );
 
         setMessages((currentMessages) => {
           const exists = currentMessages.some(
@@ -325,7 +371,7 @@ function MessageDonor() {
   };
 
   const handleChatClick = async (chat: Chat) => {
-    setSelectedChat(chat);
+    setSelectedChat({ ...chat, unreadCount: 0 });
   };
 
   const handleSendMessage = async () => {
