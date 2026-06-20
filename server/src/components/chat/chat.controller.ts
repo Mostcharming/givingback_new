@@ -3,6 +3,39 @@ import db from "../../config";
 import { User, UserRequest } from "../../interfaces";
 import { addChatRealtimeClient, emitChatMessage } from "./chat.realtime";
 
+const normalizeChatUserType = (userType?: string | null): string | null => {
+  if (!userType) {
+    return null;
+  }
+
+  const normalized = userType.toLowerCase();
+  return normalized === "corporate" ? "donor" : normalized;
+};
+
+const getExistingChatBetweenUsers = async (
+  firstUserId: number | string | null,
+  secondUserId: number | string | null,
+) => {
+  if (!firstUserId || !secondUserId) {
+    return null;
+  }
+
+  return db("chat")
+    .where((builder) => {
+      builder
+        .where({
+          participant1_user_id: firstUserId,
+          participant2_user_id: secondUserId,
+        })
+        .orWhere({
+          participant1_user_id: secondUserId,
+          participant2_user_id: firstUserId,
+        });
+    })
+    .orderBy("id", "asc")
+    .first();
+};
+
 export const getChats = async (
   req: UserRequest,
   res: Response,
@@ -74,7 +107,7 @@ export const getChats = async (
           id: chat.id,
           otherParticipant: {
             userId: otherParticipantId,
-            userType: otherParticipantType,
+            userType: normalizeChatUserType(otherParticipantType),
             email: otherParticipant?.email,
           },
           unreadCount,
@@ -142,10 +175,13 @@ export const getOrCreateChat = async (
       return;
     }
 
-    // Normalize user types: treat `corporate` as `donor`
-    const normalizedUserRole = userRole === "corporate" ? "donor" : userRole;
-    const normalizedOtherUserType =
-      finalOtherUserType === "corporate" ? "donor" : finalOtherUserType;
+    const normalizedUserRole = normalizeChatUserType(userRole);
+    const normalizedOtherUserType = normalizeChatUserType(finalOtherUserType);
+
+    if (!normalizedUserRole || !normalizedOtherUserType) {
+      res.status(400).json({ error: "Invalid chat participant type" });
+      return;
+    }
 
     // Determine participant order - admin is always participant2 with potentially null ID
     let participant1Id, participant1Type, participant2Id, participant2Type;
@@ -176,12 +212,15 @@ export const getOrCreateChat = async (
       }
     }
 
-    let chat = await db("chat")
-      .where({
-        participant1_user_id: participant1Id,
-        participant2_user_id: participant2Id,
-      })
-      .first();
+    let chat =
+      normalizedOtherUserType === "admin"
+        ? await db("chat")
+            .where({
+              participant1_user_id: participant1Id,
+              participant2_user_type: participant2Type,
+            })
+            .first()
+        : await getExistingChatBetweenUsers(participant1Id, participant2Id);
 
     if (!chat) {
       const [chatId] = await db("chat").insert({
@@ -211,7 +250,7 @@ export const getOrCreateChat = async (
         id: chat.id,
         otherParticipant: {
           userId: otherParticipantId,
-          userType: otherParticipantType,
+          userType: normalizeChatUserType(otherParticipantType),
         },
         unreadCount: isParticipant1
           ? chat.participant1_unread_count
@@ -263,7 +302,7 @@ export const searchDonor = async (
     const donor = await db("users")
       .where("email", email.toLowerCase().trim())
       .whereIn("role", ["donor", "corporate"])
-      .select("id", "email", "role")
+      .select("id", "email", "name", "role")
       .first();
 
     if (!donor) {
@@ -278,6 +317,7 @@ export const searchDonor = async (
         email: donor.email,
         name: donor.name,
         role: donor.role,
+        userType: normalizeChatUserType(donor.role),
       },
     });
   } catch (error) {
@@ -393,7 +433,7 @@ export const sendMessage = async (
     const [messageId] = await db("chat_message").insert({
       chat_id: chatId,
       sender_user_id: userId,
-      sender_user_type: userRole,
+      sender_user_type: normalizeChatUserType(userRole),
       message: message.trim(),
       attachments: attachmentsData,
       status: "sent",

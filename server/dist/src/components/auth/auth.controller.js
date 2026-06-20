@@ -2254,7 +2254,9 @@ const getProjectOrganizationFundingDetail = (req, res) => __awaiter(void 0, void
         const projectIdNum = Number(projectId);
         const organizationIdNum = Number(organizationId);
         if (!projectIdNum || !organizationIdNum) {
-            res.status(400).json({ status: "fail", error: "Invalid project or organization ID" });
+            res
+                .status(400)
+                .json({ status: "fail", error: "Invalid project or organization ID" });
             return;
         }
         const project = yield (0, config_1.default)("project").where({ id: projectIdNum }).first();
@@ -2266,7 +2268,7 @@ const getProjectOrganizationFundingDetail = (req, res) => __awaiter(void 0, void
             .leftJoin("users", "organizations.user_id", "users.id")
             .leftJoin("address", "organizations.user_id", "address.user_id")
             .where("organizations.id", organizationIdNum)
-            .select("organizations.id", "organizations.name", "organizations.phone", "organizations.website", "organizations.interest_area", "organizations.cac", "organizations.description", "organizations.active", "organizations.is_verified", "organizations.user_id", "users.email", "address.address", "address.state", "address.city")
+            .select("organizations.id", "organizations.name", "organizations.phone", "organizations.website", "organizations.interest_area", "organizations.cac", "organizations.description", "organizations.active", "organizations.is_verified", "organizations.user_id", "users.email", "address.address", "address.state", "address.city_lga")
             .first();
         if (!organization) {
             res.status(404).json({ status: "fail", error: "Organization not found" });
@@ -2274,7 +2276,10 @@ const getProjectOrganizationFundingDetail = (req, res) => __awaiter(void 0, void
         }
         const isLinkedToProject = project.multi_ngo
             ? yield (0, config_1.default)("project_organization")
-                .where({ project_id: projectIdNum, organization_id: organizationIdNum })
+                .where({
+                project_id: projectIdNum,
+                organization_id: organizationIdNum,
+            })
                 .first()
             : Number(project.organization_id) === organizationIdNum;
         if (!isLinkedToProject) {
@@ -2333,7 +2338,9 @@ const payProjectOrganizationPayout = (req, res) => __awaiter(void 0, void 0, voi
             return;
         }
         if (type === "milestone" && !milestoneIdNum) {
-            res.status(400).json({ status: "fail", error: "milestoneId is required" });
+            res
+                .status(400)
+                .json({ status: "fail", error: "milestoneId is required" });
             return;
         }
         const project = yield (0, config_1.default)("project").where({ id: projectIdNum }).first();
@@ -2343,7 +2350,10 @@ const payProjectOrganizationPayout = (req, res) => __awaiter(void 0, void 0, voi
         }
         const isLinkedToProject = project.multi_ngo
             ? yield (0, config_1.default)("project_organization")
-                .where({ project_id: projectIdNum, organization_id: organizationIdNum })
+                .where({
+                project_id: projectIdNum,
+                organization_id: organizationIdNum,
+            })
                 .first()
             : Number(project.organization_id) === organizationIdNum;
         if (!isLinkedToProject) {
@@ -2357,14 +2367,16 @@ const payProjectOrganizationPayout = (req, res) => __awaiter(void 0, void 0, voi
         const row = payoutData.rows.find((item) => {
             if (type === "mobilization")
                 return item.type === "mobilization";
-            return item.type === "milestone" && Number(item.milestoneId) === milestoneIdNum;
+            return (item.type === "milestone" && Number(item.milestoneId) === milestoneIdNum);
         });
         if (!row) {
             res.status(404).json({ status: "fail", error: "Payout row not found" });
             return;
         }
         if (row.status === "paid") {
-            res.status(409).json({ status: "fail", error: "Payout has already been paid" });
+            res
+                .status(409)
+                .json({ status: "fail", error: "Payout has already been paid" });
             return;
         }
         const [payoutId] = yield (0, config_1.default)("project_ngo_payout").insert({

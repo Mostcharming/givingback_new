@@ -15,6 +15,32 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteChat = exports.deleteMessage = exports.markChatAsRead = exports.markMessageAsRead = exports.streamChatEvents = exports.sendMessage = exports.getChatMessages = exports.searchDonor = exports.getOrCreateChat = exports.getChats = void 0;
 const config_1 = __importDefault(require("../../config"));
 const chat_realtime_1 = require("./chat.realtime");
+const normalizeChatUserType = (userType) => {
+    if (!userType) {
+        return null;
+    }
+    const normalized = userType.toLowerCase();
+    return normalized === "corporate" ? "donor" : normalized;
+};
+const getExistingChatBetweenUsers = (firstUserId, secondUserId) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!firstUserId || !secondUserId) {
+        return null;
+    }
+    return (0, config_1.default)("chat")
+        .where((builder) => {
+        builder
+            .where({
+            participant1_user_id: firstUserId,
+            participant2_user_id: secondUserId,
+        })
+            .orWhere({
+            participant1_user_id: secondUserId,
+            participant2_user_id: firstUserId,
+        });
+    })
+        .orderBy("id", "asc")
+        .first();
+});
 const getChats = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
@@ -69,7 +95,7 @@ const getChats = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
                 id: chat.id,
                 otherParticipant: {
                     userId: otherParticipantId,
-                    userType: otherParticipantType,
+                    userType: normalizeChatUserType(otherParticipantType),
                     email: otherParticipant === null || otherParticipant === void 0 ? void 0 : otherParticipant.email,
                 },
                 unreadCount,
@@ -127,37 +153,48 @@ const getOrCreateChat = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
             });
             return;
         }
+        const normalizedUserRole = normalizeChatUserType(userRole);
+        const normalizedOtherUserType = normalizeChatUserType(finalOtherUserType);
+        if (!normalizedUserRole || !normalizedOtherUserType) {
+            res.status(400).json({ error: "Invalid chat participant type" });
+            return;
+        }
         // Determine participant order - admin is always participant2 with potentially null ID
         let participant1Id, participant1Type, participant2Id, participant2Type;
-        if (finalOtherUserType === "admin") {
+        if (normalizedOtherUserType === "admin") {
             // Admin is always participant2 with potentially null ID
             participant1Id = userId;
-            participant1Type = userRole;
+            participant1Type = normalizedUserRole;
             participant2Id = null;
-            participant2Type = finalOtherUserType;
+            participant2Type = normalizedOtherUserType;
         }
         else {
             // Regular ordering for non-admin participants
-            const shouldSwap = userId < finalOtherUserId;
+            // Ensure numeric comparison and normalize types so ordering is consistent
+            const leftId = Number(userId);
+            const rightId = Number(finalOtherUserId);
+            const shouldSwap = leftId < rightId;
             if (shouldSwap) {
                 participant1Id = userId;
-                participant1Type = userRole;
+                participant1Type = normalizedUserRole;
                 participant2Id = finalOtherUserId;
-                participant2Type = finalOtherUserType;
+                participant2Type = normalizedOtherUserType;
             }
             else {
                 participant1Id = finalOtherUserId;
-                participant1Type = finalOtherUserType;
+                participant1Type = normalizedOtherUserType;
                 participant2Id = userId;
-                participant2Type = userRole;
+                participant2Type = normalizedUserRole;
             }
         }
-        let chat = yield (0, config_1.default)("chat")
-            .where({
-            participant1_user_id: participant1Id,
-            participant2_user_id: participant2Id,
-        })
-            .first();
+        let chat = normalizedOtherUserType === "admin"
+            ? yield (0, config_1.default)("chat")
+                .where({
+                participant1_user_id: participant1Id,
+                participant2_user_type: participant2Type,
+            })
+                .first()
+            : yield getExistingChatBetweenUsers(participant1Id, participant2Id);
         if (!chat) {
             const [chatId] = yield (0, config_1.default)("chat").insert({
                 participant1_user_id: participant1Id,
@@ -183,7 +220,7 @@ const getOrCreateChat = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
                 id: chat.id,
                 otherParticipant: {
                     userId: otherParticipantId,
-                    userType: otherParticipantType,
+                    userType: normalizeChatUserType(otherParticipantType),
                 },
                 unreadCount: isParticipant1
                     ? chat.participant1_unread_count
@@ -209,15 +246,17 @@ const searchDonor = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         const userRole = (_b = req.user) === null || _b === void 0 ? void 0 : _b.role;
         const { email } = req.body;
-        if (!userId || !userRole) {
+        if (!userId
+        // || !userRole
+        ) {
             res.status(401).json({ error: "Unauthorized" });
             return;
         }
         // Only NGOs can search for donors
-        if (userRole !== "ngo") {
-            res.status(403).json({ error: "Only NGOs can search for donors" });
-            return;
-        }
+        // if (userRole !== "ngo") {
+        //   res.status(403).json({ error: "Only NGOs can search for donors" });
+        //   return;
+        // }
         if (!email || typeof email !== "string") {
             res.status(400).json({ error: "Email is required" });
             return;
@@ -225,7 +264,7 @@ const searchDonor = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         // Search for donor by email
         const donor = yield (0, config_1.default)("users")
             .where("email", email.toLowerCase().trim())
-            .where("role", "donor")
+            .whereIn("role", ["donor", "corporate"])
             .select("id", "email", "name", "role")
             .first();
         if (!donor) {
@@ -239,6 +278,7 @@ const searchDonor = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
                 email: donor.email,
                 name: donor.name,
                 role: donor.role,
+                userType: normalizeChatUserType(donor.role),
             },
         });
     }
@@ -325,7 +365,7 @@ const sendMessage = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         const [messageId] = yield (0, config_1.default)("chat_message").insert({
             chat_id: chatId,
             sender_user_id: userId,
-            sender_user_type: userRole,
+            sender_user_type: normalizeChatUserType(userRole),
             message: message.trim(),
             attachments: attachmentsData,
             status: "sent",
