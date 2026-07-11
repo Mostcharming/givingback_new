@@ -18,7 +18,7 @@ app.set("views", path.join(__dirname, "views"));
 // app.enable("trust proxy");
 
 const whitelist: string[] = [
-  "http://192.168.1.147:5173",
+  "http://192.168.1.156:5173",
   "http://192.168.1.165:5173",
   "https://givebackng.org",
   "https://api.givebackng.org",

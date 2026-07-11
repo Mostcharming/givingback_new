@@ -78,6 +78,40 @@ const capitalizeFirstLetter = (value?: string | null) => {
   return value.charAt(0).toUpperCase() + value.slice(1);
 };
 
+const getUnreadCount = (chat?: Chat | null) => {
+  const count = Number(chat?.unreadCount || 0);
+  return Number.isFinite(count) ? Math.max(0, count) : 0;
+};
+
+const UnreadCountBadge = ({ count }: { count: number }) => {
+  if (count <= 0) return null;
+
+  const label = `${count} unread ${count === 1 ? "message" : "messages"}`;
+
+  return (
+    <span
+      aria-label={label}
+      title={label}
+      style={{
+        alignItems: "center",
+        backgroundColor: "#dc2626",
+        borderRadius: "999px",
+        color: "white",
+        display: "inline-flex",
+        flexShrink: 0,
+        fontSize: "0.72rem",
+        fontWeight: 700,
+        justifyContent: "center",
+        lineHeight: 1,
+        minWidth: "1.45rem",
+        padding: "0.25rem 0.45rem",
+      }}
+    >
+      {count}
+    </span>
+  );
+};
+
 const getBackendErrorMessage = (error: any, fallback: string) => {
   return (
     error?.response?.data?.message ||
@@ -305,7 +339,7 @@ function MessageDonor() {
               unreadCount:
                 selectedChatIdRef.current === incomingChatId
                   ? 0
-                  : chat.unreadCount + 1,
+                  : getUnreadCount(chat) + 1,
               lastMessage: incomingMessage.message,
               updatedAt: incomingMessage.createdAt,
             };
@@ -370,8 +404,10 @@ function MessageDonor() {
     }
   };
 
-  const handleChatClick = async (chat: Chat) => {
-    setSelectedChat({ ...chat, unreadCount: 0 });
+  const handleChatClick = (chat: Chat) => {
+    // The read effect needs the original count so it can persist the change
+    // before removing the unread badge locally.
+    setSelectedChat(chat);
   };
 
   const handleSendMessage = async () => {
@@ -495,6 +531,9 @@ function MessageDonor() {
       .includes(searchText.toLowerCase());
     return matchesSearch && chat.otherParticipant?.userType !== ADMIN_USER_TYPE;
   });
+  const adminChat = chats.find(
+    (chat) => chat.otherParticipant?.userType === ADMIN_USER_TYPE,
+  );
 
   return (
     <>
@@ -725,6 +764,7 @@ function MessageDonor() {
                     Send us a message
                   </p>
                 </div>
+                <UnreadCountBadge count={getUnreadCount(adminChat)} />
               </div>
             </div>
 
@@ -772,6 +812,7 @@ function MessageDonor() {
                       {getUserTypeDisplay(chat.otherParticipant?.userType)}
                     </p>
                   </div>
+                  <UnreadCountBadge count={getUnreadCount(chat)} />
                 </div>
               </div>
             ))}
