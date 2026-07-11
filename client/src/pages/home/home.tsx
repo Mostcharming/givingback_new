@@ -119,6 +119,126 @@ const Index = () => {
             </div>
           </div>
         </section>
+        <section className="mt-5 d-flex justify-content-center align-items-center">
+          <div className="">
+            <div style={{ width: "60vw" }}>
+              <h2
+                className="title"
+                style={{
+                  textAlign: "center",
+                  fontWeight: "600",
+                  fontSize: "35px",
+                  color: "black",
+                }}
+              >
+                Discover projects making a difference in communities around the
+                world.
+              </h2>
+            </div>
+          </div>
+        </section>
+        <section
+          style={{ paddingBottom: "25px", paddingTop: "20px" }}
+          className="feature-section feature-section-one"
+        >
+          <div className="container">
+            <div className="row justify-content-center">
+              {projects.slice(0, 3).map((project, index) => {
+                const formatter = new Intl.NumberFormat("en-NG", {
+                  style: "currency",
+                  currency: "NGN",
+                });
+
+                const cost = project.cost ?? project.allocated ?? 0;
+
+                const totalMilestones = project.milestones?.length || 0;
+                const completedMilestones =
+                  project.milestones?.filter((m) =>
+                    m.updates?.some((u) => u.status === "completed"),
+                  ).length || 0;
+
+                const progressPercent = totalMilestones
+                  ? Math.round((completedMilestones / totalMilestones) * 100)
+                  : 0;
+
+                return (
+                  <div key={index} className="col-lg-4 col-md-6 mb-4">
+                    <div
+                      className="feature-content p-3"
+                      style={{ borderRadius: "13px" }}
+                    >
+                      <img
+                        src={
+                          project?.projectImages?.length
+                            ? project.projectImages[0].image
+                            : place
+                        }
+                        alt={project.title}
+                        style={{
+                          width: "100%",
+                          height: "200px",
+                          objectFit: "cover",
+                          borderRadius: "13px",
+                        }}
+                      />
+
+                      <h5 className="mt-3 fw-bold">{project.title}</h5>
+
+                      <div
+                        className="progress mb-2"
+                        style={{ height: "10px", borderRadius: "5px" }}
+                      >
+                        <div
+                          className="progress-bar"
+                          role="progressbar"
+                          style={{
+                            width: `${progressPercent}%`,
+                            backgroundColor: "#02a95c",
+                            height: "100%",
+                            borderRadius: "5px",
+                            transition: "width 0.3s ease-in-out",
+                          }}
+                          aria-valuenow={progressPercent}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                        />
+                      </div>
+                      <small>{progressPercent}% completed</small>
+
+                      <div className="d-flex justify-content-between align-items-center mt-3">
+                        <strong>{formatter.format(cost)}</strong>
+                        <a
+                          href="/auth/register"
+                          style={{ color: "#02a95c", fontWeight: "600" }}
+                        >
+                          Donate Now
+                          <span style={{ fontSize: "1rem", marginLeft: "2px" }}>
+                            ↗
+                          </span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+        <section className="mb-5 d-flex justify-content-center align-items-center">
+          <div className="">
+            <div style={{ width: "25vw" }}>
+              <div className="fancy-list-item">
+                <a
+                  href="/latest-projects"
+                  style={{ width: "25vw" }}
+                  className="mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
+                >
+                  See More projects
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
         <div className="mt-5 about-form-area">
           <div className="container">
             <div className="about-donation-form">
@@ -596,126 +716,6 @@ const Index = () => {
                   className="mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
                 >
                   Learn More
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section className="mt-5 d-flex justify-content-center align-items-center">
-          <div className="">
-            <div style={{ width: "60vw" }}>
-              <h2
-                className="title"
-                style={{
-                  textAlign: "center",
-                  fontWeight: "600",
-                  fontSize: "35px",
-                  color: "black",
-                }}
-              >
-                Discover projects making a difference in communities around the
-                world.
-              </h2>
-            </div>
-          </div>
-        </section>
-        <section
-          style={{ paddingBottom: "25px", paddingTop: "20px" }}
-          className="feature-section feature-section-one"
-        >
-          <div className="container">
-            <div className="row justify-content-center">
-              {projects.slice(0, 3).map((project, index) => {
-                const formatter = new Intl.NumberFormat("en-NG", {
-                  style: "currency",
-                  currency: "NGN",
-                });
-
-                const cost = project.cost ?? project.allocated ?? 0;
-
-                const totalMilestones = project.milestones?.length || 0;
-                const completedMilestones =
-                  project.milestones?.filter((m) =>
-                    m.updates?.some((u) => u.status === "completed")
-                  ).length || 0;
-
-                const progressPercent = totalMilestones
-                  ? Math.round((completedMilestones / totalMilestones) * 100)
-                  : 0;
-
-                return (
-                  <div key={index} className="col-lg-4 col-md-6 mb-4">
-                    <div
-                      className="feature-content p-3"
-                      style={{ borderRadius: "13px" }}
-                    >
-                      <img
-                        src={
-                          project?.projectImages?.length
-                            ? project.projectImages[0].image
-                            : place
-                        }
-                        alt={project.title}
-                        style={{
-                          width: "100%",
-                          height: "200px",
-                          objectFit: "cover",
-                          borderRadius: "13px",
-                        }}
-                      />
-
-                      <h5 className="mt-3 fw-bold">{project.title}</h5>
-
-                      <div
-                        className="progress mb-2"
-                        style={{ height: "10px", borderRadius: "5px" }}
-                      >
-                        <div
-                          className="progress-bar"
-                          role="progressbar"
-                          style={{
-                            width: `${progressPercent}%`,
-                            backgroundColor: "#02a95c",
-                            height: "100%",
-                            borderRadius: "5px",
-                            transition: "width 0.3s ease-in-out",
-                          }}
-                          aria-valuenow={progressPercent}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        />
-                      </div>
-                      <small>{progressPercent}% completed</small>
-
-                      <div className="d-flex justify-content-between align-items-center mt-3">
-                        <strong>{formatter.format(cost)}</strong>
-                        <a
-                          href="/auth/register"
-                          style={{ color: "#02a95c", fontWeight: "600" }}
-                        >
-                          Donate Now
-                          <span style={{ fontSize: "1rem", marginLeft: "2px" }}>
-                            ↗
-                          </span>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-        <section className="mb-5 d-flex justify-content-center align-items-center">
-          <div className="">
-            <div style={{ width: "25vw" }}>
-              <div className="fancy-list-item">
-                <a
-                  href="/latest-projects"
-                  style={{ width: "25vw" }}
-                  className="mt-3 mr-4 mb-3 main-btn nav-btn d-none d-sm-inline-block cursor-pointer"
-                >
-                  See More projects
                 </a>
               </div>
             </div>
