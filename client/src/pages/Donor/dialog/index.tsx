@@ -3,19 +3,20 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import { useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
 import { UpdateNGOIcon } from '../../../assets/images/svgs'
 import FormModalInput from '../../../components/form_modal_input'
 import useBackendService from '../../../services/backend_service'
 
 export default function FormDialog({ open, handleClose, id }) {
+  const [messageError, setMessageError] = useState('')
   const { mutate: getNgoDetails } = useBackendService(`/donor/users`, 'GET', {
     onSuccess: (res: any) => {
       setNgoData(res.users[0])
     },
     onError: () => {
-      toast.error('Failed to send message. Please try again later.')
-    }
+      setMessageError('Unable to load the NGO details. Please try again.')
+    },
+    suppressErrorToast: true
   })
 
   const { mutate: sendMessageToNGO } = useBackendService(
@@ -23,12 +24,17 @@ export default function FormDialog({ open, handleClose, id }) {
     'POST',
     {
       onSuccess: (res: any) => {
-        toast.success('Message sent successfully')
+        setMessageError('')
         handleClose()
       },
-      onError: () => {
-        toast.error('Failed to send message. Please try again later.')
-      }
+      onError: (error: any) => {
+        setMessageError(
+          error?.response?.data?.error ||
+            error?.message ||
+            'Failed to send message. Please try again.'
+        )
+      },
+      suppressErrorToast: true
     }
   )
 
@@ -43,12 +49,15 @@ export default function FormDialog({ open, handleClose, id }) {
     const getNgo = async (id: string) => {
       try {
         getNgoDetails({ organization_id: id })
-      } catch (error) {
-        toast.error(error.message)
+      } catch (error: any) {
+        setMessageError(
+          error?.message || 'Unable to load the NGO details. Please try again.'
+        )
       }
     }
 
     if (id) {
+      setMessageError('')
       getNgo(id)
     }
   }, [id])
@@ -62,14 +71,23 @@ export default function FormDialog({ open, handleClose, id }) {
 
   const closeModal = () => {
     setNgoData(null)
+    setMessageError('')
     handleClose()
   }
 
   const onSubmit = async () => {
+    if (!messageData.subject.trim() || !messageData.message.trim()) {
+      setMessageError('Enter both a subject and message before sending.')
+      return
+    }
+
     try {
+      setMessageError('')
       sendMessageToNGO(messageData)
-    } catch (error) {
-      toast.error(error.message || 'Failed to send message')
+    } catch (error: any) {
+      setMessageError(
+        error?.message || 'Failed to send message. Please try again.'
+      )
     }
   }
 
@@ -98,6 +116,21 @@ export default function FormDialog({ open, handleClose, id }) {
             paddingBottom: '0px'
           }}
         >
+          {messageError && (
+            <div
+              role='alert'
+              style={{
+                backgroundColor: '#fff5f5',
+                border: '1px solid #dc3545',
+                borderRadius: '6px',
+                color: '#b42318',
+                marginBottom: '16px',
+                padding: '10px 12px'
+              }}
+            >
+              {messageError}
+            </div>
+          )}
           <FormModalInput
             label='Name of Organization'
             type='text'

@@ -3,7 +3,6 @@ import axios from "axios";
 import { MessageCircle, Search, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Image } from "react-bootstrap";
-import { toast } from "react-toastify";
 import {
   FormGroup,
   Input,
@@ -23,6 +22,7 @@ interface Chat {
     userId: string | null;
     userType: string;
     email?: string | null;
+    name?: string | null;
   };
   unreadCount: number;
   lastMessage: string | null;
@@ -49,6 +49,16 @@ interface Message {
   createdAt: string;
 }
 
+interface SearchUser {
+  id: string | number;
+  email: string;
+  name?: string | null;
+  role: string;
+  userType: string;
+}
+
+type SearchStatus = "idle" | "loading" | "success" | "error";
+
 const mapMessageFromApi = (msg: any): Message => ({
   id: msg.id,
   chatId: msg.chatId ?? msg.chat_id,
@@ -70,12 +80,12 @@ const getUserTypeDisplay = (userType?: string | null) => {
   const normalized = userType?.toLowerCase();
   if (normalized === "admin") return "ADMIN";
   if (normalized === "ngo") return "NGO";
+  if (normalized === "corporate") return "CORPORATE DONOR";
   return "DONOR";
 };
 
-const capitalizeFirstLetter = (value?: string | null) => {
-  if (!value) return value;
-  return value.charAt(0).toUpperCase() + value.slice(1);
+const getParticipantDisplayName = (participant?: Chat["otherParticipant"]) => {
+  return participant?.name || participant?.email || "Unknown";
 };
 
 const getUnreadCount = (chat?: Chat | null) => {
@@ -174,38 +184,42 @@ function MessageDonor() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageText, setMessageText] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [searchValidation, setSearchValidation] = useState<
-    "valid" | "invalid" | null
-  >(null);
-  const [showSearchTooltip, setShowSearchTooltip] = useState(false);
-  const [searchedDonor, setSearchedDonor] = useState<any>(null);
+  const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
+  const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
+  const [searchError, setSearchError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const selectedChatIdRef = useRef<string | null>(null);
   const chatsRef = useRef<Chat[]>([]);
+  const searchRequestIdRef = useRef(0);
 
   const fetchChatsAPI = useBackendService<{ chats: Chat[] }, any>(
     "/chats",
     "GET",
+    { suppressErrorToast: true },
   );
 
   const fetchMessagesAPI = useBackendService<{ messages: Message[] }, any>(
     selectedChat?.id ? `/chats/${selectedChat.id}/messages` : "/chats",
     "GET",
+    { suppressErrorToast: true },
   );
 
   const sendMessageAPI = useBackendService<{ data: Message }, any>(
     selectedChat?.id ? `/chats/${selectedChat.id}/messages` : "/chats",
     "POST",
+    { suppressErrorToast: true },
   );
 
   const createChatAPI = useBackendService<{ chat: Chat }, any>(
     "/chats",
     "POST",
+    { suppressErrorToast: true },
   );
 
-  const searchDonorAPI = useBackendService<{ donor: any }, any>(
-    `/chats/search-donor`,
+  const searchUsersAPI = useBackendService<{ users: SearchUser[] }, any>(
+    `/chats/search-users`,
     "POST",
+    { suppressErrorToast: true },
   );
 
   const isOwnMessage = (message: Message) => {
@@ -219,7 +233,9 @@ function MessageDonor() {
       {},
       {
         headers: {
-          Authorization: authState.token ? `Bearer ${authState.token}` : undefined,
+          Authorization: authState.token
+            ? `Bearer ${authState.token}`
+            : undefined,
         },
       },
     );
@@ -348,10 +364,9 @@ function MessageDonor() {
 
         if (selectedChatIdRef.current !== incomingChatId) return;
 
-        markChatAsRead(incomingChatId)
-          .catch((error) =>
-            console.error("Failed to mark realtime message as read:", error),
-          );
+        markChatAsRead(incomingChatId).catch((error) =>
+          console.error("Failed to mark realtime message as read:", error),
+        );
 
         setMessages((currentMessages) => {
           const exists = currentMessages.some(
@@ -374,6 +389,7 @@ function MessageDonor() {
     return () => {
       events.close();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authState.token, authState.user?.id]);
 
   // Scroll to bottom when messages change
@@ -405,8 +421,6 @@ function MessageDonor() {
   };
 
   const handleChatClick = (chat: Chat) => {
-    // The read effect needs the original count so it can persist the change
-    // before removing the unread badge locally.
     setSelectedChat(chat);
   };
 
@@ -438,54 +452,77 @@ function MessageDonor() {
     }
   };
 
-  const handleSearchChange = async (value: string) => {
-    setSearchText(value);
+  useEffect(() => {
+    const query = searchText.trim();
+    const requestId = ++searchRequestIdRef.current;
 
-    if (!value.trim()) {
-      setSearchValidation(null);
-      setSearchedDonor(null);
+    if (!query) {
+      setSearchStatus("idle");
+      setSearchResults([]);
+      setSearchError("");
       return;
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(value)) {
-      setSearchValidation("invalid");
-      setSearchedDonor(null);
-      return;
-    }
+    setSearchStatus("loading");
+    setSearchResults([]);
+    setSearchError("");
 
-    // Search for donor
-    try {
-      const result = await searchDonorAPI.mutateAsync({ email: value });
-      if (result.donor) {
-        setSearchValidation("valid");
-        setSearchedDonor(result.donor);
-      } else {
-        setSearchValidation("invalid");
-        setSearchedDonor(null);
+    const timer = window.setTimeout(async () => {
+      try {
+        const result = await searchUsersAPI.mutateAsync({ query });
+        if (searchRequestIdRef.current !== requestId) return;
+
+        const users = result.users || [];
+        setSearchResults(users);
+
+        if (users.length === 0) {
+          setSearchStatus("error");
+          setSearchError(`No donor or NGO found for “${query}”.`);
+          return;
+        }
+
+        setSearchStatus("success");
+      } catch (error) {
+        if (searchRequestIdRef.current !== requestId) return;
+
+        console.error("Failed to search users:", error);
+        setSearchStatus("error");
+        setSearchResults([]);
+        setSearchError(
+          getBackendErrorMessage(
+            error,
+            "Unable to search right now. Please try again.",
+          ),
+        );
       }
-    } catch (error) {
-      console.error("Failed to search donor:", error);
-      toast.error(getBackendErrorMessage(error, "Failed to search donor"));
-      setSearchValidation("invalid");
-      setSearchedDonor(null);
-    }
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText]);
+
+  const clearSearch = () => {
+    setSearchText("");
+    setSearchStatus("idle");
+    setSearchResults([]);
+    setSearchError("");
   };
 
-  const handleStartChatWithDonor = async () => {
-    if (!searchedDonor) return;
-    // If a chat already exists with this userId (don't care donor vs corporate), reuse it
+  const handleStartChatWithUser = async (searchedUser: SearchUser) => {
+    // If a chat already exists with this userId, reuse it.
     const existingChat = chats.find((chat) => {
       const otherId = chat.otherParticipant?.userId;
       if (otherId !== undefined && otherId !== null) {
-        return String(otherId) === String(searchedDonor.id);
+        return String(otherId) === String(searchedUser.id);
       }
 
       // Fallback: match by email when userId is not available
       const otherEmail = chat.otherParticipant?.email;
-      if (otherEmail && searchedDonor.email) {
-        return String(otherEmail).toLowerCase() === String(searchedDonor.email).toLowerCase();
+      if (otherEmail && searchedUser.email) {
+        return (
+          String(otherEmail).toLowerCase() ===
+          String(searchedUser.email).toLowerCase()
+        );
       }
 
       return false;
@@ -493,20 +530,16 @@ function MessageDonor() {
 
     if (existingChat) {
       setSelectedChat(existingChat);
-      setSearchText("");
-      setSearchValidation(null);
-      setSearchedDonor(null);
+      clearSearch();
       return;
     }
 
     try {
-      // Treat `corporate` the same as `donor` when creating chats
-      const normalizedType =
-        searchedDonor.userType === "corporate" ? "donor" : searchedDonor.userType || "donor";
+      const normalizedType = searchedUser.userType || "donor";
 
       const result = await createChatAPI.mutateAsync({
         otherParticipant: {
-          userId: searchedDonor.id,
+          userId: searchedUser.id,
           userType: normalizedType,
         },
       });
@@ -514,21 +547,30 @@ function MessageDonor() {
       // Add the new chat to the list
       setChats((prev) => [...prev, result.chat]);
       setSelectedChat(result.chat);
-      setSearchText("");
-      setSearchValidation(null);
-      setSearchedDonor(null);
+      clearSearch();
     } catch (error) {
-      console.error("Failed to create chat with donor:", error);
+      console.error("Failed to create chat with user:", error);
+      setSearchStatus("error");
+      setSearchError(
+        getBackendErrorMessage(
+          error,
+          "Unable to start this conversation. Please try again.",
+        ),
+      );
     }
   };
 
   const filteredChats = chats.filter((chat) => {
-    const displayName =
-      chat.otherParticipant?.userId || chat.otherParticipant?.userType;
-    const matchesSearch = (displayName || "")
-      .toString()
-      .toLowerCase()
-      .includes(searchText.toLowerCase());
+    const normalizedSearch = searchText.trim().toLowerCase();
+    const searchableValue = [
+      chat.otherParticipant?.name,
+      chat.otherParticipant?.email,
+      chat.otherParticipant?.userType,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const matchesSearch = searchableValue.includes(normalizedSearch);
     return matchesSearch && chat.otherParticipant?.userType !== ADMIN_USER_TYPE;
   });
   const adminChat = chats.find(
@@ -538,6 +580,19 @@ function MessageDonor() {
   return (
     <>
       <style>{`
+        @keyframes message-search-spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        .message-search-spinner {
+          animation: message-search-spin 0.75s linear infinite;
+          border: 3px solid #dbeafe;
+          border-radius: 50%;
+          border-top-color: #38bdf8;
+          height: 20px;
+          width: 20px;
+        }
         @media (max-width: 768px) {
           .messages-container {
             flex-direction: column !important;
@@ -577,73 +632,90 @@ function MessageDonor() {
           {/* Search */}
           <div className="p-3">
             <div style={{ position: "relative" }}>
-              <FormGroup>
-                <InputGroup className="input-group-alternative">
+              <FormGroup style={{ marginBottom: 0 }}>
+                <InputGroup
+                  className="input-group-alternative"
+                  style={{
+                    backgroundColor: "white",
+                    border: `2px solid ${
+                      searchStatus === "error" ? "#dc3545" : "#e8ebf2"
+                    }`,
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
                   <InputGroupAddon addonType="prepend">
-                    <InputGroupText style={{ backgroundColor: "white" }}>
-                      <Search />
+                    <InputGroupText
+                      style={{
+                        backgroundColor: "white",
+                        border: 0,
+                        color: "#64748b",
+                      }}
+                    >
+                      <Search size={20} />
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input
                     style={{
                       backgroundColor: "white",
+                      border: 0,
+                      boxShadow: "none",
                       height: "100%",
-                      borderColor:
-                        searchValidation === "valid"
-                          ? "#128330"
-                          : searchValidation === "invalid"
-                            ? "#dc3545"
-                            : "#e8ebf2",
-                      borderWidth: searchValidation ? "2px" : "1px",
+                      paddingRight: "48px",
                     }}
                     className="p-3"
-                    placeholder={
-                      authState.user?.role === "ngo"
-                        ? "Search donors by email"
-                        : "Search"
-                    }
+                    placeholder="Search people by name or email"
                     type="text"
                     value={searchText}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    onFocus={() =>
-                      authState.user?.role === "ngo" &&
-                      setShowSearchTooltip(true)
-                    }
-                    onBlur={() => setShowSearchTooltip(false)}
-                    title={
-                      authState.user?.role === "ngo"
-                        ? "Search for donors by email"
-                        : ""
+                    onChange={(e) => setSearchText(e.target.value)}
+                    aria-invalid={searchStatus === "error"}
+                    aria-describedby={
+                      searchStatus === "error" ? "message-search-error" : undefined
                     }
                   />
+                  {searchStatus === "loading" && (
+                    <span
+                      aria-label="Searching"
+                      role="status"
+                      style={{
+                        position: "absolute",
+                        right: "14px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 5,
+                      }}
+                    >
+                      <span className="message-search-spinner d-block" />
+                    </span>
+                  )}
                 </InputGroup>
               </FormGroup>
 
-              {/* Tooltip */}
-              {showSearchTooltip &&
-                authState.user?.role === "ngo" &&
-                !searchText && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "100%",
-                      left: "0",
-                      backgroundColor: "#333",
-                      color: "white",
-                      padding: "8px 12px",
-                      borderRadius: "4px",
-                      fontSize: "12px",
-                      whiteSpace: "nowrap",
-                      zIndex: 1000,
-                      marginTop: "4px",
-                    }}
-                  >
-                    Search for donors by email
-                  </div>
-                )}
+              {searchStatus === "error" && searchError && (
+                <div
+                  id="message-search-error"
+                  role="alert"
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: "0",
+                    right: "0",
+                    backgroundColor: "#fff5f5",
+                    border: "1px solid #dc3545",
+                    borderRadius: "6px",
+                    color: "#b42318",
+                    fontSize: "0.82rem",
+                    marginTop: "4px",
+                    padding: "10px 12px",
+                    zIndex: 1000,
+                  }}
+                >
+                  {searchError}
+                </div>
+              )}
 
-              {/* Donor suggestion */}
-              {searchValidation === "valid" && searchedDonor && (
+              {searchStatus === "success" && searchResults.length > 0 && (
                 <div
                   style={{
                     position: "absolute",
@@ -651,40 +723,62 @@ function MessageDonor() {
                     left: "0",
                     right: "0",
                     backgroundColor: "white",
-                    border: "1px solid #128330",
-                    borderRadius: "4px",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "6px",
+                    boxShadow: "0 8px 24px rgba(15, 23, 42, 0.12)",
                     marginTop: "4px",
+                    maxHeight: "280px",
+                    overflowY: "auto",
                     zIndex: 1000,
                   }}
                 >
-                  <div
-                    className="p-3 d-flex align-items-center justify-content-between"
-                    style={{ cursor: "pointer" }}
-                    onClick={handleStartChatWithDonor}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f1f2f7";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "white";
-                    }}
-                  >
-                    <div>
-                      <p className="mb-0 small fw-medium">
-                        {searchedDonor.name || "Donor"}
-                      </p>
-                      <p className="mb-0 small" style={{ color: "#888888" }}>
-                        {searchedDonor.email}
-                      </p>
-                    </div>
-                    <div
+                  {searchResults.map((user) => (
+                    <button
+                      key={user.id}
+                      type="button"
+                      className="p-3 d-flex align-items-center justify-content-between w-100"
                       style={{
-                        width: "8px",
-                        height: "8px",
-                        borderRadius: "50%",
-                        backgroundColor: "#128330",
+                        backgroundColor: "white",
+                        border: 0,
+                        borderBottom: "1px solid #eef2f6",
+                        cursor: "pointer",
+                        textAlign: "left",
                       }}
-                    />
-                  </div>
+                      onClick={() => handleStartChatWithUser(user)}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#f1f7ff";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "white";
+                      }}
+                    >
+                      <div style={{ minWidth: 0 }}>
+                        <p className="mb-0 small fw-medium text-truncate">
+                          {user.name || user.email}
+                        </p>
+                        <p
+                          className="mb-0 small text-truncate"
+                          style={{ color: "#64748b" }}
+                        >
+                          {user.email}
+                        </p>
+                      </div>
+                      <span
+                        style={{
+                          backgroundColor: "#e0f2fe",
+                          borderRadius: "999px",
+                          color: "#0369a1",
+                          flexShrink: 0,
+                          fontSize: "0.68rem",
+                          fontWeight: 700,
+                          marginLeft: "12px",
+                          padding: "4px 8px",
+                        }}
+                      >
+                        {getUserTypeDisplay(user.role)}
+                      </span>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
@@ -803,9 +897,7 @@ function MessageDonor() {
                       >
                         {chat.otherParticipant?.userType === "admin"
                           ? "GivingBack Admin"
-                          : capitalizeFirstLetter(
-                              chat.otherParticipant?.email,
-                            ) || "Unknown"}
+                          : getParticipantDisplayName(chat.otherParticipant)}
                       </span>
                     </div>
                     <p className="mb-0 small" style={{ color: "#888888" }}>
@@ -864,7 +956,7 @@ function MessageDonor() {
                 <h2 className="h5 fw-medium mb-0" style={{ color: "#000000" }}>
                   {isAdminChat(selectedChat)
                     ? "GivingBack Admin"
-                    : `${capitalizeFirstLetter(selectedChat.otherParticipant?.email) || "Unknown"} • ${getUserTypeDisplay(selectedChat.otherParticipant?.userType)}`}
+                    : `${getParticipantDisplayName(selectedChat.otherParticipant)} • ${getUserTypeDisplay(selectedChat.otherParticipant?.userType)}`}
                 </h2>
               </div>
 

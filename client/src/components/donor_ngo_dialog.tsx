@@ -3,13 +3,13 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import { useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
 import { UpdateNGOIcon } from '../assets/images/svgs'
 import useBackendService from '../services/backend_service'
 import FormModalInput from './form_modal_input'
 
 export default function Donor_Ngo_Dialog({ open, handleClose, id }) {
   const [ngoData, setNgoData] = useState<any>(null)
+  const [messageError, setMessageError] = useState('')
 
   const [messageData, setMessageData] = useState({
     subject: '',
@@ -20,7 +20,10 @@ export default function Donor_Ngo_Dialog({ open, handleClose, id }) {
     onSuccess: (res2: any) => {
       setNgoData(res2.users[0])
     },
-    onError: () => {}
+    onError: () => {
+      setMessageError('Unable to load the NGO details. Please try again.')
+    },
+    suppressErrorToast: true
   })
 
   const { mutate: mesasage } = useBackendService(
@@ -28,17 +31,23 @@ export default function Donor_Ngo_Dialog({ open, handleClose, id }) {
     'POST',
     {
       onSuccess: (res2: any) => {
-        toast.success('Message sent successfully')
+        setMessageError('')
         setMessageData({ subject: '', message: '' })
         handleClose()
       },
       onError: (error: any) => {
-        toast.error(error.message || 'Failed to send message')
-      }
+        setMessageError(
+          error?.response?.data?.error ||
+            error?.message ||
+            'Failed to send message. Please try again.'
+        )
+      },
+      suppressErrorToast: true
     }
   )
 
   useEffect(() => {
+    setMessageError('')
     getUSer({ organization_id: id })
   }, [id])
 
@@ -51,10 +60,17 @@ export default function Donor_Ngo_Dialog({ open, handleClose, id }) {
 
   const closeModal = () => {
     setNgoData(null)
+    setMessageError('')
     handleClose()
   }
 
   const onSubmit = async () => {
+    if (!messageData.subject.trim() || !messageData.message.trim()) {
+      setMessageError('Enter both a subject and message before sending.')
+      return
+    }
+
+    setMessageError('')
     mesasage({ message: messageData })
   }
 
@@ -83,6 +99,21 @@ export default function Donor_Ngo_Dialog({ open, handleClose, id }) {
             paddingBottom: '0px'
           }}
         >
+          {messageError && (
+            <div
+              role='alert'
+              style={{
+                backgroundColor: '#fff5f5',
+                border: '1px solid #dc3545',
+                borderRadius: '6px',
+                color: '#b42318',
+                marginBottom: '16px',
+                padding: '10px 12px'
+              }}
+            >
+              {messageError}
+            </div>
+          )}
           <FormModalInput
             label='Name of Organization'
             type='text'
