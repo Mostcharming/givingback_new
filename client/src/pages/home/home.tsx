@@ -211,7 +211,7 @@ const Index = () => {
                           href="/auth/register"
                           style={{ color: "#02a95c", fontWeight: "600" }}
                         >
-                          Donate Now
+                          Bid for Project
                           <span style={{ fontSize: "1rem", marginLeft: "2px" }}>
                             ↗
                           </span>

@@ -14,6 +14,9 @@ git commit -m "hi" || echo "Nothing to commit"
 git reset --hard HEAD
 git pull origin main
 
+pm2 stop all
+pm2 restart all
+
 cd /home/ubuntu/server
 npx knex migrate:latest --env production
 
