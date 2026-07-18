@@ -116,6 +116,12 @@ export const getCounts = async (
       .count("id as count")
       .first();
 
+    const totalActiveProjects = await db("project")
+      .where("donor_id", donorId)
+      .andWhere("status", "active")
+      .count("id as count")
+      .first();
+
     const currentActiveProjectsCount = Number(
       currentMonthActiveProjects?.count || 0
     );
@@ -203,7 +209,7 @@ export const getCounts = async (
         isUp: ngosTrend >= 0,
       },
       activeProjects: {
-        value: currentActiveProjectsCount,
+        value: Number(totalActiveProjects?.count || 0),
         trend: parseFloat(activeProjectsTrend.toFixed(2)),
         isUp: activeProjectsTrend >= 0,
       },
