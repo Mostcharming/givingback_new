@@ -3155,6 +3155,96 @@ export const deleteMilestoneUpdate = async (
   }
 };
 
+export const updateMilestoneUpdateStatus = async (
+  req: UserRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const user = req.user as User | undefined;
+    const milestoneUpdateId = Number(req.body.milestoneUpdateId);
+    const status = String(req.body.status || "").toLowerCase();
+
+    if (!user?.id) {
+      res.status(401).json({
+        status: "fail",
+        message: "User not authenticated",
+      });
+      return;
+    }
+
+    if (!milestoneUpdateId || !["approved", "rejected"].includes(status)) {
+      res.status(400).json({
+        status: "fail",
+        message:
+          "A valid milestone update ID and an approved or rejected status are required",
+      });
+      return;
+    }
+
+    let milestoneUpdateQuery = db("milestone_update as milestoneUpdate")
+      .join(
+        "milestone as milestone",
+        "milestoneUpdate.milestone_id",
+        "milestone.id",
+      )
+      .join("project as project", "milestone.project_id", "project.id")
+      .where("milestoneUpdate.id", milestoneUpdateId);
+
+    if (String(user.role || "").toLowerCase() !== "admin") {
+      const donor = await db("donors")
+        .where({ user_id: user.id })
+        .select("id")
+        .first();
+
+      if (!donor) {
+        res.status(403).json({
+          status: "fail",
+          message: "Only the project donor can review milestone updates",
+        });
+        return;
+      }
+
+      milestoneUpdateQuery = milestoneUpdateQuery.andWhere(
+        "project.donor_id",
+        donor.id,
+      );
+    }
+
+    const milestoneUpdate = await milestoneUpdateQuery
+      .select("milestoneUpdate.id")
+      .first();
+
+    if (!milestoneUpdate) {
+      res.status(404).json({
+        status: "fail",
+        message: "Milestone update not found for this project",
+      });
+      return;
+    }
+
+    await db("milestone_update")
+      .where({ id: milestoneUpdateId })
+      .update({ status });
+
+    const reviewedUpdate = await db("milestone_update")
+      .where({ id: milestoneUpdateId })
+      .first();
+
+    res.status(200).json({
+      status: "success",
+      message: `Milestone update ${status} successfully`,
+      data: reviewedUpdate,
+    });
+  } catch (error: any) {
+    console.error("Update milestone status error:", error);
+    res.status(500).json({
+      status: "fail",
+      error: "An error occurred while reviewing the milestone update",
+      details: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
 export const submitProposal = async (
   req: UserRequest,
   res: Response,

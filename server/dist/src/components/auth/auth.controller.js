@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkApplicationStatus = exports.submitProposal = exports.deleteMilestoneUpdate = exports.payProjectOrganizationPayout = exports.getProjectOrganizationFundingDetail = exports.getProjectOrganizations = exports.createMilestone = exports.updateProjectApplicationStatus = exports.getProjectApplications = exports.editProject = exports.publishProjectBrief = exports.createProject = exports.getDonorProjects = exports.getDonorProjectMetrics = exports.downloadSampleNGOFile = exports.bulkUploadNGOsEndpoint = exports.addSingleNGO = exports.getAllOrganizations = exports.deleteBank = exports.getOrganizationCounts = exports.updateOne = exports.changePassword = exports.deactivate = exports.resetPassword = exports.forgotPassword = exports.getOne = exports.resend = exports.onboard = exports.logout = exports.login = exports.verify = exports.signup = void 0;
+exports.checkApplicationStatus = exports.submitProposal = exports.updateMilestoneUpdateStatus = exports.deleteMilestoneUpdate = exports.payProjectOrganizationPayout = exports.getProjectOrganizationFundingDetail = exports.getProjectOrganizations = exports.createMilestone = exports.updateProjectApplicationStatus = exports.getProjectApplications = exports.editProject = exports.publishProjectBrief = exports.createProject = exports.getDonorProjects = exports.getDonorProjectMetrics = exports.downloadSampleNGOFile = exports.bulkUploadNGOsEndpoint = exports.addSingleNGO = exports.getAllOrganizations = exports.deleteBank = exports.getOrganizationCounts = exports.updateOne = exports.changePassword = exports.deactivate = exports.resetPassword = exports.forgotPassword = exports.getOne = exports.resend = exports.onboard = exports.logout = exports.login = exports.verify = exports.signup = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const xlsx_1 = __importDefault(require("xlsx"));
 const config_1 = __importDefault(require("../../config"));
@@ -2492,6 +2492,75 @@ const deleteMilestoneUpdate = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.deleteMilestoneUpdate = deleteMilestoneUpdate;
+const updateMilestoneUpdateStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = req.user;
+        const milestoneUpdateId = Number(req.body.milestoneUpdateId);
+        const status = String(req.body.status || "").toLowerCase();
+        if (!(user === null || user === void 0 ? void 0 : user.id)) {
+            res.status(401).json({
+                status: "fail",
+                message: "User not authenticated",
+            });
+            return;
+        }
+        if (!milestoneUpdateId || !["approved", "rejected"].includes(status)) {
+            res.status(400).json({
+                status: "fail",
+                message: "A valid milestone update ID and an approved or rejected status are required",
+            });
+            return;
+        }
+        let milestoneUpdateQuery = (0, config_1.default)("milestone_update as milestoneUpdate")
+            .join("milestone as milestone", "milestoneUpdate.milestone_id", "milestone.id")
+            .join("project as project", "milestone.project_id", "project.id")
+            .where("milestoneUpdate.id", milestoneUpdateId);
+        if (String(user.role || "").toLowerCase() !== "admin") {
+            const donor = yield (0, config_1.default)("donors")
+                .where({ user_id: user.id })
+                .select("id")
+                .first();
+            if (!donor) {
+                res.status(403).json({
+                    status: "fail",
+                    message: "Only the project donor can review milestone updates",
+                });
+                return;
+            }
+            milestoneUpdateQuery = milestoneUpdateQuery.andWhere("project.donor_id", donor.id);
+        }
+        const milestoneUpdate = yield milestoneUpdateQuery
+            .select("milestoneUpdate.id")
+            .first();
+        if (!milestoneUpdate) {
+            res.status(404).json({
+                status: "fail",
+                message: "Milestone update not found for this project",
+            });
+            return;
+        }
+        yield (0, config_1.default)("milestone_update")
+            .where({ id: milestoneUpdateId })
+            .update({ status });
+        const reviewedUpdate = yield (0, config_1.default)("milestone_update")
+            .where({ id: milestoneUpdateId })
+            .first();
+        res.status(200).json({
+            status: "success",
+            message: `Milestone update ${status} successfully`,
+            data: reviewedUpdate,
+        });
+    }
+    catch (error) {
+        console.error("Update milestone status error:", error);
+        res.status(500).json({
+            status: "fail",
+            error: "An error occurred while reviewing the milestone update",
+            details: error instanceof Error ? error.message : "Unknown error",
+        });
+    }
+});
+exports.updateMilestoneUpdateStatus = updateMilestoneUpdateStatus;
 const submitProposal = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
