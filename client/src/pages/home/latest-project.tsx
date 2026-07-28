@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-toastify";
-import place from "../../assets/images/home//GivingBackNG-logo.svg";
 import p3 from "../../assets/images/home/main_image/3.png";
 import p4 from "../../assets/images/home/main_image/4.png";
 import Loading from "../../components/home/loading";
 import Layout from "../../layouts/home";
 import useBackendService from "../../services/backend_service";
+import { getProjectImage } from "../../services/project-image";
 import { useLoadStyles } from "../../services/styles";
 
 const LatestProject = () => {
@@ -209,11 +209,7 @@ const LatestProject = () => {
                       style={{ borderRadius: "13px" }}
                     >
                       <img
-                        src={
-                          project?.projectImages?.length
-                            ? project.projectImages[0].image
-                            : place
-                        }
+                        src={getProjectImage(project)}
                         alt={project.title}
                         style={{
                           width: "100%",

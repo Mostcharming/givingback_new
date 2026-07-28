@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import useBackendService from "../services/backend_service";
+import { getProjectImage } from "../services/project-image";
 import { useContent } from "../services/useContext";
 import "./emptyProject.css";
 import Loading from "./home/loading";
@@ -257,7 +258,7 @@ const List = ({ type }) => {
               <>
                 <div>
                   {responseData.map((project) => {
-                    const img = project.projectImages[0]?.image;
+                    const img = getProjectImage(project);
                     return (
                       <div key={project.id} style={{ marginBottom: "24px" }}>
                         <ProjectItem

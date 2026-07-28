@@ -7,6 +7,7 @@ import CommentCard from "../../components/projects/comment-card";
 import SubmitCommentModal from "../../components/projects/SubmitCommentModal";
 import Layout from "../../layouts/home";
 import useBackendService from "../../services/backend_service";
+import { getProjectImage } from "../../services/project-image";
 import { useLoadStyles } from "../../services/styles";
 import Util from "../../services/utils";
 
@@ -66,51 +67,16 @@ const ProjectDetails = () => {
           )}
           <div className="row align-items-center justify-content-center">
             <div className="col-12">
-              {project.status === "unverified" ? (
-                project?.projectImages?.[0]?.image ? (
-                  <img
-                    src={project.projectImages[0].image}
-                    style={{
-                      width: "100%",
-                      objectFit: "cover",
-                      borderRadius: "10px",
-                    }}
-                    alt="Project Image"
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "300px",
-                      backgroundColor: "#f0f0f0",
-                      borderRadius: "10px",
-                    }}
-                  >
-                    No image available
-                  </div>
-                )
-              ) : project?.images?.[0]?.image ? (
-                <img
-                  src={project.images[0].image}
-                  style={{
-                    width: "100%",
-                    objectFit: "cover",
-                    borderRadius: "10px",
-                  }}
-                  alt="Project Image"
-                />
-              ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "300px",
-                    backgroundColor: "#f0f0f0",
-                    borderRadius: "10px",
-                  }}
-                >
-                  No image available
-                </div>
-              )}
+              <img
+                src={getProjectImage(project)}
+                style={{
+                  width: "100%",
+                  maxHeight: "560px",
+                  objectFit: "cover",
+                  borderRadius: "10px",
+                }}
+                alt={`${project.title || "Project"} cover`}
+              />
             </div>
 
             <div className="col-12">

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { capitalizeFirstLetter } from '../../services/capitalize'
+import { getProjectImage } from '../../services/project-image'
 import Util from '../../services/utils'
 
 interface ProjectCardProps {
@@ -28,10 +29,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <div
             className='thumb'
             style={{
-              backgroundImage:
-                project?.projectImages && project?.projectImages.length
-                  ? `url(${project?.projectImages[0].image})`
-                  : 'url(assets/images/project/project-1.jpg)'
+              backgroundImage: `url(${getProjectImage(project)})`
             }}
           />
           <div className='contentT'>

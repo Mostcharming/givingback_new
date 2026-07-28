@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState } from "react";
-import place from "../../assets/images/home//GivingBackNG-logo.svg";
 import main8 from "../../assets/images/home/main_image/1.png";
 import p3 from "../../assets/images/home/main_image/3.png";
 import p4 from "../../assets/images/home/main_image/4.png";
@@ -16,6 +15,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Layout from "../../layouts/home";
 import useBackendService from "../../services/backend_service";
+import { getProjectImage } from "../../services/project-image";
 import { useLoadStyles } from "../../services/styles";
 import FAQAccordion from "./faq/faq";
 const Index = () => {
@@ -168,11 +168,7 @@ const Index = () => {
                       style={{ borderRadius: "13px" }}
                     >
                       <img
-                        src={
-                          project?.projectImages?.length
-                            ? project.projectImages[0].image
-                            : place
-                        }
+                        src={getProjectImage(project)}
                         alt={project.title}
                         style={{
                           width: "100%",

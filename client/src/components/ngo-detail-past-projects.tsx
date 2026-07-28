@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Container, Row } from "react-bootstrap";
 import { toast } from "react-toastify";
 import useBackendService from "../services/backend_service";
+import { getProjectImage } from "../services/project-image";
 import Loading from "./home/loading";
 
 import cancel from "../assets/images/cancel.svg";
@@ -67,8 +68,7 @@ const NGOPastProjectsDetail = ({ id }: { id: number }) => {
             <Container>
               <Row className="pt-5">
                 {responseData.map((project) => {
-                  let img;
-                  img = project.projectImages[0]?.image;
+                  const img = getProjectImage(project);
                   return (
                     <ProjectItem
                       project={project}
