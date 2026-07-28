@@ -7,7 +7,6 @@ import { Button } from 'react-bootstrap'
 import Col from 'react-bootstrap/Col'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
-import { toast } from 'react-toastify'
 
 import { UpdateNGOIcon } from '../../assets/images/svgs'
 import FormModalInput from '../../components/form_modal_input'
@@ -26,6 +25,10 @@ function MessageDonor() {
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [messageId, setMessageId] = useState(null)
+  const [feedback, setFeedback] = useState<{
+    type: 'error' | 'success'
+    message: string
+  } | null>(null)
 
   const { authState } = useContent()
 
@@ -38,8 +41,9 @@ function MessageDonor() {
       setUnreadCount(unreadMessages)
     },
     onError: () => {
-      toast.error('Unable to fetch messages')
-    }
+      setFeedback({ type: 'error', message: 'Unable to fetch messages' })
+    },
+    suppressErrorToast: true
   })
   const { mutate: updateMessage } = useBackendService(
     `/donor/messages/${messageId}`,
@@ -54,8 +58,9 @@ function MessageDonor() {
         setUnreadCount((prevCount) => prevCount - 1)
       },
       onError: () => {
-        toast.error('Failed to mark as read')
-      }
+        setFeedback({ type: 'error', message: 'Failed to mark as read' })
+      },
+      suppressErrorToast: true
     }
   )
   const { mutate: postMessage } = useBackendService(
@@ -63,30 +68,34 @@ function MessageDonor() {
     'GET',
     {
       onSuccess: (res2: any) => {},
-      onError: () => {}
+      onError: () => {},
+      suppressErrorToast: true
     }
   )
 
   const handleSendMessage = async () => {
     try {
       if (!subject.trim()) {
-        toast.error('Subject cannot be empty!') // Notify user about the empty subject
+        setFeedback({ type: 'error', message: 'Subject cannot be empty!' })
         return // Exit the function
       }
 
       if (!message.trim()) {
-        toast.error('Message cannot be empty!') // Notify user about the empty message
+        setFeedback({ type: 'error', message: 'Message cannot be empty!' })
         return // Exit the function
       }
       // await sendMessage({ subject, message, userId: auth.user.id }) // Adjust as necessary
-      toast.success('Message sent successfully!')
+      setFeedback({ type: 'success', message: 'Message sent successfully!' })
       setSubject('') // Reset fields after sending
       setMessage('')
       setModalShow(false) // Close modal after sending
       // Optionally, fetch updated messages or update local state
       getMessage({ user_id: authState.user.id }) // Fetch dashboard data again
-    } catch (error) {
-      toast.error('Error sending message: ' + error.message)
+    } catch (error: any) {
+      setFeedback({
+        type: 'error',
+        message: 'Error sending message: ' + error.message
+      })
     }
   }
 
@@ -112,6 +121,21 @@ function MessageDonor() {
   return (
     <>
       {loading && <Loading type={'full'} />}
+      {feedback && (
+        <div
+          role={feedback.type === 'error' ? 'alert' : 'status'}
+          style={{
+            backgroundColor: feedback.type === 'error' ? '#fff5f5' : '#f0fdf4',
+            border: `1px solid ${feedback.type === 'error' ? '#dc3545' : '#128330'}`,
+            borderRadius: '6px',
+            color: feedback.type === 'error' ? '#b42318' : '#128330',
+            margin: '12px',
+            padding: '10px 12px'
+          }}
+        >
+          {feedback.message}
+        </div>
+      )}
       {modalShow && <div className='modal-backdrop' />}
       <Dialog
         open={modalShow}

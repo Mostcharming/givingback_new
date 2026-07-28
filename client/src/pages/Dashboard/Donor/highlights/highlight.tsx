@@ -8,9 +8,9 @@ import {
   CarouselIndicators,
   CarouselItem,
 } from "reactstrap";
-import placeholder from "../../../../assets/images/home/GivingBackNG-logo.svg";
 import Loading from "../../../../components/home/loading";
 import useBackendService from "../../../../services/backend_service";
+import { getProjectImage } from "../../../../services/project-image";
 
 export default function Highlights({ currentState }: any, ...args: any) {
   const [responseData, setResponseData] = useState([]);
@@ -18,10 +18,7 @@ export default function Highlights({ currentState }: any, ...args: any) {
   const [animating, setAnimating] = useState(false);
 
   const items = responseData.map((project: any) => ({
-    src:
-      project?.projectImages && project.projectImages.length > 0
-        ? project.projectImages[0].image
-        : placeholder,
+    src: getProjectImage(project),
     altText: project?.title || "Project image",
     caption: project?.description || "",
     key: project?.id || Math.random(),

@@ -3,11 +3,11 @@ import { ChevronRight } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import place from "../../../assets/images/home//GivingBackNG-logo.svg";
 import logo from "../../../assets/images/logo.png";
 import Loading from "../../../components/home/loading";
 import { getStatusBadgeProps } from "../../../helper";
 import useBackendService from "../../../services/backend_service";
+import { getProjectImage } from "../../../services/project-image";
 import { useContent } from "../../../services/useContext";
 import Overview from "./render/Details/Overview";
 import Timeline from "./render/Details/TimeLine";
@@ -109,9 +109,7 @@ const ProjectViewDetail: React.FC<any> = () => {
     }
   };
 
-  const image = project?.projectImages?.length
-    ? project.projectImages[0].image
-    : place;
+  const image = getProjectImage(project);
   const badgeProps = project.status
     ? getStatusBadgeProps(project.status)
     : { text: "", backgroundColor: "#ccc", color: "#000" };

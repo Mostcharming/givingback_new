@@ -13,7 +13,8 @@ router.use(auth_1.secureLogin);
 router.route("/").get(chat_controller_1.getChats);
 router.route("/").post(chat_controller_1.getOrCreateChat);
 router.route("/events/stream").get(chat_controller_1.streamChatEvents);
-router.route("/search-donor").post(chat_controller_1.searchDonor);
+router.route("/search-users").post(chat_controller_1.searchUsers);
+router.route("/search-donor").post(chat_controller_1.searchUsers);
 router.route("/:chatId").delete(chat_controller_1.deleteChat);
 // Message routes
 router.route("/:chatId/messages").get(chat_controller_1.getChatMessages);

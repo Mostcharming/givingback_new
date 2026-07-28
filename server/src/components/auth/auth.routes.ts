@@ -32,6 +32,7 @@ import {
   signup,
   submitProposal,
   updateOne,
+  updateMilestoneUpdateStatus,
   updateProjectApplicationStatus,
   verify,
 } from "./auth.controller";
@@ -72,6 +73,7 @@ router.get("/bulk/sample", downloadSampleNGOFile);
 router.post("/bulk/upload", uploadbulk, bulkUploadNGOsEndpoint);
 router.post("/milestones", createMilestone);
 router.delete("/milestones/:milestoneUpdateId", deleteMilestoneUpdate);
+router.patch("/milestone-updates/status", updateMilestoneUpdateStatus);
 router.get("/projects/:projectId/organizations", getProjectOrganizations);
 router.get(
   "/projects/:projectId/organizations/:organizationId/funding",

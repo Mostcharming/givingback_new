@@ -80,6 +80,11 @@ const getCounts = (userId, isDonor, orgId, donorId) => __awaiter(void 0, void 0,
             .andWhereBetween("createdAt", [lastMonthRange.start, lastMonthRange.end])
             .count("id as count")
             .first();
+        const totalActiveProjects = yield (0, config_1.default)("project")
+            .where("donor_id", donorId)
+            .andWhere("status", "active")
+            .count("id as count")
+            .first();
         const currentActiveProjectsCount = Number((currentMonthActiveProjects === null || currentMonthActiveProjects === void 0 ? void 0 : currentMonthActiveProjects.count) || 0);
         const lastMonthActiveProjectsCount = Number((lastMonthActiveProjects === null || lastMonthActiveProjects === void 0 ? void 0 : lastMonthActiveProjects.count) || 0);
         const activeProjectsTrend = calculateTrendPercentage(currentActiveProjectsCount, lastMonthActiveProjectsCount);
@@ -135,7 +140,7 @@ const getCounts = (userId, isDonor, orgId, donorId) => __awaiter(void 0, void 0,
                 isUp: ngosTrend >= 0,
             },
             activeProjects: {
-                value: currentActiveProjectsCount,
+                value: Number((totalActiveProjects === null || totalActiveProjects === void 0 ? void 0 : totalActiveProjects.count) || 0),
                 trend: parseFloat(activeProjectsTrend.toFixed(2)),
                 isUp: activeProjectsTrend >= 0,
             },

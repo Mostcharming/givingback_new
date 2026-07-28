@@ -36,6 +36,7 @@ router.get("/bulk/sample", auth_controller_1.downloadSampleNGOFile);
 router.post("/bulk/upload", general_1.uploadbulk, auth_controller_1.bulkUploadNGOsEndpoint);
 router.post("/milestones", auth_controller_1.createMilestone);
 router.delete("/milestones/:milestoneUpdateId", auth_controller_1.deleteMilestoneUpdate);
+router.patch("/milestone-updates/status", auth_controller_1.updateMilestoneUpdateStatus);
 router.get("/projects/:projectId/organizations", auth_controller_1.getProjectOrganizations);
 router.get("/projects/:projectId/organizations/:organizationId/funding", auth_controller_1.getProjectOrganizationFundingDetail);
 router.post("/projects/:projectId/organizations/:organizationId/payouts", auth_controller_1.payProjectOrganizationPayout);

@@ -8,7 +8,7 @@ const Main = ({ image, badgeProps, logo, project, currentState }) => {
       <div className="position-relative mb-5">
         <Image
           src={image}
-          alt="Person drinking from water tap"
+          alt={`${project?.title || "Project"} cover`}
           width={600}
           height={300}
           className="card-img-top"
@@ -32,7 +32,7 @@ const Main = ({ image, badgeProps, logo, project, currentState }) => {
         <div className="d-flex align-items-center">
           <Image
             src={logo}
-            alt="Person drinking from water tap"
+            alt={`${currentState?.user?.name || "Project owner"} logo`}
             width={50}
             height={50}
             className="bg-white rounded-circle m-2"

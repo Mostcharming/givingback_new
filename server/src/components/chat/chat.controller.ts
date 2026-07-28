@@ -12,6 +12,42 @@ const normalizeChatUserType = (userType?: string | null): string | null => {
   return normalized === "corporate" ? "donor" : normalized;
 };
 
+const getChatParticipantDetails = async (
+  userId: number | string | null,
+) => {
+  if (!userId) {
+    return null;
+  }
+
+  const user = await db("users")
+    .where("id", userId)
+    .select("id", "email", "role")
+    .first();
+
+  if (!user) {
+    return null;
+  }
+
+  const normalizedRole = user.role?.toLowerCase();
+  const profile =
+    normalizedRole === "ngo"
+      ? await db("organizations")
+          .where("user_id", userId)
+          .select("name")
+          .first()
+      : await db("donors")
+          .where("user_id", userId)
+          .select("name")
+          .first();
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: profile?.name || null,
+    role: normalizedRole,
+  };
+};
+
 const getExistingChatBetweenUsers = async (
   firstUserId: number | string | null,
   secondUserId: number | string | null,
@@ -91,10 +127,7 @@ export const getChats = async (
 
         // Only fetch user if otherParticipantId is not null (admin can have null ID)
         const otherParticipant = otherParticipantId
-          ? await db("users")
-              .where("id", otherParticipantId)
-              .select("id", "email")
-              .first()
+          ? await getChatParticipantDetails(otherParticipantId)
           : null;
 
         const lastMessage = await db("chat_message")
@@ -107,8 +140,11 @@ export const getChats = async (
           id: chat.id,
           otherParticipant: {
             userId: otherParticipantId,
-            userType: normalizeChatUserType(otherParticipantType),
+            userType:
+              otherParticipant?.role ||
+              normalizeChatUserType(otherParticipantType),
             email: otherParticipant?.email,
+            name: otherParticipant?.name,
           },
           unreadCount,
           lastMessage: lastMessage
@@ -243,6 +279,9 @@ export const getOrCreateChat = async (
     const otherParticipantType = isParticipant1
       ? chat.participant2_user_type
       : chat.participant1_user_type;
+    const otherParticipantDetails = await getChatParticipantDetails(
+      otherParticipantId,
+    );
 
     res.status(200).json({
       message: "Chat retrieved/created successfully",
@@ -250,7 +289,11 @@ export const getOrCreateChat = async (
         id: chat.id,
         otherParticipant: {
           userId: otherParticipantId,
-          userType: normalizeChatUserType(otherParticipantType),
+          userType:
+            otherParticipantDetails?.role ||
+            normalizeChatUserType(otherParticipantType),
+          email: otherParticipantDetails?.email,
+          name: otherParticipantDetails?.name,
         },
         unreadCount: isParticipant1
           ? chat.participant1_unread_count
@@ -269,61 +312,78 @@ export const getOrCreateChat = async (
   }
 };
 
-export const searchDonor = async (
+export const searchUsers = async (
   req: UserRequest,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = (req.user as User)?.id;
-    const userRole = (req.user as User)?.role;
-    const { email } = req.body;
+    const searchValue = req.body.query ?? req.body.email;
 
-    if (
-      !userId
-      // || !userRole
-    ) {
+    if (!userId) {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
 
-    // Only NGOs can search for donors
-    // if (userRole !== "ngo") {
-    //   res.status(403).json({ error: "Only NGOs can search for donors" });
-    //   return;
-    // }
-
-    if (!email || typeof email !== "string") {
-      res.status(400).json({ error: "Email is required" });
+    if (typeof searchValue !== "string" || !searchValue.trim()) {
+      res.status(400).json({ error: "A name or email is required" });
       return;
     }
 
-    // Search for donor by email
-    const donor = await db("users")
-      .where("email", email.toLowerCase().trim())
-      .whereIn("role", ["donor", "corporate"])
-      .select("id", "email", "name", "role")
-      .first();
+    const normalizedSearch = searchValue.trim().toLowerCase();
+    const likeSearch = `%${normalizedSearch}%`;
 
-    if (!donor) {
-      res.status(404).json({ error: "Donor not found", donor: null });
-      return;
-    }
+    const matches = await db("users")
+      .leftJoin("donors", "users.id", "donors.user_id")
+      .leftJoin("organizations", "users.id", "organizations.user_id")
+      .whereNot("users.id", userId)
+      .whereRaw("LOWER(users.role) IN (?, ?, ?)", [
+        "donor",
+        "corporate",
+        "ngo",
+      ])
+      .andWhere((builder) => {
+        builder
+          .whereRaw("LOWER(users.email) LIKE ?", [likeSearch])
+          .orWhereRaw("LOWER(donors.name) LIKE ?", [likeSearch])
+          .orWhereRaw("LOWER(organizations.name) LIKE ?", [likeSearch]);
+      })
+      .distinct(
+        "users.id",
+        "users.email",
+        "users.role",
+        db.raw("COALESCE(organizations.name, donors.name) as name"),
+      )
+      .orderByRaw(
+        "CASE WHEN LOWER(users.email) = ? OR LOWER(COALESCE(organizations.name, donors.name)) = ? THEN 0 ELSE 1 END",
+        [normalizedSearch, normalizedSearch],
+      )
+      .orderByRaw("COALESCE(organizations.name, donors.name) ASC")
+      .limit(10);
+
+    const users = matches.map((match) => {
+      const role = match.role?.toLowerCase();
+
+      return {
+        id: match.id,
+        email: match.email,
+        name: match.name || null,
+        role,
+        userType: normalizeChatUserType(role),
+      };
+    });
 
     res.status(200).json({
-      message: "Donor found",
-      donor: {
-        id: donor.id,
-        email: donor.email,
-        name: donor.name,
-        role: donor.role,
-        userType: normalizeChatUserType(donor.role),
-      },
+      message: users.length > 0 ? "Users found" : "No users found",
+      users,
+      // Keep the previous response field while older clients use /search-donor.
+      donor: users[0] || null,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: "Unable to search for donor",
+      error: "Unable to search for users",
       details: error instanceof Error ? error.message : "Unknown error",
     });
   }

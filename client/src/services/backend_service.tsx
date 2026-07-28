@@ -17,15 +17,25 @@ interface BackendServiceConfig extends AxiosRequestConfig {
   }
 }
 
+type BackendServiceOptions<TData, TError> = UseMutationOptions<
+  TData,
+  TError,
+  any,
+  unknown
+> & {
+  suppressErrorToast?: boolean
+}
+
 const useBackendService = <TData, TError>(
   endpoint: string,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
-  options: UseMutationOptions<TData, TError, any, unknown> = {}
+  options: BackendServiceOptions<TData, TError> = {}
 ): UseMutationResult<TData, TError, any, unknown> => {
   const { authState } = useContent()
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const url = baseURL + endpoint
+  const { suppressErrorToast = false, ...mutationOptions } = options
 
   const backendService = async (
     payload: any,
@@ -84,12 +94,17 @@ const useBackendService = <TData, TError>(
   }
 
   const enhancedOptions = {
-    ...options,
+    ...mutationOptions,
     onError: (error: any, variables: any, context: unknown) => {
       if (!navigator.onLine) {
-        toast.error(
-          'No internet connection. Please check your network and try again.'
-        )
+        if (!suppressErrorToast) {
+          toast.error(
+            'No internet connection. Please check your network and try again.'
+          )
+        }
+        if (mutationOptions.onError) {
+          mutationOptions.onError(error, variables, context)
+        }
         return
       }
 
@@ -101,8 +116,8 @@ const useBackendService = <TData, TError>(
         return
       }
 
-      if (options.onError) {
-        options.onError(error, variables, context)
+      if (mutationOptions.onError) {
+        mutationOptions.onError(error, variables, context)
       }
     }
   }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { loadStripe } from "@stripe/stripe-js";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -19,6 +20,11 @@ interface FundWalletModalProps {
   toggle: () => void;
 }
 
+interface ProjectOption {
+  value: string | number;
+  label: string;
+}
+
 export default function FundWalletModal({
   isOpen,
   toggle,
@@ -32,7 +38,7 @@ export default function FundWalletModal({
   });
   const { authState, currentState } = useContent();
   const [stripe, setStripe] = useState<any>(null);
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<ProjectOption[]>([]);
   const [paystackPublicKey, setPaystackPublicKey] = useState<string | null>(
     null
   );
@@ -43,7 +49,6 @@ export default function FundWalletModal({
   const isFormComplete =
     formData.country &&
     formData.amount &&
-    formData.project &&
     formData.remark &&
     formData.paymentMethod;
 
@@ -59,19 +64,42 @@ export default function FundWalletModal({
     }));
   };
 
-  const { mutate: fetchUsers } = useBackendService("/allprojects", "GET", {
-    onSuccess: (res: any) => {
-      setProjects(
-        res.projects.map((project) => ({
-          value: project.id,
-          label: project.title,
-        }))
-      );
-    },
-    onError: () => {
-      toast.error("Failed to fetch Projects.");
-    },
-  });
+  const setProjectOptions = (projectList: any[]) => {
+    setProjects(
+      projectList.map((project) => ({
+        value: project.id,
+        label: project.title,
+      }))
+    );
+  };
+
+  const { mutate: fetchOrganizationProjects } = useBackendService(
+    "/allprojects",
+    "GET",
+    {
+      onSuccess: (res: any) => {
+        setProjectOptions(res.projects || []);
+      },
+      onError: () => {
+        toast.error("Failed to fetch projects.");
+        setProjects([]);
+      },
+    }
+  );
+
+  const { mutate: fetchDonorProjects } = useBackendService(
+    "/auth/donor/projects",
+    "GET",
+    {
+      onSuccess: (res: any) => {
+        setProjectOptions(res.data || []);
+      },
+      onError: () => {
+        toast.error("Failed to fetch your projects.");
+        setProjects([]);
+      },
+    }
+  );
 
   const { mutate: paymentGateways } = useBackendService(
     "/admin/payment-gateways",
@@ -207,33 +235,33 @@ export default function FundWalletModal({
   }, [stripePublicKey]);
 
   useEffect(() => {
-    if (isOpen) {
-      paymentGateways({});
+    if (!isOpen) return;
 
-      fetchUsers({
+    paymentGateways({});
+
+    if (role === "donor" || role === "corporate") {
+      fetchDonorProjects({ status: "active" });
+    } else if (
+      (role === "NGO" || role === "ngo") &&
+      currentState.user?.id
+    ) {
+      fetchOrganizationProjects({
         limit: 1000,
         projectType: "present",
         status: "active",
         organization_id: currentState.user.id,
       });
-
-      if (role === "NGO") {
-        fetchUsers({
-          limit: 1000,
-          projectType: "present",
-          status: "active",
-          organization_id: currentState.user.id,
-        });
-      } else {
-        fetchUsers({
-          limit: 1000,
-          projectType: "present",
-          status: "active",
-          // donor_id: currentState.user.id,
-        });
-      }
+    } else {
+      setProjects([]);
     }
-  }, [isOpen]);
+  }, [
+    isOpen,
+    role,
+    currentState.user?.id,
+    paymentGateways,
+    fetchDonorProjects,
+    fetchOrganizationProjects,
+  ]);
 
   const handlePaystackPayment = () => {
     if (!paystackPublicKey) {
@@ -256,8 +284,8 @@ export default function FundWalletModal({
       currency: paymentData.currency,
       ref: paymentData.reference,
       metadata: {
-        project: formData.project,
         remark: formData.remark,
+        ...(formData.project ? { project: formData.project } : {}),
       },
       callback: function (response: any) {
         toast.success("Payment successful: " + response.reference);
@@ -269,8 +297,8 @@ export default function FundWalletModal({
           status: response.status,
           currency: paymentData.currency,
           amount: parseFloat(formData.amount),
-          project_id: formData.project,
           remark: formData.remark,
+          ...(formData.project ? { project_id: formData.project } : {}),
         };
         fundPost(paymentDetails);
         setIsProcessing(false);
@@ -298,11 +326,11 @@ export default function FundWalletModal({
       const sessionData = {
         amount: Math.round(parseFloat(formData.amount) * 100),
         currency: "usd",
-        project_id: formData.project,
         remark: formData.remark,
         user_id: authState.user.id,
         success_url: `${baseUrl}?status=success`,
         cancel_url: `${baseUrl}?status=cancelled`,
+        ...(formData.project ? { project_id: formData.project } : {}),
       };
 
       createStripeSession(sessionData);
@@ -393,8 +421,8 @@ export default function FundWalletModal({
                 height: "auto",
               }}
             >
-              <option value="" disabled>
-                Attach project
+              <option value="">
+                Attach project (optional)
               </option>
               {projects.map((project) => (
                 <option key={project.value} value={project.value}>

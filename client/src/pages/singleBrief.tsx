@@ -11,11 +11,12 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Badge, Button, Card, CardBody, Col, Container, Row } from "reactstrap";
-import place from "../assets/images/home/GivingBackNG-logo.svg";
+import sponsorPlaceholder from "../assets/images/home/GivingBackNG-logo.svg";
 import Loading from "../components/home/loading";
 import SubmitProposalModal from "../components/SubmitProposalModal";
 import useBackendService from "../services/backend_service";
 import { capitalizeFirstLetter } from "../services/capitalize";
+import { getProjectImage } from "../services/project-image";
 import "./singleBrief.css";
 
 const SingleBriefs: React.FC<any> = () => {
@@ -125,7 +126,7 @@ const SingleBriefs: React.FC<any> = () => {
           <Row className="align-items-start">
             <Col xs="auto" className="mb-3 mb-sm-0">
               <img
-                src={brief.projectImages?.[0]?.image || place}
+                src={getProjectImage(brief)}
                 alt={brief.title || "Brief"}
                 className="banner-img"
               />
@@ -388,7 +389,7 @@ const SingleBriefs: React.FC<any> = () => {
                 <Row className="mt-3">
                   <Col xs="auto">
                     <img
-                      src={brief.donor?.image || place}
+                      src={brief.donor?.image || sponsorPlaceholder}
                       alt={brief.donor?.name || "Sponsor"}
                       className="sponsor-logo"
                     />

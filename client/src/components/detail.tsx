@@ -7,6 +7,7 @@ import { toast } from 'react-toastify'
 import { Button, Col, Modal, Row } from 'reactstrap'
 import useBackendService from '../services/backend_service'
 import { capitalizeFirstLetter } from '../services/capitalize'
+import { getProjectImage } from '../services/project-image'
 import { useContent } from '../services/useContext'
 import Loading from './home/loading'
 
@@ -32,7 +33,7 @@ const Detail = (props: { projectID: number; isAdmin?: boolean }) => {
     {
       onSuccess: (res: any) => {
         setpreviousProject(res.projects[0])
-        setImg(res.projects[0].projectImages[0].image)
+        setImg(getProjectImage(res.projects[0]))
       },
       onError: () => {
         toast.error('Error getting projects data')

@@ -8,7 +8,7 @@ import {
   getOrCreateChat,
   markChatAsRead,
   markMessageAsRead,
-  searchDonor,
+  searchUsers,
   sendMessage,
   streamChatEvents,
 } from "./chat.controller";
@@ -22,7 +22,8 @@ router.use(secureLogin);
 router.route("/").get(getChats);
 router.route("/").post(getOrCreateChat);
 router.route("/events/stream").get(streamChatEvents);
-router.route("/search-donor").post(searchDonor);
+router.route("/search-users").post(searchUsers);
+router.route("/search-donor").post(searchUsers);
 router.route("/:chatId").delete(deleteChat);
 
 // Message routes

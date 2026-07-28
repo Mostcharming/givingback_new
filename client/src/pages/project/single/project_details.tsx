@@ -10,6 +10,7 @@ import MileStoneUpdateModal from "../../../components/MilestoneUpdateModal";
 import Tables from "../../../components/tables";
 import ViewMileStoneUpdateModal from "../../../components/ViewMilestoneUpdateModal";
 import useBackendService from "../../../services/backend_service";
+import { getProjectImage } from "../../../services/project-image";
 import { useContent } from "../../../services/useContext";
 import RespondToBriefModal from "../../RespondToBriefModal";
 
@@ -279,15 +280,16 @@ const ProjectSummary: React.FC<any> = ({ project, ngo = null }) => {
     <>
       <div className="mt-4" style={{ backgroundColor: "white" }}>
         <div style={{ padding: "30px" }}>
-          {project.images && project.images.length > 0 ? (
-            <img
-              src={project.images[0]?.image}
-              alt="Project"
-              style={{ width: "100%" }}
-            />
-          ) : (
-            <p>No image available</p>
-          )}
+          <img
+            src={getProjectImage(project)}
+            alt={`${project.title || "Project"} cover`}
+            style={{
+              width: "100%",
+              maxHeight: "560px",
+              objectFit: "cover",
+              borderRadius: "10px",
+            }}
+          />
 
           <div className="mt-4">
             <span
