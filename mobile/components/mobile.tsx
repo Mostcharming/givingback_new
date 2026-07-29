@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   pageContent: {
+    paddingBottom: 96,
     paddingHorizontal: 18,
   },
   sectionHeader: {
