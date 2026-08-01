@@ -43,7 +43,6 @@ const getCounts = (req, res, next) => __awaiter(void 0, void 0, void 0, function
 exports.getCounts = getCounts;
 const updateUserByAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const transaction = yield config_1.default.transaction();
     try {
         const { name, phone, website, interest_area, cac, bankName, accountName, accountNumber, state, city_lga, active, address, } = req.body;
         const userDataToUpdate = {
@@ -104,11 +103,9 @@ const updateUserByAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, 
                 .where({ user_id: user.user_id })
                 .update(banksUpdateData);
         }
-        yield transaction.commit();
         res.status(200).json({ message: "User details updated successfully" });
     }
     catch (error) {
-        yield transaction.rollback();
         console.error(error); // Log error for debugging
         res.status(500).json({ error: "Internal server error" });
     }
@@ -289,7 +286,6 @@ const feedBack = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
 });
 exports.feedBack = feedBack;
 const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const transaction = yield config_1.default.transaction();
     try {
         const projectId = req.params.id;
         const { status } = req.body;
@@ -309,11 +305,9 @@ const updateProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
             status,
         });
         // Uncomment and type further logic if required, e.g., sponsors or beneficiaries updates
-        yield transaction.commit();
         res.status(200).json({ message: "Previous Project updated successfully" });
     }
     catch (error) {
-        yield transaction.rollback();
         console.error("Error updating project:", error);
         res.status(500).json({ error: "Unable to update project" });
     }
@@ -461,7 +455,6 @@ const getAllDonors = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.getAllDonors = getAllDonors;
 const createProject = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const transaction = yield config_1.default.transaction();
     try {
         const { title, 
         // sponsor,
@@ -579,7 +572,6 @@ const createProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
                 },
             }).sendEmail("adminbriefngo", "New Project assigned");
         })));
-        yield transaction.commit();
         const donor2 = yield (0, config_1.default)("donors").where({ id: donor_id }).first();
         const donor = yield (0, config_1.default)("users").where({ id: donor2.user_id }).first();
         const donorName = donor2.name;
@@ -600,9 +592,8 @@ const createProject = (req, res, next) => __awaiter(void 0, void 0, void 0, func
         res.status(201).json({ message: "Briefs created successfully" });
     }
     catch (error) {
-        yield transaction.rollback();
         console.error("Error creating projects:", error);
-        // res.status(500).json({ error: "Unable to create projects" });
+        res.status(500).json({ error: "Unable to create projects" });
     }
 });
 exports.createProject = createProject;

@@ -5,6 +5,15 @@ import { fetchUsers } from "../../helper/getusers";
 import { User, UserRequest } from "../../interfaces";
 import Email from "../../utils/mail";
 
+class TransactionRequestError extends Error {
+  constructor(
+    public readonly statusCode: number,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
 export const getCountsHandler = async (
   req: UserRequest,
   res: Response,
@@ -52,8 +61,6 @@ export const newDonor = async (
   res: Response,
   next: NextFunction
 ) => {
-  const transaction = await db.transaction();
-
   try {
     const user_id = (req.user as User)?.id;
 
@@ -126,8 +133,6 @@ export const newDonor = async (
       token: 0,
     });
 
-    await transaction.commit();
-
     //email
     const token = 0;
     const url = name ? name : "";
@@ -148,7 +153,6 @@ export const newDonor = async (
       donor: newDonor,
     });
   } catch (error) {
-    await transaction.rollback();
     console.error(error);
 
     res.status(500).json({
@@ -314,8 +318,6 @@ export const getRecipient = async (req: any, res: Response) => {
 
 // Donate
 export const donate = async (req: any, res: Response) => {
-  const trx = await db.transaction();
-
   try {
     const {
       amount,
@@ -333,53 +335,59 @@ export const donate = async (req: any, res: Response) => {
 
     const donationAmount = parseFloat(amount);
 
-    const wallet = await trx("wallet").where("user_id", donor_id).first();
+    const { donationId, updatedBalance } = await db.transaction(async (trx) => {
+      const wallet = await trx("wallet").where("user_id", donor_id).first();
 
-    if (!wallet) {
-      return res
-        .status(404)
-        .json({ message: "Wallet not found for this donor" });
-    }
+      if (!wallet) {
+        throw new TransactionRequestError(
+          404,
+          "Wallet not found for this donor",
+        );
+      }
 
-    if (wallet.balance < donationAmount) {
-      return res
-        .status(400)
-        .json({ message: "Insufficient balance in wallet" });
-    }
+      if (wallet.balance < donationAmount) {
+        throw new TransactionRequestError(
+          400,
+          "Insufficient balance in wallet",
+        );
+      }
 
-    const updatedBalance = wallet.balance - donationAmount;
-    await trx("wallet")
-      .where("user_id", donor_id)
-      .update({ balance: updatedBalance });
+      const updatedBalance = wallet.balance - donationAmount;
+      await trx("wallet")
+        .where("user_id", donor_id)
+        .update({ balance: updatedBalance });
 
-    const dono = await trx("donors")
-      .where({ user_id: donor_id })
-      .select("id")
-      .first();
+      const dono = await trx("donors")
+        .where({ user_id: donor_id })
+        .select("id")
+        .first();
 
-    const [donationId] = await trx("donations").insert(
-      {
-        amount,
-        project_id,
-        ngo_id,
-        donor_id: dono?.id,
-        type,
-      },
-      ["id"]
-    );
+      const [donationId] = await trx("donations").insert(
+        {
+          amount,
+          project_id,
+          ngo_id,
+          donor_id: dono?.id,
+          type,
+        },
+        ["id"],
+      );
 
-    const ngoWallet = await trx("wallet").where("user_id", ngo_id).first();
+      const ngoWallet = await trx("wallet").where("user_id", ngo_id).first();
 
-    if (!ngoWallet) {
-      return res.status(404).json({ message: "Wallet not found for this NGO" });
-    }
+      if (!ngoWallet) {
+        throw new TransactionRequestError(
+          404,
+          "Wallet not found for this NGO",
+        );
+      }
 
-    const updatedNgoBalance = ngoWallet.balance + donationAmount;
-    await trx("wallet")
-      .where("user_id", ngo_id)
-      .update({ balance: updatedNgoBalance });
+      await trx("wallet")
+        .where("user_id", ngo_id)
+        .update({ balance: ngoWallet.balance + donationAmount });
 
-    await trx.commit();
+      return { donationId, updatedBalance };
+    });
 
     //email
 
@@ -430,8 +438,10 @@ export const donate = async (req: any, res: Response) => {
       updatedBalance,
     });
   } catch (error) {
-    await trx.rollback();
     console.error(error);
+    if (error instanceof TransactionRequestError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
     res.status(500).json({ message: "Error adding donation" });
   }
 };
@@ -626,8 +636,6 @@ export const addbrief = async (
   res: any,
   next: NextFunction
 ): Promise<void> => {
-  const transaction = await db.transaction();
-
   try {
     const userId = req.user.id;
 
@@ -797,8 +805,6 @@ export const addbrief = async (
       .where({ user_id: userId })
       .decrement("balance", totalFunds);
 
-    await transaction.commit();
-
     const adminEmail = "info@givingbackng.org";
 
     const adminAdditionalData = {
@@ -821,7 +827,6 @@ export const addbrief = async (
 
     res.status(201).json({ message: "Briefs created successfully" });
   } catch (error) {
-    await transaction.rollback();
     console.error("Error creating projects:", error);
     res.status(500).json({ error: "Unable to create projects" });
   }

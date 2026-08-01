@@ -4,13 +4,10 @@ import cors, { CorsOptions } from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import morgan from "morgan";
-import cron from "node-cron";
 import path from "path";
 
 import routes from "../components/index";
 import { notificationMiddleware } from "../middleware/notifications";
-
-import { fetchRateFromGoogle } from "../utils/rateUtils";
 
 const app = express();
 app.set("view engine", "pug");
@@ -75,8 +72,5 @@ app.all("*", (err: any, req: Request, res: Response, next: NextFunction) => {
   const status = err.code || 500;
   res.status(status).json({ error: err.message });
 });
-
-// Fetch rate every 5 minutes using cron job
-cron.schedule("*/5 * * * *", fetchRateFromGoogle);
 
 export default app;

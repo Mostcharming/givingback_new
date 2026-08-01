@@ -17,6 +17,9 @@ const stripe_1 = __importDefault(require("stripe"));
 const config_1 = __importDefault(require("../../config"));
 const getProjects_1 = require("../../helper/getProjects");
 const mail_1 = __importDefault(require("../../utils/mail"));
+const rateUtils_1 = require("../../utils/rateUtils");
+class UserNotFoundError extends Error {
+}
 function initializeStripe() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -115,36 +118,29 @@ const makeDonation = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         let amounts = Number(amount);
         let conversionRate = 1; // Default rate for NGN
         if (currency === "usd") {
-            // Fetch the rate from the `rates` table
-            const rateEntry = yield (0, config_1.default)("rates").select("rate").first();
-            if (!rateEntry) {
-                res.status(500).json({ error: "Exchange rate not found." });
-                return;
-            }
-            conversionRate = rateEntry.rate;
+            conversionRate = yield (0, rateUtils_1.getUsdToNgnRate)();
             amounts = amounts * conversionRate;
         }
-        const trx = yield config_1.default.transaction();
-        const [donationId] = yield trx("donations")
-            .insert({
-            amount: amounts,
-            project_id: projectId,
-            ngo_id: ngoId,
-            type,
-        })
-            .returning("id");
-        // Save the rate in the `donation_rates` table
-        yield trx("donation_rates").insert({
-            donation_id: donationId,
-            rate: conversionRate,
-        });
-        yield trx("transactions").insert({
-            donation_id: donationId,
-            payment_gateway,
-            status: "success",
-            transaction_id: transactionId,
-        });
-        yield trx.commit();
+        yield config_1.default.transaction((trx) => __awaiter(void 0, void 0, void 0, function* () {
+            const [donationId] = yield trx("donations")
+                .insert({
+                amount: amounts,
+                project_id: projectId,
+                ngo_id: ngoId,
+                type,
+            })
+                .returning("id");
+            yield trx("donation_rates").insert({
+                donation_id: donationId,
+                rate: conversionRate,
+            });
+            yield trx("transactions").insert({
+                donation_id: donationId,
+                payment_gateway,
+                status: "success",
+                transaction_id: transactionId,
+            });
+        }));
         let userData = yield (0, config_1.default)("organizations").where("user_id", ngoId).first();
         if (!userData) {
             if (!userData) {
@@ -237,31 +233,27 @@ exports.stripeHandler = stripeHandler;
 const handleDonation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user_id, amount, payment_gateway, transactionId, currency } = req.body;
     let amounts = Number(amount);
-    const trx = yield config_1.default.transaction();
     try {
         let conversionRate = 1;
         if (currency === "usd") {
-            const rateEntry = yield (0, config_1.default)("rates").select("rate").first();
-            if (!rateEntry) {
-                res.status(500).json({ error: "Exchange rate not found." });
-                yield trx.rollback();
-                return;
-            }
-            conversionRate = rateEntry.rate;
+            conversionRate = yield (0, rateUtils_1.getUsdToNgnRate)();
             amounts = amounts * conversionRate;
         }
-        let donor = yield (0, config_1.default)("donors").where({ user_id }).select("id").first();
-        let donationId;
-        // Check if the user is a donor first
-        if (!donor) {
-            // If not a donor, check if the user is an organization
-            const organization = yield (0, config_1.default)("organizations")
+        const donationId = yield config_1.default.transaction((trx) => __awaiter(void 0, void 0, void 0, function* () {
+            const donor = yield trx("donors")
                 .where({ user_id })
                 .select("id")
                 .first();
-            // If the user is an organization, insert the donation into the database with the NGO ID
-            if (organization) {
-                [donationId] = yield trx("donations")
+            let insertedDonationId;
+            if (!donor) {
+                const organization = yield trx("organizations")
+                    .where({ user_id })
+                    .select("id")
+                    .first();
+                if (!organization) {
+                    throw new UserNotFoundError("User not found.");
+                }
+                [insertedDonationId] = yield trx("donations")
                     .insert({
                     amount: amounts,
                     ngo_id: organization.id,
@@ -270,31 +262,29 @@ const handleDonation = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     .returning("id");
             }
             else {
-                // Handle the case where neither donor nor organization is found
-                return res.status(404).json({ error: "User not found." });
+                [insertedDonationId] = yield trx("donations")
+                    .insert({
+                    amount: amounts,
+                    donor_id: donor.id,
+                    type: "Wallet fund",
+                })
+                    .returning("id");
             }
-        }
-        else {
-            [donationId] = yield trx("donations")
-                .insert({
-                amount: amounts,
-                donor_id: donor.id,
-                type: "Wallet fund",
-            })
-                .returning("id");
-        }
-        yield trx("donation_rates").insert({
-            donation_id: donationId,
-            rate: conversionRate,
-        });
-        yield trx("transactions").insert({
-            donation_id: donationId,
-            payment_gateway,
-            status: "success",
-            transaction_id: transactionId,
-        });
-        yield trx("wallet").where("user_id", user_id).increment("balance", amounts);
-        yield trx.commit();
+            yield trx("donation_rates").insert({
+                donation_id: insertedDonationId,
+                rate: conversionRate,
+            });
+            yield trx("transactions").insert({
+                donation_id: insertedDonationId,
+                payment_gateway,
+                status: "success",
+                transaction_id: transactionId,
+            });
+            yield trx("wallet")
+                .where("user_id", user_id)
+                .increment("balance", amounts);
+            return insertedDonationId;
+        }));
         let userData = yield (0, config_1.default)("organizations").where("user_id", user_id).first();
         if (!userData) {
             userData = yield (0, config_1.default)("donors").where("user_id", user_id).first();
@@ -323,7 +313,10 @@ const handleDonation = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
     catch (error) {
         console.log(error);
-        yield trx.rollback();
+        if (error instanceof UserNotFoundError) {
+            res.status(404).json({ error: error.message });
+            return;
+        }
         res.status(500).json({ error: "Unable to process donation." });
     }
 });
@@ -334,45 +327,37 @@ const handleStripeCheckoutSuccess = (req, res) => __awaiter(void 0, void 0, void
     if (!sessionId) {
         return res.status(400).json({ error: "Missing session_id" });
     }
-    const trx = yield config_1.default.transaction();
     try {
         const stripe = yield initializeStripe();
         const session = yield stripe.checkout.sessions.retrieve(sessionId);
-        if (session.payment_status === "paid") {
-            let amounts = ((_a = session.amount_total) !== null && _a !== void 0 ? _a : 0) / 100;
-            let conversionRate = 1;
-            const transactionId = session.payment_intent;
-            const rateEntry = yield (0, config_1.default)("rates").select("rate").first();
-            if (!rateEntry) {
-                res.status(500).json({ error: "Exchange rate not found." });
-                yield trx.rollback();
-                return;
-            }
-            conversionRate = rateEntry.rate;
-            amounts = amounts * conversionRate;
-            let donor = yield (0, config_1.default)("donors").where({ user_id }).select("id").first();
+        if (session.payment_status !== "paid") {
+            return res.json({ success: false, status: session.payment_status });
+        }
+        let amounts = ((_a = session.amount_total) !== null && _a !== void 0 ? _a : 0) / 100;
+        const conversionRate = yield (0, rateUtils_1.getUsdToNgnRate)();
+        const transactionId = session.payment_intent;
+        amounts = amounts * conversionRate;
+        yield config_1.default.transaction((trx) => __awaiter(void 0, void 0, void 0, function* () {
+            const donor = yield trx("donors")
+                .where({ user_id })
+                .select("id")
+                .first();
             let donationId;
-            // Check if the user is a donor first
             if (!donor) {
-                // If not a donor, check if the user is an organization
-                const organization = yield (0, config_1.default)("organizations")
+                const organization = yield trx("organizations")
                     .where({ user_id })
                     .select("id")
                     .first();
-                // If the user is an organization, insert the donation into the database with the NGO ID
-                if (organization) {
-                    [donationId] = yield trx("donations")
-                        .insert({
-                        amount: amounts,
-                        ngo_id: organization.id,
-                        type: "Wallet fund",
-                    })
-                        .returning("id");
+                if (!organization) {
+                    throw new UserNotFoundError("User not found.");
                 }
-                else {
-                    // Handle the case where neither donor nor organization is found
-                    return res.status(404).json({ error: "User not found." });
-                }
+                [donationId] = yield trx("donations")
+                    .insert({
+                    amount: amounts,
+                    ngo_id: organization.id,
+                    type: "Wallet fund",
+                })
+                    .returning("id");
             }
             else {
                 [donationId] = yield trx("donations")
@@ -396,42 +381,41 @@ const handleStripeCheckoutSuccess = (req, res) => __awaiter(void 0, void 0, void
             yield trx("wallet")
                 .where("user_id", user_id)
                 .increment("balance", amounts);
-            yield trx.commit();
-            let userData = yield (0, config_1.default)("organizations")
-                .where("user_id", user_id)
-                .first();
-            if (!userData) {
-                userData = yield (0, config_1.default)("donors").where("user_id", user_id).first();
-            }
-            const userDataE = yield (0, config_1.default)("users").where("id", user_id).first();
-            const email = userDataE.email;
-            const token = 0;
-            const url = userData.name;
-            const additionalData = {
-                currency: "usd",
-                transactionId: transactionId,
-                ngoName: userData.name,
-                userName: userData.name,
-                amount: amount,
-            };
-            yield new mail_1.default({ email: email, url, token, additionalData }).sendEmail("fundngo", "Funding Received");
-            yield new mail_1.default({
-                email: "info@givingbackng.org",
-                url,
-                token,
-                additionalData,
-            }).sendEmail("adminwallet", "New Funding");
-            res.json({
-                success: true,
-                message: "Stripe checkout verfied and completed",
-            });
+        }));
+        let userData = yield (0, config_1.default)("organizations")
+            .where("user_id", user_id)
+            .first();
+        if (!userData) {
+            userData = yield (0, config_1.default)("donors").where("user_id", user_id).first();
         }
-        else {
-            return res.json({ success: false, status: session.payment_status });
-        }
+        const userDataE = yield (0, config_1.default)("users").where("id", user_id).first();
+        const email = userDataE.email;
+        const token = 0;
+        const url = userData.name;
+        const additionalData = {
+            currency: "usd",
+            transactionId: transactionId,
+            ngoName: userData.name,
+            userName: userData.name,
+            amount: amount,
+        };
+        yield new mail_1.default({ email: email, url, token, additionalData }).sendEmail("fundngo", "Funding Received");
+        yield new mail_1.default({
+            email: "info@givingbackng.org",
+            url,
+            token,
+            additionalData,
+        }).sendEmail("adminwallet", "New Funding");
+        res.json({
+            success: true,
+            message: "Stripe checkout verfied and completed",
+        });
     }
     catch (error) {
         console.error("Stripe verification error:", error);
+        if (error instanceof UserNotFoundError) {
+            return res.status(404).json({ error: error.message });
+        }
         return res.status(500).json({ error: "Internal server error" });
     }
 });

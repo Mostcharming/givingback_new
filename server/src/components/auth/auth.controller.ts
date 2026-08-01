@@ -881,7 +881,7 @@ export const addSingleNGO = async (
   req: UserRequest,
   res: Response,
 ): Promise<void> => {
-  const transaction = await db.transaction();
+  let transaction: any;
 
   try {
     const {
@@ -927,6 +927,7 @@ export const addSingleNGO = async (
     const generatedPassword = generateRandomPassword(12);
     const hashedPassword = hash(generatedPassword.trim());
 
+    transaction = await db.transaction();
     const [userId] = await transaction("users").insert({
       email: mail,
       password: hashedPassword,
@@ -995,7 +996,9 @@ export const addSingleNGO = async (
       },
     });
   } catch (error) {
-    await transaction.rollback();
+    if (transaction && !transaction.isCompleted()) {
+      await transaction.rollback();
+    }
     console.error("Add Single NGO Error:", error);
     res.status(500).json({
       error: "An error occurred while adding the NGO",
@@ -1445,7 +1448,7 @@ export const createProject = async (
   req: UserRequest,
   res: Response,
 ): Promise<void> => {
-  const transaction = await db.transaction();
+  let transaction: any;
 
   try {
     const userId = (req.user as User)?.id;
@@ -1627,6 +1630,7 @@ export const createProject = async (
       // For public, do NOT add to organization profile
     }
 
+    transaction = await db.transaction();
     const [projectId] = await transaction("project").insert({
       title: title.trim(),
       category,
@@ -1835,7 +1839,9 @@ export const createProject = async (
       },
     });
   } catch (error) {
-    await transaction.rollback();
+    if (transaction && !transaction.isCompleted()) {
+      await transaction.rollback();
+    }
     console.error("Create Project Error:", error);
 
     res.status(500).json({

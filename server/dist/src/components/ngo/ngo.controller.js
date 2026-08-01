@@ -98,7 +98,6 @@ const create = (req, res, next) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.create = create;
 const createp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const transaction = yield config_1.default.transaction();
     try {
         const { title, category, duration, description, status, cost, raised, sponsors, beneficiaries, } = req.body;
         const missingFields = [];
@@ -203,7 +202,6 @@ const createp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 }
             })));
         }
-        yield transaction.commit();
         const token = 0;
         const url = "";
         const additionalData = {
@@ -220,7 +218,6 @@ const createp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(201).json({ message: "Previous Project created successfully" });
     }
     catch (error) {
-        yield transaction.rollback();
         console.error("Error creating project:", error);
         res.status(500).json({ error: "Unable to create project" });
     }
@@ -297,38 +294,42 @@ exports.addMilestoneUpdate = addMilestoneUpdate;
 const withdraw = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { amount, accountNumber, bank, saveAccount } = req.body;
-        const trx = yield config_1.default.transaction();
         let userData = yield (0, config_1.default)("organizations")
             .where("user_id", req.user.id)
             .first();
         let userData1 = yield (0, config_1.default)("users").where("id", req.user.id).first();
-        const [donationId] = yield trx("donations")
-            .insert({
-            amount,
-            ngo_id: userData.id,
-            type: "Withdrawal Request",
-        })
-            .returning("id");
-        yield trx("transactions").insert({
-            donation_id: donationId,
-            payment_gateway: "Paystack",
-            status: "pending",
-        });
-        yield trx("donation_messages").insert({
-            donation_id: donationId,
-            message: "A new withdrawal request has been created.",
-            subject: "Withdrawal Request",
-        });
-        if (saveAccount) {
-            const newBank = {
-                bankName: bank,
-                accountName: "",
-                accountNumber,
-                user_id: req.user.id,
-            };
-            yield trx("banks").insert(newBank);
+        if (!userData || !userData1) {
+            res.status(404).json({ error: "User not found" });
+            return;
         }
-        trx.commit();
+        yield config_1.default.transaction((trx) => __awaiter(void 0, void 0, void 0, function* () {
+            const [donationId] = yield trx("donations")
+                .insert({
+                amount,
+                ngo_id: userData.id,
+                type: "Withdrawal Request",
+            })
+                .returning("id");
+            yield trx("transactions").insert({
+                donation_id: donationId,
+                payment_gateway: "Paystack",
+                status: "pending",
+            });
+            yield trx("donation_messages").insert({
+                donation_id: donationId,
+                message: "A new withdrawal request has been created.",
+                subject: "Withdrawal Request",
+            });
+            if (saveAccount) {
+                const newBank = {
+                    bankName: bank,
+                    accountName: "",
+                    accountNumber,
+                    user_id: req.user.id,
+                };
+                yield trx("banks").insert(newBank);
+            }
+        }));
         const token = 0;
         const url = "name";
         const currentDate = new Date();
@@ -416,8 +417,6 @@ const respondBrief = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.respondBrief = respondBrief;
 //v2
 const createProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const trx = yield config_1.default.transaction();
     try {
         const { title, description, status, duration, startDate, endDate, interest_area, orgemail, cost, raised, milestones, sponsors, beneficiaries, } = req.body;
         // const organization = await db("organizations")
@@ -435,68 +434,70 @@ const createProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             });
         }
         const finalStatus = status === "completed" ? "unverified" : status;
-        const [project_id] = yield trx("project").insert({
-            title,
-            description,
-            status: finalStatus,
-            startDate,
-            endDate,
-            category: interest_area,
-            cost,
-            allocated: raised,
-            organization_id: organization.id,
-        });
-        if (milestones && milestones.length > 0) {
-            const milestoneData = milestones.map((m) => ({
-                milestone: m.milestone,
-                status: m.mstatus,
-                description: m.miledes,
-                target: 0,
-                project_id,
+        const project_id = yield config_1.default.transaction((trx) => __awaiter(void 0, void 0, void 0, function* () {
+            var _a;
+            const [projectId] = yield trx("project").insert({
+                title,
+                description,
+                status: finalStatus,
+                startDate,
+                endDate,
+                category: interest_area,
+                cost,
+                allocated: raised,
                 organization_id: organization.id,
-            }));
-            yield trx("milestone").insert(milestoneData);
-        }
-        if (sponsors && sponsors.length > 0) {
-            const sponsorUploads = Array.isArray(req.files)
-                ? req.files.filter((file) => file.fieldname.startsWith("sponsors["))
-                : [];
-            for (let i = 0; i < sponsors.length; i++) {
-                yield trx("project_sponsor").insert({
-                    name: sponsors[i].sponsor,
-                    image: ((_a = sponsorUploads === null || sponsorUploads === void 0 ? void 0 : sponsorUploads[i]) === null || _a === void 0 ? void 0 : _a.location) || null,
-                    description: sponsors[i].sdesc,
-                    project_id,
-                });
+            });
+            if (milestones && milestones.length > 0) {
+                const milestoneData = milestones.map((m) => ({
+                    milestone: m.milestone,
+                    status: m.mstatus,
+                    description: m.miledes,
+                    target: 0,
+                    project_id: projectId,
+                    organization_id: organization.id,
+                }));
+                yield trx("milestone").insert(milestoneData);
             }
-        }
-        if (beneficiaries && beneficiaries.length > 0) {
-            const beneficiaryData = beneficiaries.map((b) => ({
-                state: b.state || "",
-                city: b.city || "",
-                community: b.address,
-                contact: b.contact,
-                project_id,
-            }));
-            yield trx("beneficiary").insert(beneficiaryData);
-        }
-        const imageUploads = Array.isArray(req.files)
-            ? req.files.filter((file) => file.fieldname.startsWith("images["))
-            : [];
-        if (imageUploads && imageUploads.length > 0) {
-            const imageData = imageUploads.map((img) => ({
-                image: img.location,
-                project_id,
-            }));
-            yield trx("project_images").insert(imageData);
-        }
-        yield trx.commit();
+            if (sponsors && sponsors.length > 0) {
+                const sponsorUploads = Array.isArray(req.files)
+                    ? req.files.filter((file) => file.fieldname.startsWith("sponsors["))
+                    : [];
+                for (let i = 0; i < sponsors.length; i++) {
+                    yield trx("project_sponsor").insert({
+                        name: sponsors[i].sponsor,
+                        image: ((_a = sponsorUploads === null || sponsorUploads === void 0 ? void 0 : sponsorUploads[i]) === null || _a === void 0 ? void 0 : _a.location) || null,
+                        description: sponsors[i].sdesc,
+                        project_id: projectId,
+                    });
+                }
+            }
+            if (beneficiaries && beneficiaries.length > 0) {
+                const beneficiaryData = beneficiaries.map((b) => ({
+                    state: b.state || "",
+                    city: b.city || "",
+                    community: b.address,
+                    contact: b.contact,
+                    project_id: projectId,
+                }));
+                yield trx("beneficiary").insert(beneficiaryData);
+            }
+            const imageUploads = Array.isArray(req.files)
+                ? req.files.filter((file) => file.fieldname.startsWith("images["))
+                : [];
+            if (imageUploads && imageUploads.length > 0) {
+                const imageData = imageUploads.map((img) => ({
+                    image: img.location,
+                    project_id: projectId,
+                }));
+                yield trx("project_images").insert(imageData);
+            }
+            return projectId;
+        }));
         res
             .status(201)
             .json({ message: "Project created successfully", project_id });
     }
     catch (error) {
-        yield trx.rollback();
         res.status(500).json({ error: error.message });
     }
 });

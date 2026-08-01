@@ -17,6 +17,12 @@ const config_1 = __importDefault(require("../../config"));
 const dash_1 = require("../../helper/dash");
 const getusers_1 = require("../../helper/getusers");
 const mail_1 = __importDefault(require("../../utils/mail"));
+class TransactionRequestError extends Error {
+    constructor(statusCode, message) {
+        super(message);
+        this.statusCode = statusCode;
+    }
+}
 const getCountsHandler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -55,7 +61,6 @@ const getCountsHandler = (req, res, next) => __awaiter(void 0, void 0, void 0, f
 exports.getCountsHandler = getCountsHandler;
 const newDonor = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const transaction = yield config_1.default.transaction();
     try {
         const user_id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         // Fetch user data
@@ -112,7 +117,6 @@ const newDonor = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
             status: 1,
             token: 0,
         });
-        yield transaction.commit();
         //email
         const token = 0;
         const url = name ? name : "";
@@ -130,7 +134,6 @@ const newDonor = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         });
     }
     catch (error) {
-        yield transaction.rollback();
         console.error(error);
         res.status(500).json({
             error: "Unable to create donor",
@@ -264,45 +267,41 @@ const getRecipient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.getRecipient = getRecipient;
 // Donate
 const donate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const trx = yield config_1.default.transaction();
     try {
         const { amount, project_id, ngo_id, donor_id, type = "Donated", } = req.body;
         const donationAmount = parseFloat(amount);
-        const wallet = yield trx("wallet").where("user_id", donor_id).first();
-        if (!wallet) {
-            return res
-                .status(404)
-                .json({ message: "Wallet not found for this donor" });
-        }
-        if (wallet.balance < donationAmount) {
-            return res
-                .status(400)
-                .json({ message: "Insufficient balance in wallet" });
-        }
-        const updatedBalance = wallet.balance - donationAmount;
-        yield trx("wallet")
-            .where("user_id", donor_id)
-            .update({ balance: updatedBalance });
-        const dono = yield trx("donors")
-            .where({ user_id: donor_id })
-            .select("id")
-            .first();
-        const [donationId] = yield trx("donations").insert({
-            amount,
-            project_id,
-            ngo_id,
-            donor_id: dono === null || dono === void 0 ? void 0 : dono.id,
-            type,
-        }, ["id"]);
-        const ngoWallet = yield trx("wallet").where("user_id", ngo_id).first();
-        if (!ngoWallet) {
-            return res.status(404).json({ message: "Wallet not found for this NGO" });
-        }
-        const updatedNgoBalance = ngoWallet.balance + donationAmount;
-        yield trx("wallet")
-            .where("user_id", ngo_id)
-            .update({ balance: updatedNgoBalance });
-        yield trx.commit();
+        const { donationId, updatedBalance } = yield config_1.default.transaction((trx) => __awaiter(void 0, void 0, void 0, function* () {
+            const wallet = yield trx("wallet").where("user_id", donor_id).first();
+            if (!wallet) {
+                throw new TransactionRequestError(404, "Wallet not found for this donor");
+            }
+            if (wallet.balance < donationAmount) {
+                throw new TransactionRequestError(400, "Insufficient balance in wallet");
+            }
+            const updatedBalance = wallet.balance - donationAmount;
+            yield trx("wallet")
+                .where("user_id", donor_id)
+                .update({ balance: updatedBalance });
+            const dono = yield trx("donors")
+                .where({ user_id: donor_id })
+                .select("id")
+                .first();
+            const [donationId] = yield trx("donations").insert({
+                amount,
+                project_id,
+                ngo_id,
+                donor_id: dono === null || dono === void 0 ? void 0 : dono.id,
+                type,
+            }, ["id"]);
+            const ngoWallet = yield trx("wallet").where("user_id", ngo_id).first();
+            if (!ngoWallet) {
+                throw new TransactionRequestError(404, "Wallet not found for this NGO");
+            }
+            yield trx("wallet")
+                .where("user_id", ngo_id)
+                .update({ balance: ngoWallet.balance + donationAmount });
+            return { donationId, updatedBalance };
+        }));
         //email
         let userData = yield (0, config_1.default)("organizations").where("user_id", ngo_id).first();
         let userData4 = yield (0, config_1.default)("users").where("id", ngo_id).first();
@@ -346,8 +345,10 @@ const donate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
     }
     catch (error) {
-        yield trx.rollback();
         console.error(error);
+        if (error instanceof TransactionRequestError) {
+            return res.status(error.statusCode).json({ message: error.message });
+        }
         res.status(500).json({ message: "Error adding donation" });
     }
 });
@@ -448,7 +449,6 @@ const getAllUserPresentProjects = (req, res, next) => __awaiter(void 0, void 0, 
 });
 exports.getAllUserPresentProjects = getAllUserPresentProjects;
 const addbrief = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const transaction = yield config_1.default.transaction();
     try {
         const userId = req.user.id;
         const { title, startDate, endDate, description, objectives, category, cost, scope, beneficiary_overview, beneficiaries, milestones, donor_id, ngos, funds, } = req.body;
@@ -586,7 +586,6 @@ const addbrief = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         yield (0, config_1.default)("wallet")
             .where({ user_id: userId })
             .decrement("balance", totalFunds);
-        yield transaction.commit();
         const adminEmail = "info@givingbackng.org";
         const adminAdditionalData = {
             donorName,
@@ -606,7 +605,6 @@ const addbrief = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         res.status(201).json({ message: "Briefs created successfully" });
     }
     catch (error) {
-        yield transaction.rollback();
         console.error("Error creating projects:", error);
         res.status(500).json({ error: "Unable to create projects" });
     }
