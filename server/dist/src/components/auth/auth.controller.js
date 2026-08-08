@@ -712,7 +712,7 @@ function generateRandomPassword(length = 12) {
 }
 const addSingleNGO = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const transaction = yield config_1.default.transaction();
+    let transaction;
     try {
         const { name, email, phone, address, state, city_lga, interest_area, cac, website, accountName, accountNumber, bankName, bvn, } = req.body;
         const donorId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
@@ -735,6 +735,7 @@ const addSingleNGO = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         }
         const generatedPassword = generateRandomPassword(12);
         const hashedPassword = (0, general_1.hash)(generatedPassword.trim());
+        transaction = yield config_1.default.transaction();
         const [userId] = yield transaction("users").insert({
             email: mail,
             password: hashedPassword,
@@ -799,7 +800,9 @@ const addSingleNGO = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         });
     }
     catch (error) {
-        yield transaction.rollback();
+        if (transaction && !transaction.isCompleted()) {
+            yield transaction.rollback();
+        }
         console.error("Add Single NGO Error:", error);
         res.status(500).json({
             error: "An error occurred while adding the NGO",
@@ -1151,7 +1154,7 @@ const getDonorProjects = (req, res) => __awaiter(void 0, void 0, void 0, functio
 exports.getDonorProjects = getDonorProjects;
 const createProject = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const transaction = yield config_1.default.transaction();
+    let transaction;
     try {
         const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         if (!userId) {
@@ -1300,6 +1303,7 @@ const createProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             console.log(`Public visibility with category: ${category} => Found organizations: ${orgIds.join(", ")}`);
             // For public, do NOT add to organization profile
         }
+        transaction = yield config_1.default.transaction();
         const [projectId] = yield transaction("project").insert({
             title: title.trim(),
             category,
@@ -1479,7 +1483,9 @@ const createProject = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         });
     }
     catch (error) {
-        yield transaction.rollback();
+        if (transaction && !transaction.isCompleted()) {
+            yield transaction.rollback();
+        }
         console.error("Create Project Error:", error);
         res.status(500).json({
             status: "fail",

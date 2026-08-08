@@ -113,8 +113,6 @@ interface Beneficiary {
 }
 
 export const createp = async (req: any, res: Response) => {
-  const transaction = await db.transaction();
-
   try {
     const {
       title,
@@ -249,8 +247,6 @@ export const createp = async (req: any, res: Response) => {
       );
     }
 
-    await transaction.commit();
-
     const token = 0;
     const url = "";
     const additionalData = {
@@ -267,8 +263,6 @@ export const createp = async (req: any, res: Response) => {
     }).sendEmail("pastpadmin", "New Past Project");
     res.status(201).json({ message: "Previous Project created successfully" });
   } catch (error) {
-    await transaction.rollback();
-
     console.error("Error creating project:", error);
     res.status(500).json({ error: "Unable to create project" });
   }
@@ -349,42 +343,45 @@ export const withdraw = async (req: any, res: Response) => {
   try {
     const { amount, accountNumber, bank, saveAccount } = req.body;
 
-    const trx = await db.transaction();
-
     let userData = await db("organizations")
       .where("user_id", req.user.id)
       .first();
     let userData1 = await db("users").where("id", req.user.id).first();
 
-    const [donationId] = await trx("donations")
-      .insert({
-        amount,
-        ngo_id: userData.id,
-        type: "Withdrawal Request",
-      })
-      .returning("id");
-
-    await trx("transactions").insert({
-      donation_id: donationId,
-      payment_gateway: "Paystack",
-      status: "pending",
-    });
-    await trx("donation_messages").insert({
-      donation_id: donationId,
-      message: "A new withdrawal request has been created.",
-      subject: "Withdrawal Request",
-    });
-    if (saveAccount) {
-      const newBank = {
-        bankName: bank,
-        accountName: "",
-        accountNumber,
-        user_id: req.user.id,
-      };
-      await trx("banks").insert(newBank);
+    if (!userData || !userData1) {
+      res.status(404).json({ error: "User not found" });
+      return;
     }
 
-    trx.commit();
+    await db.transaction(async (trx) => {
+      const [donationId] = await trx("donations")
+        .insert({
+          amount,
+          ngo_id: userData.id,
+          type: "Withdrawal Request",
+        })
+        .returning("id");
+
+      await trx("transactions").insert({
+        donation_id: donationId,
+        payment_gateway: "Paystack",
+        status: "pending",
+      });
+      await trx("donation_messages").insert({
+        donation_id: donationId,
+        message: "A new withdrawal request has been created.",
+        subject: "Withdrawal Request",
+      });
+      if (saveAccount) {
+        const newBank = {
+          bankName: bank,
+          accountName: "",
+          accountNumber,
+          user_id: req.user.id,
+        };
+        await trx("banks").insert(newBank);
+      }
+    });
 
     const token = 0;
     const url = "name";
@@ -476,7 +473,6 @@ export const respondBrief = async (req: any, res: Response) => {
 
 //v2
 export const createProject = async (req: Request, res: Response) => {
-  const trx = await db.transaction();
   try {
     const {
       title,
@@ -511,75 +507,76 @@ export const createProject = async (req: Request, res: Response) => {
 
     const finalStatus = status === "completed" ? "unverified" : status;
 
-    const [project_id] = await trx("project").insert({
-      title,
-      description,
-      status: finalStatus,
-      startDate,
-      endDate,
-      category: interest_area,
-      cost,
-      allocated: raised,
-      organization_id: organization.id,
-    });
-
-    if (milestones && milestones.length > 0) {
-      const milestoneData = milestones.map((m: any) => ({
-        milestone: m.milestone,
-        status: m.mstatus,
-        description: m.miledes,
-        target: 0,
-        project_id,
+    const project_id = await db.transaction(async (trx) => {
+      const [projectId] = await trx("project").insert({
+        title,
+        description,
+        status: finalStatus,
+        startDate,
+        endDate,
+        category: interest_area,
+        cost,
+        allocated: raised,
         organization_id: organization.id,
-      }));
-      await trx("milestone").insert(milestoneData);
-    }
+      });
 
-    if (sponsors && sponsors.length > 0) {
-      const sponsorUploads = Array.isArray(req.files)
-        ? req.files.filter((file: any) =>
-            file.fieldname.startsWith("sponsors["),
-          )
-        : [];
-      for (let i = 0; i < sponsors.length; i++) {
-        await trx("project_sponsor").insert({
-          name: sponsors[i].sponsor,
-          image: (sponsorUploads?.[i] as any)?.location || null,
-          description: sponsors[i].sdesc,
-          project_id,
-        });
+      if (milestones && milestones.length > 0) {
+        const milestoneData = milestones.map((m: any) => ({
+          milestone: m.milestone,
+          status: m.mstatus,
+          description: m.miledes,
+          target: 0,
+          project_id: projectId,
+          organization_id: organization.id,
+        }));
+        await trx("milestone").insert(milestoneData);
       }
-    }
 
-    if (beneficiaries && beneficiaries.length > 0) {
-      const beneficiaryData = beneficiaries.map((b: any) => ({
-        state: b.state || "",
-        city: b.city || "",
-        community: b.address,
-        contact: b.contact,
-        project_id,
-      }));
-      await trx("beneficiary").insert(beneficiaryData);
-    }
+      if (sponsors && sponsors.length > 0) {
+        const sponsorUploads = Array.isArray(req.files)
+          ? req.files.filter((file: any) =>
+              file.fieldname.startsWith("sponsors["),
+            )
+          : [];
+        for (let i = 0; i < sponsors.length; i++) {
+          await trx("project_sponsor").insert({
+            name: sponsors[i].sponsor,
+            image: (sponsorUploads?.[i] as any)?.location || null,
+            description: sponsors[i].sdesc,
+            project_id: projectId,
+          });
+        }
+      }
 
-    const imageUploads = Array.isArray(req.files)
-      ? req.files.filter((file: any) => file.fieldname.startsWith("images["))
-      : [];
+      if (beneficiaries && beneficiaries.length > 0) {
+        const beneficiaryData = beneficiaries.map((b: any) => ({
+          state: b.state || "",
+          city: b.city || "",
+          community: b.address,
+          contact: b.contact,
+          project_id: projectId,
+        }));
+        await trx("beneficiary").insert(beneficiaryData);
+      }
 
-    if (imageUploads && imageUploads.length > 0) {
-      const imageData = imageUploads.map((img: any) => ({
-        image: img.location,
-        project_id,
-      }));
-      await trx("project_images").insert(imageData);
-    }
+      const imageUploads = Array.isArray(req.files)
+        ? req.files.filter((file: any) => file.fieldname.startsWith("images["))
+        : [];
 
-    await trx.commit();
+      if (imageUploads && imageUploads.length > 0) {
+        const imageData = imageUploads.map((img: any) => ({
+          image: img.location,
+          project_id: projectId,
+        }));
+        await trx("project_images").insert(imageData);
+      }
+
+      return projectId;
+    });
     res
       .status(201)
       .json({ message: "Project created successfully", project_id });
   } catch (error: any) {
-    await trx.rollback();
     res.status(500).json({ error: error.message });
   }
 };

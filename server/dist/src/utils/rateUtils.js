@@ -12,35 +12,37 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchRateFromGoogle = void 0;
+exports.getUsdToNgnRate = void 0;
 const axios_1 = __importDefault(require("axios"));
 const config_1 = __importDefault(require("../config"));
-const fetchRateFromGoogle = () => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const response = yield axios_1.default.get('https://api.exchangerate-api.com/v4/latest/USD');
-        const rate = response.data.rates.NGN;
-        yield saveRateToDB(rate);
-    }
-    catch (error) {
-        console.error('Error fetching rate from Google:', error);
-    }
-});
-exports.fetchRateFromGoogle = fetchRateFromGoogle;
-const saveRateToDB = (rate) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const latestRate = yield (0, config_1.default)('rates').orderBy('updated_at', 'desc').first();
-        if (latestRate && latestRate.mode !== 'automatic') {
-            console.log('Last rate entry is not automatic. Skipping update.');
-            return;
+const RATE_API_URL = "https://api.exchangerate-api.com/v4/latest/USD";
+const RATE_API_TIMEOUT_MS = 5000;
+/**
+ * Resolve the USD to NGN rate only when a conversion needs it.
+ *
+ * A manually configured rate remains authoritative. In automatic mode, the
+ * live rate is fetched directly and is not persisted, so starting the server
+ * no longer creates background API or database traffic.
+ */
+const getUsdToNgnRate = () => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
+    const configuredRate = yield (0, config_1.default)("rates")
+        .orderBy("updated_at", "desc")
+        .first();
+    if (configuredRate && configuredRate.mode !== "automatic") {
+        const manualRate = Number(configuredRate.rate);
+        if (!Number.isFinite(manualRate) || manualRate <= 0) {
+            throw new Error("The manually configured USD to NGN rate is invalid.");
         }
-        if (!latestRate || latestRate.mode === 'automatic') {
-            yield (0, config_1.default)('rates').del();
-            yield (0, config_1.default)('rates').insert({ rate, mode: 'automatic' });
-            console.log('Rate updated automatically.');
-        }
-        console.log('Rate saved to DB successfully.');
+        return manualRate;
     }
-    catch (error) {
-        console.error('Error saving rate to DB:', error);
+    const response = yield axios_1.default.get(RATE_API_URL, {
+        timeout: RATE_API_TIMEOUT_MS,
+    });
+    const liveRate = Number((_b = (_a = response.data) === null || _a === void 0 ? void 0 : _a.rates) === null || _b === void 0 ? void 0 : _b.NGN);
+    if (!Number.isFinite(liveRate) || liveRate <= 0) {
+        throw new Error("The exchange-rate provider returned an invalid NGN rate.");
     }
+    return liveRate;
 });
+exports.getUsdToNgnRate = getUsdToNgnRate;

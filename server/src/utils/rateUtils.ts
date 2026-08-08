@@ -1,34 +1,39 @@
-import axios from 'axios'
-import db from '../config'
+import axios from "axios";
+import db from "../config";
 
-export const fetchRateFromGoogle = async (): Promise<void> => {
-  try {
-    const response = await axios.get(
-      'https://api.exchangerate-api.com/v4/latest/USD'
-    )
-    const rate = response.data.rates.NGN
-    await saveRateToDB(rate)
-  } catch (error) {
-    console.error('Error fetching rate from Google:', error)
-  }
-}
+const RATE_API_URL = "https://api.exchangerate-api.com/v4/latest/USD";
+const RATE_API_TIMEOUT_MS = 5_000;
 
-const saveRateToDB = async (rate: number): Promise<void> => {
-  try {
-    const latestRate = await db('rates').orderBy('updated_at', 'desc').first()
+/**
+ * Resolve the USD to NGN rate only when a conversion needs it.
+ *
+ * A manually configured rate remains authoritative. In automatic mode, the
+ * live rate is fetched directly and is not persisted, so starting the server
+ * no longer creates background API or database traffic.
+ */
+export const getUsdToNgnRate = async (): Promise<number> => {
+  const configuredRate = await db("rates")
+    .orderBy("updated_at", "desc")
+    .first();
 
-    if (latestRate && latestRate.mode !== 'automatic') {
-      console.log('Last rate entry is not automatic. Skipping update.')
-      return
+  if (configuredRate && configuredRate.mode !== "automatic") {
+    const manualRate = Number(configuredRate.rate);
+
+    if (!Number.isFinite(manualRate) || manualRate <= 0) {
+      throw new Error("The manually configured USD to NGN rate is invalid.");
     }
 
-    if (!latestRate || latestRate.mode === 'automatic') {
-      await db('rates').del()
-      await db('rates').insert({ rate, mode: 'automatic' })
-      console.log('Rate updated automatically.')
-    }
-    console.log('Rate saved to DB successfully.')
-  } catch (error) {
-    console.error('Error saving rate to DB:', error)
+    return manualRate;
   }
-}
+
+  const response = await axios.get(RATE_API_URL, {
+    timeout: RATE_API_TIMEOUT_MS,
+  });
+  const liveRate = Number(response.data?.rates?.NGN);
+
+  if (!Number.isFinite(liveRate) || liveRate <= 0) {
+    throw new Error("The exchange-rate provider returned an invalid NGN rate.");
+  }
+
+  return liveRate;
+};

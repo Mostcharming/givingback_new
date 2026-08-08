@@ -3,6 +3,9 @@ import Stripe from "stripe";
 import db from "../../config";
 import { getProjects } from "../../helper/getProjects";
 import Email from "../../utils/mail";
+import { getUsdToNgnRate } from "../../utils/rateUtils";
+
+class UserNotFoundError extends Error {}
 
 async function initializeStripe() {
   try {
@@ -141,41 +144,32 @@ export const makeDonation = async (req: Request, res: any): Promise<void> => {
     let conversionRate = 1; // Default rate for NGN
 
     if (currency === "usd") {
-      // Fetch the rate from the `rates` table
-      const rateEntry = await db("rates").select("rate").first();
-      if (!rateEntry) {
-        res.status(500).json({ error: "Exchange rate not found." });
-        return;
-      }
-      conversionRate = rateEntry.rate;
+      conversionRate = await getUsdToNgnRate();
       amounts = amounts * conversionRate;
     }
 
-    const trx = await db.transaction();
+    await db.transaction(async (trx) => {
+      const [donationId] = await trx("donations")
+        .insert({
+          amount: amounts,
+          project_id: projectId,
+          ngo_id: ngoId,
+          type,
+        })
+        .returning("id");
 
-    const [donationId] = await trx("donations")
-      .insert({
-        amount: amounts,
-        project_id: projectId,
-        ngo_id: ngoId,
-        type,
-      })
-      .returning("id");
+      await trx("donation_rates").insert({
+        donation_id: donationId,
+        rate: conversionRate,
+      });
 
-    // Save the rate in the `donation_rates` table
-    await trx("donation_rates").insert({
-      donation_id: donationId,
-      rate: conversionRate,
+      await trx("transactions").insert({
+        donation_id: donationId,
+        payment_gateway,
+        status: "success",
+        transaction_id: transactionId,
+      });
     });
-
-    await trx("transactions").insert({
-      donation_id: donationId,
-      payment_gateway,
-      status: "success",
-      transaction_id: transactionId,
-    });
-
-    await trx.commit();
 
     let userData = await db("organizations").where("user_id", ngoId).first();
     if (!userData) {
@@ -281,34 +275,31 @@ export const handleDonation = async (req: Request, res: any): Promise<void> => {
     req.body;
   let amounts = Number(amount);
 
-  const trx = await db.transaction();
   try {
     let conversionRate = 1;
     if (currency === "usd") {
-      const rateEntry = await db("rates").select("rate").first();
-      if (!rateEntry) {
-        res.status(500).json({ error: "Exchange rate not found." });
-        await trx.rollback();
-        return;
-      }
-      conversionRate = rateEntry.rate;
+      conversionRate = await getUsdToNgnRate();
       amounts = amounts * conversionRate;
     }
 
-    let donor = await db("donors").where({ user_id }).select("id").first();
-    let donationId: any;
-
-    // Check if the user is a donor first
-    if (!donor) {
-      // If not a donor, check if the user is an organization
-      const organization = await db("organizations")
+    const donationId = await db.transaction(async (trx) => {
+      const donor = await trx("donors")
         .where({ user_id })
         .select("id")
         .first();
+      let insertedDonationId: any;
 
-      // If the user is an organization, insert the donation into the database with the NGO ID
-      if (organization) {
-        [donationId] = await trx("donations")
+      if (!donor) {
+        const organization = await trx("organizations")
+          .where({ user_id })
+          .select("id")
+          .first();
+
+        if (!organization) {
+          throw new UserNotFoundError("User not found.");
+        }
+
+        [insertedDonationId] = await trx("donations")
           .insert({
             amount: amounts,
             ngo_id: organization.id,
@@ -316,34 +307,33 @@ export const handleDonation = async (req: Request, res: any): Promise<void> => {
           })
           .returning("id");
       } else {
-        // Handle the case where neither donor nor organization is found
-        return res.status(404).json({ error: "User not found." });
+        [insertedDonationId] = await trx("donations")
+          .insert({
+            amount: amounts,
+            donor_id: donor.id,
+            type: "Wallet fund",
+          })
+          .returning("id");
       }
-    } else {
-      [donationId] = await trx("donations")
-        .insert({
-          amount: amounts,
-          donor_id: donor.id,
-          type: "Wallet fund",
-        })
-        .returning("id");
-    }
 
-    await trx("donation_rates").insert({
-      donation_id: donationId,
-      rate: conversionRate,
+      await trx("donation_rates").insert({
+        donation_id: insertedDonationId,
+        rate: conversionRate,
+      });
+
+      await trx("transactions").insert({
+        donation_id: insertedDonationId,
+        payment_gateway,
+        status: "success",
+        transaction_id: transactionId,
+      });
+
+      await trx("wallet")
+        .where("user_id", user_id)
+        .increment("balance", amounts);
+
+      return insertedDonationId;
     });
-
-    await trx("transactions").insert({
-      donation_id: donationId,
-      payment_gateway,
-      status: "success",
-      transaction_id: transactionId,
-    });
-
-    await trx("wallet").where("user_id", user_id).increment("balance", amounts);
-
-    await trx.commit();
 
     let userData = await db("organizations").where("user_id", user_id).first();
     if (!userData) {
@@ -378,7 +368,10 @@ export const handleDonation = async (req: Request, res: any): Promise<void> => {
     });
   } catch (error) {
     console.log(error);
-    await trx.rollback();
+    if (error instanceof UserNotFoundError) {
+      res.status(404).json({ error: error.message });
+      return;
+    }
     res.status(500).json({ error: "Unable to process donation." });
   }
 };
@@ -392,8 +385,6 @@ export const handleStripeCheckoutSuccess = async (
     return res.status(400).json({ error: "Missing session_id" });
   }
 
-  const trx = await db.transaction();
-
   try {
     const stripe = await initializeStripe();
 
@@ -401,43 +392,39 @@ export const handleStripeCheckoutSuccess = async (
       sessionId as string,
     );
 
-    if (session.payment_status === "paid") {
-      let amounts = (session.amount_total ?? 0) / 100;
-      let conversionRate = 1;
-      const transactionId = session.payment_intent;
-      const rateEntry = await db("rates").select("rate").first();
-      if (!rateEntry) {
-        res.status(500).json({ error: "Exchange rate not found." });
-        await trx.rollback();
-        return;
-      }
-      conversionRate = rateEntry.rate;
-      amounts = amounts * conversionRate;
+    if (session.payment_status !== "paid") {
+      return res.json({ success: false, status: session.payment_status });
+    }
 
-      let donor = await db("donors").where({ user_id }).select("id").first();
+    let amounts = (session.amount_total ?? 0) / 100;
+    const conversionRate = await getUsdToNgnRate();
+    const transactionId = session.payment_intent;
+    amounts = amounts * conversionRate;
+
+    await db.transaction(async (trx) => {
+      const donor = await trx("donors")
+        .where({ user_id })
+        .select("id")
+        .first();
       let donationId: any;
 
-      // Check if the user is a donor first
       if (!donor) {
-        // If not a donor, check if the user is an organization
-        const organization = await db("organizations")
+        const organization = await trx("organizations")
           .where({ user_id })
           .select("id")
           .first();
 
-        // If the user is an organization, insert the donation into the database with the NGO ID
-        if (organization) {
-          [donationId] = await trx("donations")
-            .insert({
-              amount: amounts,
-              ngo_id: organization.id,
-              type: "Wallet fund",
-            })
-            .returning("id");
-        } else {
-          // Handle the case where neither donor nor organization is found
-          return res.status(404).json({ error: "User not found." });
+        if (!organization) {
+          throw new UserNotFoundError("User not found.");
         }
+
+        [donationId] = await trx("donations")
+          .insert({
+            amount: amounts,
+            ngo_id: organization.id,
+            type: "Wallet fund",
+          })
+          .returning("id");
       } else {
         [donationId] = await trx("donations")
           .insert({
@@ -463,48 +450,47 @@ export const handleStripeCheckoutSuccess = async (
       await trx("wallet")
         .where("user_id", user_id)
         .increment("balance", amounts);
+    });
 
-      await trx.commit();
-
-      let userData = await db("organizations")
-        .where("user_id", user_id)
-        .first();
-      if (!userData) {
-        userData = await db("donors").where("user_id", user_id).first();
-      }
-
-      const userDataE = await db("users").where("id", user_id).first();
-      const email = userDataE.email;
-
-      const token = 0;
-      const url = userData.name;
-      const additionalData = {
-        currency: "usd",
-        transactionId: transactionId,
-        ngoName: userData.name,
-        userName: userData.name,
-        amount: amount,
-      };
-
-      await new Email({ email: email, url, token, additionalData }).sendEmail(
-        "fundngo",
-        "Funding Received",
-      );
-      await new Email({
-        email: "info@givingbackng.org",
-        url,
-        token,
-        additionalData,
-      }).sendEmail("adminwallet", "New Funding");
-      res.json({
-        success: true,
-        message: "Stripe checkout verfied and completed",
-      });
-    } else {
-      return res.json({ success: false, status: session.payment_status });
+    let userData = await db("organizations")
+      .where("user_id", user_id)
+      .first();
+    if (!userData) {
+      userData = await db("donors").where("user_id", user_id).first();
     }
+
+    const userDataE = await db("users").where("id", user_id).first();
+    const email = userDataE.email;
+
+    const token = 0;
+    const url = userData.name;
+    const additionalData = {
+      currency: "usd",
+      transactionId: transactionId,
+      ngoName: userData.name,
+      userName: userData.name,
+      amount: amount,
+    };
+
+    await new Email({ email: email, url, token, additionalData }).sendEmail(
+      "fundngo",
+      "Funding Received",
+    );
+    await new Email({
+      email: "info@givingbackng.org",
+      url,
+      token,
+      additionalData,
+    }).sendEmail("adminwallet", "New Funding");
+    res.json({
+      success: true,
+      message: "Stripe checkout verfied and completed",
+    });
   } catch (error) {
     console.error("Stripe verification error:", error);
+    if (error instanceof UserNotFoundError) {
+      return res.status(404).json({ error: error.message });
+    }
     return res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -9,11 +9,9 @@ const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const morgan_1 = __importDefault(require("morgan"));
-const node_cron_1 = __importDefault(require("node-cron"));
 const path_1 = __importDefault(require("path"));
 const index_1 = __importDefault(require("../components/index"));
 const notifications_1 = require("../middleware/notifications");
-const rateUtils_1 = require("../utils/rateUtils");
 const app = (0, express_1.default)();
 app.set("view engine", "pug");
 app.set("views", path_1.default.join(__dirname, "views"));
@@ -66,6 +64,4 @@ app.all("*", (err, req, res, next) => {
     const status = err.code || 500;
     res.status(status).json({ error: err.message });
 });
-// Fetch rate every 5 minutes using cron job
-node_cron_1.default.schedule("*/5 * * * *", rateUtils_1.fetchRateFromGoogle);
 exports.default = app;

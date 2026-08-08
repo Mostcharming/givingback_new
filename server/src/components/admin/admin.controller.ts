@@ -61,7 +61,6 @@ export const updateUserByAdmin = async (
   next: NextFunction
 ) => {
   const { id } = req.params;
-  const transaction = await db.transaction();
 
   try {
     const {
@@ -144,10 +143,8 @@ export const updateUserByAdmin = async (
         .update(banksUpdateData);
     }
 
-    await transaction.commit();
     res.status(200).json({ message: "User details updated successfully" });
   } catch (error) {
-    await transaction.rollback();
     console.error(error); // Log error for debugging
     res.status(500).json({ error: "Internal server error" });
   }
@@ -413,7 +410,6 @@ export const updateProject = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const transaction = await db.transaction();
   try {
     const projectId = req.params.id as string;
 
@@ -438,10 +434,8 @@ export const updateProject = async (
 
     // Uncomment and type further logic if required, e.g., sponsors or beneficiaries updates
 
-    await transaction.commit();
     res.status(200).json({ message: "Previous Project updated successfully" });
   } catch (error) {
-    await transaction.rollback();
     console.error("Error updating project:", error);
     res.status(500).json({ error: "Unable to update project" });
   }
@@ -642,8 +636,6 @@ export const createProject = async (
   res: any,
   next: NextFunction
 ): Promise<void> => {
-  const transaction = await db.transaction();
-
   try {
     const {
       title,
@@ -783,8 +775,6 @@ export const createProject = async (
         }).sendEmail("adminbriefngo", "New Project assigned");
       })
     );
-    await transaction.commit();
-
     const donor2 = await db("donors").where({ id: donor_id }).first();
     const donor = await db("users").where({ id: donor2.user_id }).first();
 
@@ -809,9 +799,7 @@ export const createProject = async (
     }).sendEmail("adminbriefngodonor", "New Project assigned");
     res.status(201).json({ message: "Briefs created successfully" });
   } catch (error) {
-    await transaction.rollback();
-
     console.error("Error creating projects:", error);
-    // res.status(500).json({ error: "Unable to create projects" });
+    res.status(500).json({ error: "Unable to create projects" });
   }
 };
