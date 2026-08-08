@@ -22,6 +22,7 @@ import {
   getProjectApplications,
   getProjectOrganizationFundingDetail,
   getProjectOrganizations,
+  getSession,
   login,
   logout,
   onboard,
@@ -50,6 +51,7 @@ router.use(secureLogin);
 
 router.get("/logout", logout);
 router.get("/", getOne);
+router.get("/session", getSession);
 router.get("/organization-counts", getOrganizationCounts);
 router.get("/donor/project-stats", getDonorProjectMetrics);
 router.get("/donor/projects", getDonorProjects);

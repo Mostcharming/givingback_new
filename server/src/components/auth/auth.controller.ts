@@ -212,12 +212,6 @@ export const onboard = async (req: Request, res: Response) => {
 
       await db("address").insert(address);
 
-      await new Email({
-        email: mail,
-        url: "",
-        token,
-        additionalData,
-      }).sendEmail("otp", "Welcome to the GivingBack Family!");
     } else {
       const additionalFields = {
         orgemail: orgemail?.trim(),
@@ -246,22 +240,31 @@ export const onboard = async (req: Request, res: Response) => {
       );
     }
 
-    await new Email({
-      email: mail,
-      url: "",
-      token,
-      additionalData,
-    }).sendEmail("otp", "Welcome to the GivingBack Family!");
-
-    await new Email({
-      email: "info@givingbackng.org",
-      url: "",
-      token,
-      additionalData,
-    }).sendEmail("adminonb", "New User");
+    const emailResults = await Promise.allSettled([
+      new Email({
+        email: mail,
+        url: "",
+        token,
+        additionalData,
+      }).sendEmail("otp", "Welcome to the GivingBack Family!"),
+      new Email({
+        email: "info@givingbackng.org",
+        url: "",
+        token,
+        additionalData,
+      }).sendEmail("adminonb", "New User"),
+    ]);
+    emailResults.forEach((result) => {
+      if (result.status === "rejected") {
+        console.error("Onboarding email error:", result.reason);
+      }
+    });
     createSendToken(user, 200, req, res);
   } catch (error) {
     console.error("Onboard Error:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Unable to create your account" });
+    }
   }
 };
 
@@ -411,6 +414,48 @@ export const getOne = async (
     donationsCount,
     wallet,
   });
+};
+
+export const getSession = async (
+  req: UserRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const id = (req.user as User)?.id;
+    const user = await db("users")
+      .where({ id })
+      .select(
+        "id",
+        "email",
+        "role",
+        "status",
+        "active",
+        "first_time_login",
+      )
+      .first();
+
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const profile =
+      (await db("organizations").where({ user_id: id }).first()) ||
+      (await db("donors").where({ user_id: id }).first()) ||
+      null;
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        profile,
+        user,
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      error: error.message || "Unable to restore session",
+    });
+  }
 };
 
 export const forgotPassword = async (
@@ -2589,7 +2634,8 @@ export const createMilestone = async (
       project_id,
       due_date,
     } = req.body;
-    // const userId = (req.user as User)?.id;
+    const userId = (req.user as User)?.id;
+    const userRole = (req.user as User)?.role;
 
     // Validate required fields
     if (!title || !description || !target || !project_id) {
@@ -2609,6 +2655,25 @@ export const createMilestone = async (
         message: "Project not found",
       });
       return;
+    }
+
+    if (userRole !== "admin") {
+      if (userRole !== "donor" && userRole !== "corporate") {
+        res.status(403).json({
+          status: "fail",
+          message: "Only the project donor can create milestones",
+        });
+        return;
+      }
+
+      const donor = await db("donors").where({ user_id: userId }).first();
+      if (!donor || Number(project.donor_id) !== Number(donor.id)) {
+        res.status(403).json({
+          status: "fail",
+          message: "You do not have permission to update this project",
+        });
+        return;
+      }
     }
 
     // Create the milestone

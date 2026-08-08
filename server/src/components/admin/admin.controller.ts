@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import xlsx from "xlsx";
 import db from "../../config";
 import { fetchDonations } from "../../helper/getTransac";
+import { User, UserRequest } from "../../interfaces";
 import { hash } from "../../middleware/general";
 import Email from "../../utils/mail";
 
@@ -302,7 +303,7 @@ export const bulk = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const getDonations = async (
-  req: Request,
+  req: UserRequest,
   res: Response
 ): Promise<void> => {
   try {
@@ -320,13 +321,52 @@ export const getDonations = async (
       status,
     } = req.query;
 
+    const authenticatedUser = req.user as User;
+    let scopedNgoId: number | undefined;
+    let scopedDonorId: number | undefined;
+
+    if (authenticatedUser.role === "NGO") {
+      const organization = await db("organizations")
+        .where({ user_id: authenticatedUser.id })
+        .select("id")
+        .first();
+      if (!organization) {
+        res.status(404).json({ message: "Organization profile not found" });
+        return;
+      }
+      scopedNgoId = Number(organization.id);
+    } else if (
+      authenticatedUser.role === "donor" ||
+      authenticatedUser.role === "corporate"
+    ) {
+      const donor = await db("donors")
+        .where({ user_id: authenticatedUser.id })
+        .select("id")
+        .first();
+      if (!donor) {
+        res.status(404).json({ message: "Donor profile not found" });
+        return;
+      }
+      scopedDonorId = Number(donor.id);
+    }
+
     // Fetch donations using the helper function
     const result = await fetchDonations({
       page: page ? parseInt(page as string, 10) : undefined,
       limit: limit ? parseInt(limit as string, 10) : undefined,
       project_id: project_id ? parseInt(project_id as string, 10) : undefined,
-      ngo_id: ngo_id ? parseInt(ngo_id as string, 10) : undefined,
-      donor_id: donor_id ? parseInt(donor_id as string, 10) : undefined,
+      ngo_id:
+        authenticatedUser.role === "admin"
+          ? ngo_id
+            ? parseInt(ngo_id as string, 10)
+            : undefined
+          : scopedNgoId,
+      donor_id:
+        authenticatedUser.role === "admin"
+          ? donor_id
+            ? parseInt(donor_id as string, 10)
+            : undefined
+          : scopedDonorId,
       type: type as string,
       min_amount: min_amount ? parseFloat(min_amount as string) : undefined,
       max_amount: max_amount ? parseFloat(max_amount as string) : undefined,

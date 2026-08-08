@@ -269,6 +269,7 @@ export const stripeHandler = async (
     });
     res.json({
       sessionId: session.id,
+      url: session.url,
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

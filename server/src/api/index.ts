@@ -26,12 +26,16 @@ const whitelist: string[] = [
   "http://localhost:5173",
 ];
 
+const isAllowedOrigin = (origin: string) =>
+  whitelist.includes(origin) ||
+  /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+
 const corsOptions: CorsOptions = {
   credentials: true,
   origin: function (origin, callback) {
     if (!origin) {
       return callback(null, true);
-    } else if (whitelist.indexOf(origin) === -1) {
+    } else if (!isAllowedOrigin(origin)) {
       return callback(new Error("Not allowed by CORS"), false);
     }
     return callback(null, true);
@@ -42,7 +46,7 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Methods", "GET, PATCH, POST, PUT, DELETE");
   res.header(
     "Access-Control-Allow-Headers",
-    "Content-Type, Access-Control-Allow-Origin, Origin, X-Requested-With, Accept",
+    "Authorization, Content-Type, Access-Control-Allow-Origin, Origin, X-Requested-With, Accept",
   );
   res.header("Access-Control-Allow-Credentials", "true");
   next();

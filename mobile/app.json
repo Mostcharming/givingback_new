@@ -27,6 +27,21 @@
     },
     "plugins": [
       "expo-router",
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow GivingBack to use Face ID to unlock your account securely."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow GivingBack to select project evidence and profile photos.",
+          "cameraPermission": "Allow GivingBack to capture project evidence.",
+          "microphonePermission": false
+        }
+      ],
       [
         "expo-splash-screen",
         {

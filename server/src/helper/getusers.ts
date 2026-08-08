@@ -136,6 +136,7 @@ export const fetchUsers = async (filters: {
 
       const userDetails: any = {
         id: organization.id,
+        user_id: user.id,
         email: user.email,
         name: organization.name,
         phone: organization.phone,
