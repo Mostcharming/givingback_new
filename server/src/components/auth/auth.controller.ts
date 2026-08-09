@@ -100,9 +100,15 @@ export const verify = async (
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-  const { email, password: rawPassword, uuid } = req.body;
+  const { password: rawPassword, uuid } = req.body;
+  const email =
+    typeof req.body.email === "string"
+      ? req.body.email.trim().toLowerCase()
+      : "";
 
-  const user = await db("users").where({ email }).first();
+  const user = await db("users")
+    .whereRaw("LOWER(TRIM(email)) = ?", [email])
+    .first();
   if (!user) {
     res.status(400).json({ error: "User not found" });
     return;

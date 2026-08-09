@@ -196,10 +196,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const login = useCallback(
     async (email: string, password: string) => {
       const response = await apiPost<LoginResponse>('/auth/login', {
-        email: email.trim().toLowerCase(),
+        email: email.trim(),
         password,
         uuid: '',
       });
+      if (!response.token || !response.data?.user) {
+        throw new ApiError('The server returned an invalid login response.', 500, response);
+      }
       const nextSession = {
         token: response.token,
         user: response.data.user,

@@ -25,14 +25,20 @@ export const verifyLogin = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { email } = req.body
+    const email =
+      typeof req.body.email === 'string'
+        ? req.body.email.trim().toLowerCase()
+        : ''
 
     if (!email) {
       res.status(422).json({ error: 'All fields are required' })
       return
     }
 
-    const user = await db('users').where({ email }).first()
+    req.body.email = email
+    const user = await db('users')
+      .whereRaw('LOWER(TRIM(email)) = ?', [email])
+      .first()
 
     if (!user) {
       res.status(404).json({ error: 'Invalid Login Credentials' })
@@ -52,14 +58,20 @@ export const verifyNewUser = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { email } = req.body
+    const email =
+      typeof req.body.email === 'string'
+        ? req.body.email.trim().toLowerCase()
+        : ''
 
     if (!email) {
       res.status(422).json({ error: 'All fields are required' })
       return
     }
 
-    const user = await db('users').where({ email }).first()
+    req.body.email = email
+    const user = await db('users')
+      .whereRaw('LOWER(TRIM(email)) = ?', [email])
+      .first()
 
     if (user) {
       res.status(422).json({ error: 'User already exists' })

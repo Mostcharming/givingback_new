@@ -120,13 +120,14 @@ export default function DashboardScreen() {
       ) : (
         <View style={styles.metricGrid}>
           {metrics.map(([label, value, icon, accent]) => (
-            <MetricCard
-              accent={accent as 'blue' | 'gold' | 'green' | 'purple'}
-              icon={icon as keyof typeof Ionicons.glyphMap}
-              key={String(label)}
-              label={String(label)}
-              value={String(value ?? 0)}
-            />
+            <View key={String(label)} style={styles.metricCell}>
+              <MetricCard
+                accent={accent as 'blue' | 'gold' | 'green' | 'purple'}
+                icon={icon as keyof typeof Ionicons.glyphMap}
+                label={String(label)}
+                value={String(value ?? 0)}
+              />
+            </View>
           ))}
         </View>
       )}
@@ -241,6 +242,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
+  },
+  metricCell: {
+    flexBasis: '47%',
+    flexGrow: 1,
   },
   actionGrid: {
     gap: 10,

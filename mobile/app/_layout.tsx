@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
 
+import { AppBackButton } from '@/components/app-back-button';
 import { Palette } from '@/constants/design';
 import { AuthProvider, useAuth } from '@/contexts/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -31,13 +32,15 @@ function RootNavigator() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack
-        screenOptions={{
+        screenOptions={({ route }) => ({
           contentStyle: { backgroundColor: Palette.background },
+          headerBackVisible: false,
+          headerLeft: () => <AppBackButton currentRoute={route.name} />,
           headerShadowVisible: false,
           headerStyle: { backgroundColor: Palette.background },
           headerTintColor: Palette.greenDeep,
           headerTitleStyle: { fontWeight: '800' },
-        }}>
+        })}>
         <Stack.Protected guard={!session}>
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         </Stack.Protected>
@@ -62,7 +65,10 @@ function RootNavigator() {
           <Stack.Screen name="settings/support" options={{ title: 'Support' }} />
           <Stack.Screen name="payment-result" options={{ headerShown: false }} />
         </Stack.Protected>
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen
+          name="modal"
+          options={{ headerLeft: () => null, presentation: 'modal', title: 'Modal' }}
+        />
       </Stack>
       <StatusBar style="dark" />
     </ThemeProvider>

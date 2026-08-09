@@ -1,6 +1,35 @@
-export const API_BASE_URL = (
-  process.env.EXPO_PUBLIC_API_URL || 'https://api.givebackng.org/rest/v1'
-).replace(/\/+$/, '');
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
+
+const PRODUCTION_API_URL = 'https://givebackng.org/rest/v1';
+const DEVELOPMENT_API_PORT = process.env.EXPO_PUBLIC_API_PORT || '5001';
+
+function getExpoDevelopmentHost() {
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (!hostUri) return null;
+
+  try {
+    const url = new URL(hostUri.includes('://') ? hostUri : `http://${hostUri}`);
+    return url.hostname;
+  } catch {
+    return hostUri.split(':')[0] || null;
+  }
+}
+
+function getDefaultApiUrl() {
+  if (!__DEV__) return PRODUCTION_API_URL;
+
+  // On a physical device, localhost is the phone itself. Expo's development
+  // host is the computer running Metro and, in local development, the API.
+  const host =
+    getExpoDevelopmentHost() || (Platform.OS === 'android' ? '10.0.2.2' : 'localhost');
+  return `http://${host}:${DEVELOPMENT_API_PORT}/rest/v1`;
+}
+
+export const API_BASE_URL = (process.env.EXPO_PUBLIC_API_URL || getDefaultApiUrl()).replace(
+  /\/+$/,
+  '',
+);
 
 export type QueryValue = boolean | number | string | null | undefined;
 

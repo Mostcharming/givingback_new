@@ -16,6 +16,13 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npx expo start
    ```
 
+   During local development, the app automatically calls port `5001` on the
+   computer running Expo. This lets Expo Go and simulators use the same local
+   API as the web app instead of silently connecting to production.
+
+   To use a different API host or port, copy `.env.example` to `.env.local`,
+   update the value, and restart Expo with `npx expo start --clear`.
+
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
