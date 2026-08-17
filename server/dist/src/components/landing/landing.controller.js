@@ -223,6 +223,7 @@ const stripeHandler = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         });
         res.json({
             sessionId: session.id,
+            url: session.url,
         });
     }
     catch (error) {

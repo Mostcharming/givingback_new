@@ -10,9 +10,26 @@ import routes from "../components/index";
 import { notificationMiddleware } from "../middleware/notifications";
 
 const app = express();
+
+const configuredTrustProxy = process.env.TRUST_PROXY?.trim();
+
+if (configuredTrustProxy) {
+  const numericTrustProxy = Number(configuredTrustProxy);
+
+  app.set(
+    "trust proxy",
+    /^\d+$/.test(configuredTrustProxy) && Number.isInteger(numericTrustProxy)
+      ? numericTrustProxy
+      : configuredTrustProxy,
+  );
+} else if (process.env.NODE_ENV === "production") {
+  // Production normally reaches Express through Nginx on this same host.
+  // Trust loopback so a client cannot forge its IP in X-Forwarded-For.
+  app.set("trust proxy", "loopback");
+}
+
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
-// app.enable("trust proxy");
 
 const whitelist: string[] = [
   "http://192.168.1.156:5173",

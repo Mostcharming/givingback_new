@@ -84,6 +84,7 @@ const fetchUsers = (filters) => __awaiter(void 0, void 0, void 0, function* () {
                 continue;
             const userDetails = {
                 id: organization.id,
+                user_id: user.id,
                 email: user.email,
                 name: organization.name,
                 phone: organization.phone,

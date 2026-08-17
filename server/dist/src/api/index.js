@@ -2,6 +2,7 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const compression_1 = __importDefault(require("compression"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
@@ -13,9 +14,20 @@ const path_1 = __importDefault(require("path"));
 const index_1 = __importDefault(require("../components/index"));
 const notifications_1 = require("../middleware/notifications");
 const app = (0, express_1.default)();
+const configuredTrustProxy = (_a = process.env.TRUST_PROXY) === null || _a === void 0 ? void 0 : _a.trim();
+if (configuredTrustProxy) {
+    const numericTrustProxy = Number(configuredTrustProxy);
+    app.set("trust proxy", /^\d+$/.test(configuredTrustProxy) && Number.isInteger(numericTrustProxy)
+        ? numericTrustProxy
+        : configuredTrustProxy);
+}
+else if (process.env.NODE_ENV === "production") {
+    // Production normally reaches Express through Nginx on this same host.
+    // Trust loopback so a client cannot forge its IP in X-Forwarded-For.
+    app.set("trust proxy", "loopback");
+}
 app.set("view engine", "pug");
 app.set("views", path_1.default.join(__dirname, "views"));
-// app.enable("trust proxy");
 const whitelist = [
     "http://192.168.1.156:5173",
     "http://192.168.1.165:5173",
@@ -24,13 +36,15 @@ const whitelist = [
     "https://www.givebackng.org",
     "http://localhost:5173",
 ];
+const isAllowedOrigin = (origin) => whitelist.includes(origin) ||
+    /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
 const corsOptions = {
     credentials: true,
     origin: function (origin, callback) {
         if (!origin) {
             return callback(null, true);
         }
-        else if (whitelist.indexOf(origin) === -1) {
+        else if (!isAllowedOrigin(origin)) {
             return callback(new Error("Not allowed by CORS"), false);
         }
         return callback(null, true);
@@ -38,7 +52,7 @@ const corsOptions = {
 };
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Methods", "GET, PATCH, POST, PUT, DELETE");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Origin, Origin, X-Requested-With, Accept");
+    res.header("Access-Control-Allow-Headers", "Authorization, Content-Type, Access-Control-Allow-Origin, Origin, X-Requested-With, Accept");
     res.header("Access-Control-Allow-Credentials", "true");
     next();
 });

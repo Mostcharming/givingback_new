@@ -29,12 +29,17 @@ const verifyToken = (token, secret) => {
 exports.verifyToken = verifyToken;
 const verifyLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email } = req.body;
+        const email = typeof req.body.email === 'string'
+            ? req.body.email.trim().toLowerCase()
+            : '';
         if (!email) {
             res.status(422).json({ error: 'All fields are required' });
             return;
         }
-        const user = yield (0, config_1.default)('users').where({ email }).first();
+        req.body.email = email;
+        const user = yield (0, config_1.default)('users')
+            .whereRaw('LOWER(TRIM(email)) = ?', [email])
+            .first();
         if (!user) {
             res.status(404).json({ error: 'Invalid Login Credentials' });
             return;
@@ -49,12 +54,17 @@ exports.verifyLogin = verifyLogin;
 // Middleware to verify a new user
 const verifyNewUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email } = req.body;
+        const email = typeof req.body.email === 'string'
+            ? req.body.email.trim().toLowerCase()
+            : '';
         if (!email) {
             res.status(422).json({ error: 'All fields are required' });
             return;
         }
-        const user = yield (0, config_1.default)('users').where({ email }).first();
+        req.body.email = email;
+        const user = yield (0, config_1.default)('users')
+            .whereRaw('LOWER(TRIM(email)) = ?', [email])
+            .first();
         if (user) {
             res.status(422).json({ error: 'User already exists' });
             return;

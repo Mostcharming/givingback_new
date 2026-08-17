@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkApplicationStatus = exports.submitProposal = exports.updateMilestoneUpdateStatus = exports.deleteMilestoneUpdate = exports.payProjectOrganizationPayout = exports.getProjectOrganizationFundingDetail = exports.getProjectOrganizations = exports.createMilestone = exports.updateProjectApplicationStatus = exports.getProjectApplications = exports.editProject = exports.publishProjectBrief = exports.createProject = exports.getDonorProjects = exports.getDonorProjectMetrics = exports.downloadSampleNGOFile = exports.bulkUploadNGOsEndpoint = exports.addSingleNGO = exports.getAllOrganizations = exports.deleteBank = exports.getOrganizationCounts = exports.updateOne = exports.changePassword = exports.deactivate = exports.resetPassword = exports.forgotPassword = exports.getOne = exports.resend = exports.onboard = exports.logout = exports.login = exports.verify = exports.signup = void 0;
+exports.checkApplicationStatus = exports.submitProposal = exports.updateMilestoneUpdateStatus = exports.deleteMilestoneUpdate = exports.payProjectOrganizationPayout = exports.getProjectOrganizationFundingDetail = exports.getProjectOrganizations = exports.createMilestone = exports.updateProjectApplicationStatus = exports.getProjectApplications = exports.editProject = exports.publishProjectBrief = exports.createProject = exports.getDonorProjects = exports.getDonorProjectMetrics = exports.downloadSampleNGOFile = exports.bulkUploadNGOsEndpoint = exports.addSingleNGO = exports.getAllOrganizations = exports.deleteBank = exports.getOrganizationCounts = exports.updateOne = exports.changePassword = exports.deactivate = exports.resetPassword = exports.forgotPassword = exports.getSession = exports.getOne = exports.resend = exports.onboard = exports.logout = exports.login = exports.verify = exports.signup = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const xlsx_1 = __importDefault(require("xlsx"));
 const config_1 = __importDefault(require("../../config"));
@@ -106,8 +106,13 @@ const verify = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.verify = verify;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, password: rawPassword, uuid } = req.body;
-    const user = yield (0, config_1.default)("users").where({ email }).first();
+    const { password: rawPassword, uuid } = req.body;
+    const email = typeof req.body.email === "string"
+        ? req.body.email.trim().toLowerCase()
+        : "";
+    const user = yield (0, config_1.default)("users")
+        .whereRaw("LOWER(TRIM(email)) = ?", [email])
+        .first();
     if (!user) {
         res.status(400).json({ error: "User not found" });
         return;
@@ -187,12 +192,6 @@ const onboard = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 user_id: userId,
             };
             yield (0, config_1.default)("address").insert(address);
-            yield new mail_1.default({
-                email: mail,
-                url: "",
-                token,
-                additionalData,
-            }).sendEmail("otp", "Welcome to the GivingBack Family!");
         }
         else {
             const additionalFields = {
@@ -218,22 +217,32 @@ const onboard = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 yield (0, config_1.default)("userimg").insert(doc);
             })));
         }
-        yield new mail_1.default({
-            email: mail,
-            url: "",
-            token,
-            additionalData,
-        }).sendEmail("otp", "Welcome to the GivingBack Family!");
-        yield new mail_1.default({
-            email: "info@givingbackng.org",
-            url: "",
-            token,
-            additionalData,
-        }).sendEmail("adminonb", "New User");
+        const emailResults = yield Promise.allSettled([
+            new mail_1.default({
+                email: mail,
+                url: "",
+                token,
+                additionalData,
+            }).sendEmail("otp", "Welcome to the GivingBack Family!"),
+            new mail_1.default({
+                email: "info@givingbackng.org",
+                url: "",
+                token,
+                additionalData,
+            }).sendEmail("adminonb", "New User"),
+        ]);
+        emailResults.forEach((result) => {
+            if (result.status === "rejected") {
+                console.error("Onboarding email error:", result.reason);
+            }
+        });
         (0, jwt_1.createSendToken)(user, 200, req, res);
     }
     catch (error) {
         console.error("Onboard Error:", error);
+        if (!res.headersSent) {
+            res.status(500).json({ error: "Unable to create your account" });
+        }
     }
 });
 exports.onboard = onboard;
@@ -352,6 +361,36 @@ const getOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     });
 });
 exports.getOne = getOne;
+const getSession = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const user = yield (0, config_1.default)("users")
+            .where({ id })
+            .select("id", "email", "role", "status", "active", "first_time_login")
+            .first();
+        if (!user) {
+            res.status(404).json({ error: "User not found" });
+            return;
+        }
+        const profile = (yield (0, config_1.default)("organizations").where({ user_id: id }).first()) ||
+            (yield (0, config_1.default)("donors").where({ user_id: id }).first()) ||
+            null;
+        res.status(200).json({
+            status: "success",
+            data: {
+                profile,
+                user,
+            },
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            error: error.message || "Unable to restore session",
+        });
+    }
+});
+exports.getSession = getSession;
 const forgotPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email } = req.body;
     const token = (0, otp_1.generateOtp)(9);
@@ -2060,9 +2099,11 @@ const updateProjectApplicationStatus = (req, res) => __awaiter(void 0, void 0, v
 });
 exports.updateProjectApplicationStatus = updateProjectApplicationStatus;
 const createMilestone = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     try {
         const { title, description, status = "in-progress", target, project_id, due_date, } = req.body;
-        // const userId = (req.user as User)?.id;
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const userRole = (_b = req.user) === null || _b === void 0 ? void 0 : _b.role;
         // Validate required fields
         if (!title || !description || !target || !project_id) {
             res.status(400).json({
@@ -2079,6 +2120,23 @@ const createMilestone = (req, res) => __awaiter(void 0, void 0, void 0, function
                 message: "Project not found",
             });
             return;
+        }
+        if (userRole !== "admin") {
+            if (userRole !== "donor" && userRole !== "corporate") {
+                res.status(403).json({
+                    status: "fail",
+                    message: "Only the project donor can create milestones",
+                });
+                return;
+            }
+            const donor = yield (0, config_1.default)("donors").where({ user_id: userId }).first();
+            if (!donor || Number(project.donor_id) !== Number(donor.id)) {
+                res.status(403).json({
+                    status: "fail",
+                    message: "You do not have permission to update this project",
+                });
+                return;
+            }
         }
         // Create the milestone
         const milestoneData = {

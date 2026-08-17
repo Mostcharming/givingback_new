@@ -243,13 +243,47 @@ const getDonations = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     try {
         // Extract filters from query parameters
         const { page, limit, project_id, ngo_id, donor_id, type, min_amount, max_amount, payment_gateway, status, } = req.query;
+        const authenticatedUser = req.user;
+        let scopedNgoId;
+        let scopedDonorId;
+        if (authenticatedUser.role === "NGO") {
+            const organization = yield (0, config_1.default)("organizations")
+                .where({ user_id: authenticatedUser.id })
+                .select("id")
+                .first();
+            if (!organization) {
+                res.status(404).json({ message: "Organization profile not found" });
+                return;
+            }
+            scopedNgoId = Number(organization.id);
+        }
+        else if (authenticatedUser.role === "donor" ||
+            authenticatedUser.role === "corporate") {
+            const donor = yield (0, config_1.default)("donors")
+                .where({ user_id: authenticatedUser.id })
+                .select("id")
+                .first();
+            if (!donor) {
+                res.status(404).json({ message: "Donor profile not found" });
+                return;
+            }
+            scopedDonorId = Number(donor.id);
+        }
         // Fetch donations using the helper function
         const result = yield (0, getTransac_1.fetchDonations)({
             page: page ? parseInt(page, 10) : undefined,
             limit: limit ? parseInt(limit, 10) : undefined,
             project_id: project_id ? parseInt(project_id, 10) : undefined,
-            ngo_id: ngo_id ? parseInt(ngo_id, 10) : undefined,
-            donor_id: donor_id ? parseInt(donor_id, 10) : undefined,
+            ngo_id: authenticatedUser.role === "admin"
+                ? ngo_id
+                    ? parseInt(ngo_id, 10)
+                    : undefined
+                : scopedNgoId,
+            donor_id: authenticatedUser.role === "admin"
+                ? donor_id
+                    ? parseInt(donor_id, 10)
+                    : undefined
+                : scopedDonorId,
             type: type,
             min_amount: min_amount ? parseFloat(min_amount) : undefined,
             max_amount: max_amount ? parseFloat(max_amount) : undefined,

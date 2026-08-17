@@ -17,6 +17,7 @@ router.post("/resetpassword", auth_controller_1.resetPassword);
 router.use(auth_1.secureLogin);
 router.get("/logout", auth_controller_1.logout);
 router.get("/", auth_controller_1.getOne);
+router.get("/session", auth_controller_1.getSession);
 router.get("/organization-counts", auth_controller_1.getOrganizationCounts);
 router.get("/donor/project-stats", auth_controller_1.getDonorProjectMetrics);
 router.get("/donor/projects", auth_controller_1.getDonorProjects);
