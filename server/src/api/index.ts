@@ -32,7 +32,7 @@ app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
 const whitelist: string[] = [
-  "http://192.168.1.156:5173",
+  "http://192.168.1.147:5173",
   "http://192.168.1.165:5173",
   "https://givebackng.org",
   "https://api.givebackng.org",

@@ -29,7 +29,7 @@ else if (process.env.NODE_ENV === "production") {
 app.set("view engine", "pug");
 app.set("views", path_1.default.join(__dirname, "views"));
 const whitelist = [
-    "http://192.168.1.156:5173",
+    "http://192.168.1.147:5173",
     "http://192.168.1.165:5173",
     "https://givebackng.org",
     "https://api.givebackng.org",
